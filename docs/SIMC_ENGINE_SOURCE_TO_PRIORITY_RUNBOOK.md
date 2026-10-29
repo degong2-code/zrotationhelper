@@ -126,6 +126,30 @@ This actual SimC run has **NOT RUN** on the user's PC in the current
 GitHub-only verification. Keep these outputs private: logs can contain
 character/gear details, and never commit them to this public repository.
 
+## Native SimC performed-action events (local, private)
+
+After `simc_native_reference_capture.py` creates the local reference folder,
+the extracted action log can be converted into a hash-checked event list:
+
+```powershell
+python tools/research/simc_native_performed_events.py --reference-dir "C:\zrot\simc_native_reference" --out "C:\zrot\simc_native_events.json"
+```
+
+The parser reads the native receipt and validates the raw APL/log SHA256 and
+byte counts before processing. Its narrow syntax is derived from official
+SimulationCraft `action_t::execute()` and `sim_ostream_t` source at commit
+`710c2408bfd3ae4df71b8cd55cdf01f63fd6c926`.
+It recognizes only timestamped `performs Action '<token>' (<id>) (<resource>)`
+lines. Unrecognized performed-action formats are reported as partial/blocked,
+never silently counted as verified matches. A `performs` event can be an
+autoattack, proc, background effect, or an actual foreground APL action:
+**the parser does not yet determine which.** It is *not* a complete per-action
+SimC prediction comparison, and actual native SimC execution remains NOT RUN
+within this GitHub development session.
+
+**Do not upload native action logs or character profile dumps to this public
+repository.** Retain local outputs for later empirical comparison.
+
 ## 4. Missing before engine completion
 
 - Verify effective default APL exports from the current actual SimC binary across representative specs/builds.
