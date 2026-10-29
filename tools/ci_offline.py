@@ -370,6 +370,22 @@ def check_simc_apl_condition_strict_pre() -> None:
 
 
 
+
+def check_simc_wcl_post_lock_guard_replay() -> None:
+    """Numeric blind candidate lock + SimC guard replay, research-only."""
+    p = ROOT / 'tools/research/post_lock_simc_wcl_guard_replay.py'
+    compile(p.read_bytes(), str(p), 'exec', dont_inherit=True)
+    proc = subprocess.run(
+        [sys.executable, '-B', str(p)],
+        cwd=str(ROOT), capture_output=True, text=True, timeout=20,
+        env={k:v for k,v in os.environ.items() if k not in
+             {'WCL_CLIENT_ID','WCL_CLIENT_SECRET','GH_TOKEN','GITHUB_TOKEN'}},
+    )
+    assert proc.returncode == 0, 'post-lock SimC/WCL guard replay self-test failed'
+    assert 'POST_LOCK_SIMC_WCL_GUARD_REPLAY_SELF_TEST=PASS' in proc.stdout
+
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -387,6 +403,7 @@ def main() -> int:
         ('native_aura_strict_pre_coverage_boundary', check_native_aura_strict_pre_coverage_boundary),
         ('simc_apl_syntax_inventory_research_only', check_simc_apl_syntax_inventory),
         ('simc_apl_condition_strict_pre_research_only', check_simc_apl_condition_strict_pre),
+        ('simc_wcl_post_lock_guard_replay_research_only', check_simc_wcl_post_lock_guard_replay),
     )
     for name, fn in checks:
         try:
@@ -398,7 +415,7 @@ def main() -> int:
         results.append({'name':name,'status':status})
         print(name + ': ' + status, flush=True)
     rows = []
-    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py'):
+    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py'):
         p = ROOT / relative
         if p.is_file():
             rows.append((relative,sha256(p.read_bytes())))
@@ -419,7 +436,8 @@ def main() -> int:
         'checks':results,
         'validation_scope':'OFFLINE_SYNTHETIC_SPEC_STRUCTURE_AND_SIMC_APL_SYNTAX_ONLY',
         'simc_apl_expression_semantics':'LIMITED_RESEARCH_ONLY',
-        'simc_apl_wcl_replay':'NOT_RUN',
+        'simc_apl_wcl_replay':'SYNTHETIC_GUARD_ONLY_NOT_FULL_APL',
+        'blind_wcl_independence_validation':'NOT_RUN',
         'spec_adapter_authority_contract':'NOT_RUN',
         'cross_spec_empirical_validation':'NOT_RUN',
         'full_o4_pipeline':'NOT_RUN',
