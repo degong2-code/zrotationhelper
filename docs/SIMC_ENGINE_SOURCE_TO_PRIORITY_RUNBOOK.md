@@ -62,13 +62,13 @@ Run `python tools/research/simc_apl_priority_trace.py --self-test` to check its 
 
 ## Additional input: complete readiness requirements (research-only)
 
-The snapshot may include \`"build_key"\` and \`"readiness_contract"\`.
-\`tools/research/simc_apl_readiness_provider.py\` derives candidate READY /
+The snapshot may include `"build_key"` and `"readiness_contract"`.
+`tools/research/simc_apl_readiness_provider.py` derives candidate READY /
 NOT_READY / UNKNOWN from **strictly earlier** observations.
 
 Every action requires an explicit, provenance-linked policy for all eight
-applicability dimensions: \`ability_learned\`, \`cooldown_or_charge\`,
-\`resource\`, \`gcd\`, \`cast_state\`, \`movement\`, \`range\`, \`target\`.
+applicability dimensions: `ability_learned`, `cooldown_or_charge`,
+`resource`, `gcd`, `cast_state`, `movement`, `range`, `target`.
 Each dimension either has observed numeric predicates (ALL/ANY) or a documented
 NOT_APPLICABLE waiver. Missing dimensions/observations produce UNKNOWN.
 Policies are supplied by the caller and are **not automatically certified**
@@ -76,10 +76,10 @@ against Blizzard mechanics. A READY computed from a declared policy remains
 research-only. The same action's contradictory observed readiness is rejected.
 
 **Precombat variable boundary:** the runtime does not silently materialize
-\`actions.precombat\` variable assignments. Values used later as
-\`variable.*\` must be supplied as strictly earlier features or derived
+`actions.precombat` variable assignments. Values used later as
+`variable.*` must be supplied as strictly earlier features or derived
 independently from a verified precombat execution state. A source-only
-\`variable\` declaration is not evidence that the initialization executed.
+`variable` declaration is not evidence that the initialization executed.
 
 ## Precombat APL variables → in-combat priority (research-only)
 
@@ -107,20 +107,21 @@ python tools/research/simc_apl_precombat_replay.py --model "C:\zrot\model.json" 
 ```
 
 The existing `simc_apl_priority_trace.py` consumes the same timeline
-if included as `precombat_replay` inside its `--snapshot` input. Native
-SimC-log format parsing and actual per-event trace validation remain NOT RUN.
+if included as `precombat_replay` inside its `--snapshot` input. A narrow native
+performed-action parser exists; independent foreground classification and
+actual native state-based per-event validation remain NOT RUN.
 
 ## Native SimC reference acquisition (local, private)
 
 Run the actual SimC executable to collect the action log and the effective
 APL together:
 
-\`\`\`powershell
+```powershell
 python tools/research/simc_native_reference_capture.py --spec enhancement --profile "C:\simc\my_character.simc" --simc-bin "C:\simc\simc.exe" --out-dir "C:\zrot\simc_native_reference"
-\`\`\`
+```
 
-The script uses SimC's documented \`log=1\`, \`log_spell_id=1\`,
-\`save_actions\` and \`output\` options. It writes a SHA256 receipt.
+The script uses SimC's documented `log=1`, `log_spell_id=1`,
+`save_actions` and `output` options. It writes a SHA256 receipt.
 **It does not yet parse the log or validate action-by-action equivalence.**
 This actual SimC run has **NOT RUN** on the user's PC in the current
 GitHub-only verification. Keep these outputs private: logs can contain
@@ -154,26 +155,26 @@ repository.** Retain local outputs for later empirical comparison.
 
 The local reusable comparison engine is:
 
-\`\`\`powershell
+```powershell
 python tools/research/simc_native_oracle_reconciliation.py --reference-dir "C:\zrot\simc_native_reference" --cases-file "C:\zrot\simc_oracle_cases.json" --spec enhancement --build-key "caller_pinned_build" --out "C:\zrot\simc_oracle_replay.json"
-\`\`\`
+```
 
-Input \`cases\` must refer to an *existing hash-checked native performs event* by
-\`native_source_line\`. For each case, include the exact native actor literal
-(locally only), native event \`decision_timestamp_ms\`, pinned
-\`source_apl_sha256\`, \`spec_slug\`, \`build_key\`, strict-PRE \`transitions\`,
-\`operand_to_feature\`, and \`readiness_feature_keys\`.
-Only events explicitly labeled \`native_event_scope:
-"CALLER_ATTESTED_FOREGROUND_APL"\` with a \`scope_evidence_ref\` are eligible
+Input `cases` must refer to an *existing hash-checked native performs event* by
+`native_source_line`. For each case, include the exact native actor literal
+(locally only), native event `decision_timestamp_ms`, pinned
+`source_apl_sha256`, `spec_slug`, `build_key`, strict-PRE `transitions`,
+`operand_to_feature`, and `readiness_feature_keys`.
+Only events explicitly labeled `native_event_scope:
+"CALLER_ATTESTED_FOREGROUND_APL"` with a `scope_evidence_ref` are eligible
 for a provisional comparison; the label **is not independent certification**.
 Other native performed events are excluded, not automatically called mistakes.
 
 Output classes:
-- \`PROVISIONAL_MATCH\` — exact native vs predicted action *token* match
-- \`PROVISIONAL_DIFFERENCE\` — different tokens; action replacements,
+- `PROVISIONAL_MATCH` — exact native vs predicted action *token* match
+- `PROVISIONAL_DIFFERENCE` — different tokens; action replacements,
   background effects and timing semantics are not yet controlled
-- \`UNKNOWN\` — missing state, unreadiness, or unsupported APL semantics
-- \`EXCLUDED\` — no relevant event or insufficient identity/foreground scope
+- `UNKNOWN` — missing state, unreadiness, or unsupported APL semantics
+- `EXCLUDED` — no relevant event or insufficient identity/foreground scope
 
 This step does **not** extract PRE resource/cooldown/target state from native
 logs, identify true APL-foreground casts, or validate token/spell identity.
