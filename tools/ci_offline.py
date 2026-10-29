@@ -532,6 +532,90 @@ def check_simc_native_reference_capture_contract() -> None:
 
 
 
+
+def check_simc_readiness_to_priority_cli() -> None:
+    """End-to-end synthetic action readiness predicates -> source APL choice."""
+    import tempfile
+    provider=ROOT/'tools/research/simc_apl_source_engine.py'
+    trace=ROOT/'tools/research/simc_apl_priority_trace.py'
+    with tempfile.TemporaryDirectory(prefix="zrot_pre_ready_cli_") as td:
+        folder=Path(td)
+        apl=folder/'apl.simc'
+        model=folder/'model.json'
+        snap=folder/'state.json'
+        apl.write_text(
+            "spec=synthetic\n"
+            "actions=alpha,if=active_enemies>=2\n"
+            "actions+=/beta\n", encoding='utf-8')
+        env={k:v for k,v in os.environ.items() if k not in
+             {'WCL_CLIENT_ID','WCL_CLIENT_SECRET','GH_TOKEN','GITHUB_TOKEN'}}
+        r=subprocess.run([sys.executable,'-B',str(provider),
+                          '--spec','synthetic','--actions-file',str(apl),
+                          '--out',str(model)],
+                         cwd=str(ROOT),capture_output=True,text=True,timeout=15,env=env)
+        assert r.returncode==0,'synthetic source ingestion failed'
+        ingested=json.loads(model.read_text(encoding='utf-8'))
+        source_sha=ingested['apl_sha256']
+        columns={
+          'ability_learned':('learned','eq',1),
+          'cooldown_or_charge':('cooldown_ms','le',0),
+          'resource':('resource','ge',40),
+          'gcd':('gcd_available','eq',1),
+          'cast_state':('casting','eq',0),
+          'movement':('moving','eq',0),
+          'range':('in_range','eq',1),
+          'target':('target_valid','eq',1),
+        }
+        contract={
+          'schema':'ZrotGenericReadinessRequirementsV1',
+          'spec_slug':'synthetic','build_key':'build_synthetic',
+          'apl_sha256':source_sha,'hypothesis_only':True,
+          'actions':{'alpha':{
+            'evidence_ref':'synthetic_fixture',
+            'dimensions':{name:{'mode':'ALL','predicates':[
+              {'feature':field,'op':op,'value':value}]}
+              for name,(field,op,value) in columns.items()}
+          }},
+        }
+        values={
+          'enemies':2,'learned':1,'cooldown_ms':0,'resource':50,
+          'gcd_available':1,'casting':0,'moving':0,'in_range':1,
+          'target_valid':1,
+        }
+        def check_run(current):
+            payload={
+              'spec_slug':'synthetic','build_key':'build_synthetic',
+              'decision_timestamp_ms':1000,
+              'transitions':[
+                  {'timestamp_ms':900,'key':key,'value':val}
+                  for key,val in current.items()],
+              'operand_to_feature':{'active_enemies':'enemies'},
+              'readiness_feature_keys':{},
+              'readiness_contract':contract,
+            }
+            snap.write_text(json.dumps(payload),encoding='utf-8')
+            p=subprocess.run([sys.executable,'-B',str(trace),
+                              '--model',str(model),'--snapshot',str(snap)],
+                             cwd=str(ROOT),capture_output=True,text=True,
+                             timeout=15,env=env)
+            assert p.returncode==0, 'readiness to priority CLI failed'
+            return json.loads(p.stdout)
+        good=check_run(values)
+        assert good['status']=='HYPOTHESIS_CANDIDATE'
+        assert good['candidate_action_token']=='alpha'
+        assert not good['actionable']
+        assert good['readiness_provenance']=='SOURCE_DECLARED_REQUIREMENT_MODEL_UNVERIFIED'
+        without_target=check_run({k:v for k,v in values.items() if k!='target_valid'})
+        assert without_target['status']=='BLOCKED'
+        assert without_target['reason']=='ACTION_READINESS_UNKNOWN'
+        failed=check_run({**values,'cooldown_ms':500})
+        assert failed['status']=='BLOCKED'
+        assert failed['reason']=='ACTION_READINESS_UNKNOWN'
+        # Alpha known NOT_READY, next beta is unknown; no false fallback.
+        assert failed['candidate_action_token'] is None
+
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -555,6 +639,7 @@ def main() -> int:
         ('simc_source_to_priority_file_cli', check_simc_source_to_priority_file_cli),
         ('simc_conditional_priority_structural_ir', check_simc_conditional_priority_ir),
         ('simc_pre_readiness_provider', check_simc_pre_readiness_provider),
+        ('simc_readiness_to_priority_cli', check_simc_readiness_to_priority_cli),
         ('simc_native_reference_capture_contract', check_simc_native_reference_capture_contract),
         ('simc_wcl_batch_reconciliation_research_only', check_simc_wcl_batch_reconciliation),
     )

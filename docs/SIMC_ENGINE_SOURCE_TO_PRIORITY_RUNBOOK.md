@@ -59,6 +59,44 @@ Output status is `HYPOTHESIS_CANDIDATE`, `BLOCKED`, or `NO_DETERMINABLE_ACTION`.
 
 Run `python tools/research/simc_apl_priority_trace.py --self-test` to check its offline fixtures.
 
+
+## Additional input: complete readiness requirements (research-only)
+
+The snapshot may include \`"build_key"\` and \`"readiness_contract"\`.
+\`tools/research/simc_apl_readiness_provider.py\` derives candidate READY /
+NOT_READY / UNKNOWN from **strictly earlier** observations.
+
+Every action requires an explicit, provenance-linked policy for all eight
+applicability dimensions: \`ability_learned\`, \`cooldown_or_charge\`,
+\`resource\`, \`gcd\`, \`cast_state\`, \`movement\`, \`range\`, \`target\`.
+Each dimension either has observed numeric predicates (ALL/ANY) or a documented
+NOT_APPLICABLE waiver. Missing dimensions/observations produce UNKNOWN.
+Policies are supplied by the caller and are **not automatically certified**
+against Blizzard mechanics. A READY computed from a declared policy remains
+research-only. The same action's contradictory observed readiness is rejected.
+
+**Precombat variable boundary:** the runtime does not silently materialize
+\`actions.precombat\` variable assignments. Values used later as
+\`variable.*\` must be supplied as strictly earlier features or derived
+independently from a verified precombat execution state. A source-only
+\`variable\` declaration is not evidence that the initialization executed.
+
+## Native SimC reference acquisition (local, private)
+
+Run the actual SimC executable to collect the action log and the effective
+APL together:
+
+\`\`\`powershell
+python tools/research/simc_native_reference_capture.py --spec enhancement --profile "C:\simc\my_character.simc" --simc-bin "C:\simc\simc.exe" --out-dir "C:\zrot\simc_native_reference"
+\`\`\`
+
+The script uses SimC's documented \`log=1\`, \`log_spell_id=1\`,
+\`save_actions\` and \`output\` options. It writes a SHA256 receipt.
+**It does not yet parse the log or validate action-by-action equivalence.**
+This actual SimC run has **NOT RUN** on the user's PC in the current
+GitHub-only verification. Keep these outputs private: logs can contain
+character/gear details, and never commit them to this public repository.
+
 ## 4. Missing before engine completion
 
 - Verify effective default APL exports from the current actual SimC binary across representative specs/builds.
