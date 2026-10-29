@@ -11,8 +11,12 @@ SimC source: simulationcraft/simc Wiki ActionLists (2026).
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, asdict
 from typing import Any, Mapping
+import argparse
+import json
+import math
+from pathlib import Path
 
 from simc_apl_condition_research import bind_strict_pre, evaluate
 
@@ -81,7 +85,12 @@ def trace_priority(
                 raise ValueError("ROW_ORDER_NOT_PINNED")
             seen.add(rank)
     events: list[dict[str, Any]] = []
-    variable_values: dict[str, float] = {}
+    # Explicitly observed variable values may carry forward from earlier
+    # decision scans. Never reinitialize persistent variables to zero.
+    variable_values: dict[str, float] = {
+        k[len("variable."):]: v for k, v in values.items()
+        if k.startswith("variable.") and len(k) > len("variable.")
+    }
 
     def outcome(status, token, list_name, line, reason):
         return AplTrace(
@@ -136,25 +145,95 @@ def trace_priority(
                                    "RUN_LIST_YIELD_NO_FALLTHROUGH")
                 continue
             if command == "variable":
-                if set(params) - {"name", "if", "op", "value"}:
+                # SimC APL variable operators. Persistent values must be
+                # reconstructed from strict-PRE observations, not silently 0.
+                if set(params) - {"name", "if", "op", "value",
+                                  "value_else", "condition", "default"}:
                     return outcome(BLOCK, None, group_name, line,
                                    "UNSUPPORTED_VARIABLE_MODIFIERS")
                 variable = params.get("name", "")
                 op = params.get("op", "set")
-                if not variable or not variable.replace("_","").isalnum():
+                if not variable or not variable.replace("_", "").isalnum():
                     return outcome(BLOCK, None, group_name, line,
                                    "INVALID_VARIABLE_NAME")
-                if op != "set" or "value" not in params:
+                if "default" in params:
+                    fallback = condition(params["default"])
+                    if fallback.value is None:
+                        return outcome(BLOCK, None, group_name, line,
+                                       "VARIABLE_DEFAULT_" + fallback.status)
+                    default_value = fallback.value
+                else:
+                    default_value = 0.0  # SimC documented initial default
+                current = variable_values.get(variable)
+                value_expr = params.get("value")
+                if op == "reset":
+                    new_value = default_value
+                elif op == "setif":
+                    if "condition" not in params or value_expr is None or \
+                            "value_else" not in params:
+                        return outcome(BLOCK, None, group_name, line,
+                                       "VARIABLE_SETIF_ARGUMENTS_MISSING")
+                    predicate = condition(params["condition"])
+                    if predicate.status not in ("TRUE", "FALSE"):
+                        return outcome(BLOCK, None, group_name, line,
+                                       "VARIABLE_SETIF_" + predicate.status)
+                    chosen = value_expr if predicate.status == "TRUE" \
+                        else params["value_else"]
+                    computed = condition(chosen)
+                    if computed.value is None:
+                        return outcome(BLOCK, None, group_name, line,
+                                       "VARIABLE_VALUE_" + computed.status)
+                    new_value = computed.value
+                else:
+                    if value_expr is None:
+                        return outcome(BLOCK, None, group_name, line,
+                                       "VARIABLE_VALUE_REQUIRED")
+                    computed = condition(value_expr)
+                    if computed.value is None:
+                        return outcome(BLOCK, None, group_name, line,
+                                       "VARIABLE_VALUE_" + computed.status)
+                    argument = computed.value
+                    if op == "set":
+                        new_value = argument
+                    elif op in ("floor", "ceil"):
+                        new_value = float(
+                            math.floor(argument) if op == "floor"
+                            else math.ceil(argument))
+                    else:
+                        if current is None:
+                            return outcome(BLOCK, None, group_name, line,
+                                           "VARIABLE_PREVIOUS_VALUE_UNKNOWN")
+                        try:
+                            if op == "add":
+                                new_value = current + argument
+                            elif op == "sub":
+                                new_value = current - argument
+                            elif op == "mul":
+                                new_value = current * argument
+                            elif op == "div":
+                                new_value = current / argument if argument else 0.0
+                            elif op == "pow":
+                                new_value = current ** argument
+                            elif op == "mod":
+                                new_value = math.fmod(current, argument)
+                            elif op == "min":
+                                new_value = min(current, argument)
+                            elif op == "max":
+                                new_value = max(current, argument)
+                            else:
+                                return outcome(BLOCK, None, group_name, line,
+                                               "VARIABLE_OPERATION_NOT_SUPPORTED")
+                        except (ZeroDivisionError, ValueError, OverflowError):
+                            return outcome(BLOCK, None, group_name, line,
+                                           "VARIABLE_ARITHMETIC_UNDEFINED")
+                if isinstance(new_value, complex) or not math.isfinite(new_value):
                     return outcome(BLOCK, None, group_name, line,
-                                   "VARIABLE_OPERATION_NOT_SUPPORTED")
-                value = condition(params["value"])
-                if value.status not in ("TRUE", "FALSE") or value.value is None:
-                    return outcome(BLOCK, None, group_name, line,
-                                   "VARIABLE_VALUE_" + value.status)
-                variable_values[variable] = value.value
+                                   "VARIABLE_ARITHMETIC_UNDEFINED")
+                variable_values[variable] = float(new_value)
                 events.append({"list": group_name, "line": line,
-                               "command": command, "kind": "VARIABLE_SET",
-                               "variable": variable})
+                               "command": command, "kind": "VARIABLE_UPDATE",
+                               "operator": op, "variable": variable,
+                               "value": variable_values[variable]})
                 continue
             # Not safe to ignore directives that may change action flow.
             if row["role"] != "ACTION_TOKEN":
@@ -269,8 +348,121 @@ def selftest():
         assert str(e) == "APL_SOURCE_PIN_MISMATCH"
     else:
         raise AssertionError("UNPINNED_APL_ACCEPTED")
+    # Persistent variables cannot be synthesized from a new scan's defaults.
+    v = (
+        b"spec=enhancement\n"
+        b"actions=variable,name=counter,op=add,value=2\n"
+        b"actions+=/variable,name=gate,op=setif,condition=variable.counter>=5,"
+        b"value=1,value_else=0\n"
+        b"actions+=/stormstrike,if=variable.gate=1\n"
+        b"actions+=/lava_lash\n"
+    )
+    vm = ingest_actions(v, expected_spec="enhancement")
+    vk = dict(kw, model=vm,
+              expected_apl_sha256=hashlib.sha256(v).hexdigest())
+    unknown_previous = trace_priority(
+        **vk, action_readiness={"stormstrike": "READY", "lava_lash": "READY"})
+    assert unknown_previous.reason == "VARIABLE_PREVIOUS_VALUE_UNKNOWN"
+    carried = StrictPreStateProvider().build(
+        action_timestamp_ms=1000,
+        transitions=(StateTransition(900, "previous_counter", 3),))
+    carried_kw = dict(vk, strict_pre_state=carried,
+                      operand_to_feature={"variable.counter":"previous_counter"})
+    found = trace_priority(
+        **carried_kw, action_readiness={"stormstrike": "READY"})
+    assert found.candidate_action_token == "stormstrike", found
+    assert any(e.get("operator") == "setif" and e.get("value") == 1.0
+               for e in found.trace)
+    # No source timestamp equality/future leakage.
+    future = StrictPreStateProvider().build(
+        action_timestamp_ms=1000,
+        transitions=(StateTransition(1000, "previous_counter", 3),
+                     StateTransition(1001, "previous_counter", 100)))
+    missing = trace_priority(
+        **dict(carried_kw, strict_pre_state=future),
+        action_readiness={"stormstrike": "READY"})
+    assert missing.reason == "VARIABLE_PREVIOUS_VALUE_UNKNOWN"
+    # 'reset' uses the SimC documented default, even without prior value.
+    reset = b"spec=enhancement\n" \
+            b"actions=variable,name=gate,op=reset,default=7\n" \
+            b"actions+=/stormstrike,if=variable.gate=7\n"
+    reset_model = ingest_actions(reset, expected_spec="enhancement")
+    reset_result = trace_priority(
+        **dict(kw, model=reset_model,
+               expected_apl_sha256=hashlib.sha256(reset).hexdigest()),
+        action_readiness={"stormstrike":"READY"})
+    assert reset_result.candidate_action_token == "stormstrike"
+    # Safe fail-closed on unsupported variable options.
+    delayed = reset.replace(b"default=7", b"default=7,delay=0.5")
+    delay_result = trace_priority(
+        **dict(kw, model=ingest_actions(delayed, expected_spec="enhancement"),
+               expected_apl_sha256=hashlib.sha256(delayed).hexdigest()),
+        action_readiness={"stormstrike":"READY"})
+    assert delay_result.reason == "UNSUPPORTED_VARIABLE_MODIFIERS"
+    print("SIMC_APL_VARIABLE_OPERATORS_AND_PRE_SELF_TEST=PASS")
     print("SIMC_APL_ORDERED_PRIORITY_TRAVERSAL_SELF_TEST=PASS")
 
 
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Research-only SimC APL priority trace for a PRE snapshot")
+    parser.add_argument("--model", type=Path,
+                        help="JSON hypothesis emitted by simc_apl_source_engine.py")
+    parser.add_argument("--snapshot", type=Path,
+                        help="JSON with PRE transitions, operand map and readiness keys")
+    parser.add_argument("--output", type=Path, help="Write trace JSON")
+    parser.add_argument("--self-test", action="store_true")
+    options = parser.parse_args()
+    if options.self_test or (options.model is None and options.snapshot is None):
+        selftest()
+        return 0
+    if options.model is None or options.snapshot is None:
+        parser.error("--model and --snapshot must both be supplied")
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] /
+                           "02_SOURCE" / "runtime"))
+    from raid_dps.core.behavioral_evaluator import (
+        StrictPreStateProvider, StateTransition, ObservationStatus)
+    model = json.loads(options.model.read_text(encoding="utf-8"))
+    data = json.loads(options.snapshot.read_text(encoding="utf-8"))
+    ts = data["decision_timestamp_ms"]
+    transitions = tuple(StateTransition(
+        int(r["timestamp_ms"]), str(r["key"]), r["value"])
+        for r in data["transitions"])
+    state = StrictPreStateProvider().build(
+        action_timestamp_ms=ts, transitions=transitions,
+        required_keys=data.get("required_keys", ()),
+        unobservable_keys=data.get("unobservable_keys", ()))
+    readiness = {}
+    for action, key in data["readiness_feature_keys"].items():
+        obs = state.features.get(key)
+        if (obs is not None and obs.status is ObservationStatus.OBSERVED
+                and obs.source_timestamp_ms is not None
+                and obs.value in ("READY", "NOT_READY", "UNKNOWN", "UNOBSERVABLE")):
+            readiness[action] = obs.value
+    result = trace_priority(
+        model, strict_pre_state=state,
+        spec_slug=data["spec_slug"],
+        operand_to_feature=data["operand_to_feature"],
+        action_readiness=readiness,
+        expected_apl_sha256=model["apl_sha256"],
+        expected_profile_sha256=model.get("profile_sha256"),
+    )
+    payload = {
+        **asdict(result),
+        "validation": "SIMC_APL_HYPOTHESIS_RESEARCH_ONLY",
+        "readiness_provenance": "EXPLICIT_STRICT_PRE_FEATURES",
+        "source_priority_is_optimal": False,
+        "current_game_authority": "UNVERIFIED",
+    }
+    output = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+    if options.output:
+        options.output.parent.mkdir(parents=True, exist_ok=True)
+        options.output.write_text(output, encoding="utf-8")
+    else:
+        print(output)
+    return 0
+
+
 if __name__ == "__main__":
-    selftest()
+    raise SystemExit(main())
