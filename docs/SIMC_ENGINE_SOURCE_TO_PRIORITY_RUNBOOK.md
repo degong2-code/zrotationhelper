@@ -150,6 +150,38 @@ within this GitHub development session.
 **Do not upload native action logs or character profile dumps to this public
 repository.** Retain local outputs for later empirical comparison.
 
+## Native SimC decision comparison — explicit PRE fixtures (research-only)
+
+The local reusable comparison engine is:
+
+\`\`\`powershell
+python tools/research/simc_native_oracle_reconciliation.py --reference-dir "C:\zrot\simc_native_reference" --cases-file "C:\zrot\simc_oracle_cases.json" --spec enhancement --build-key "caller_pinned_build" --out "C:\zrot\simc_oracle_replay.json"
+\`\`\`
+
+Input \`cases\` must refer to an *existing hash-checked native performs event* by
+\`native_source_line\`. For each case, include the exact native actor literal
+(locally only), native event \`decision_timestamp_ms\`, pinned
+\`source_apl_sha256\`, \`spec_slug\`, \`build_key\`, strict-PRE \`transitions\`,
+\`operand_to_feature\`, and \`readiness_feature_keys\`.
+Only events explicitly labeled \`native_event_scope:
+"CALLER_ATTESTED_FOREGROUND_APL"\` with a \`scope_evidence_ref\` are eligible
+for a provisional comparison; the label **is not independent certification**.
+Other native performed events are excluded, not automatically called mistakes.
+
+Output classes:
+- \`PROVISIONAL_MATCH\` — exact native vs predicted action *token* match
+- \`PROVISIONAL_DIFFERENCE\` — different tokens; action replacements,
+  background effects and timing semantics are not yet controlled
+- \`UNKNOWN\` — missing state, unreadiness, or unsupported APL semantics
+- \`EXCLUDED\` — no relevant event or insufficient identity/foreground scope
+
+This step does **not** extract PRE resource/cooldown/target state from native
+logs, identify true APL-foreground casts, or validate token/spell identity.
+It does not create gameplay rules. Native logs and local actor identities
+must remain private and must not be uploaded to this public GitHub repository.
+The only completed validation is **offline synthetic**, not actual local
+SimulationCraft production.
+
 ## 4. Missing before engine completion
 
 - Verify effective default APL exports from the current actual SimC binary across representative specs/builds.
