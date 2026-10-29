@@ -399,6 +399,65 @@ def selftest():
                expected_apl_sha256=hashlib.sha256(delayed).hexdigest()),
         action_readiness={"stormstrike":"READY"})
     assert delay_result.reason == "UNSUPPORTED_VARIABLE_MODIFIERS"
+    # All supported stateful operations use the *observed* previous value.
+    op_expectations = {
+        "add": 8, "sub": 4, "mul": 12, "div": 3, "pow": 36,
+        "mod": 0, "min": 2, "max": 6,
+    }
+    observed_six = StrictPreStateProvider().build(
+        action_timestamp_ms=1000,
+        transitions=(StateTransition(901, "previous_counter", 6),))
+    for op, expected_value in op_expectations.items():
+        fixture = (
+            "spec=enhancement\n"
+            f"actions=variable,name=counter,op={op},value=2\n"
+            f"actions+=/stormstrike,if=variable.counter={expected_value}\n"
+        ).encode()
+        result = trace_priority(
+            **dict(kw, model=ingest_actions(fixture, expected_spec="enhancement"),
+                   strict_pre_state=observed_six,
+                   operand_to_feature={"variable.counter":"previous_counter"},
+                   expected_apl_sha256=hashlib.sha256(fixture).hexdigest()),
+            action_readiness={"stormstrike":"READY"})
+        assert result.status == CANDIDATE, (op, result.reason)
+    # SimC's variable div-by-zero convention is 0 (different from guards).
+    divide_zero = (
+        b"spec=enhancement\n"
+        b"actions=variable,name=counter,op=div,value=0\n"
+        b"actions+=/stormstrike,if=variable.counter=0\n"
+    )
+    divide_result = trace_priority(
+        **dict(kw, model=ingest_actions(divide_zero, expected_spec="enhancement"),
+               strict_pre_state=observed_six,
+               operand_to_feature={"variable.counter":"previous_counter"},
+               expected_apl_sha256=hashlib.sha256(divide_zero).hexdigest()),
+        action_readiness={"stormstrike":"READY"})
+    assert divide_result.status == CANDIDATE
+    # A declared default is not substituted for an unobserved *persistent*
+    # previous value in a later scan.
+    no_prior = (
+        b"spec=enhancement\n"
+        b"actions=variable,name=counter,op=add,default=3,value=2\n"
+        b"actions+=/stormstrike\n"
+    )
+    unobserved_prior = trace_priority(
+        **dict(kw, model=ingest_actions(no_prior, expected_spec="enhancement"),
+               expected_apl_sha256=hashlib.sha256(no_prior).hexdigest()),
+        action_readiness={"stormstrike":"READY"})
+    assert unobserved_prior.reason == "VARIABLE_PREVIOUS_VALUE_UNKNOWN"
+    # setif false branch and noninteger value rounding.
+    for op, value, expected_value in (
+        ("floor", 2.9, 2), ("ceil", 2.1, 3)):
+        fixture = (
+            "spec=enhancement\n"
+            f"actions=variable,name=gate,op={op},value={value}\n"
+            f"actions+=/stormstrike,if=variable.gate={expected_value}\n"
+        ).encode()
+        result = trace_priority(
+            **dict(kw, model=ingest_actions(fixture, expected_spec="enhancement"),
+                   expected_apl_sha256=hashlib.sha256(fixture).hexdigest()),
+            action_readiness={"stormstrike":"READY"})
+        assert result.status == CANDIDATE, op
     print("SIMC_APL_VARIABLE_OPERATORS_AND_PRE_SELF_TEST=PASS")
     print("SIMC_APL_ORDERED_PRIORITY_TRAVERSAL_SELF_TEST=PASS")
 
