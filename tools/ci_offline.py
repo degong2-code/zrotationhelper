@@ -419,6 +419,69 @@ def check_simc_apl_ordered_priority() -> None:
 
 
 
+def check_simc_source_to_priority_file_cli() -> None:
+    """Offline end-to-end: exported APL file -> model -> Strict PRE -> JSON."""
+    import tempfile
+    source_engine = ROOT / 'tools/research/simc_apl_source_engine.py'
+    priority_engine = ROOT / 'tools/research/simc_apl_priority_trace.py'
+    env = {k:v for k,v in os.environ.items() if k not in
+           {'WCL_CLIENT_ID','WCL_CLIENT_SECRET','GH_TOKEN','GITHUB_TOKEN'}}
+    with tempfile.TemporaryDirectory(prefix='zrot_apl_cli_') as td:
+        workspace=Path(td)
+        source=workspace/'input.simc'
+        model=workspace/'model.json'
+        snapshot=workspace/'state.json'
+        source.write_text(
+            'spec=enhancement\n'
+            'actions=variable,name=gate,op=set,value=4\n'
+            'actions+=/stormstrike,if=active_enemies>=2&'
+            'buff.foo.stack>=variable.gate\n'
+            'actions+=/lava_lash\n', encoding='utf-8')
+        ingest=subprocess.run(
+            [sys.executable,'-B',str(source_engine),'--spec','enhancement',
+             '--actions-file',str(source),'--out',str(model)],
+            cwd=str(ROOT),capture_output=True,text=True,timeout=15,env=env)
+        assert ingest.returncode == 0, 'source ingestion CLI failed'
+        data=json.loads(model.read_text(encoding='utf-8'))
+        assert data['apl_row_count'] == 3
+        assert data['actionable_general_rotation'] is False
+        sample={
+            'spec_slug':'enhancement','decision_timestamp_ms':1000,
+            'transitions':[
+                {'timestamp_ms':900,'key':'targets','value':2},
+                {'timestamp_ms':950,'key':'stacks','value':5},
+                {'timestamp_ms':970,'key':'storm_ready','value':'READY'},
+                {'timestamp_ms':1000,'key':'stacks','value':0},
+                {'timestamp_ms':1020,'key':'targets','value':0},
+            ],
+            'operand_to_feature':{
+                'active_enemies':'targets','buff.foo.stack':'stacks',
+            },
+            'readiness_feature_keys':{'stormstrike':'storm_ready'},
+        }
+        def run_state(s):
+            snapshot.write_text(json.dumps(s),encoding='utf-8')
+            output=subprocess.run(
+                [sys.executable,'-B',str(priority_engine),
+                 '--model',str(model),'--snapshot',str(snapshot)],
+                cwd=str(ROOT),capture_output=True,text=True,timeout=15,env=env)
+            assert output.returncode == 0, 'priority CLI failed'
+            return json.loads(output.stdout)
+        matched=run_state(sample)
+        assert matched['status']=='HYPOTHESIS_CANDIDATE'
+        assert matched['candidate_action_token']=='stormstrike'
+        assert matched['actionable'] is False
+        assert matched['provenance']['strict_pre_timestamp_ms']==970
+        unavailable=run_state({
+            **sample, 'transitions':[
+                {**r,'timestamp_ms':1000} if r['key']=='storm_ready'
+                else r for r in sample['transitions']
+            ]})
+        assert unavailable['status']=='BLOCKED'
+        assert unavailable['reason']=='ACTION_READINESS_UNKNOWN'
+        assert unavailable['candidate_action_token'] is None
+
+
 def check_simc_wcl_batch_reconciliation() -> None:
     """Bounded SimC action-hypothesis replay against synthetic WCL-shaped casts."""
     p = ROOT / 'tools/research/simc_wcl_reconciliation_engine.py'
@@ -454,6 +517,7 @@ def main() -> int:
         ('simc_wcl_post_lock_guard_replay_research_only', check_simc_wcl_post_lock_guard_replay),
         ('simc_generic_source_hypothesis', check_simc_generic_source_hypothesis),
         ('simc_apl_ordered_priority_research_only', check_simc_apl_ordered_priority),
+        ('simc_source_to_priority_file_cli', check_simc_source_to_priority_file_cli),
         ('simc_wcl_batch_reconciliation_research_only', check_simc_wcl_batch_reconciliation),
     )
     for name, fn in checks:
