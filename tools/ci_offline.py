@@ -497,6 +497,17 @@ def check_simc_wcl_batch_reconciliation() -> None:
 
 
 
+
+def check_simc_conditional_priority_ir() -> None:
+    """All APL lists and condition branches are retained, never auto-promoted."""
+    p=ROOT / 'tools/research/simc_apl_conditional_ir.py'
+    compile(p.read_bytes(),str(p),'exec',dont_inherit=True)
+    proc=subprocess.run([sys.executable,'-B',str(p),'--self-test'],
+                        cwd=str(ROOT),capture_output=True,text=True,timeout=20)
+    assert proc.returncode==0, 'SimC conditional priority IR self-test failed'
+    assert 'SIMC_GENERIC_CONDITIONAL_PRIORITY_IR_SELF_TEST=PASS' in proc.stdout
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -518,6 +529,7 @@ def main() -> int:
         ('simc_generic_source_hypothesis', check_simc_generic_source_hypothesis),
         ('simc_apl_ordered_priority_research_only', check_simc_apl_ordered_priority),
         ('simc_source_to_priority_file_cli', check_simc_source_to_priority_file_cli),
+        ('simc_conditional_priority_structural_ir', check_simc_conditional_priority_ir),
         ('simc_wcl_batch_reconciliation_research_only', check_simc_wcl_batch_reconciliation),
     )
     for name, fn in checks:
@@ -530,7 +542,7 @@ def main() -> int:
         results.append({'name':name,'status':status})
         print(name + ': ' + status, flush=True)
     rows = []
-    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py'):
+    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py', 'tools/research/simc_apl_conditional_ir.py'):
         p = ROOT / relative
         if p.is_file():
             rows.append((relative,sha256(p.read_bytes())))
@@ -555,6 +567,7 @@ def main() -> int:
         'simc_live_apl_export':'NOT_RUN',
         'simc_generic_source_engine':'SOURCE_CAPTURE_CAPABILITY_ONLY',
         'simc_apl_priority_research':'BOUNDED_ORDER_TRACE_ONLY',
+        'simc_structural_if_else_ir':'SOURCE_CONDITIONAL_STRUCTURE_ONLY',
         'simc_wcl_batch_reconciliation':'SYNTHETIC_ACTION_FAMILY_CANDIDATES_ONLY',
         'blind_wcl_independence_validation':'NOT_RUN',
         'spec_adapter_authority_contract':'NOT_RUN',
