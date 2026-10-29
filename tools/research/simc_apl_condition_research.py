@@ -164,8 +164,8 @@ def _compute(tree, bound):
     missing = _merge(mx, my)
     if op in ('&', '|'):
         # Three-valued logic: FALSE & UNKNOWN = FALSE, TRUE | UNKNOWN = TRUE.
-        if op == '&' and (x == 0 if x is not None else False or
-                          y == 0 if y is not None else False):
+        if op == '&' and ((x is not None and x == 0) or
+                          (y is not None and y == 0)):
             return 0.0, frozenset(), None
         if op == '|' and ((x is not None and x != 0) or (y is not None and y != 0)):
             return 1.0, frozenset(), None
@@ -274,6 +274,10 @@ def inspect_guards(profile_text: str, state, *, operand_to_feature):
 
 
 def selftest():
+    import sys
+    from pathlib import Path
+    runtime_root = Path(__file__).resolve().parents[2] / '02_SOURCE' / 'runtime'
+    sys.path.insert(0, str(runtime_root))
     from raid_dps.core.behavioral_evaluator import (
         ObservationStatus, StateTransition, StrictPreStateProvider
     )
