@@ -402,6 +402,22 @@ def check_simc_generic_source_hypothesis() -> None:
 
 
 
+
+def check_simc_apl_ordered_priority() -> None:
+    """Research-only APL order, nested list and variable evaluation."""
+    p = ROOT / 'tools/research/simc_apl_priority_trace.py'
+    compile(p.read_bytes(), str(p), 'exec', dont_inherit=True)
+    proc = subprocess.run(
+        [sys.executable, '-B', str(p)],
+        cwd=str(ROOT), capture_output=True, text=True, timeout=20,
+        env={k:v for k,v in os.environ.items() if k not in
+             {'WCL_CLIENT_ID','WCL_CLIENT_SECRET','GH_TOKEN','GITHUB_TOKEN'}},
+    )
+    assert proc.returncode == 0, 'SimC APL priority traversal failed'
+    assert 'SIMC_APL_ORDERED_PRIORITY_TRAVERSAL_SELF_TEST=PASS' in proc.stdout
+
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -421,6 +437,7 @@ def main() -> int:
         ('simc_apl_condition_strict_pre_research_only', check_simc_apl_condition_strict_pre),
         ('simc_wcl_post_lock_guard_replay_research_only', check_simc_wcl_post_lock_guard_replay),
         ('simc_generic_source_hypothesis', check_simc_generic_source_hypothesis),
+        ('simc_apl_ordered_priority_research_only', check_simc_apl_ordered_priority),
     )
     for name, fn in checks:
         try:
@@ -432,7 +449,7 @@ def main() -> int:
         results.append({'name':name,'status':status})
         print(name + ': ' + status, flush=True)
     rows = []
-    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py'):
+    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py'):
         p = ROOT / relative
         if p.is_file():
             rows.append((relative,sha256(p.read_bytes())))
@@ -456,6 +473,7 @@ def main() -> int:
         'simc_apl_wcl_replay':'SYNTHETIC_GUARD_ONLY_NOT_FULL_APL',
         'simc_live_apl_export':'NOT_RUN',
         'simc_generic_source_engine':'SOURCE_CAPTURE_CAPABILITY_ONLY',
+        'simc_apl_priority_research':'BOUNDED_ORDER_TRACE_ONLY',
         'blind_wcl_independence_validation':'NOT_RUN',
         'spec_adapter_authority_contract':'NOT_RUN',
         'cross_spec_empirical_validation':'NOT_RUN',
