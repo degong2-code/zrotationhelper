@@ -23,3 +23,6 @@ Seq637: UNKNOWN. Seq578: quarantined/unchanged. Existing FROZEN artifacts, CURRE
 No private personal paths, WCL credentials, evidence bundles, private logs, old branches, migration staging files, or unreviewed contracts should be committed. A targeted heuristic scan passed on the initial eight files, but it cannot certify the absence of every secret or third-party right. Review all files and repository settings **before any public push**.
 
 No open-source license is included in this bootstrap draft; public visibility alone is not an open-source license. Choose and approve a license separately if open-source reuse is intended.
+## CI execution smoke trigger
+
+This branch-only README update is a deliberate push event after the workflow file was installed. The expected checks are offline Python 3.12 and 3.14; results remain unverified until the actual GitHub Actions jobs and receipts are inspected. No product-source or authoritative-state files are changed.
