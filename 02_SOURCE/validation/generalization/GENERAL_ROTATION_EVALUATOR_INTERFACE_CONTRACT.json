@@ -1,0 +1,39 @@
+{
+  "schema": "ZraidGeneralRotationEvaluatorInterfaceContract",
+  "version": "1.0",
+  "stage": "ZRAID_EXPLICIT_GENERIC_BEHAVIORAL_EVALUATOR_INTERFACE_V1",
+  "source_inspection_sha256": "e1c4cfa9e5bc14c4db8a3e99179797fb9d5d09e7d767db40ee9bc89fb4ac43a1",
+  "source_contract_sha256": "10decb59f4c5749bb191aacbb06e7355ece40138f368a174e844ee561be8fc73",
+  "source_validation_sha256": "4253b8930f784d9e1bb37eb1e4c8ee8a85c9ed7492e56a0f16ffab2f033568cc",
+  "module": {
+    "path": "02_SOURCE/runtime/raid_dps/core/general_rotation_evaluator.py",
+    "sha256": "9229bc4c94e110308b5099966485b73728c9234f9f79d69c22e1deb1eb386d25"
+  },
+  "responsibility": "evaluate already-reconstructed strict-PRE DecisionState against externally supplied generic RotationRule objects",
+  "strict_pre_contract": "state_timestamp_max_ms < decision_timestamp_ms",
+  "priority_contract": "lower_integer_is_higher_priority",
+  "input_contract": {
+    "decision_state": {
+      "decision_timestamp_ms": "int",
+      "state_timestamp_max_ms": "int|null",
+      "values": "mapping[str, any]",
+      "spec_key": "optional opaque identifier",
+      "build_key": "optional opaque identifier"
+    },
+    "rules": "sequence[RotationRule]; produced outside evaluator by spec/build semantic layer or future authoritative rule model"
+  },
+  "output_contract": "EvaluationResult -> Recommendation IR or none",
+  "genericity_policy": {
+    "specialization_specific_mechanics_in_evaluator": false,
+    "spell_ids_or_names_in_evaluator": false,
+    "resource_semantics_in_evaluator": false,
+    "network_access": false,
+    "simc_access": false,
+    "optimality_claim": false
+  },
+  "integration_boundary": "state reconstruction -> spec semantic layer/rule provider -> GeneralRotationEvaluator -> Recommendation IR",
+  "main_control_mutation": false,
+  "workflow_bound": false,
+  "behavioral_correctness_proven": false,
+  "project_wide_cross_spec_synthetic_validated": false
+}

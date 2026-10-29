@@ -1,0 +1,39 @@
+name: zrot-offline-ci
+
+on:
+  push:
+    branches:
+      - main
+      - work/github-ci-bootstrap
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    name: Offline Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile, synthetic regression and receipt
+        run: python -B tools/ci_offline.py
+      - name: Upload scoped offline receipt
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zrot-offline-py${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/
+          if-no-files-found: warn
+          retention-days: 7
