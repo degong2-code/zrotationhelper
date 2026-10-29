@@ -179,95 +179,14 @@ def trace_priority(
                                    "RUN_LIST_YIELD_NO_FALLTHROUGH")
                 continue
             if command == "variable":
-                # SimC APL variable operators. Persistent values must be
-                # reconstructed from strict-PRE observations, not silently 0.
-                if set(params) - {"name", "if", "op", "value",
-                                  "value_else", "condition", "default"}:
-                    return outcome(BLOCK, None, group_name, line,
-                                   "UNSUPPORTED_VARIABLE_MODIFIERS")
-                variable = params.get("name", "")
-                op = params.get("op", "set")
-                if not variable or not variable.replace("_", "").isalnum():
-                    return outcome(BLOCK, None, group_name, line,
-                                   "INVALID_VARIABLE_NAME")
-                if "default" in params:
-                    fallback = condition(params["default"])
-                    if fallback.value is None:
-                        return outcome(BLOCK, None, group_name, line,
-                                       "VARIABLE_DEFAULT_" + fallback.status)
-                    default_value = fallback.value
-                else:
-                    default_value = 0.0  # SimC documented initial default
-                current = variable_values.get(variable)
-                value_expr = params.get("value")
-                if op == "reset":
-                    new_value = default_value
-                elif op == "setif":
-                    if "condition" not in params or value_expr is None or \
-                            "value_else" not in params:
-                        return outcome(BLOCK, None, group_name, line,
-                                       "VARIABLE_SETIF_ARGUMENTS_MISSING")
-                    predicate = condition(params["condition"])
-                    if predicate.status not in ("TRUE", "FALSE"):
-                        return outcome(BLOCK, None, group_name, line,
-                                       "VARIABLE_SETIF_" + predicate.status)
-                    chosen = value_expr if predicate.status == "TRUE" \
-                        else params["value_else"]
-                    computed = condition(chosen)
-                    if computed.value is None:
-                        return outcome(BLOCK, None, group_name, line,
-                                       "VARIABLE_VALUE_" + computed.status)
-                    new_value = computed.value
-                else:
-                    if value_expr is None:
-                        return outcome(BLOCK, None, group_name, line,
-                                       "VARIABLE_VALUE_REQUIRED")
-                    computed = condition(value_expr)
-                    if computed.value is None:
-                        return outcome(BLOCK, None, group_name, line,
-                                       "VARIABLE_VALUE_" + computed.status)
-                    argument = computed.value
-                    if op == "set":
-                        new_value = argument
-                    elif op in ("floor", "ceil"):
-                        new_value = float(
-                            math.floor(argument) if op == "floor"
-                            else math.ceil(argument))
-                    else:
-                        if current is None:
-                            return outcome(BLOCK, None, group_name, line,
-                                           "VARIABLE_PREVIOUS_VALUE_UNKNOWN")
-                        try:
-                            if op == "add":
-                                new_value = current + argument
-                            elif op == "sub":
-                                new_value = current - argument
-                            elif op == "mul":
-                                new_value = current * argument
-                            elif op == "div":
-                                new_value = current / argument if argument else 0.0
-                            elif op == "pow":
-                                new_value = current ** argument
-                            elif op == "mod":
-                                new_value = math.fmod(current, argument)
-                            elif op == "min":
-                                new_value = min(current, argument)
-                            elif op == "max":
-                                new_value = max(current, argument)
-                            else:
-                                return outcome(BLOCK, None, group_name, line,
-                                               "VARIABLE_OPERATION_NOT_SUPPORTED")
-                        except (ZeroDivisionError, ValueError, OverflowError):
-                            return outcome(BLOCK, None, group_name, line,
-                                           "VARIABLE_ARITHMETIC_UNDEFINED")
-                if isinstance(new_value, complex) or not math.isfinite(new_value):
-                    return outcome(BLOCK, None, group_name, line,
-                                   "VARIABLE_ARITHMETIC_UNDEFINED")
-                variable_values[variable] = float(new_value)
-                events.append({"list": group_name, "line": line,
-                               "command": command, "kind": "VARIABLE_UPDATE",
-                               "operator": op, "variable": variable,
-                               "value": variable_values[variable]})
+                from simc_apl_variable_runtime import apply_variable
+                update=apply_variable(params,variable_values,condition)
+                if update.status != "APPLIED":
+                    return outcome(BLOCK,None,group_name,line,update.reason)
+                events.append({"list":group_name,"line":line,
+                               "command":command,"kind":"VARIABLE_UPDATE",
+                               "operator":update.operator,
+                               "variable":update.name,"value":update.value})
                 continue
             # Not safe to ignore directives that may change action flow.
             if row["role"] != "ACTION_TOKEN":
