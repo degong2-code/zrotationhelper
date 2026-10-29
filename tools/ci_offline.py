@@ -200,6 +200,106 @@ def check_spec_adapter_structure() -> None:
         assert len(frozen_refs) == len(set(frozen_refs))
 
 
+
+def check_cross_spec_runtime_bridge() -> None:
+    """Adapter -> strict PRE -> generic recommendation -> behavioral outcome.
+
+    Synthetic interface test only. READY is assigned by the fixture, not
+    inferred from combat logs or the game.
+    """
+    from raid_dps.core import behavioral_evaluator as be
+    from raid_dps.core import general_rotation_evaluator as gr
+    from raid_dps.specs.enhancement_shaman import ADAPTER as enhancement
+    from raid_dps.specs.fury_warrior import ADAPTER as fury
+    for adapter in (enhancement, fury):
+        family = next(
+            f for f in adapter.action_families()
+            if f.base_action_ids and f.upgraded_action_ids
+        )
+        feature = next(
+            f for f in adapter.state_features()
+            if f.key in ('maelstrom_weapon_stacks', 'rage')
+        )
+        state = be.StrictPreStateProvider().build(
+            action_timestamp_ms=1000,
+            transitions=(
+                be.StateTransition(900, feature.key, 5),
+                be.StateTransition(1000, feature.key, 0),
+                be.StateTransition(1100, feature.key, 0),
+            ),
+            required_keys=(feature.key,),
+        )
+        assert state.excluded_same_timestamp_n == 1
+        assert state.excluded_future_n == 1
+        assert state.features[feature.key].value == 5
+        observed = {
+            key: obs.value for key, obs in state.features.items()
+            if obs.status is be.ObservationStatus.OBSERVED
+        }
+        decision = gr.GeneralRotationEvaluator().evaluate(
+            gr.DecisionState(
+                1000, state.state_timestamp_max_ms, observed,
+                spec_key=adapter.spec_slug,
+            ),
+            (
+                gr.RotationRule(
+                    'synthetic_bridge', 10, family.key,
+                    (gr.RuleCondition(feature.key, 'ge', 5),),
+                    confidence='SYNTHETIC_ONLY',
+                    evidence=('synthetic_bridge',),
+                ),
+            ),
+        )
+        assert decision.recommendation is not None
+        assert decision.recommendation.recommended_action == family.key
+        rule = be.BehavioralRule(
+            'synthetic_bridge', family.key,
+            (be.RuleCondition(feature.key, 'ge', 5),),
+            spec_slug=adapter.spec_slug,
+        )
+        actual = int(family.upgraded_action_ids[0])
+        outcomes = []
+        for readiness, expected, excluded in (
+            (be.ReadinessStatus.READY, be.EvaluationStatus.ACTION_MATCH, False),
+            (be.ReadinessStatus.UNKNOWN, be.EvaluationStatus.READINESS_UNKNOWN, True),
+        ):
+            fixture = be.FixtureObservation(
+                adapter.spec_slug + ':' + readiness.value, 'SYNTHETIC',
+                adapter.spec_slug, None, 1000, actual, state,
+                {family.key: readiness},
+            )
+            result = be.BehavioralEvaluator().evaluate(
+                rule=rule, fixture=fixture, adapter=adapter,
+            )
+            assert expected in result.statuses
+            assert result.excluded_from_mismatch_denominator is excluded
+            outcomes.append(result)
+        masked = be.StrictPreStateProvider().build(
+            action_timestamp_ms=1000,
+            transitions=(be.StateTransition(900, feature.key, 5),),
+            required_keys=(feature.key,),
+            unobservable_keys=(feature.key,),
+        )
+        masked_fixture = be.FixtureObservation(
+            adapter.spec_slug + ':masked', 'SYNTHETIC', adapter.spec_slug,
+            None, 1000, actual, masked,
+            {family.key: be.ReadinessStatus.READY},
+        )
+        unavailable = be.BehavioralEvaluator().evaluate(
+            rule=rule, fixture=masked_fixture, adapter=adapter,
+        )
+        assert be.EvaluationStatus.STATE_UNOBSERVABLE in unavailable.statuses
+        assert unavailable.excluded_from_mismatch_denominator
+        outcomes.append(unavailable)
+        summary = be.summarize(
+            outcomes, fixture_kinds=('SYNTHETIC',) * len(outcomes),
+        )
+        assert summary['mismatch_denominator_n'] == 1
+        assert summary['empirical_validation'] == 'NOT_RUN'
+        assert summary['authority_promotion'] is False
+
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -212,6 +312,7 @@ def main() -> int:
         ('identity_import', check_identity_import),
         ('cross_spec_6_case_synthetic', check_cross_spec_self_test),
         ('spec_adapter_structure_only', check_spec_adapter_structure),
+        ('cross_spec_runtime_bridge_synthetic', check_cross_spec_runtime_bridge),
         ('source_manifest_safety', check_source_manifest_safety),
     )
     for name, fn in checks:
@@ -245,6 +346,7 @@ def main() -> int:
         'checks':results,
         'validation_scope':'OFFLINE_SYNTHETIC_AND_SPEC_STRUCTURE_ONLY',
         'spec_adapter_authority_contract':'NOT_RUN',
+        'cross_spec_empirical_validation':'NOT_RUN',
         'wcl_live':'NOT_RUN','simc_live':'NOT_RUN','windows_actual':'NOT_RUN',
         'seq637':'UNKNOWN','authority_promotion':'NONE',
     }

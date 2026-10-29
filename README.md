@@ -30,3 +30,15 @@ This branch-only README update is a deliberate push event after the workflow fil
 ## SpecAdapter structural smoke (second source batch)
 
 The eight verbatim `raid_dps/specs/` sources are published here for **structural smoke tests only**. Three adapters (Enhancement Stormbringer, Fury Slayer, Unholy Golden Fixture) are importable and checked for declaration consistency. Primitive allowlists in this bootstrap test are **self-derived**, not independently loaded from the frozen onboarding contract. Their `frozen_evidence_ids()` methods preserve pre-existing labels; this repository does **not** validate or promote those evidence claims. WCL readiness, ability identities, gameplay priority, and Seq637 remain unvalidated here.
+
+## Cross-spec runtime bridge smoke
+
+The bootstrap CI also executes a small synthetic **Enhancement/Fury** integration:
+SpecAdapter action families and declared features feed StrictPreStateProvider
+(strictly earlier events only), GeneralRotationEvaluator, and BehavioralEvaluator.
+It checks upgraded ability-family normalization, UNKNOWN readiness exclusion, and
+UNOBSERVABLE state exclusion. The readiness and state inputs are **synthetic**;
+there is no O4 live WCL stream, independently verified primitive allowlist, or
+gameplay/optimality claim. The existing WAVE3 15-check scaffold was reviewed
+locally but its project-bound execution/manifest is **not** deployed by this
+bootstrap.
