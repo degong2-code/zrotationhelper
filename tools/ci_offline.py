@@ -140,10 +140,17 @@ def check_cross_spec_self_test() -> None:
     assert 'SELF_TEST_CASE_N=6' in proc.stdout
 
 
-def check_ci_pipeline_canary() -> None:
-    """One-time, isolated CI failure-path probe; no product logic is modified."""
-    # Deliberate wrong expected count, corrected in the next commit after log inspection.
-    assert len(SRC_PATHS) == 9, 'deliberate CI diagnostic canary'
+def check_source_manifest_safety() -> None:
+    """Fail closed if bootstrap scope changes silently or references leave the repo."""
+    assert len(SRC_PATHS) == 8, 'bootstrap source scope changed; review required'
+    assert len(SRC_PATHS) == len(set(SRC_PATHS)), 'duplicate manifest path'
+    root = ROOT.resolve()
+    for relative in SRC_PATHS:
+        path = Path(relative)
+        assert not path.is_absolute() and '..' not in path.parts
+        resolved = (ROOT / path).resolve(strict=True)
+        assert resolved.is_relative_to(root)
+        assert resolved.is_file()
 
 
 def main() -> int:
@@ -157,7 +164,7 @@ def main() -> int:
         ('behavioral_readiness_unknown', check_behavioral_readiness),
         ('identity_import', check_identity_import),
         ('cross_spec_6_case_synthetic', check_cross_spec_self_test),
-        ('ci_pipeline_canary', check_ci_pipeline_canary),
+        ('source_manifest_safety', check_source_manifest_safety),
     )
     for name, fn in checks:
         try:
