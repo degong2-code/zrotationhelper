@@ -590,6 +590,24 @@ def main() -> int:
                 and obs.source_timestamp_ms is not None
                 and obs.value in ("READY", "NOT_READY", "UNKNOWN", "UNOBSERVABLE")):
             readiness[action] = obs.value
+    # A completeness-checked readiness model can be supplied in the same
+    # snapshot. It stays a SOURCE-DECLARED, UNVERIFIED hypothesis; it does
+    # not replace an actual trusted strict-PRE readiness observation.
+    if "readiness_contract" in data:
+        from simc_apl_readiness_provider import derive_readiness
+        contract_result=derive_readiness(
+            data["readiness_contract"],state,
+            spec_slug=data["spec_slug"],
+            build_key=data["build_key"],
+            apl_sha256=model["apl_sha256"],
+        )
+        for action, verdict in contract_result.items():
+            prior=readiness.get(action)
+            if prior is not None and prior not in ("UNKNOWN","UNOBSERVABLE") and \
+                    verdict.status not in ("UNKNOWN",prior):
+                raise ValueError("CONFLICTING_READINESS_EVIDENCE")
+            if prior is None or prior in ("UNKNOWN","UNOBSERVABLE"):
+                readiness[action]=verdict.status
     result = trace_priority(
         model, strict_pre_state=state,
         spec_slug=data["spec_slug"],
@@ -602,7 +620,9 @@ def main() -> int:
     payload = {
         **asdict(result),
         "validation": "SIMC_APL_HYPOTHESIS_RESEARCH_ONLY",
-        "readiness_provenance": "EXPLICIT_STRICT_PRE_FEATURES",
+        "readiness_provenance": ("SOURCE_DECLARED_REQUIREMENT_MODEL_UNVERIFIED"
+                                if "readiness_contract" in data
+                                else "EXPLICIT_STRICT_PRE_FEATURES"),
         "source_priority_is_optimal": False,
         "current_game_authority": "UNVERIFIED",
     }

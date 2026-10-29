@@ -508,6 +508,18 @@ def check_simc_conditional_priority_ir() -> None:
     assert 'SIMC_GENERIC_CONDITIONAL_PRIORITY_IR_SELF_TEST=PASS' in proc.stdout
 
 
+
+def check_simc_pre_readiness_provider() -> None:
+    """Missing charge/cooldown/resource/GCD/target state stays UNKNOWN."""
+    p=ROOT / 'tools/research/simc_apl_readiness_provider.py'
+    compile(p.read_bytes(),str(p),'exec',dont_inherit=True)
+    proc=subprocess.run([sys.executable,'-B',str(p)],
+        cwd=str(ROOT),capture_output=True,text=True,timeout=20)
+    assert proc.returncode==0, 'generic PRE readiness provider failed'
+    assert 'SIMC_GENERIC_PRE_READINESS_SELF_TEST=PASS' in proc.stdout
+
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -530,6 +542,7 @@ def main() -> int:
         ('simc_apl_ordered_priority_research_only', check_simc_apl_ordered_priority),
         ('simc_source_to_priority_file_cli', check_simc_source_to_priority_file_cli),
         ('simc_conditional_priority_structural_ir', check_simc_conditional_priority_ir),
+        ('simc_pre_readiness_provider', check_simc_pre_readiness_provider),
         ('simc_wcl_batch_reconciliation_research_only', check_simc_wcl_batch_reconciliation),
     )
     for name, fn in checks:
@@ -542,7 +555,7 @@ def main() -> int:
         results.append({'name':name,'status':status})
         print(name + ': ' + status, flush=True)
     rows = []
-    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py', 'tools/research/simc_apl_conditional_ir.py'):
+    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py', 'tools/research/simc_apl_conditional_ir.py', 'tools/research/simc_apl_readiness_provider.py'):
         p = ROOT / relative
         if p.is_file():
             rows.append((relative,sha256(p.read_bytes())))
@@ -568,6 +581,7 @@ def main() -> int:
         'simc_generic_source_engine':'SOURCE_CAPTURE_CAPABILITY_ONLY',
         'simc_apl_priority_research':'BOUNDED_ORDER_TRACE_ONLY',
         'simc_structural_if_else_ir':'SOURCE_CONDITIONAL_STRUCTURE_ONLY',
+        'simc_readiness_derivation':'SOURCE_DECLARED_CONSTRAINTS_NOT_EMPIRICAL',
         'simc_wcl_batch_reconciliation':'SYNTHETIC_ACTION_FAMILY_CANDIDATES_ONLY',
         'blind_wcl_independence_validation':'NOT_RUN',
         'spec_adapter_authority_contract':'NOT_RUN',
