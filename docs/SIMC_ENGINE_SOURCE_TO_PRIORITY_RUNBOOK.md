@@ -12,6 +12,14 @@ python tools/research/simc_apl_source_engine.py --spec enhancement --profile "C:
 
 The `--spec` value must match the profile's exact SimC specialization name. The importer hashes the **profile**, the **effective APL** and the **local SimC executable**. Existing exported action lists can instead be ingested with `--actions-file` (this does **not** independently verify the original profile/build).
 
+For an immutable **official public profile** source (not an executed effective APL), use:
+
+```powershell
+python tools/research/simc_apl_source_engine.py --spec fury --upstream-profile "profiles/MID2/MID2_Warrior_Fury.simc" --upstream-revision "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926" --out "C:\\zrot\\model.json"
+```
+
+This path ran successfully in GitHub Actions against both MID2 Fury and Enhancement at the pinned commit. It does **not** establish current-game or actual SimC executable equivalence.
+
 **Status of this local executable path:** implemented, but actual user-PC SimC production execution **NOT RUN**. The program checks single-actor/profile consistency and refuses external unpinned profile includes.
 
 ## 2. Provide one decision's strictly earlier state
@@ -37,6 +45,8 @@ Save as `C:\zrot\snapshot.json` (synthetic example, **not** real WCL evidence):
 }
 ```
 
+For the SimC `auto_attack` control directive, explicitly supply a timestamped PRE observation, for example a `transitions` entry `{"timestamp_ms": 900, "key": "auto_attack_active", "value": 1}` and top-level `"control_feature_keys": {"auto_attack_active":"auto_attack_active"}`. If it is already active, the engine can continue to subsequent APL rows; if inactive it reports `AUTO_ATTACK_START_REQUIRED`, and if unobserved it reports `AUTO_ATTACK_STATE_UNKNOWN`. A synthetic `1` must never be mistaken for verified WCL evidence. Persistent precombat variables likewise need legitimate earlier state provenance; they are not auto-initialized from missing observations.
+
 These bindings are illustrative. **Do not equate any such buff or readiness field with genuine WCL identity or Blizzard mechanics without independent verification.** Unmapped conditions and missing readiness remain `UNKNOWN`. State events with timestamps equal to or later than decision time are excluded.
 
 ## 3. Produce a priority candidate and trace
@@ -52,7 +62,7 @@ Run `python tools/research/simc_apl_priority_trace.py --self-test` to check its 
 ## 4. Missing before engine completion
 
 - Verify effective default APL exports from the current actual SimC binary across representative specs/builds.
-- Complete SimC expressions, variable lifetimes, non-GCD directives, `target_if` target selection, `pool_resource`, `sync`, `line_cd`, GCD and charge/cooldown readiness.
+- Complete SimC expressions, variable lifetimes, other non-GCD directives (auto-attack active-state handling is partial), `target_if` target selection, `pool_resource`, `sync`, `line_cd`, GCD and charge/cooldown readiness.
 - Make source-state and readiness providers derive values from legitimate game/WCL/Blizzard sources instead of handcrafted snapshots.
 - Build a multi-state conditional `IF/ELSE` model, then compare its predictions with SimC itself before WCL post-lock reconciliation.
 - Verify with independent WCL holdouts and never inject SimC outputs into blind discovery before candidate lock.
