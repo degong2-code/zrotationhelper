@@ -1,0 +1,1 @@
+"""Specialization adapter packages."""

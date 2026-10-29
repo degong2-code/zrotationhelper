@@ -26,3 +26,7 @@ No open-source license is included in this bootstrap draft; public visibility al
 ## CI execution smoke trigger
 
 This branch-only README update is a deliberate push event after the workflow file was installed. The expected checks are offline Python 3.12 and 3.14; results remain unverified until the actual GitHub Actions jobs and receipts are inspected. No product-source or authoritative-state files are changed.
+
+## SpecAdapter structural smoke (second source batch)
+
+The eight verbatim `raid_dps/specs/` sources are published here for **structural smoke tests only**. Three adapters (Enhancement Stormbringer, Fury Slayer, Unholy Golden Fixture) are importable and checked for declaration consistency. Primitive allowlists in this bootstrap test are **self-derived**, not independently loaded from the frozen onboarding contract. Their `frozen_evidence_ids()` methods preserve pre-existing labels; this repository does **not** validate or promote those evidence claims. WCL readiness, ability identities, gameplay priority, and Seq637 remain unvalidated here.

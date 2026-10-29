@@ -27,6 +27,17 @@ SRC_PATHS = (
 )
 
 
+SPEC_PATHS = (
+    '02_SOURCE/runtime/raid_dps/specs/__init__.py',
+    '02_SOURCE/runtime/raid_dps/specs/protocol.py',
+    '02_SOURCE/runtime/raid_dps/specs/enhancement_shaman/__init__.py',
+    '02_SOURCE/runtime/raid_dps/specs/enhancement_shaman/adapter.py',
+    '02_SOURCE/runtime/raid_dps/specs/fury_warrior/__init__.py',
+    '02_SOURCE/runtime/raid_dps/specs/fury_warrior/adapter.py',
+    '02_SOURCE/runtime/raid_dps/specs/unholy_dk/__init__.py',
+    '02_SOURCE/runtime/raid_dps/specs/unholy_dk/adapter.py',
+)
+
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -153,6 +164,42 @@ def check_source_manifest_safety() -> None:
         assert resolved.is_file()
 
 
+def check_spec_adapter_structure() -> None:
+    """Structural smoke only; frozen primitive authority and WCL are not checked."""
+    from importlib import import_module
+    from raid_dps.specs.protocol import SpecAdapter, validate_adapter
+    assert len(SPEC_PATHS) == 8
+    assert len(set(SPEC_PATHS)) == 8
+    root = ROOT.resolve()
+    for relative in SPEC_PATHS:
+        p = Path(relative)
+        assert not p.is_absolute() and '..' not in p.parts
+        source = (ROOT / p).resolve(strict=True)
+        assert source.is_relative_to(root)
+        assert source.is_file()
+        compile(source.read_bytes(), relative, 'exec', dont_inherit=True)
+    sys.path.insert(0, str(PY_ROOT))
+    slugs = ('enhancement_shaman', 'fury_warrior', 'unholy_dk')
+    seen = set()
+    for slug in slugs:
+        adapter = import_module('raid_dps.specs.' + slug).ADAPTER
+        assert isinstance(adapter, SpecAdapter)
+        assert adapter.spec_slug not in seen
+        seen.add(adapter.spec_slug)
+        primitives_from_candidate = {feature.primitive for feature in adapter.state_features()}
+        assert primitives_from_candidate
+        # This is only a structural self-consistency test. An authoritative
+        # primitive allowlist is not part of the public bootstrap snapshot.
+        assert not validate_adapter(adapter, allowed_primitives=primitives_from_candidate)
+        families = {family.key: family for family in adapter.action_families()}
+        for override in adapter.action_overrides():
+            family = families[override.family_key]
+            assert set(override.when_active_action_ids).issubset(set(family.upgraded_action_ids))
+            assert set(override.when_inactive_action_ids).issubset(set(family.base_action_ids))
+        frozen_refs = adapter.frozen_evidence_ids()
+        assert len(frozen_refs) == len(set(frozen_refs))
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -164,6 +211,7 @@ def main() -> int:
         ('behavioral_readiness_unknown', check_behavioral_readiness),
         ('identity_import', check_identity_import),
         ('cross_spec_6_case_synthetic', check_cross_spec_self_test),
+        ('spec_adapter_structure_only', check_spec_adapter_structure),
         ('source_manifest_safety', check_source_manifest_safety),
     )
     for name, fn in checks:
@@ -176,7 +224,7 @@ def main() -> int:
         results.append({'name':name,'status':status})
         print(name + ': ' + status, flush=True)
     rows = []
-    for relative in SRC_PATHS:
+    for relative in SRC_PATHS + SPEC_PATHS:
         p = ROOT / relative
         if p.is_file():
             rows.append((relative,sha256(p.read_bytes())))
@@ -195,7 +243,8 @@ def main() -> int:
         'platform':platform.platform(),
         'source_sha256_file_sha':sha256((ARTIFACTS/'source_sha256.txt').read_bytes()),
         'checks':results,
-        'validation_scope':'OFFLINE_SYNTHETIC_ONLY',
+        'validation_scope':'OFFLINE_SYNTHETIC_AND_SPEC_STRUCTURE_ONLY',
+        'spec_adapter_authority_contract':'NOT_RUN',
         'wcl_live':'NOT_RUN','simc_live':'NOT_RUN','windows_actual':'NOT_RUN',
         'seq637':'UNKNOWN','authority_promotion':'NONE',
     }
