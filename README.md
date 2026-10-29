@@ -42,3 +42,14 @@ there is no O4 live WCL stream, independently verified primitive allowlist, or
 gameplay/optimality claim. The existing WAVE3 15-check scaffold was reviewed
 locally but its project-bound execution/manifest is **not** deployed by this
 bootstrap.
+
+## Native aura / O4 boundary smoke
+
+A byte-identical `core/coverage.py` joins the selected bootstrap source.
+One offline synthetic test now checks WCL-shaped aura event identities into
+`AuraIdIndex` (strictly earlier transitions only), then synthetic General
+Rotation decisions and semantic MASK precedence. This is **not** the full O4
+`prestate_coverage.py` producer, O1/O3 artifact validation, WCL ingestion,
+or game-optimality proof. O4 runtime dependencies and authoritative input
+manifests must be migrated and independently tested before a runnable
+Windows product baseline can be claimed.

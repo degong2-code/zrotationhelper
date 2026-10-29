@@ -20,6 +20,7 @@ SRC_PATHS = (
     '02_SOURCE/runtime/raid_dps/core/__init__.py',
     '02_SOURCE/runtime/raid_dps/core/identity.py',
     '02_SOURCE/runtime/raid_dps/core/prestate.py',
+    '02_SOURCE/runtime/raid_dps/core/coverage.py',
     '02_SOURCE/runtime/raid_dps/core/general_rotation_evaluator.py',
     '02_SOURCE/runtime/raid_dps/core/behavioral_evaluator.py',
     '02_SOURCE/validation/generalization/CROSS_SPEC_SYNTHETIC_PROBE_v1.py',
@@ -153,7 +154,7 @@ def check_cross_spec_self_test() -> None:
 
 def check_source_manifest_safety() -> None:
     """Fail closed if bootstrap scope changes silently or references leave the repo."""
-    assert len(SRC_PATHS) == 8, 'bootstrap source scope changed; review required'
+    assert len(SRC_PATHS) == 9, 'bootstrap source scope changed; review required'
     assert len(SRC_PATHS) == len(set(SRC_PATHS)), 'duplicate manifest path'
     root = ROOT.resolve()
     for relative in SRC_PATHS:
@@ -300,6 +301,45 @@ def check_cross_spec_runtime_bridge() -> None:
 
 
 
+def check_native_aura_strict_pre_coverage_boundary() -> None:
+    """WCL-shaped aura events -> strict-PRE decisions; O4 full pipeline NOT_RUN."""
+    from raid_dps.core import coverage, prestate
+    from raid_dps.core import general_rotation_evaluator as gr
+    from raid_dps.specs.enhancement_shaman import ADAPTER
+    features = {feature.key: feature for feature in ADAPTER.state_features()}
+    stack_ids = features['maelstrom_weapon_stacks'].identity_ids
+    assert 344179 in stack_ids
+    aura = prestate.AuraIdIndex((
+        {'timestamp':900, 'abilityGameID':344179, 'type':'applybuffstack', 'stack':5},
+        {'timestamp':1000, 'abilityGameID':344179, 'type':'removebuff'},
+        {'timestamp':1005, 'abilityGameID':344179, 'type':'applybuffstack', 'stack':9},
+    ))
+    assert aura.latest_state_pre(stack_ids, 900) == (False, 0)
+    assert aura.latest_state_pre(stack_ids, 1000) == (True, 5)
+    assert aura.latest_state_pre(stack_ids, 1001) == (False, 0)
+    rules = (
+        gr.RotationRule('synthetic_stacks_branch', 10, 'SYNTHETIC_A',
+                        (gr.RuleCondition('mw_stacks', 'ge', 5),)),
+        gr.RotationRule('synthetic_fallback', 100, 'SYNTHETIC_B'),
+    )
+    for timestamp, last_source, expected in (
+        (1000, 900, 'synthetic_stacks_branch'),
+        (1001, 1000, 'synthetic_fallback'),
+    ):
+        _, stacks = aura.latest_state_pre(stack_ids, timestamp)
+        recommendation = gr.GeneralRotationEvaluator().evaluate(
+            gr.DecisionState(timestamp, last_source, {'mw_stacks':stacks},
+                             spec_key=ADAPTER.spec_slug),
+            rules,
+        ).recommendation
+        assert recommendation is not None and recommendation.rule_id == expected
+    assert coverage.classify_coverage(19,20) == coverage.TRACKABLE
+    assert coverage.classify_coverage(4,20) == coverage.PARTIAL
+    assert coverage.classify_coverage(20,20,semantic_mask=True) == coverage.MASKED
+    assert coverage.coverage_record(field='target_hp_pct_pre',covered=20,total=20,
+                                    semantic_mask=True,semantic_route='UNOBSERVABLE')['status'] == coverage.MASKED
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -314,6 +354,7 @@ def main() -> int:
         ('spec_adapter_structure_only', check_spec_adapter_structure),
         ('cross_spec_runtime_bridge_synthetic', check_cross_spec_runtime_bridge),
         ('source_manifest_safety', check_source_manifest_safety),
+        ('native_aura_strict_pre_coverage_boundary', check_native_aura_strict_pre_coverage_boundary),
     )
     for name, fn in checks:
         try:
@@ -347,6 +388,7 @@ def main() -> int:
         'validation_scope':'OFFLINE_SYNTHETIC_AND_SPEC_STRUCTURE_ONLY',
         'spec_adapter_authority_contract':'NOT_RUN',
         'cross_spec_empirical_validation':'NOT_RUN',
+        'full_o4_pipeline':'NOT_RUN',
         'wcl_live':'NOT_RUN','simc_live':'NOT_RUN','windows_actual':'NOT_RUN',
         'seq637':'UNKNOWN','authority_promotion':'NONE',
     }
