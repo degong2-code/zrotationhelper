@@ -340,6 +340,20 @@ def check_native_aura_strict_pre_coverage_boundary() -> None:
                                     semantic_mask=True,semantic_route='UNOBSERVABLE')['status'] == coverage.MASKED
 
 
+
+def check_simc_apl_syntax_inventory() -> None:
+    """Only parse syntax, never evaluate SimC expressions or promote rules."""
+    p = ROOT / 'tools/research/simc_apl_syntax_inventory.py'
+    compile(p.read_bytes(), str(p), 'exec', dont_inherit=True)
+    proc = subprocess.run(
+        [sys.executable, '-I', '-B', str(p), '--self-test'],
+        cwd=str(ROOT), capture_output=True, text=True, timeout=10,
+    )
+    assert proc.returncode == 0, 'SimC syntax inventory self-test failed'
+    assert 'SIMC_APL_SYNTAX_SELF_TEST=PASS' in proc.stdout
+
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -355,6 +369,7 @@ def main() -> int:
         ('cross_spec_runtime_bridge_synthetic', check_cross_spec_runtime_bridge),
         ('source_manifest_safety', check_source_manifest_safety),
         ('native_aura_strict_pre_coverage_boundary', check_native_aura_strict_pre_coverage_boundary),
+        ('simc_apl_syntax_inventory_research_only', check_simc_apl_syntax_inventory),
     )
     for name, fn in checks:
         try:
@@ -366,7 +381,7 @@ def main() -> int:
         results.append({'name':name,'status':status})
         print(name + ': ' + status, flush=True)
     rows = []
-    for relative in SRC_PATHS + SPEC_PATHS:
+    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py',):
         p = ROOT / relative
         if p.is_file():
             rows.append((relative,sha256(p.read_bytes())))
@@ -385,7 +400,8 @@ def main() -> int:
         'platform':platform.platform(),
         'source_sha256_file_sha':sha256((ARTIFACTS/'source_sha256.txt').read_bytes()),
         'checks':results,
-        'validation_scope':'OFFLINE_SYNTHETIC_AND_SPEC_STRUCTURE_ONLY',
+        'validation_scope':'OFFLINE_SYNTHETIC_SPEC_STRUCTURE_AND_SIMC_APL_SYNTAX_ONLY',
+        'simc_apl_expression_semantics':'NOT_RUN',
         'spec_adapter_authority_contract':'NOT_RUN',
         'cross_spec_empirical_validation':'NOT_RUN',
         'full_o4_pipeline':'NOT_RUN',
