@@ -20,10 +20,6 @@ from typing import Any, Iterable, Mapping
 
 from post_lock_simc_wcl_guard_replay import _locked_numeric_actions
 from simc_apl_priority_trace import CANDIDATE, trace_priority
-from raid_dps.core.behavioral_evaluator import (
-    StrictPreStateProvider, StateTransition, ObservationStatus, normalize_action,
-)
-
 
 @dataclass(frozen=True)
 class ReplayIdentity:
@@ -91,6 +87,7 @@ class SimcWclReconciler:
                 raise ValueError("INVALID_ACTION_NUMERIC_MAP")
 
     def _ready(self, state):
+        from raid_dps.core.behavioral_evaluator import ObservationStatus
         """Only explicitly observed PRE readiness; never guess from cooldown."""
         ready = {}
         for token in self.action_map:
@@ -107,6 +104,7 @@ class SimcWclReconciler:
         return ready
 
     def evaluate(self, row: NormalizedWclDecision):
+        from raid_dps.core.behavioral_evaluator import StrictPreStateProvider, normalize_action
         base = {
             "case_id": row.case_id,
             "schema": "ZrotSimcWclDecisionReconciliationResearchV1",
@@ -196,6 +194,10 @@ class SimcWclReconciler:
 
 
 def selftest():
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / '02_SOURCE' / 'runtime'))
+    from raid_dps.core.behavioral_evaluator import StateTransition
     from raid_dps.specs.enhancement_shaman import ADAPTER as adapter
     from simc_apl_source_engine import ingest_actions
     import json
