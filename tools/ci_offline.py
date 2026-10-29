@@ -628,6 +628,73 @@ def check_simc_precombat_variable_replay() -> None:
 
 
 
+
+def check_simc_precombat_to_priority_cli() -> None:
+    """Fully generic source precombat variables feed a later hypothesis trace."""
+    import tempfile
+    source=ROOT/'tools/research/simc_apl_source_engine.py'
+    priority=ROOT/'tools/research/simc_apl_priority_trace.py'
+    with tempfile.TemporaryDirectory(prefix="zrot_precombat_priority_") as td:
+        folder=Path(td)
+        apl=folder/'source.simc'
+        model=folder/'model.json'
+        snapshot=folder/'snapshot.json'
+        apl.write_text(
+            "spec=synthetic\n"
+            "actions.precombat=snapshot_stats\n"
+            "actions.precombat+=/variable,name=threshold,value=trinket.1.has_use_buff+4\n"
+            "actions=spell_a,if=resource>=variable.threshold\n"
+            "actions+=/spell_b\n",encoding='utf-8')
+        ingested=subprocess.run(
+            [sys.executable,'-B',str(source),'--actions-file',str(apl),
+             '--spec','synthetic','--out',str(model)],
+            cwd=str(ROOT),capture_output=True,text=True,timeout=20)
+        assert ingested.returncode==0,"precombat fixture APL ingest failed"
+        base={
+            "spec_slug":"synthetic","decision_timestamp_ms":1000,
+            "transitions":[
+                {"timestamp_ms":900,"key":"resource","value":5},
+                {"timestamp_ms":950,"key":"spell_a_ready","value":"READY"},
+            ],
+            "operand_to_feature":{"resource":"resource"},
+            "readiness_feature_keys":{"spell_a":"spell_a_ready"},
+            "precombat_replay":{
+                "row_timeline":[
+                    {"source_line":2,"timestamp_ms":-300,
+                     "status":"EXECUTED","evidence_ref":"SYNTHETIC_ONLY"},
+                    {"source_line":3,"timestamp_ms":-100,
+                     "status":"EXECUTED","evidence_ref":"SYNTHETIC_ONLY"},
+                ],
+                "source_transitions":[
+                    {"timestamp_ms":-200,"key":"trinket.1.has_use_buff",
+                     "value":1},
+                ],
+            },
+        }
+        def run(payload):
+            snapshot.write_text(json.dumps(payload),encoding='utf-8')
+            z=subprocess.run(
+                [sys.executable,'-B',str(priority),
+                 '--model',str(model),'--snapshot',str(snapshot)],
+                cwd=str(ROOT),capture_output=True,text=True,timeout=20)
+            assert z.returncode==0,"precombat to priority CLI failed"
+            return json.loads(z.stdout)
+        result=run(base)
+        assert result["status"]=="HYPOTHESIS_CANDIDATE",result
+        assert result["candidate_action_token"]=="spell_a"
+        assert result["precombat_source_derivation"]["variables"]=={"threshold":5.0}
+        assert result["derived_variable_values_are_observed"] is False
+        failed=run({**base,"precombat_replay":{
+            **base["precombat_replay"],"source_transitions":[
+                {"timestamp_ms":-100,"key":"trinket.1.has_use_buff",
+                 "value":1}
+            ]}})
+        assert failed["status"]=="BLOCKED"
+        assert failed["reason"].startswith("PRECOMBAT_VARIABLE_VALUE_UNKNOWN")
+        assert failed["candidate_action_token"] is None
+
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -654,6 +721,7 @@ def main() -> int:
         ('simc_readiness_to_priority_cli', check_simc_readiness_to_priority_cli),
         ('simc_native_reference_capture_contract', check_simc_native_reference_capture_contract),
         ('simc_precombat_variable_replay', check_simc_precombat_variable_replay),
+        ('simc_precombat_to_priority_cli', check_simc_precombat_to_priority_cli),
         ('simc_wcl_batch_reconciliation_research_only', check_simc_wcl_batch_reconciliation),
     )
     for name, fn in checks:

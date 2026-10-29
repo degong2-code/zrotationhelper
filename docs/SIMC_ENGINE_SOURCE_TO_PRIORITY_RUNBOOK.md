@@ -81,6 +81,35 @@ research-only. The same action's contradictory observed readiness is rejected.
 independently from a verified precombat execution state. A source-only
 \`variable\` declaration is not evidence that the initialization executed.
 
+## Precombat APL variables → in-combat priority (research-only)
+
+A `snapshot.json` can include `"precombat_replay"` with `"row_timeline"`
+and `"source_transitions"`. The replay executes numeric `variable` operations
+in **strictly increasing, negative precombat timestamps** and carries the
+derived `variable.*` values into the later APL scan. Every precombat APL row
+must have an externally attested `source_line`, `timestamp_ms`, `status`
+(`EXECUTED` or `SKIPPED`) and `evidence_ref`; relevant state operands must
+be provided with timestamps strictly before their respective variable rows.
+
+This is **not** proof that a SimC precombat action executed, nor that the
+assumed non-variable precombat actions produced the declared state changes.
+When a row or operand is missing the replay stops with `BLOCKED` instead
+of defaulting a variable to zero. Derived features are explicitly marked
+`SOURCE_DERIVED_NOT_EMPIRICALLY_OBSERVED`, and the CLI output sets
+`derived_variable_values_are_observed=false`. Do not feed these
+hypothetical values into an independently discovered WCL candidate cohort
+as if they were measured PRE combat states.
+
+The standalone interface is:
+
+```powershell
+python tools/research/simc_apl_precombat_replay.py --model "C:\zrot\model.json" --timeline "C:\zrot\precombat_timeline.json" --out "C:\zrot\precombat_result.json"
+```
+
+The existing `simc_apl_priority_trace.py` consumes the same timeline
+if included as `precombat_replay` inside its `--snapshot` input. Native
+SimC-log format parsing and actual per-event trace validation remain NOT RUN.
+
 ## Native SimC reference acquisition (local, private)
 
 Run the actual SimC executable to collect the action log and the effective

@@ -498,6 +498,49 @@ def main() -> int:
     transitions = tuple(StateTransition(
         int(r["timestamp_ms"]), str(r["key"]), r["value"])
         for r in data["transitions"])
+    operand_to_feature = dict(data["operand_to_feature"])
+    precombat_result = None
+    if "precombat_replay" in data:
+        from simc_apl_precombat_replay import replay_precombat
+        pc = data["precombat_replay"]
+        precombat_result = replay_precombat(
+            model, spec_slug=data["spec_slug"],
+            expected_apl_sha256=model["apl_sha256"],
+            row_timeline=pc["row_timeline"],
+            source_transitions=[
+                StateTransition(int(r["timestamp_ms"]),str(r["key"]),r["value"])
+                for r in pc["source_transitions"]
+            ],
+        )
+        if precombat_result["status"] == "SOURCE_DERIVED_HYPOTHESIS":
+            produced_keys = {r["key"] for r in
+                             precombat_result["variable_transitions"]}
+            if produced_keys.intersection(t.key for t in transitions):
+                raise ValueError("AMBIGUOUS_VARIABLE_PROVENANCE")
+            if any(operand_to_feature.get(key,key) != key
+                   for key in produced_keys):
+                raise ValueError("CONFLICTING_PRECOMBAT_VARIABLE_BINDING")
+            transitions += tuple(StateTransition(
+                int(r["timestamp_ms"]),str(r["key"]),r["value"])
+                for r in precombat_result["variable_transitions"])
+            for key in produced_keys:
+                operand_to_feature[key] = key
+        elif precombat_result["status"] != "NO_PRECOMBAT_VARIABLES":
+            payload={
+                "status":"BLOCKED","candidate_action_token":None,
+                "reason":"PRECOMBAT_" + str(precombat_result["stop_reason"]),
+                "precombat_replay":precombat_result,
+                "actionable":False,"wcl_validation":"NOT_RUN",
+                "source_priority_is_optimal":False,
+                "current_game_authority":"UNVERIFIED",
+            }
+            rendered=json.dumps(payload,ensure_ascii=False,indent=2)+"\n"
+            if options.output:
+                options.output.parent.mkdir(parents=True,exist_ok=True)
+                options.output.write_text(rendered,encoding="utf-8")
+            else:
+                print(rendered)
+            return 0
     state = StrictPreStateProvider().build(
         action_timestamp_ms=ts, transitions=transitions,
         required_keys=data.get("required_keys", ()),
@@ -530,7 +573,7 @@ def main() -> int:
     result = trace_priority(
         model, strict_pre_state=state,
         spec_slug=data["spec_slug"],
-        operand_to_feature=data["operand_to_feature"],
+        operand_to_feature=operand_to_feature,
         action_readiness=readiness,
         control_feature_keys=data.get("control_feature_keys", {}),
         expected_apl_sha256=model["apl_sha256"],
@@ -544,6 +587,8 @@ def main() -> int:
                                 else "EXPLICIT_STRICT_PRE_FEATURES"),
         "source_priority_is_optimal": False,
         "current_game_authority": "UNVERIFIED",
+        "precombat_source_derivation": precombat_result,
+        "derived_variable_values_are_observed": False,
     }
     output = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
     if options.output:
