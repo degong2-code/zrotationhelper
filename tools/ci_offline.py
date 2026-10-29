@@ -140,6 +140,12 @@ def check_cross_spec_self_test() -> None:
     assert 'SELF_TEST_CASE_N=6' in proc.stdout
 
 
+def check_ci_pipeline_canary() -> None:
+    """One-time, isolated CI failure-path probe; no product logic is modified."""
+    # Deliberate wrong expected count, corrected in the next commit after log inspection.
+    assert len(SRC_PATHS) == 9, 'deliberate CI diagnostic canary'
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -151,6 +157,7 @@ def main() -> int:
         ('behavioral_readiness_unknown', check_behavioral_readiness),
         ('identity_import', check_identity_import),
         ('cross_spec_6_case_synthetic', check_cross_spec_self_test),
+        ('ci_pipeline_canary', check_ci_pipeline_canary),
     )
     for name, fn in checks:
         try:
