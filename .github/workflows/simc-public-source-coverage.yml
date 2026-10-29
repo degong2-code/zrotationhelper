@@ -1,0 +1,58 @@
+name: Official SimC APL source coverage (pinned public source)
+
+on:
+  push:
+    branches: [work/github-ci-bootstrap]
+    paths:
+      - "tools/research/simc_apl_source_engine.py"
+      - "tools/research/simc_apl_conditional_ir.py"
+      - ".github/workflows/simc-public-source-coverage.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  upstream-apl-structural-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exercise generic engine on pinned public MID2 profiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          REV="710c2408bfd3ae4df71b8cd55cdf01f63fd6c926"
+          for entry in "enhancement MID2_Shaman_Enhancement" "fury MID2_Warrior_Fury"; do
+            read -r SPEC PROFILE <<< "$entry"
+            python tools/research/simc_apl_source_engine.py \
+              --spec "$SPEC" \
+              --upstream-revision "$REV" \
+              --upstream-profile "profiles/MID2/$PROFILE.simc" \
+              --out "$RUNNER_TEMP/$SPEC-model.json"
+            python tools/research/simc_apl_conditional_ir.py \
+              --source-model "$RUNNER_TEMP/$SPEC-model.json" \
+              --out "$RUNNER_TEMP/$SPEC-ir.json"
+          done
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          base=Path(os.environ["RUNNER_TEMP"])
+          for spec,expected in (("enhancement",114),("fury",121)):
+              model=json.loads((base/f"{spec}-model.json").read_text())
+              ir=json.loads((base/f"{spec}-ir.json").read_text())
+              assert model["source_kind"]=="SIMC_PUBLIC_REPO_INLINE_PROFILE_APL"
+              assert model["actual_simc_executable_run"]=="NOT_RUN"
+              assert model["apl_row_count"]==expected,(spec,model["apl_row_count"])
+              assert ir["total_rows"]==expected and ir["all_rows_preserved"]
+              assert ir["gameplay_rule_promotion"] is False
+              assert ir["complete_simc_execution"] is False
+              print(f"PUBLIC_SIMC_SOURCE_IR={spec} ROWS={expected} "
+                    f"LISTS={len(ir['lists'])} "
+                    f"GUARD_SYNTAX={ir['condition_expression_diagnostics']} "
+                    "VALIDATION=PUBLIC_SOURCE_STRUCTURE_ONLY")
+          PY

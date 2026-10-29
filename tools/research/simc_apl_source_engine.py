@@ -22,6 +22,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import urllib.request
 
 from simc_apl_syntax_inventory import parse as parse_apl
 
@@ -227,6 +228,63 @@ def capture_from_simc(
     return result
 
 
+_SIMC_UPSTREAM_REVISION = re.compile(r"^[0-9a-f]{40}$")
+_SIMC_UPSTREAM_PROFILE = re.compile(
+    r"^profiles/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+\.simc$")
+
+
+def capture_official_simc_profile(
+    *, upstream_profile_path: str, commit_sha: str, expected_spec: str,
+    fetch_bytes=None,
+) -> dict:
+    """Load a pinned PUBLIC SimC profile directly from the official repo.
+
+    This is an APL source input, NOT the executed effective APL from a SimC
+    binary. It cannot certify the client's patch, build or spell semantics.
+    Git URL is immutable and fixed to the official public source.
+    """
+    if not _SIMC_UPSTREAM_REVISION.fullmatch(commit_sha):
+        raise SourceContractError("UPSTREAM_REVISION_MUST_BE_FULL_COMMIT_SHA")
+    if not _SIMC_UPSTREAM_PROFILE.fullmatch(upstream_profile_path):
+        raise SourceContractError("INVALID_UPSTREAM_PROFILE_PATH")
+    uri=("https://raw.githubusercontent.com/simulationcraft/simc/"
+         + commit_sha + "/" + upstream_profile_path)
+    if fetch_bytes is None:
+        def fetch_bytes():
+            request=urllib.request.Request(
+                uri,headers={"User-Agent":"zRotationHelper-Public-APL-Research/1"})
+            try:
+                with urllib.request.urlopen(request,timeout=20) as response:
+                    raw=response.read(2_000_001)
+            except (OSError, ValueError) as e:
+                raise SourceContractError("OFFICIAL_SIMC_FETCH_FAILED") from e
+            return raw
+    raw=fetch_bytes()
+    if not isinstance(raw, bytes) or not raw or len(raw)>2_000_000:
+        raise SourceContractError("INVALID_OFFICIAL_SIMC_SOURCE_SIZE")
+    fields=_profile_fields(_text(raw))
+    if fields["actor_count"]!=1:
+        raise SourceContractError("OFFICIAL_PROFILE_SINGLE_ACTOR_REQUIRED")
+    if fields["spec"]!=expected_spec:
+        raise SourceContractError("OFFICIAL_PROFILE_SPEC_MISMATCH")
+    if fields["external_profile_dependencies_detected"]:
+        raise SourceContractError("OFFICIAL_PROFILE_EXTERNAL_DEPENDENCIES_UNPINNED")
+    if not fields["custom_apl_in_profile"]:
+        raise SourceContractError("OFFICIAL_PROFILE_INLINE_APL_MISSING")
+    out=ingest_actions(
+        raw,expected_spec=expected_spec,
+        profile_sha256=sha(raw),profile_spec=fields["spec"],
+        input_contains_custom_apl=True,profile_dependencies_verified=True)
+    out["source_kind"]="SIMC_PUBLIC_REPO_INLINE_PROFILE_APL"
+    out["official_upstream_repo"]="simulationcraft/simc"
+    out["official_upstream_commit"]=commit_sha
+    out["official_upstream_path"]=upstream_profile_path
+    out["profile_and_apl_are_same_bytes"]=True
+    out["actual_simc_executable_run"]="NOT_RUN"
+    out["current_game_build_verified"]=False
+    return out
+
+
 def selftest():
     # Contract tests are supporting evidence, not the intended output.
     a=b"actions=call_action_list,name=st,if=active_enemies=1\n" \
@@ -245,6 +303,30 @@ def selftest():
     try:ingest_actions(a,expected_spec="fury",profile_spec="enhancement")
     except SourceContractError:pass
     else:raise AssertionError("CROSS_SPEC_PROFILE_ACCEPTED")
+    upstream=(
+        b'shaman="Synthetic"\n'
+        b'spec=enhancement\n'
+        b'actions=auto_attack\n'
+        b'actions+=/stormstrike,if=active_enemies=1\n')
+    captured=capture_official_simc_profile(
+        upstream_profile_path="profiles/MID2/Synthetic_Enhancement.simc",
+        commit_sha="a"*40,expected_spec="enhancement",
+        fetch_bytes=lambda:upstream)
+    assert captured["apl_row_count"]==2
+    assert captured["source_kind"]=="SIMC_PUBLIC_REPO_INLINE_PROFILE_APL"
+    assert captured["profile_and_apl_are_same_bytes"]
+    assert captured["actual_simc_executable_run"]=="NOT_RUN"
+    for bad in ("../private.simc","profiles/MID2/../../secret.simc",
+                "https://example.com/profile.simc"):
+        try:
+            capture_official_simc_profile(
+                upstream_profile_path=bad,commit_sha="a"*40,
+                expected_spec="enhancement",fetch_bytes=lambda:upstream)
+        except SourceContractError:
+            pass
+        else:
+            raise AssertionError("UNSAFE_PUBLIC_SOURCE_PATH_ACCEPTED")
+    print("SIMC_PUBLIC_PROFILE_SOURCE_SELF_TEST=PASS")
     print("SIMC_GENERIC_SOURCE_HYPOTHESIS_SELF_TEST=PASS")
 
 
@@ -252,6 +334,8 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile",type=Path)
     parser.add_argument("--actions-file",type=Path)
+    parser.add_argument("--upstream-profile",type=str)
+    parser.add_argument("--upstream-revision",type=str)
     parser.add_argument("--spec")
     parser.add_argument("--simc-bin",type=Path)
     parser.add_argument("--out",type=Path)
@@ -260,11 +344,19 @@ def main():
     if opts.self_test:
         selftest()
         return
-    if opts.spec is None or (opts.profile is None and opts.actions_file is None):
-        parser.error("--spec and either --profile or --actions-file required")
+    selected=sum(x is not None for x in
+                 (opts.profile,opts.actions_file,opts.upstream_profile))
+    if opts.spec is None or selected!=1:
+        parser.error("--spec and exactly one source: --profile, --actions-file, --upstream-profile")
     if opts.actions_file is not None:
         raw=opts.actions_file.read_bytes()
         result=ingest_actions(raw, expected_spec=opts.spec)
+    elif opts.upstream_profile is not None:
+        if opts.upstream_revision is None:
+            parser.error("--upstream-revision requires full immutable commit SHA")
+        result=capture_official_simc_profile(
+            upstream_profile_path=opts.upstream_profile,
+            commit_sha=opts.upstream_revision,expected_spec=opts.spec)
     else:
         result=capture_from_simc(profile_file=opts.profile,
                                  expected_spec=opts.spec,
