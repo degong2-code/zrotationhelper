@@ -6,6 +6,7 @@ on:
     paths:
       - "tools/research/simc_apl_source_engine.py"
       - "tools/research/simc_apl_conditional_ir.py"
+      - "tools/research/simc_apl_priority_trace.py"
       - ".github/workflows/simc-public-source-coverage.yml"
   workflow_dispatch:
 
@@ -55,4 +56,49 @@ jobs:
                     f"LISTS={len(ir['lists'])} "
                     f"GUARD_SYNTAX={ir['condition_expression_diagnostics']} "
                     "VALIDATION=PUBLIC_SOURCE_STRUCTURE_ONLY")
+          PY
+          python - <<'PY'
+          """Real upstream APL runtime-boundary probe; NOT SimC executable output."""
+          import json, os, subprocess, sys
+          from pathlib import Path
+          base=Path(os.environ["RUNNER_TEMP"])
+          engine=Path("tools/research/simc_apl_priority_trace.py")
+          for spec in ("enhancement","fury"):
+              model_path=base/f"{spec}-model.json"
+              snapshot=base/f"{spec}-snapshot.json"
+              snapshot.write_text(json.dumps({
+                  "spec_slug":spec,
+                  "decision_timestamp_ms":1000,
+                  "transitions":[],
+                  "operand_to_feature":{},
+                  "readiness_feature_keys":{},
+              }))
+              cmd=[sys.executable,str(engine),"--model",str(model_path),
+                   "--snapshot",str(snapshot)]
+              run=subprocess.run(cmd,capture_output=True,text=True,check=True)
+              row=json.loads(run.stdout)
+              assert row["status"]=="BLOCKED",(spec,row)
+              assert row["candidate_action_token"] is None,(spec,row)
+              if spec=="fury":
+                  assert row["reason"]=="AUTO_ATTACK_STATE_UNKNOWN",row
+              print(f"PUBLIC_SIMC_APL_RUNTIME_BOUNDARY={spec} "
+                    f"REASON={row['reason']} "
+                    "PRIORITY_ACTION=NONE VALIDATION=REAL_SOURCE_SYNTHETIC_STATE_ONLY")
+          # The first Fury APL action is auto_attack. We can skip it ONLY
+          # when an actual timestamped PRE state explicitly says active.
+          fury=base/"fury-snapshot.json"
+          fury.write_text(json.dumps({
+              "spec_slug":"fury","decision_timestamp_ms":1000,
+              "transitions":[{"timestamp_ms":900,"key":"auto_active","value":1}],
+              "operand_to_feature":{},"readiness_feature_keys":{},
+              "control_feature_keys":{"auto_attack_active":"auto_active"}
+          }))
+          run=subprocess.run(
+              [sys.executable,str(engine),"--model",str(base/"fury-model.json"),
+               "--snapshot",str(fury)],capture_output=True,text=True,check=True)
+          row=json.loads(run.stdout)
+          assert row["status"]=="BLOCKED" and row["candidate_action_token"] is None
+          assert any(e.get("status")=="ALREADY_ACTIVE_SKIP" for e in row["trace"])
+          print("PUBLIC_SIMC_APL_AUTO_ATTACK_PRE_SKIP=PASS "
+                "VALIDATION=REAL_SOURCE_SYNTHETIC_STATE_ONLY")
           PY

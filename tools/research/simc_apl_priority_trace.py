@@ -46,6 +46,7 @@ def trace_priority(
     operand_to_feature: Mapping[str, str],
     action_readiness: Mapping[str, str],
     expected_apl_sha256: str,
+    control_feature_keys: Mapping[str, str] | None = None,
     expected_profile_sha256: str | None = None,
 ) -> AplTrace:
     """Traverse one SimC APL scan. Readiness must be external/observed.
@@ -131,6 +132,39 @@ def trace_priority(
                 if test.status != "TRUE":
                     return outcome(BLOCK, None, group_name, line,
                                    "GUARD_" + test.status)
+            if command == "auto_attack":
+                # auto_attack is not a normal GCD skill. SimC triggers it
+                # only if swings have not already started. Do not treat
+                # it as a recommended cast or silently skip unknown status.
+                # A controlled "active" observation must be STRICT PRE.
+                if set(params) - {"if", "sync_weapons"}:
+                    return outcome(BLOCK, None, group_name, line,
+                                   "UNSUPPORTED_AUTO_ATTACK_MODIFIERS")
+                key = (control_feature_keys or {}).get("auto_attack_active")
+                observation = (strict_pre_state.features.get(key)
+                               if key is not None else None)
+                status = getattr(getattr(observation, "status", None),
+                                 "value", None)
+                ts = getattr(observation, "source_timestamp_ms", None)
+                raw = getattr(observation, "value", None)
+                if (status != "OBSERVED" or ts is None or
+                        ts >= strict_pre_state.decision_timestamp_ms or
+                        type(raw) not in (bool, int) or raw not in (0, 1)):
+                    events.append({"list": group_name, "line": line,
+                                   "command": command, "kind": "CONTROL_STATE",
+                                   "status": "UNKNOWN"})
+                    return outcome(BLOCK, None, group_name, line,
+                                   "AUTO_ATTACK_STATE_UNKNOWN")
+                if not bool(raw):
+                    events.append({"list": group_name, "line": line,
+                                   "command": command, "kind": "CONTROL_STATE",
+                                   "status": "START_REQUIRED"})
+                    return outcome(BLOCK, None, group_name, line,
+                                   "AUTO_ATTACK_START_REQUIRED")
+                events.append({"list": group_name, "line": line,
+                               "command": command, "kind": "CONTROL_STATE",
+                               "status": "ALREADY_ACTIVE_SKIP"})
+                continue
             if command in ("call_action_list", "run_action_list"):
                 # 'name' is the only supported control modifier at this stage.
                 if set(params) - {"name", "if"} or not params.get("name"):
@@ -458,6 +492,63 @@ def selftest():
                    expected_apl_sha256=hashlib.sha256(fixture).hexdigest()),
             action_readiness={"stormstrike":"READY"})
         assert result.status == CANDIDATE, op
+    # The auto-attack control action is not a GCD recommendation. An active
+    # PRE state may skip it; absent/late/inactive must not be assumed active.
+    control_profile = (
+        b"spec=enhancement\n"
+        b"actions=auto_attack\n"
+        b"actions+=/stormstrike,if=active_enemies>=2\n"
+    )
+    control_model = ingest_actions(control_profile, expected_spec="enhancement")
+    ck = dict(kw, model=control_model,
+              expected_apl_sha256=hashlib.sha256(control_profile).hexdigest(),
+              control_feature_keys={"auto_attack_active":"auto_active"},
+              action_readiness={"stormstrike":"READY"})
+    no_auto_obs = trace_priority(**ck)
+    assert no_auto_obs.reason == "AUTO_ATTACK_STATE_UNKNOWN"
+    active = StrictPreStateProvider().build(
+        action_timestamp_ms=1000,
+        transitions=(StateTransition(900,"auto_active",1),
+                     StateTransition(910,"targets",2),
+                     StateTransition(1000,"auto_active",0),
+                     StateTransition(1001,"targets",0)))
+    yes = trace_priority(**dict(ck,strict_pre_state=active))
+    assert yes.status == CANDIDATE and yes.candidate_action_token == "stormstrike", yes
+    assert any(e.get("status") == "ALREADY_ACTIVE_SKIP" for e in yes.trace)
+    inactive = StrictPreStateProvider().build(
+        action_timestamp_ms=1000,
+        transitions=(StateTransition(900,"auto_active",0),
+                     StateTransition(910,"targets",2)))
+    needs_start = trace_priority(**dict(ck,strict_pre_state=inactive))
+    assert needs_start.reason == "AUTO_ATTACK_START_REQUIRED"
+    future_only = StrictPreStateProvider().build(
+        action_timestamp_ms=1000,
+        transitions=(StateTransition(1000,"auto_active",1),
+                     StateTransition(1001,"auto_active",1),
+                     StateTransition(900,"targets",2)))
+    assert trace_priority(**dict(ck,strict_pre_state=future_only)).reason == \
+        "AUTO_ATTACK_STATE_UNKNOWN"
+    # Precombat variable values are not silently materialized. They must
+    # be observed as prior persistent state, independent from APL source.
+    initialized_profile = (
+        b"spec=enhancement\n"
+        b"actions.precombat=variable,name=pre_gate,op=set,value=2\n"
+        b"actions=stormstrike,if=variable.pre_gate=2\n"
+    )
+    initialized_model = ingest_actions(initialized_profile,expected_spec="enhancement")
+    pv = dict(kw,model=initialized_model,
+              expected_apl_sha256=hashlib.sha256(initialized_profile).hexdigest(),
+              operand_to_feature={"variable.pre_gate":"pre_gate"})
+    no_precombat = trace_priority(**pv,action_readiness={"stormstrike":"READY"})
+    assert no_precombat.reason == "GUARD_UNKNOWN"
+    known_precombat = StrictPreStateProvider().build(
+        action_timestamp_ms=1000,
+        transitions=(StateTransition(800,"pre_gate",2),))
+    with_precombat = trace_priority(
+        **dict(pv,strict_pre_state=known_precombat),
+        action_readiness={"stormstrike":"READY"})
+    assert with_precombat.candidate_action_token=="stormstrike"
+    print("SIMC_APL_AUTO_ATTACK_AND_PRECOMBAT_BOUNDARY_SELF_TEST=PASS")
     print("SIMC_APL_VARIABLE_OPERATORS_AND_PRE_SELF_TEST=PASS")
     print("SIMC_APL_ORDERED_PRIORITY_TRAVERSAL_SELF_TEST=PASS")
 
@@ -504,6 +595,7 @@ def main() -> int:
         spec_slug=data["spec_slug"],
         operand_to_feature=data["operand_to_feature"],
         action_readiness=readiness,
+        control_feature_keys=data.get("control_feature_keys", {}),
         expected_apl_sha256=model["apl_sha256"],
         expected_profile_sha256=model.get("profile_sha256"),
     )
