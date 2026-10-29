@@ -695,6 +695,18 @@ def check_simc_precombat_to_priority_cli() -> None:
 
 
 
+
+def check_simc_native_performed_extractor() -> None:
+    """Pinned native SimC 'performs Action' extraction; no APL-origin claim."""
+    p=ROOT/'tools/research/simc_native_performed_events.py'
+    compile(p.read_bytes(),str(p),'exec',dont_inherit=True)
+    run=subprocess.run([sys.executable,'-B',str(p),'--self-test'],
+        cwd=str(ROOT),capture_output=True,text=True,timeout=20)
+    assert run.returncode==0, 'SimC native performed event extractor failed'
+    assert 'SIMC_NATIVE_PERFORMED_EVENT_EXTRACTOR_SELF_TEST=PASS' in run.stdout
+
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -722,6 +734,7 @@ def main() -> int:
         ('simc_native_reference_capture_contract', check_simc_native_reference_capture_contract),
         ('simc_precombat_variable_replay', check_simc_precombat_variable_replay),
         ('simc_precombat_to_priority_cli', check_simc_precombat_to_priority_cli),
+        ('simc_native_performed_event_extractor', check_simc_native_performed_extractor),
         ('simc_wcl_batch_reconciliation_research_only', check_simc_wcl_batch_reconciliation),
     )
     for name, fn in checks:
@@ -734,7 +747,7 @@ def main() -> int:
         results.append({'name':name,'status':status})
         print(name + ': ' + status, flush=True)
     rows = []
-    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py', 'tools/research/simc_apl_conditional_ir.py', 'tools/research/simc_apl_readiness_provider.py', 'tools/research/simc_native_reference_capture.py', 'tools/research/simc_apl_variable_runtime.py', 'tools/research/simc_apl_precombat_replay.py'):
+    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py', 'tools/research/simc_apl_conditional_ir.py', 'tools/research/simc_apl_readiness_provider.py', 'tools/research/simc_native_reference_capture.py', 'tools/research/simc_apl_variable_runtime.py', 'tools/research/simc_apl_precombat_replay.py', 'tools/research/simc_native_performed_events.py'):
         p = ROOT / relative
         if p.is_file():
             rows.append((relative,sha256(p.read_bytes())))
