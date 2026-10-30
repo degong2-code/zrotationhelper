@@ -45,3 +45,25 @@ Once Native results are available:
 4. Only then bind verified native operands/readiness and compare existing generic APL evaluator with actual source-pinned foreground decision references. Keep independent WCL blind candidate discovery isolated until lock and use Blizzard/current patch for mechanic truth.
 
 **Authority:** Branch-only. MAIN `CURRENT_STATE`, architecture/global handoff, registry, active manifest, General Rotation baseline, FROZEN/Seq578 unchanged. Seq637 UNKNOWN. User local/PyCharm work not required.
+
+
+## Native experiment finding — timestamp-only correlation was NOT sufficient
+
+**Original build** [41033216189](https://github.com/degong2-code/zrotationhelper/actions/runs/41033216189) **SUCCESS** for source-pinned C++ compile, three real public profiles, SHA-pinned raw log, diagnostic group parser, source-independent recalculation and native action provenance. Built executable SHA256 `96e2309678a11dccead4655c667713c9478d101c4da5ad446abb463fbd9cbf0e`.
+
+Initial *unqualified*, **timestamp-only** comparison yielded:
+
+| Public profile | Native select_action entry diagnostic groups | Raw selected action pointer rows | Source values consistent | Potential conflicts | Same-ms ambiguous |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Enhancement | 64 | 64 | 197 | 122 | 65 |
+| Fury | 168 | 76 | 186 | 320 | 166 |
+| Unholy DK | 66 | 66 | 156 | 128 | 112 |
+| **Total** | **298** | **206** | **539** | **570** | **343** |
+
+**These initial 570 apparent conflicts are *not* a validated count of missing resource transitions.** Source examples revealed a critical lineage anomaly: a diagnostic entry at Native t=942ms, raw log line 119, was being compared against an INIT at t=0ms, **raw log line 5605** from the same nominal actor/spawn. The mutation record's printed log position was *after* the diagnostic. This could be a later reset/replayed iteration or output-order phenomenon; the capture lacks a proven shared execution epoch. Therefore timestamp `0 < 942` and repeated actor/spawn identity are **insufficient to certify that INIT causally preceded this action**. The 32 INIT / 24 spawn-associated time-filtered evidence and 489 gain/loss events from earlier stages must be read as **timestamp-filtered source observations**, not yet independently certified complete causal state sequences. Do not quietly promote them to actual Strict PRE readiness.
+
+**Failure type:** evidence-join/producer-epoch identification failure, *not* an established failure of any SimC priority hypothesis or a class-specific ability rule. Source stdout order cannot be assumed to be causal either without knowing SimC print buffering; hence the appropriate label is `SOURCE_LOG_ORDER_AMBIGUITY`, not automatic "future event" or "invalid" declaration.
+
+**Corrective successor:** `simc_native_select_resource_diagnostic_audit.py` now requires the candidate prior mutation to have both `source_timestamp < decision_timestamp` **and** `source_log_line < diagnostic BEGIN line`; if an earlier-timestamp candidate is printed at or after that diagnostic source position, the comparison is classified `SOURCE_LOG_ORDER_AMBIGUITY` and excluded from match/conflict. A dedicated 3-spec negative synthetic case proves a source INIT printed after SELECT despite an earlier timestamp cannot be accepted. The new Native run [41034104957](https://github.com/degong2-code/zrotationhelper/actions/runs/41034104957) must be checked before recording corrected counts.
+
+**Limit:** even a marker earlier in file order does not positively certify a shared Native iteration/capture epoch. Current correction is a conservative **ambiguity quarantine**, not a proof that remaining records are causally valid. Exact Next must establish a unique native execution epoch and action-selection correlation, preferably with a source-derived monotonic event sequence or capture ID embedded in both producer and diagnostic. Do not use the current 570 preliminary conflicts or apparent "agreement" fractions as gameplay accuracy.
