@@ -4,9 +4,9 @@
   "owner": "RESEARCH_BRANCH",
   "repository": "degong2-code/zrotationhelper",
   "branch": "work/github-ci-bootstrap",
-  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V6.md",
-  "canonical_handoff_blob_sha": "1636f64f09d96e188cf2ddaef2910da88ebbbdb8",
-  "research_code_evidence_sha": "df6d055bfd3f3e837cc703baf9c38f6ed3fe9f1b",
+  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V7.md",
+  "canonical_handoff_blob_sha": "359aac82b1135cc8b86442fc7b3e8dfeaf826aa2",
+  "research_code_evidence_sha": "d43374850c51420ffea82f934ffd7684faf6b414",
   "github_main_observed_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
   "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
   "actual_native_eval_ci": {
@@ -39,7 +39,7 @@
   "seq637_actual_local_result": "UNKNOWN",
   "seq578_and_frozen": "UNCHANGED_NO_PROMOTION",
   "shared_authoritative_state_mutated": false,
-  "next": "MINIMUM_IF_GUARD_EVAL_CALLSITE_AND_READINESS_EVIDENCE_GAP",
+  "next": "MINIMUM_READY_DIMENSIONS_IF_ELSE_CANDIDATE_WITH_WCL_BLIND_LOCK_INDEPENDENCE",
   "verified_as_of": "2026-10-31",
   "source_route_audit_path": "docs/DEVELOPER_NOTE_PINNED_APL_BARE_RESOURCE_EVAL_REACHABILITY_20261031.md",
   "source_route_audit_blob_sha": "c348162d309155658fbddc9c2e715a2966b54f2d",
@@ -66,5 +66,43 @@
     "code_sha": "df6d055bfd3f3e837cc703baf9c38f6ed3fe9f1b"
   },
   "direct_if_guard_operand_certified": 0,
-  "raw_native_marker_artifact_retained": false
+  "raw_native_marker_artifact_retained": false,
+  "direct_if_source_audit_path": "docs/DEVELOPER_NOTE_PINNED_NATIVE_DIRECT_IF_20261031.md",
+  "direct_if_source_audit_blob_sha": "834daf707738bacabafce8686c12ad43192bdde4",
+  "native_direct_if_ci": {
+    "run_id": 41084262760,
+    "conclusion": "success",
+    "code_sha": "d43374850c51420ffea82f934ffd7684faf6b414",
+    "public_profiles": [
+      "fury",
+      "havoc"
+    ],
+    "compiled_binary_sha256": "f906f0518d90f13b56fa05467e0e591b783f070e0e311b1443a1889ff7256980",
+    "resource_eval_count": 266,
+    "direct_if_eval_count": 179,
+    "variable_eval_count": 82,
+    "unknown_context_count": 5,
+    "readiness_certified": 0,
+    "gameplay_rule_promotion": false,
+    "marker_replay": "PASS_SAME_DIRECT_IF_SOURCE_OUTCOMES",
+    "artifact_id": 12990129697,
+    "artifact_expires_at": "2026-11-06T15:54:14Z"
+  },
+  "native_direct_if_offline_ci": {
+    "run_id": 41084262818,
+    "conclusion": "success",
+    "code_sha": "d43374850c51420ffea82f934ffd7684faf6b414",
+    "python_versions": [
+      "3.12",
+      "3.14"
+    ]
+  },
+  "historical_failed_native_ci": {
+    "run_id": 41082893641,
+    "conclusion": "failure",
+    "code_sha": "4fdf8b2a20477a92cb2a665d3da81c5078174bda",
+    "reason": "SUMMARY_POINTER_EVIDENCE_PATH_SHADOW"
+  },
+  "direct_if_guard_bare_eval_certified": 179,
+  "marker_only_replayable_artifact_retained": true
 }
