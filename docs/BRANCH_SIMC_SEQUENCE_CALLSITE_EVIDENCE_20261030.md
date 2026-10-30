@@ -29,3 +29,21 @@ Even with native callsite evidence, no decision PRE state; no actual eligibility
 The new instrumented binary is a separate artifact with a fresh SHA and cannot reuse the previous `9f480f0c...` hash. Research-only; no changes to MAIN, active manifest, General Rotation baseline, FROZEN, Seq578, Seq637 UNKNOWN, or global handoff.
 
 Exact Next: resolve new native CI outcome; if it fails, separate generic pipeline failure from hypothesis failure. If PASS, compare source pointer + caller origin on the same raw action entries, especially unproven Fury events. Progress next to instrument exact `select_action` return and Strict PRE transitions, avoiding replay of same-timestamp post-action states.
+
+
+## Verified Native successor result — source-callsite classification PASS
+
+**Superseding result:** research branch commit `33c2b4d60640943846d182902e0bed84c649f356`, [Native CI run 41016072868](https://github.com/degong2-code/zrotationhelper/actions/runs/41016072868) completed **SUCCESS**. The GitHub Actions job completed source check, synthetic tests, C++ compile, two native profile runs, receipt verification and summary-only artifact upload.
+
+- **Newly compiled instrumented binary SHA256:** `15d1eb46fc3af3aeaafb31ace6cdb33825675ac5b436f6db0ccfe8218258ef86`, distinct from prior `9f480f0c...`. Upstream source SHA fixed at `710c2408bfd3ae4df71b8cd55cdf01f63fd6c926`.
+- **Enhancement:** 71 Native sampled sequence rows; 71 exact pointer→APL row+signature matches; 0 drift; `FOREGROUND_EXECUTE_ACTION=64`, `PRECOMBAT_DIRECT=7`.
+- **Fury:** 94 sequence rows; 92 exact pointer→APL row+signature matches; 0 drift; `FOREGROUND_EXECUTE_ACTION=76`, `PRECOMBAT_DIRECT=16`, **`WAIT_NON_ACTION=2`**. These two wait records have no action pointer by design and must not count as uncertain spell actions.
+- **Together:** 165 recorded sequence entries = **163 genuine action entries with 163 exact APL pointer provenance matches** + two identified nonaction waits. `0` signature drift; `140` foreground **execute_action callsites**, `23` precombat callsites, `2` wait records. No queued-specialized or variable-side-effect entry occurred in these two small public fixtures: their detection remains synthetic/static verified, not empirically covered.
+- **Important false-confidence correction:** Initial same-feature C++ run [41015679751](https://github.com/degong2-code/zrotationhelper/actions/runs/41015679751) had **compile PASS / native audit FAIL** (`LIVE_POINTER_UNCLASSIFIED_SEQUENCE_CALLSITE_fury`) because it included the two waits among unknown **actions**. This is a validation pipeline classification failure, *not* a failure of the SimC hypothesis or APL pointer algorithm. The follow-on patch explicitly distinguishes `WAIT_NON_ACTION` from `UNKNOWN_CALLSITE` for genuine actions, then independently recompiled and passed.
+- Offline Python 3.12/3.14 CI run [41016072936](https://github.com/degong2-code/zrotationhelper/actions/runs/41016072936) both SUCCESS at the corrected implementation commit.
+
+**Evidence interpretation:** The 163/163 ratio is conditional on the *recorded action sequence entries in these two source-pinned public runs*, not a cross-build identity-precision or recommendation-accuracy estimate. A source `FOREGROUND_EXECUTE_ACTION` callsite can arise from `strict_sequence` / `spell_queued_action` as well as `select_action`; it is not independently proof of a normal foreground priority decision. No strict PRE state reconstructed and no readiness policy validated. Source pointer count is unrelated to whether SimC is optimal and cannot substitute for independent blind WCL discovery.
+
+**Next product-critical task:** discriminate actual `select_action` returns vs strict-sequence/queued foreground paths at the action selection event, preserving queue/aborted action evidence; then record only earlier-than-decision source state transitions with explicit observability limitations to begin state-conditioned priority replay. Favor a small generic reporter change over repeated costly full C++ rebuilds when an offline source or synthetic fixture suffices. Next native source fixture should be a genuine held-out specialization/build (not repeat existing two for percentage inflation).
+
+MAIN authority remains unchanged; no global handoff, FROZEN, Seq578, or project pointer modifications, and Seq637 is UNKNOWN.
