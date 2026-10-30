@@ -4,9 +4,9 @@
   "owner": "RESEARCH_BRANCH",
   "repository": "degong2-code/zrotationhelper",
   "branch": "work/github-ci-bootstrap",
-  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V14.md",
-  "canonical_handoff_blob_sha": "73793b4bb11b3115dc7cbefdb3ec7e2a0768c8a3",
-  "research_code_evidence_sha": "9b2f92091af1bb19f96d5090fd3f408ca8f90ce3",
+  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V15.md",
+  "canonical_handoff_blob_sha": "9f6acdf6bd61a26084ef041dc727f3667ab82906",
+  "research_code_evidence_sha": "6da1ea068ad93862f4b9973cf6ea8d639833e355",
   "github_main_observed_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
   "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
   "actual_native_eval_ci": {
@@ -39,7 +39,7 @@
   "seq637_actual_local_result": "UNKNOWN",
   "seq578_and_frozen": "UNCHANGED_NO_PROMOTION",
   "shared_authoritative_state_mutated": false,
-  "next": "MAIN_APPROVED_IDENTITY_READINESS_CONTRACT_AND_INDEPENDENT_WCL_BLIND_LOCK",
+  "next": "WCL_INDEPENDENT_NUMERIC_LOCK_AND_MAIN_SPEC_ADAPTER_READINESS_IDENTITY_APPROVAL",
   "verified_as_of": "2026-10-31",
   "source_route_audit_path": "docs/DEVELOPER_NOTE_PINNED_APL_BARE_RESOURCE_EVAL_REACHABILITY_20261031.md",
   "source_route_audit_blob_sha": "c348162d309155658fbddc9c2e715a2966b54f2d",
@@ -196,5 +196,23 @@
     "havoc": 1286
   },
   "game_client_ability_id_certified": 0,
-  "source_native_rebuild": "NOT_RUN"
+  "source_native_rebuild": "NOT_RUN",
+  "post_lock_blind_guard_path": "tools/research/post_lock_simc_wcl_guard_replay.py",
+  "post_lock_blind_guard_blob_sha": "6c583745b8554740c9369ae8a0e8581dd293f608",
+  "post_lock_blind_guard_ci": {
+    "run_id": 41105867712,
+    "conclusion": "success",
+    "code_sha": "6da1ea068ad93862f4b9973cf6ea8d639833e355",
+    "python_versions": [
+      "3.12",
+      "3.14"
+    ],
+    "scope": "SYNTHETIC_ONLY"
+  },
+  "post_lock_blind_syntax_status": "PASS",
+  "post_lock_blind_semantic_input_rejection": "PASS_SYNTHETIC",
+  "post_lock_blind_provenance_certification": "NOT_RUN",
+  "actual_wcl_blind_candidate_lock_provided": false,
+  "actual_gameplay_spell_ids_certified": 0,
+  "new_live_api_or_native_simc": "NOT_RUN"
 }
