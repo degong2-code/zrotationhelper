@@ -39,7 +39,7 @@ jobs:
             max_time=60 vary_combat_length=0 seed=1247695 \
             log=1 log_spell_id=1 report_details=1 \
             "save_actions=/capture/simc_effective_actions.simc" \
-            "json2=/capture/simc_native_sequence.json" \
+            "json2=/capture/simc_native_sequence.json,full_states=1" \
             "output=/capture/simc_native_log.txt"
           test -s "$ROOT/simc_effective_actions.simc"
           test -s "$ROOT/simc_native_log.txt"
@@ -92,6 +92,10 @@ jobs:
           sample_exact = 0
           sample_any_time = 0
           sample_multi_at_time = 0
+          unmatched = []
+          native_tokens_by_time = {}
+          for native_row in native_rows:
+              native_tokens_by_time.setdefault(native_row["timestamp_ms"],[]).append(native_row["action_token"])
           for r in sample_actions:
               t = r["timestamp_ms"]
               key = (t, r["action_token"])
@@ -100,12 +104,31 @@ jobs:
               if native_available[key] > 0:
                   native_available[key] -= 1
                   sample_exact += 1
+              else:
+                  # Public profile only: scoped diagnostic, never foreground.
+                  unmatched.append({
+                      "sequence":r["sequence"],"ordinal":r["ordinal"],
+                      "timestamp_ms":t,"action_token":r["action_token"],
+                      "action_id":r["numeric_action_id"],
+                      "same_time_native_count":at_time[t],
+                      "same_time_native_tokens":sorted(set(native_tokens_by_time.get(t,[]))),
+                  })
           assert 0 <= sample_exact <= min(len(sample_actions),len(native_rows))
+          assert sample_exact + len(unmatched) == len(sample_actions)
+          sequence_rows = sequence["precombat_sequence"] + sequence["combat_sequence"]
+          state_coverage = {
+              "nonempty_buffs_rows":sum(bool(r["buffs_snapshot"]) for r in sequence_rows),
+              "nonempty_cooldowns_rows":sum(bool(r["cooldowns_snapshot"]) for r in sequence_rows),
+              "nonempty_targets_rows":sum(bool(r["targets_snapshot"]) for r in sequence_rows),
+              "nonempty_resources_rows":sum(bool(r["resources_snapshot"]) for r in sequence_rows),
+          }
           summary = {
               "schema":"ZrotPublicNativeProofResearchV1",
               "research_branch_sha":os.environ["GITHUB_SHA"],
               "image_digest":receipt["image_digest"],
               "simc_seed":1247695,
+              "json2_full_states_requested":True,
+              "json2_snapshot_coverage":state_coverage,
               "binary_sha256":binary_sha,
               "public_profile_sha256":receipt["profile_sha256"],
               "effective_apl_sha256":receipt["effective_apl_sha256"],
@@ -118,7 +141,8 @@ jobs:
               "diagnostic_same_time_and_token_matched_count":sample_exact,
               "diagnostic_same_time_any_native_count":sample_any_time,
               "diagnostic_same_time_multiple_native_count":sample_multi_at_time,
-              "diagnostic_unmatched_json2_samples":len(sample_actions)-sample_exact,
+              "diagnostic_unmatched_json2_samples":len(unmatched),
+              "diagnostic_unmatched_public_rows":unmatched,
               "diagnostic_unmatched_native_performs":len(native_rows)-sample_exact,
               "diagnostic_scope":"CROSS_FORMAT_IDENTITY_ONLY_NOT_FOREGROUND_OR_PRE",
               "unrecognized_performs_count":events["unrecognized_performs_event_count"],
