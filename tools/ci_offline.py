@@ -791,6 +791,18 @@ def check_simc_readiness_source_coverage_compat() -> None:
     assert payload["provider_probe"]["folded_extra_missing"] == "UNKNOWN"
 
 
+def check_simc_native_pointer_action_id_synthetic() -> None:
+    """Actual source-pointer ID parser on synthetic Native markers, no Native build."""
+    p = ROOT / "tools" / "research" / "simc_native_pointer_action_id_consistency.py"
+    compile(p.read_bytes(), str(p), "exec", dont_inherit=True)
+    r = subprocess.run(
+        [sys.executable, "-B", str(p), "--self-test"],
+        cwd=str(ROOT), capture_output=True, text=True, timeout=25,
+    )
+    assert r.returncode == 0, "source-pointer numeric action ID synthetic regression"
+    assert "SIMC_NATIVE_ACTION_ID_SOURCE_POINTER_SELF_TEST=PASS" in r.stdout
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -824,6 +836,7 @@ def main() -> int:
         ('simc_native_json2_sequence', check_simc_native_json2_sequence),
         ('native_apl_eval_scope_synthetic_only', check_native_apl_eval_attempt_scopes),
         ('native_direct_if_guard_synthetic_only', check_native_direct_if_guard_research),
+        ('simc_native_pointer_action_id_synthetic_only', check_simc_native_pointer_action_id_synthetic),
         ('simc_wcl_batch_reconciliation_research_only', check_simc_wcl_batch_reconciliation),
     )
     for name, fn in checks:
@@ -836,7 +849,7 @@ def main() -> int:
         results.append({'name':name,'status':status})
         print(name + ': ' + status, flush=True)
     rows = []
-    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py', 'tools/research/simc_apl_conditional_ir.py', 'tools/research/simc_apl_readiness_provider.py', 'tools/research/simc_native_reference_capture.py', 'tools/research/simc_apl_variable_runtime.py', 'tools/research/simc_apl_precombat_replay.py', 'tools/research/simc_native_performed_events.py', 'tools/research/simc_native_oracle_reconciliation.py', 'tools/research/simc_native_json_sequence.py', 'tools/research/simc_native_apl_eval_scope_instrument.py', 'tools/research/simc_native_apl_eval_scope_audit.py', 'tools/research/simc_native_if_guard_instrument.py', 'tools/research/simc_native_if_guard_audit.py', 'tools/research/simc_readiness_source_coverage_compat.py', 'docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json'):
+    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py', 'tools/research/simc_apl_conditional_ir.py', 'tools/research/simc_apl_readiness_provider.py', 'tools/research/simc_native_reference_capture.py', 'tools/research/simc_apl_variable_runtime.py', 'tools/research/simc_apl_precombat_replay.py', 'tools/research/simc_native_performed_events.py', 'tools/research/simc_native_oracle_reconciliation.py', 'tools/research/simc_native_json_sequence.py', 'tools/research/simc_native_apl_eval_scope_instrument.py', 'tools/research/simc_native_apl_eval_scope_audit.py', 'tools/research/simc_native_if_guard_instrument.py', 'tools/research/simc_native_if_guard_audit.py', 'tools/research/simc_readiness_source_coverage_compat.py', 'docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json', 'tools/research/simc_native_pointer_action_id_consistency.py'):
         p = ROOT / relative
         if p.is_file():
             rows.append((relative,sha256(p.read_bytes())))
