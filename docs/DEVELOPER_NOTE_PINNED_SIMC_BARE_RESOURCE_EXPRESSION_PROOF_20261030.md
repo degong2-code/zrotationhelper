@@ -53,3 +53,7 @@ The previously validated Native source epoch/reset sequence [41059211056](https:
 4. MAIN alone may promote production General Rotation IR or encounter plans after compatibility review. No FROZEN/Seq/main changes in this increment.
 
 **Local user action:** none. GitHub source + CI are the deliverables; no downloadable standalone Python file was handed out.
+
+## Branch continuity reference (2026-10-30; documentation only)
+
+For the current operational recovery order, evidence ledger and **distinct product vs session Exact Next**, read [BRANCH_SIMC_HANDOFF_20261030_V3.md](BRANCH_SIMC_HANDOFF_20261030_V3.md) as the branch-local successor to earlier branch V1/V2 notes. The minimal machine pointer is `_UPLOAD_TO_CHATGPT/branches/BR-SIMC-APL-BOOTSTRAP/LATEST_HANDOFF.json` (branch-local, **NOT** the MAIN global latest handoff). This cross-reference changes **no underlying static source proof, Native action/parity result, readiness state, or gameplay rule status**. All approved MAIN identity, active production file and Runtime boot requirements remain independently unverified / UNKNOWN until their actual authoritative bytes are checked. A fresh chat must report restoration, then **stop until the user writes “진행”**.
