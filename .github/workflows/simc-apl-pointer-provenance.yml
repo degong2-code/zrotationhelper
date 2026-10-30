@@ -17,6 +17,7 @@ on:
       - "tools/research/simc_native_select_resource_diagnostic_audit.py"
       - "tools/research/simc_native_epoch_sequence_instrument.py"
       - "tools/research/simc_native_epoch_sequence_audit.py"
+      - "tools/research/simc_native_reset_boundary_instrument.py"
       - ".github/workflows/simc-apl-pointer-provenance.yml"
   workflow_dispatch:
 
@@ -51,6 +52,7 @@ jobs:
           python tools/research/simc_native_select_resource_diagnostic_audit.py --self-test
           python tools/research/simc_native_epoch_sequence_instrument.py --self-test
           python tools/research/simc_native_epoch_sequence_audit.py --self-test
+          python tools/research/simc_native_reset_boundary_instrument.py --self-test
       - name: Checkout exact upstream SimulationCraft source
         shell: bash
         run: |
@@ -80,6 +82,8 @@ jobs:
           test -s "$RUNNER_TEMP/simc-select-resource-diagnostic-receipt.json"
           python tools/research/simc_native_epoch_sequence_instrument.py --upstream-root "$RUNNER_TEMP/simc-pinned" > "$RUNNER_TEMP/simc-epoch-source-receipt.json"
           test -s "$RUNNER_TEMP/simc-epoch-source-receipt.json"
+          python tools/research/simc_native_reset_boundary_instrument.py --upstream-root "$RUNNER_TEMP/simc-pinned" > "$RUNNER_TEMP/simc-reset-clock-epoch-receipt.json"
+          test -s "$RUNNER_TEMP/simc-reset-clock-epoch-receipt.json"
       - name: Compile separate research-only source binary (no game changes)
         shell: bash
         run: |
@@ -113,5 +117,6 @@ jobs:
             ${{ runner.temp }}/simc-lifecycle-source-receipt.json
             ${{ runner.temp }}/simc-select-resource-diagnostic-receipt.json
             ${{ runner.temp }}/simc-epoch-source-receipt.json
+            ${{ runner.temp }}/simc-reset-clock-epoch-receipt.json
           if-no-files-found: error
           retention-days: 7
