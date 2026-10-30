@@ -67,3 +67,27 @@ Initial *unqualified*, **timestamp-only** comparison yielded:
 **Corrective successor:** `simc_native_select_resource_diagnostic_audit.py` now requires the candidate prior mutation to have both `source_timestamp < decision_timestamp` **and** `source_log_line < diagnostic BEGIN line`; if an earlier-timestamp candidate is printed at or after that diagnostic source position, the comparison is classified `SOURCE_LOG_ORDER_AMBIGUITY` and excluded from match/conflict. A dedicated 3-spec negative synthetic case proves a source INIT printed after SELECT despite an earlier timestamp cannot be accepted. The new Native run [41034104957](https://github.com/degong2-code/zrotationhelper/actions/runs/41034104957) must be checked before recording corrected counts.
 
 **Limit:** even a marker earlier in file order does not positively certify a shared Native iteration/capture epoch. Current correction is a conservative **ambiguity quarantine**, not a proof that remaining records are causally valid. Exact Next must establish a unique native execution epoch and action-selection correlation, preferably with a source-derived monotonic event sequence or capture ID embedded in both producer and diagnostic. Do not use the current 570 preliminary conflicts or apparent "agreement" fractions as gameplay accuracy.
+
+
+## Corrected Native source-order audit — empirical result
+
+**Corrective Native run:** https://github.com/degong2-code/zrotationhelper/actions/runs/41034104957 — **SUCCESS**, fixed upstream source compiled, three public profiles executed, all existing action object and source-raw projections passed, plus new negative synthetic log-order regression. Newly compiled diagnostic binary SHA256 `bb4525ffa534b04437804285bac44f22257edb7ad36439d44374e3be3a39dd60`. This must not be confused with original experimental binary `96e230...`.
+
+| Source profile | Select-action diagnostic entry groups | Recorded source-pointer foreground action rows | Measured current/max comparisons | Source log-order ambiguity | Same-ms ambiguity | Confirmed consistent | Confirmed discrepancy |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Enhancement | 64 | 64 | 384 | 366 | 18 | **0** | **0** |
+| Fury | 168 | 76 | 672 | 640 | 32 | **0** | **0** |
+| Unholy | 66 | 66 | 396 | 384 | 12 | **0** | **0** |
+| **Total** | **298** | **206** | **1,452** | **1,390** | **62** | **0** | **0** |
+
+**Interpretation:** There were 1,452 diagnostic current/max field comparisons across 298 Native select_action-entry groups. None could be *certified* as a causal prior-value comparison under the current capture contract: 1,390 had source-log-position contradiction (an earlier-timestamp candidate printed later than the decision entry), while 62 had same-millisecond ambiguity. Zero certified consistent/discrepant comparisons is **NOT evidence of perfect agreement** or lack of class module direct writes. It means the native producer/decision join has **insufficient execution-epoch ordering evidence**.
+
+The 298 entry groups are **not** identical to 206 source-pointer-backed recorded foreground actions: SimC `select_action` may be invoked multiple times and return null/quiet or an action with native ID 0. The current native END marker uses `action ? action->id : 0`, so ID 0 **does not independently prove a null action**. Do not equate these denominators or calculate accuracy from them.
+
+**Corrective code:** a source event with timestamp `<t` is not eligible unless its original log-line position also precedes the diagnostic group; existence of a contradictory later-printed earlier-timestamp source row yields `SOURCE_LOG_ORDER_AMBIGUITY`, not a fabricated earlier state or named missing-mechanic claim. Even compatible text ordering alone is not full epoch provenance, so the remaining result would still be claim-limited. This correction passed the 3-spec synthetic regression and Python 3.12/3.14 CI [41034104939](https://github.com/degong2-code/zrotationhelper/actions/runs/41034104939).
+
+### Why this is product-critical and the exact next producer fix
+
+Source player `reset()`, `init_resources(true)`, `arise()`, and the source log printing lifecycle can produce multiple resource snapshots with identical native elapsed time or actor/spawn labels across a single report. Neither timestamp nor log text position alone proves shared execution epoch. The **next valid solution is a source-generated, monotonically increasing runtime event sequence and explicit simulation iteration/capture epoch** attached to *every* INIT/RECALC/GAIN/LOSS and select-entry marker. This must be generated at Native event emission time, not reconstructed from sorted output. All sources are already instrumented from generic `player.cpp`, making one common per-simulator sequence/epoch policy feasible. Verify unique identity and causal order against raw log and a new held-out profile without inventing values.
+
+Do **not** retry a source-only formula to produce arbitrary ratios from a log with unverified epoch/order. First source-lock an epoch/sequence contract and independently validate it. Only then re-run strict PRE current/max comparisons and investigate genuine unexplained gaps; current Blizzard semantics and WCL blind discovery remain separate lanes. No readiness or gameplay recommendations promoted.
