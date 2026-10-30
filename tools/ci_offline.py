@@ -772,6 +772,25 @@ def check_native_apl_eval_attempt_scopes() -> None:
         assert "SELF_TEST=PASS" in proc.stdout
 
 
+def check_simc_readiness_source_coverage_compat() -> None:
+    """Research-only existing-provider gap + pinned source obligation coverage."""
+    p = ROOT / "tools" / "research" / "simc_readiness_source_coverage_compat.py"
+    compile(p.read_bytes(), str(p), "exec", dont_inherit=True)
+    run = subprocess.run(
+        [sys.executable, "-B", str(p), "--self-test"],
+        cwd=str(ROOT), capture_output=True, text=True, timeout=25,
+    )
+    assert run.returncode == 0, "SimC source-readiness compatibility probe failed"
+    assert "SIMC_READINESS_SOURCE_COVERAGE_COMPAT_SELF_TEST=PASS" in run.stdout
+    payload = json.loads(run.stdout.splitlines()[-1])
+    assert payload["ready_certified"] == 0
+    assert payload["gameplay_rule_promotion"] is False
+    assert payload["provider_probe"]["eight_declared_only"] == (
+        "READY_DESPITE_UNDECLARED_SOURCE_GATES"
+    )
+    assert payload["provider_probe"]["folded_extra_missing"] == "UNKNOWN"
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -795,6 +814,7 @@ def main() -> int:
         ('simc_source_to_priority_file_cli', check_simc_source_to_priority_file_cli),
         ('simc_conditional_priority_structural_ir', check_simc_conditional_priority_ir),
         ('simc_pre_readiness_provider', check_simc_pre_readiness_provider),
+        ('simc_readiness_source_coverage_compat_synthetic', check_simc_readiness_source_coverage_compat),
         ('simc_readiness_to_priority_cli', check_simc_readiness_to_priority_cli),
         ('simc_native_reference_capture_contract', check_simc_native_reference_capture_contract),
         ('simc_precombat_variable_replay', check_simc_precombat_variable_replay),
@@ -816,7 +836,7 @@ def main() -> int:
         results.append({'name':name,'status':status})
         print(name + ': ' + status, flush=True)
     rows = []
-    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py', 'tools/research/simc_apl_conditional_ir.py', 'tools/research/simc_apl_readiness_provider.py', 'tools/research/simc_native_reference_capture.py', 'tools/research/simc_apl_variable_runtime.py', 'tools/research/simc_apl_precombat_replay.py', 'tools/research/simc_native_performed_events.py', 'tools/research/simc_native_oracle_reconciliation.py', 'tools/research/simc_native_json_sequence.py', 'tools/research/simc_native_apl_eval_scope_instrument.py', 'tools/research/simc_native_apl_eval_scope_audit.py', 'tools/research/simc_native_if_guard_instrument.py', 'tools/research/simc_native_if_guard_audit.py'):
+    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py', 'tools/research/simc_apl_conditional_ir.py', 'tools/research/simc_apl_readiness_provider.py', 'tools/research/simc_native_reference_capture.py', 'tools/research/simc_apl_variable_runtime.py', 'tools/research/simc_apl_precombat_replay.py', 'tools/research/simc_native_performed_events.py', 'tools/research/simc_native_oracle_reconciliation.py', 'tools/research/simc_native_json_sequence.py', 'tools/research/simc_native_apl_eval_scope_instrument.py', 'tools/research/simc_native_apl_eval_scope_audit.py', 'tools/research/simc_native_if_guard_instrument.py', 'tools/research/simc_native_if_guard_audit.py', 'tools/research/simc_readiness_source_coverage_compat.py', 'docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json'):
         p = ROOT / relative
         if p.is_file():
             rows.append((relative,sha256(p.read_bytes())))
