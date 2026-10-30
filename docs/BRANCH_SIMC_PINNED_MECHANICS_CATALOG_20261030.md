@@ -41,3 +41,50 @@ Example: `ascendance` returned **16** exact conservatively normalized name recor
 Develop a **generic evidence-based actor/spec/build filter** for the multiple spell candidates using XML class/spec metadata + source profile/talent information, while preserving all candidates and rejecting insufficient or conflicting provenance. Measure how often it narrows ambiguous results **without false-positive certification** on new held-out profiles. Then compare inferred action IDs with independently certified native foreground SimC action/effect IDs, and cross-check Blizzard official mechanic/patch authority. Only complete, earlier-than-decision Strict PRE transitions and certified readiness policy can reach the shared runtime. WCL blind independent discovery must remain unexposed to SimC semantics until its candidate lock; reconcile and holdout afterward.
 
 Maintain branch-only ownership: `main`, MAIN `CURRENT_STATE`, global `LATEST_HANDOFF`, Work OS, Seq578, frozen baselines, manifests and production pointers were not changed. Seq637 remains UNKNOWN. The current local MAIN/Work OS approved runtime remains UNKNOWN.
+
+
+## Successor increment — generic profile actor/spec candidate evidence (2026-10-30)
+
+**User priority audit:** This increment develops the generic engine's **ability to automatically investigate arbitrary new SimC profiles**, not one fixed spec rotation. No class-specific spell ID mappings, class decision tree, manual action rules or encounter semantics are introduced. Branch-only, no MAIN promotion.
+
+### Implementation and bounded proof
+
+- `tools/research/simc_spell_query_scope_filter.py` derives exact pinned profile SHA, single actor class, verified spec name and presence/fingerprint (SHA256) of its raw talent directives. The fingerprint does **not** interpret selected talents or prove build eligibility. The source profile is still an independently supplied file in the same pinned Docker image and is hashed before parsing.
+- `assess_candidate_scope` requires matching route/APL/profile/spec/binary identities via existing `link_catalog_candidates_to_route`, then compares XML `<class name>` and `<spec name>` to that profile. Only conservative exact normalization and class/spec concatenations are considered explicit positive **lexical evidence**. Missing names stay UNSTATED; nonmatching labels are REVIEW, not grounds for deletion because class/spec/racial/pet/internal spells can have different identities. All candidate IDs survive intact.
+- Output includes per-token source candidate IDs, explicit class/spec support, explicit class nonmatch, unresolved candidates, original/retained count, and UNKNOWN final ID/readiness. A singleton support set is still not proof of actual native APL action binding. `talent_directive_count` and `talent_directives_sha256` carry reproducibility only, not inferred talent mechanics.
+- Existing standalone native Docker CI `.github/workflows/simc-public-mechanics-catalog.yml` now tests cross-spec synthetic examples and adds **held-out Unholy Death Knight** public profile to the native probe (three fixtures, five source-derived action token spell queries each). The source tokens are selected by generic alphabetical bounded request plan, not cherry-picked spells and not the full APL. XML is ephemeral; only summary JSON is uploaded.
+
+### Native evidence
+
+**Native run SUCCESS:** https://github.com/degong2-code/zrotationhelper/actions/runs/41011274525
+
+**Offline CI SUCCESS:** https://github.com/degong2-code/zrotationhelper/actions/runs/41011274599 (Python 3.12 and 3.14).
+
+Fixed official image: `simulationcraftorg/simc@sha256:a6cfbc243456825d2dbecd607fe025948680219f4b4348603ed77a081b5f5895`. SimC binary SHA256 `804fc81296fe1ae5208161df5cece258e2ac7489de60c3816d2097da3612e6fc`.
+
+| Docker image internal public spec/profile | APL rows | Name-matched DBC spell IDs | Explicit class/spec positive support | Other retained, not certified | Explicit class nonmatch review | Talent source directives |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Enhancement Shaman | 115 | 26 | 11 | 15 | 2 | 1 |
+| Fury Warrior | 121 | 8 | 5 | 3 | 0 | 1 |
+| Unholy Death Knight (**new scope fixture**) | 63 | 23 | 12 | 11 | 11 | 1 |
+| **Total** | 299 | **57** | **28** | **29** | **13** | 3 |
+
+The remaining 29 includes 13 candidates with explicit class nonmatch and 16 with no positive class/spec label. Not all 29 are invalid: race/pet/shared/internal spell data may differ. **All 57 IDs are retained**. Each profile queried exactly five APL-derived action strings. Native status `PINNED_SIMC_PUBLIC_DBC_SPELL_QUERY_NATIVE=PASS QUERIES=15 SPECS=3`; the synthetic module self-test `SIMC_PINNED_PROFILE_SCOPE_FILTER_SELF_TEST=PASS SPECS=3 SYNTHETIC_ONLY` covers the exact profile SHA, actor/spec mismatch, ambiguous names, class conflicting or absent labels, full candidate preservation and fail-closed readiness.
+
+Examples: `ascendance` from Enhancement has 16 exact-name DBC candidates, 7 with explicit positive scope labels; neither the 7 nor the remaining 9 are automatically certified/excluded. `arcane_torrent` from Unholy has 9 name candidates, one positive label and eight class nonmatch review candidates; racial applicability cannot be inferred solely from these labels. The generic filter preserves all.
+
+### Claim-strength and data separation
+
+- **PASS**: extraction of exact pinned profile actor/spec/talent fingerprints, XML scope label comparison and evidence ranking, no dropped IDs, three actual pinned public profiles, CI Python 3.12/3.14.
+- **UNKNOWN / NOT RUN**: actual learned talents, spell/ability identity in actor-specific SimC implementation, cooldown/action replacement, race/gear legality, Blizzard live/current patch truth, foreground action parity, WCL blind discovery/replay, real Strict PRE state, full semantics across all 27 specializations, General Rotation decision accuracy.
+- The earlier public GitHub source APL Enhancement count **114** and image-internal profile Enhancement count **115** remain distinct hashes/baselines; do not compare those row counts as one fixture. The new native probe reused the image-internal profile and did not update either authoritative input.
+- No real action is promoted merely from one matching `<class>`/`<spec>` tag, and no assertion of zero false-positive candidate IDs is made: **0 gameplay identities certified** is a policy, not accuracy measurement.
+
+### Focused Exact Next
+
+1. Inspect **actual SimulationCraft actor-action binding paths** generically to link an APL action token to instantiated `action_t::id` / runtime source identity, with source provenance and handling of replacements/race/pet/procs; source DBC name match alone is insufficient.
+2. Add independent/native foreground event evidence to test these candidate mappings; if the resolved effective action differs from name-based DBC IDs, preserve conflict and keep UNKNOWN.
+3. Build a generic talent/build applicability reader from pinned SimC profile and talent database (not class-specific manually written ability maps). Verify on a *new held-out* spec/build.
+4. Only when identities/mechanics are certified, generate source-accountable readiness policies and valid Strict PRE transitions; independent WCL blind discovery must lock separately before SimC replay.
+
+No changes to `main`, MAIN `CURRENT_STATE`, global `LATEST_HANDOFF`, FROZEN, Seq578 or production pointers. Seq637 remains UNKNOWN; local MAIN/Work OS authoritative state not verified here.
