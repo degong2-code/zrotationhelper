@@ -341,7 +341,7 @@ def selftest():
                  f"rage|{cur}|100\n").encode()+
                 event("SELECT_END",seq+1,t,iteration=iteration))
     def reset(iteration,seq):
-        return f"ZROT_NATIVE_RESET_BOUNDARY_V1|0|{iteration}|{seq}|0\\n".encode()
+        return f"ZROT_NATIVE_RESET_BOUNDARY_V1|0|{iteration}|{seq}|0\n".encode()
     raw=reset(0,0)+event("INIT",1,0)+diag(10,10,seq=2)+event(
         "GAIN",4,20,cur=20)+diag(30,20,seq=5)+reset(1,7)+event(
         "INIT",8,0,iteration=1,cur=77)+diag(10,77,iteration=1,seq=9)
