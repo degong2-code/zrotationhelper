@@ -34,6 +34,7 @@ FIXTURES=(
     ("enhancement","profiles/MID2/MID2_Shaman_Enhancement.simc"),
     ("fury","profiles/MID2/MID2_Warrior_Fury.simc"),
     ("unholy","profiles/MID2/MID2_Death_Knight_Unholy.simc"),
+    ("havoc","profiles/MID2/MID2_Demon_Hunter_Havoc.simc"),
 )
 
 
@@ -193,6 +194,8 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
             epoch=parse_epoch_native_log(
                 blobs[names[1]],receipt["native_log_sha256"])
             epoch_audit=independent_epoch_audit(blobs[names[1]],epoch)
+            if epoch["reset_boundary_count"]<1:
+                raise ValueError("NATIVE_EPOCH_NO_RUNTIME_RESET_BOUNDARY_"+spec)
             if epoch_audit["status"]!="PASS_EPOCH_NATIVE_SOURCE_BYTES_INDEPENDENT_RECALC":
                 raise ValueError("NATIVE_EPOCH_SOURCE_AUDIT_FAILED")
             epoch_comparison=compare_epoch_bound_resources(
@@ -208,6 +211,9 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
                 "spec":spec,
                 "native_epoch_log_source_sha256":epoch["source_log_sha256"],
                 "native_epoch_source_marker_count":epoch["event_count"],
+                "native_epoch_reset_boundary_count":epoch["reset_boundary_count"],
+                "native_epoch_reset_thread_iteration_pairs":sorted({
+                    (x["thread"],x["iteration"]) for x in epoch["reset_boundaries"]}),
                 "native_epoch_iterations":epoch["source_iterations"],
                 "native_epoch_event_kinds":epoch["event_kind_counts"],
                 "native_epoch_independent_audit":epoch_audit["status"],
