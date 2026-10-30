@@ -1,0 +1,36 @@
+name: Pinned public SimC mechanics catalog probe (research only)
+
+on:
+  push:
+    branches: [work/github-ci-bootstrap]
+    paths:
+      - "tools/research/simc_spell_query_catalog.py"
+      - "tools/research/simc_spell_query_public_probe.py"
+      - ".github/workflows/simc-public-mechanics-catalog.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-dbc-xml:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test cross-spec candidate catalog parser, no live calls
+        run: python tools/research/simc_spell_query_catalog.py --self-test
+      - name: Extract public XML from pinned actual SimC binary
+        env:
+          ZROT_PUBLIC_CATALOG_SUMMARY: ${{ runner.temp }}/zrot-public-mechanics-catalog-summary.json
+        run: python tools/research/simc_spell_query_public_probe.py
+      - name: Upload summary only; no XML, profile or private input
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-public-mechanics-summary-${{ github.sha }}
+          path: ${{ runner.temp }}/zrot-public-mechanics-catalog-summary.json
+          if-no-files-found: error
+          retention-days: 7
