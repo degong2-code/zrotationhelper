@@ -40,8 +40,8 @@ def patch_sources(sources:dict[str,str])->dict[str,str]:
     kinds=(
         ("GAIN", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_V1\|[^\n]*\n[^\n]*\n[^\n]*\n[^\n]*"GAIN" \);'),
         ("LOSS", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_V1\|[^\n]*\n[^\n]*\n[^\n]*\n[^\n]*"LOSS" \);'),
-        ("INIT", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1\|[^\n]*\n[^\n]*\n[^\n]*\n[^\n]*"INIT" \);'),
-        ("RECALC", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1\|[^\n]*\n[^\n]*\n[^\n]*\n[^\n]*"RECALC" \);'),
+        ("INIT", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1\|[^\n]*\|INIT",\n(?:[^\n]*\n){2}[^\n]*\);'),
+        ("RECALC", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1\|[^\n]*\|RECALC",\n(?:[^\n]*\n){2}[^\n]*\);'),
         ("SELECT_BEGIN", r'sim->print_log\( "ZROT_NATIVE_SELECT_RESOURCE_BEGIN_V1\|[^\n]*\n[^\n]*\);'),
         ("SELECT_END", r'sim->print_log\( "ZROT_NATIVE_SELECT_RESOURCE_END_V1\|[^\n]*\n[^\n]*\n[^\n]*\);'),
     )
@@ -124,14 +124,14 @@ def selftest():
            '                    alpha,\n'
            '                    beta,\n'
            '                    gamma, "LOSS" );\n'
-           '    sim->print_log( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1|{}",\n'
+           '    sim->print_log( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1|{}|INIT",\n'
            '                    alpha,\n'
            '                    beta,\n'
-           '                    gamma, "INIT" );\n'
-           '    sim->print_log( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1|{}",\n'
+           '                    gamma );\n'
+           '    sim->print_log( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1|{}|RECALC",\n'
            '                    alpha,\n'
            '                    beta,\n'
-           '                    gamma, "RECALC" );\n'
+           '                    gamma );\n'
            '    sim->print_log( "ZROT_NATIVE_SELECT_RESOURCE_BEGIN_V1|{}",\n'
            '                    alpha );\n'
            '    sim->print_log( "ZROT_NATIVE_SELECT_RESOURCE_END_V1|{}",\n'
