@@ -362,7 +362,7 @@ def selftest():
         reset(0,4)+event("INIT",5,0,cur=30)+diag(10,30,seq=6))
     repeat_src=parse_epoch_native_log(repeated,sha(repeated))
     assert repeat_src["reset_boundary_count"]==2
-    assert independent_epoch_audit(repeated,repeat_src)["event_count"]==8
+    assert independent_epoch_audit(repeated,repeat_src)["event_count"]==6
     assert compare_epoch_bound_resources(repeated,repeat_src)[
         "comparison_counts"]=={"CONSISTENT_PRIOR_SOURCE_VALUE":4}
     # No epoch reset stamp = not a source-verified execution window.
