@@ -34,3 +34,14 @@ A valid `INIT` marker proves the source-instrumented function exited with a spec
 - Next higher-impact task after this bounded increment: establish *actual resource state coverage* against source-verified **independent diagnostic samples at decision points**, with source-level actor identity and no same-time leakage; classify unknown direct-write/callback paths and fix them only where gameplay-facing priority would change. Add buff/cooldown/charge producers as needed and only then attempt conditional APL parity. New, unused build/spec holdout after candidate lock; WCL blind candidate discovery stays isolated from SimC semantics before its lock.
 
 **Authority:** MAIN `CURRENT_STATE`, global `LATEST_HANDOFF`, canonical registry, General Rotation/FROZEN, Seq578, product pointer unchanged. Seq637 UNKNOWN. No WCL/Blizzard live gameplay claims.
+
+
+## Source-level direct-write counterexamples (bounded audit)
+
+Pinned **upstream** tree `simulationcraft/simc@710c2408bfd3ae4df71b8cd55cdf01f63fd6c926` yielded concrete non-`resource_gain/loss` current-resource assignments outside the instrumented generic functions:
+
+- `engine/class_modules/sc_warrior.cpp` lines ~8148, 8162, 8193, 8207 and 8238 contain current-health multiplier changes adjacent to `recalculate_resource_max(RESOURCE_HEALTH)`. Importantly some happen **after** that generic recalc hook, so observing recalc's function exit alone can miss the final current-health value.
+- `engine/class_modules/sc_mage.cpp` line ~6778 sets `resources.current[rt] = resources.max[rt] * pct` after changing max for an aura interaction, outside generic gain/loss and generic recalc.
+- `engine/player/player.cpp` `pool_resource_t::ready()` temporary write/restore cases are a counterexample to simply recording **every** direct assignment as a combat-state transition. Only durable changes belong in persistent PRE features. The exact set of class/source sites is build-dependent.
+
+This negative evidence demonstrates why `source_completeness=PARTIAL` and `readiness=UNKNOWN` are mandatory even if **all** INIT/RECALC logs in a small profile run parse successfully. A future read-only, pinned-tree write-site inventory or an independently captured *decision-time diagnostic snapshot* may locate missing transitions; snapshots taken at the current selection timestamp must never be retroactively treated as `t-1` PRE observations.
