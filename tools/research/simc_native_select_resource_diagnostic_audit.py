@@ -189,9 +189,18 @@ def compare_diagnostics(raw_log:bytes,*,expected_log_sha256:str,
                 value=row["current" if metric=="current" else "max"]
                 key=(actor,resource,metric)
                 history=obs.get(key,[])
-                earlier=[v for v in history if v[0]<t]
+                # Timestamp and source-log position BOTH matter. The
+                # source log can contain later reset/iteration INIT at t=0
+                # after an earlier printed select_action entry. Comparing
+                # that late row as causal PRE would leak future/source epoch.
+                earlier=[v for v in history if v[0]<t and v[1]<group["begin_line"]]
+                contradictory_order=[v for v in history
+                                     if v[0]<t and v[1]>=group["begin_line"]]
                 same=[v for v in history if v[0]==t]
-                if same:
+                if contradictory_order:
+                    status="SOURCE_LOG_ORDER_AMBIGUITY"
+                    reference=None
+                elif same:
                     status="SAME_TIMESTAMP_SOURCE_AMBIGUITY"
                     reference=None
                 elif not earlier:
@@ -252,6 +261,17 @@ def selftest():
         assert proof["source_selection_diagnostic_audit"]["decision_entry_count"]==3
         assert not proof["native_entry_snapshot_used_as_reconstructed_pre"]
         assert proof["gameplay_rule_promotion"] is False
+        # A source INIT at t=0 printed *after* a SELECT at t=10
+        # is NOT causally established, despite timestamp 0 < 10.
+        out_of_order=block(10,20)+life(0,20,100)
+        oo_resource=native_log_to_ndjson(
+            out_of_order,expected_log_sha256=sha(out_of_order))
+        oo_life=project_lifecycle_log(out_of_order,sha(out_of_order))
+        uncertain=compare_diagnostics(
+            out_of_order,expected_log_sha256=sha(out_of_order),
+            resource_projection=oo_resource,lifecycle_projection=oo_life)
+        assert uncertain["comparison_counts"]=={"SOURCE_LOG_ORDER_AMBIGUITY":2},uncertain
+
         altered=raw.replace(b"END_V1|10|0|1|1",b"END_V1|12|0|1|1")
         try:extract_diagnostic_groups(altered,expected_sha256=sha(altered))
         except ValueError as e:assert str(e)=="DIAG_NATIVE_GROUP_IDENTITY_OR_CLOCK_CHANGE"
