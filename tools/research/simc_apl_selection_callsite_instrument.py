@@ -62,9 +62,11 @@ def patch_callsite_sources(sources:dict[str,str])->dict[str,str]:
         count=2)
     # The two precombat sites are structurally distinct from combat execute.
     out[name]=replace_exact(out[name],
-        "sequence_add( action, action->target );",
-        'sequence_add( action, action->target, "PRECOMBAT_DIRECT" );',
-        count=2)
+        "              sequence_add( action, action->target );",
+        '              sequence_add( action, action->target, "PRECOMBAT_DIRECT" );')
+    out[name]=replace_exact(out[name],
+        "            sequence_add( action, action->target );",
+        '            sequence_add( action, action->target, "PRECOMBAT_DIRECT" );')
     out[name]=replace_exact(out[name],
         "        sequence_add( action, action->target );",
         '        sequence_add( action, action->target, "FOREGROUND_EXECUTE_ACTION" );',
