@@ -1,0 +1,208 @@
+{
+  "schema": "ZrotBranchSimcReadinessSourceGapV1",
+  "owner": "BR-SIMC-APL-BOOTSTRAP",
+  "authority": "SOURCE_PINNED_BRANCH_HYPOTHESIS_ONLY",
+  "research_git_code_sha": "d43374850c51420ffea82f934ffd7684faf6b414",
+  "native_evidence_run_id": 41084262760,
+  "simc_upstream_commit": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
+  "source_pins": {
+    "common_action": "engine/action/action.cpp@399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4",
+    "warrior": "engine/class_modules/sc_warrior.cpp@275a56a140f6800030b61df6958ee50b48c32821",
+    "demon_hunter": "engine/class_modules/sc_demon_hunter.cpp@d7ee195c60e83f48cca16400a51bd3f68c94b710",
+    "fury_profile": "profiles/MID2/MID2_Warrior_Fury.simc@3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+    "havoc_profile": "profiles/MID2/MID2_Demon_Hunter_Havoc.simc@9cab6566a655df9cf1d73bb92e7173ed1e708a25",
+    "generic_provider": "tools/research/simc_apl_readiness_provider.py@e59d2ea46455fc3e764daddd0abc3a8b6cce4c0c"
+  },
+  "current_provider_schema": "ZrotGenericReadinessRequirementsV1",
+  "provider_mandatory_dimensions": [
+    "ability_learned",
+    "cooldown_or_charge",
+    "resource",
+    "gcd",
+    "cast_state",
+    "movement",
+    "range",
+    "target"
+  ],
+  "provider_rejects_undeclared_dimensions": true,
+  "readiness_outcome": "UNKNOWN",
+  "readiness_tokens_certified": 0,
+  "readiness_tokens_in_existing_four_profile_inventory": 90,
+  "user_if_else_promotion": false,
+  "game_patch_verified": false,
+  "source_only_no_wcl": "WCL_BLIND_DISCOVERY_NOT_RUN_IN_THIS_BRANCH",
+  "candidate_actions": [
+    {
+      "spec": "fury",
+      "action": "rampage",
+      "effective_apl_sha256": "98635a684638d241000c0f9b3a78b9eb43d9579b522f864b8aaf5ebaa159e737",
+      "profile_build": "PINNED_MID2_PUBLIC_PROFILE_ONLY",
+      "root_list_gate": {
+        "source_line": 58,
+        "condition": "talent.slayers_dominance&active_enemies=1",
+        "source_scope": "PROFILE_TEXT_NOT_LIVE_BUILD_CERTIFICATION"
+      },
+      "observed_direct_if_rows": [
+        {
+          "list": "slayer",
+          "ordinal": 3,
+          "profile_source_line": 65,
+          "guard": "buff.recklessness.up&rage>=100",
+          "actual_native_bare_eval": 48,
+          "guard_true": 13,
+          "guard_false": 35
+        },
+        {
+          "list": "slayer",
+          "ordinal": 13,
+          "profile_source_line": 75,
+          "guard": "rage>100",
+          "actual_native_bare_eval": 7,
+          "guard_true": 4,
+          "guard_false": 3
+        }
+      ],
+      "other_source_priority_rows_note": "Slayer list also contains earlier and later rampage rows with different guards; all higher-priority actions need PRE readiness/guard status before choosing a row.",
+      "common_predicate_sources": [
+        "action_t::ready",
+        "action_t::action_ready"
+      ],
+      "extra_source_obligations": [
+        {
+          "id": "MAIN_AND_OFF_HAND_WEAPON",
+          "source_symbol": "rampage_parent_t::ready",
+          "source_truth": "Both hands require a non-WEAPON_NONE equipped weapon",
+          "required_state": [
+            "equipment.main_hand_weapon_type",
+            "equipment.off_hand_weapon_type"
+          ],
+          "live_status": "UNKNOWN"
+        },
+        {
+          "id": "DYNAMIC_RESOURCE_COST",
+          "source_symbol": "rampage_parent_t::cost",
+          "source_truth": "Conditional extra rage cost when rampaging_berserker_2 talent and recklessness buff are active",
+          "required_state": [
+            "talent.rampaging_berserker_2",
+            "buff.recklessness",
+            "action.rampage_actual_cost",
+            "resource.rage"
+          ],
+          "live_status": "UNKNOWN"
+        }
+      ],
+      "conditional_warning": "Source guard rage>=100 or rage>100 is NOT a certified resource affordability threshold. At rage exactly 100 these source guards differ; readiness still UNKNOWN."
+    },
+    {
+      "spec": "havoc",
+      "action": "felblade",
+      "effective_apl_sha256": "bee79d14337f12b7c98fdb426849480342f7292d3da0cb60e8a805883d65a995",
+      "profile_build": "PINNED_MID2_PUBLIC_PROFILE_ONLY",
+      "observed_direct_if_rows": [
+        {
+          "list": "default",
+          "ordinal": 26,
+          "profile_source_line": 64,
+          "guard": "hero_tree.felscarred&fury<=100",
+          "actual_native_bare_eval": 3,
+          "guard_true": 3,
+          "guard_false": 0
+        }
+      ],
+      "source_only_other_rows": [
+        {
+          "profile_source_line": 58,
+          "guard": "buff.inertia_trigger.up",
+          "native_direct_bare_fury_proof": "NOT_OBSERVED"
+        },
+        {
+          "profile_source_line": 66,
+          "guard": null,
+          "native_direct_bare_fury_proof": "NOT_APPLICABLE_NO_IF"
+        }
+      ],
+      "common_predicate_sources": [
+        "action_t::ready",
+        "action_t::action_ready"
+      ],
+      "extra_source_obligations": [
+        {
+          "id": "SHARED_MOVEMENT_COOLDOWN",
+          "source_symbol": "felblade_t::ready",
+          "source_truth": "felblade_vengeful_retreat_movement_shared cooldown must not be down",
+          "required_state": [
+            "cooldown.felblade_vengeful_retreat_movement_shared"
+          ],
+          "live_status": "UNKNOWN"
+        },
+        {
+          "id": "DIRECTIONAL_MOVEMENT",
+          "source_symbol": "felblade_t constructor",
+          "source_truth": "movement_directionality TOWARDS for action_t::action_ready check",
+          "required_state": [
+            "player.movement_directionality",
+            "target.position_relation",
+            "action.felblade_has_movement_directionality"
+          ],
+          "live_status": "UNKNOWN"
+        }
+      ],
+      "conditional_warning": "Three original APL Felblade rows have different guards or none; resource guard alone is not skill priority, action eligibility or overall fallback."
+    }
+  ],
+  "common_source_obligations": [
+    {
+      "id": "ability_learned",
+      "source_source": "action_t::init verify_actor_spec/spell and class action constructor",
+      "state": "UNKNOWN_STRICT_PRE"
+    },
+    {
+      "id": "cooldown_or_charge",
+      "source_source": "action_t::ready cooldown->is_ready/internal_cooldown->down; action_t::action_ready line_cooldown",
+      "state": "UNKNOWN_STRICT_PRE"
+    },
+    {
+      "id": "resource",
+      "source_source": "action_t::ready cost_affordable; subclass can override cost",
+      "state": "UNKNOWN_STRICT_PRE"
+    },
+    {
+      "id": "gcd",
+      "source_source": "player action schedule and readiness context; not proven by source guard",
+      "state": "UNKNOWN_STRICT_PRE"
+    },
+    {
+      "id": "cast_state",
+      "source_source": "action_t::ready usable_while_casting/execute_time/gcd; action_t::action_ready further restrictions",
+      "state": "UNKNOWN_STRICT_PRE"
+    },
+    {
+      "id": "movement",
+      "source_source": "action_t::ready is_moving/usable_moving; action_t::action_ready directionality",
+      "state": "UNKNOWN_STRICT_PRE"
+    },
+    {
+      "id": "range",
+      "source_source": "action_t::action_ready select_target and target readiness; no live PRE range proof",
+      "state": "UNKNOWN_STRICT_PRE"
+    },
+    {
+      "id": "target",
+      "source_source": "action_t::action_ready select_target; source target requirement not live actor-target identity",
+      "state": "UNKNOWN_STRICT_PRE"
+    }
+  ],
+  "minimal_evidence_to_advance": [
+    "Verify action numeric identity, pinned talent/build and selected profile, not merely the specialization name",
+    "Independent STRICT PRE provenance of all applicable common and source-specific readiness dimensions, including observed or evidence-backed nonapplicability",
+    "Actual per-row ordered guard state and all earlier candidate action readiness; if UNKNOWN, block the IF/ELSE fallback",
+    "Preserve action-attempt/IF result separately from READY, selected and executed action",
+    "WCL blind cohort and candidate lock before receiving this SimC-derived row/threshold mapping",
+    "Blizzard official mechanic corroboration, appropriate replay and holdout before user-facing rule"
+  ],
+  "blocked_integration": "COMMON_PROVIDER_ONLY_8_DIMS_REJECTS_SPECIFIC_GATES_NO_WAIVER_OR_READY",
+  "lifecycle": "SOURCE_CANDIDATE_ONLY",
+  "source_rows_not_necessarily_full_effective_apl_mapping": true,
+  "missing_data_semantics": "UNKNOWN_NOT_NOT_READY",
+  "no_main_or_frozen_promotion": true
+}

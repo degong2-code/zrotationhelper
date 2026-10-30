@@ -4,8 +4,8 @@
   "owner": "RESEARCH_BRANCH",
   "repository": "degong2-code/zrotationhelper",
   "branch": "work/github-ci-bootstrap",
-  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V7.md",
-  "canonical_handoff_blob_sha": "359aac82b1135cc8b86442fc7b3e8dfeaf826aa2",
+  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V8.md",
+  "canonical_handoff_blob_sha": "ee9587a70d0f7639be7697744fe82763206622a2",
   "research_code_evidence_sha": "d43374850c51420ffea82f934ffd7684faf6b414",
   "github_main_observed_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
   "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
@@ -39,7 +39,7 @@
   "seq637_actual_local_result": "UNKNOWN",
   "seq578_and_frozen": "UNCHANGED_NO_PROMOTION",
   "shared_authoritative_state_mutated": false,
-  "next": "MINIMUM_READY_DIMENSIONS_IF_ELSE_CANDIDATE_WITH_WCL_BLIND_LOCK_INDEPENDENCE",
+  "next": "MAIN_SPEC_ADAPTER_READINESS_EXTRA_DIMENSION_COMPATIBILITY_AND_WCL_BLIND_LOCK",
   "verified_as_of": "2026-10-31",
   "source_route_audit_path": "docs/DEVELOPER_NOTE_PINNED_APL_BARE_RESOURCE_EVAL_REACHABILITY_20261031.md",
   "source_route_audit_blob_sha": "c348162d309155658fbddc9c2e715a2966b54f2d",
@@ -104,5 +104,13 @@
     "reason": "SUMMARY_POINTER_EVIDENCE_PATH_SHADOW"
   },
   "direct_if_guard_bare_eval_certified": 179,
-  "marker_only_replayable_artifact_retained": true
+  "marker_only_replayable_artifact_retained": true,
+  "source_readiness_gap_path": "docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json",
+  "source_readiness_gap_blob_sha": "e437da47d632737c9eacc3901c945590aff0308b",
+  "blind_safe_observability_request_path": "docs/BR_WCL_BLIND_SAFE_OBSERVABILITY_REQUEST_20261031.md",
+  "blind_safe_observability_request_blob_sha": "f3c93cc8fd4e8da5ad4db0444c4d64716ee2034a",
+  "readiness_source_obligation_status": "SOURCE_ONLY_8_COMMON_PLUS_SPECIFIC_EXTRAS_UNOBSERVED",
+  "readiness_adapter_missing_extra_dimension_coverage": "BLOCKED_MAIN_COMPATIBILITY",
+  "readiness_certified": 0,
+  "no_new_native_execution": true
 }
