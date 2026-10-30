@@ -28,6 +28,7 @@ from simc_native_select_resource_diagnostic_audit import compare_diagnostics
 from simc_native_epoch_sequence_audit import (
     parse_epoch_native_log, independent_epoch_audit, compare_epoch_bound_resources
 )
+from simc_native_bare_resource_eval_audit import audit as audit_native_bare_resource_eval
 from decimal import Decimal
 
 FIXTURES=(
@@ -207,6 +208,15 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
             if epoch_comparison["native_select_entry_count"]!=diagnostic[
                     "native_selection_entry_count"]:
                 raise ValueError("NATIVE_EPOCH_SELECT_DIAGNOSTIC_COUNT_MISMATCH")
+            bare_eval=audit_native_bare_resource_eval(
+                blobs[names[1]], receipt["native_log_sha256"])
+            if (bare_eval["source_log_sha256"]!=receipt["native_log_sha256"]
+                    or bare_eval["evaluations_inside_selection"]>
+                    bare_eval["native_evaluation_count"]
+                    or bare_eval["gameplay_rule_promotion"] is not False
+                    or bare_eval["eval_used_as_strict_pre"] is not False
+                    or bare_eval["certified_operand_values"]!=0):
+                raise ValueError("NATIVE_BARE_RESOURCE_EVAL_PRE_CERTIFICATION_LEAK")
             summaries.append({
                 "spec":spec,
                 "native_epoch_log_source_sha256":epoch["source_log_sha256"],
@@ -221,6 +231,13 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
                 "native_epoch_possible_gaps":epoch_comparison["potential_mismatch_examples"],
                 "native_epoch_selected_entry_count":epoch_comparison["native_select_entry_count"],
                 "native_epoch_snapshot_promoted_as_pre":False,
+                "native_bare_resource_eval_count":bare_eval["native_evaluation_count"],
+                "native_bare_resource_eval_within_selection":bare_eval["evaluations_inside_selection"],
+                "native_bare_resource_eval_resources":bare_eval["evaluated_resource_counts"],
+                "native_bare_resource_eval_outcomes":bare_eval["counts"],
+                "native_bare_resource_eval_examples":bare_eval["examples_max_25"],
+                "native_bare_resource_eval_source_row_identity":"UNKNOWN",
+                "native_bare_resource_eval_strict_pre_certified":False,
                 "select_resource_diagnostic_log_sha256":diagnostic["source_log_sha256"],
                 "select_resource_diagnostic_audit":diagnostic[
                     "source_selection_diagnostic_audit"]["status"],
