@@ -139,6 +139,7 @@ def compile_structural_ir(source_model: dict) -> dict:
         node = {
             "id": f"{list_name}:{rank}",
             "source_line": line,
+            "source_empty_option_slots_ignored": raw.get("ignored_empty_option_slots",0),
             "list_name": list_name,
             "priority_in_list": rank,
             "operation": kind,
@@ -171,6 +172,8 @@ def compile_structural_ir(source_model: dict) -> dict:
         "priority_entry_list":"default",
         "precombat_is_distinct": "precombat" in nodes,
         "total_rows":sum(len(r) for r in nodes.values()),
+        "source_empty_option_slots_ignored":sum(n["source_empty_option_slots_ignored"]
+                                                  for rows in nodes.values() for n in rows),
         "condition_expression_diagnostics":dict(syntax),
         "required_state_operands":sorted(all_features),
         "semantic_gap_count_by_row":dict(sorted(gap.items(),key=lambda kv:(-kv[1],kv[0]))),
