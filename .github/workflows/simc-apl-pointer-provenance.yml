@@ -18,6 +18,8 @@ on:
       - "tools/research/simc_native_epoch_sequence_instrument.py"
       - "tools/research/simc_native_epoch_sequence_audit.py"
       - "tools/research/simc_native_reset_boundary_instrument.py"
+      - "tools/research/simc_native_bare_resource_eval_instrument.py"
+      - "tools/research/simc_native_bare_resource_eval_audit.py"
       - ".github/workflows/simc-apl-pointer-provenance.yml"
   workflow_dispatch:
 
@@ -53,6 +55,8 @@ jobs:
           python tools/research/simc_native_epoch_sequence_instrument.py --self-test
           python tools/research/simc_native_epoch_sequence_audit.py --self-test
           python tools/research/simc_native_reset_boundary_instrument.py --self-test
+          python tools/research/simc_native_bare_resource_eval_instrument.py --self-test
+          python tools/research/simc_native_bare_resource_eval_audit.py --self-test
       - name: Checkout exact upstream SimulationCraft source
         shell: bash
         run: |
@@ -84,6 +88,8 @@ jobs:
           test -s "$RUNNER_TEMP/simc-epoch-source-receipt.json"
           python tools/research/simc_native_reset_boundary_instrument.py --upstream-root "$RUNNER_TEMP/simc-pinned" > "$RUNNER_TEMP/simc-reset-clock-epoch-receipt.json"
           test -s "$RUNNER_TEMP/simc-reset-clock-epoch-receipt.json"
+          python tools/research/simc_native_bare_resource_eval_instrument.py --upstream-root "$RUNNER_TEMP/simc-pinned" > "$RUNNER_TEMP/simc-bare-resource-eval-source-receipt.json"
+          test -s "$RUNNER_TEMP/simc-bare-resource-eval-source-receipt.json"
       - name: Compile separate research-only source binary (no game changes)
         shell: bash
         run: |
@@ -93,7 +99,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
           cmake --build "$RUNNER_TEMP/simc-pinned-build" --target simc -j 2
           test -s "$RUNNER_TEMP/simc-pinned-build/simc"
-      - name: Run three public profiles and audit action origins plus real native resource mutations
+      - name: Run four pinned profiles; compare source-native evaluation with epoch PRE
         shell: bash
         env:
           PROVENANCE_SUMMARY: ${{ runner.temp }}/zrot-pointer-provenance-summary.json
@@ -118,5 +124,6 @@ jobs:
             ${{ runner.temp }}/simc-select-resource-diagnostic-receipt.json
             ${{ runner.temp }}/simc-epoch-source-receipt.json
             ${{ runner.temp }}/simc-reset-clock-epoch-receipt.json
+            ${{ runner.temp }}/simc-bare-resource-eval-source-receipt.json
           if-no-files-found: error
           retention-days: 7
