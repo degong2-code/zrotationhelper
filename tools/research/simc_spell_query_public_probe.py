@@ -24,10 +24,12 @@ from simc_apl_conditional_ir import compile_structural_ir
 from simc_apl_observability_contract import compile_requirements
 from simc_apl_semantic_resolver import compile_semantic_route_plan
 from simc_spell_query_catalog import build_catalog,make_query_plan,sha,link_catalog_candidates_to_route
+from simc_spell_query_scope_filter import parse_pinned_profile_scope,assess_candidate_scope
 
 IMAGE="simulationcraftorg/simc@sha256:a6cfbc243456825d2dbecd607fe025948680219f4b4348603ed77a081b5f5895"
 PUBLIC_FIXTURES=(("enhancement","MID2_Shaman_Enhancement"),
-                 ("fury","MID2_Warrior_Fury"))
+                 ("fury","MID2_Warrior_Fury"),
+                 ("unholy","MID2_Death_Knight_Unholy"))
 
 
 def run_docker(*args,capture=True):
@@ -51,6 +53,8 @@ def run():
             profile=run_docker("--entrypoint","cat",IMAGE,
                                f"/app/SimulationCraft/profiles/MID2/{profile_stem}.simc")
             profile_sha=sha(profile)
+            scope=parse_pinned_profile_scope(profile,expected_spec=spec,
+                                             expected_profile_sha256=profile_sha)
             model=ingest_actions(profile,expected_spec=spec,
                                  profile_sha256=profile_sha,
                                  simc_executable_sha256=binary_sha,
@@ -79,6 +83,11 @@ def run():
                                   image_digest=IMAGE.split("@",1)[1],
                                   query_blobs=blobs,query_sha256=hashes)
             joined=link_catalog_candidates_to_route(route,catalog)
+            scoped=assess_candidate_scope(route,catalog,scope)
+            if scoped["total_candidates_preserved"]!=scoped["total_name_candidates"]:
+                raise AssertionError("CANDIDATE_SCOPE_EVIDENCE_LOSS")
+            if scoped["all_readiness"]!="UNKNOWN" or not scoped["all_action_spell_ids_uncertified"]:
+                raise AssertionError("SCOPE_FALSIFIED_GAMEPLAY_AUTHORITY")
             if catalog["source_query_token_count"]!=5:
                 raise AssertionError("PUBLIC_SAMPLE_QUERY_COUNT_NOT_MET")
             statuses=Counter(r["resolution_status"] for r in catalog["spell_query_results"])
@@ -86,6 +95,21 @@ def run():
                 "spec":spec,"source_profile_sha256":profile_sha,
                 "source_apl_sha256":model["apl_sha256"],
                 "source_row_count":model["apl_row_count"],
+                "actor_class_token":scope["actor_class_token"],
+                "talent_directive_count":scope["talent_directive_count"],
+                "talent_directives_sha256":scope["talent_directives_sha256"],
+                "scope_positive_candidate_count":scoped["total_explicit_scope_support_candidates"],
+                "scope_class_nonmatch_candidate_count":scoped["total_class_nonmatch_candidates"],
+                "scope_status_counts":scoped["scope_status_counts"],
+                "scope_candidate_retained_count":scoped["total_candidates_preserved"],
+                "scope_query_details":[{
+                    "query_token":r["action_token"],
+                    "original_name_candidate_count":len(r["original_candidate_ids"]),
+                    "explicitly_scope_supported_count":len(r["explicitly_supported_candidate_ids"]),
+                    "class_nonmatch_count":len(r["class_nonmatch_candidate_ids"]),
+                    "all_candidate_ids_retained":r["every_candidate_retained_for_review"],
+                } for r in scoped["action_candidate_scope_assessments"]
+                  if r["action_token"] in request["selected_query_tokens"]],
                 "selected_action_tokens":request["selected_query_tokens"],
                 "query_result_summary":dict(sorted(statuses.items())),
                 "source_action_requirements_count":joined["route_action_count"],
@@ -119,10 +143,10 @@ def run():
         "gameplay_rule_promotion":False,
         "private_raw_artifacts_uploaded":False,
     }
-    assert report["total_query_count"]==10
+    assert report["total_query_count"]==15
     summary_path=os.environ.get("ZROT_PUBLIC_CATALOG_SUMMARY")
     rendered=json.dumps(report,sort_keys=True,indent=2)+"\n"
-    print("PINNED_SIMC_PUBLIC_DBC_SPELL_QUERY_NATIVE=PASS QUERIES=10 SPECS=2")
+    print("PINNED_SIMC_PUBLIC_DBC_SPELL_QUERY_NATIVE=PASS QUERIES=15 SPECS=3")
     print(rendered)
     if summary_path:
         Path(summary_path).write_text(rendered,encoding="utf-8")
