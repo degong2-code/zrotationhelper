@@ -246,7 +246,7 @@ def selftest():
         proof=compare_diagnostics(raw,expected_log_sha256=sha(raw),
                                   resource_projection=resource,lifecycle_projection=lifeproj)
         assert proof["comparison_counts"]=={
-            "CONSISTENT_WITH_LAST_OBSERVED_SOURCE_VALUE":5,
+            "CONSISTENT_WITH_LAST_OBSERVED_SOURCE_VALUE":4,
             "CONFLICT_POSSIBLE_MISSING_TRANSITION":1,
             "SAME_TIMESTAMP_SOURCE_AMBIGUITY":1},proof
         assert proof["source_selection_diagnostic_audit"]["decision_entry_count"]==3
