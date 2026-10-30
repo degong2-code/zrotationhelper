@@ -4,9 +4,9 @@
   "owner": "RESEARCH_BRANCH",
   "repository": "degong2-code/zrotationhelper",
   "branch": "work/github-ci-bootstrap",
-  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V9.md",
-  "canonical_handoff_blob_sha": "8a7b96b9ed6e4a61b3177fe0cfcef5f44aca5730",
-  "research_code_evidence_sha": "a1629b3373eb1f47124e14cb133b75796eee23a5",
+  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V10.md",
+  "canonical_handoff_blob_sha": "8c2453a51ff9603462844374e4659398e9f84874",
+  "research_code_evidence_sha": "9b2f92091af1bb19f96d5090fd3f408ca8f90ce3",
   "github_main_observed_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
   "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
   "actual_native_eval_ci": {
@@ -39,7 +39,7 @@
   "seq637_actual_local_result": "UNKNOWN",
   "seq578_and_frozen": "UNCHANGED_NO_PROMOTION",
   "shared_authoritative_state_mutated": false,
-  "next": "MAIN_SPEC_ADAPTER_READINESS_COVERAGE_COMPATIBILITY_DECISION",
+  "next": "REUSABLE_ARCHIVED_MARKER_AND_MATCHED_EFFECTIVE_APL_ID_EVIDENCE_FEASIBILITY",
   "verified_as_of": "2026-10-31",
   "source_route_audit_path": "docs/DEVELOPER_NOTE_PINNED_APL_BARE_RESOURCE_EVAL_REACHABILITY_20261031.md",
   "source_route_audit_blob_sha": "c348162d309155658fbddc9c2e715a2966b54f2d",
@@ -130,5 +130,21 @@
   "source_coverage_audit": "PASS_SYNTHETIC_EVIDENCE_ONLY",
   "app_gameplay_ready_certified": 0,
   "new_native_validation": "NOT_RUN",
-  "live_wcl": "NOT_RUN"
+  "live_wcl": "NOT_RUN",
+  "native_action_id_source_note_path": "docs/DEVELOPER_NOTE_NATIVE_ACTION_OBJECT_ID_20261031.md",
+  "native_action_id_source_note_blob_sha": "c645375e4bd9ebffa66486f588a1e58cf1db0236",
+  "native_action_id_audit_script_path": "tools/research/simc_native_pointer_action_id_consistency.py",
+  "native_action_id_audit_script_blob_sha": "25f323f260e153cdaec7a9965c36a6d30e238c0f",
+  "native_action_id_ci": {
+    "run_id": 41096210210,
+    "conclusion": "success",
+    "code_sha": "9b2f92091af1bb19f96d5090fd3f408ca8f90ce3",
+    "scope": "SYNTHETIC_ONLY"
+  },
+  "historical_failed_ci_ids": [
+    41095848633,
+    41096036252
+  ],
+  "actual_numeric_game_action_id_certified": 0,
+  "source_owned_id_replay_actual_archived_marker": "NOT_RUN"
 }
