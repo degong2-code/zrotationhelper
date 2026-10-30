@@ -16,6 +16,7 @@ from pathlib import Path
 import re
 
 MARK="ZROT_NATIVE_EVENT_V2|"
+RESET="ZROT_NATIVE_RESET_BOUNDARY_V1|"
 KINDS={"GAIN","LOSS","INIT","RECALC","SELECT_BEGIN","SELECT_END"}
 NUMBER=r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
 REGEX=re.compile(
@@ -74,6 +75,23 @@ def parse_epoch_native_log(raw:bytes,expected_sha256:str)->dict:
     if sha(raw)!=expected_sha256:raise ValueError("EPOCH_NATIVE_LOG_SHA_MISMATCH")
     if not raw.endswith(b"\n"):raise ValueError("EPOCH_NATIVE_LOG_FINAL_NEWLINE")
     lines=raw.splitlines()
+    reset_boundaries=[]
+    for i,line in enumerate(lines):
+        if RESET.encode() not in line:continue
+        text=line.decode("utf-8")
+        if text.count(RESET)!=1:
+            raise ValueError("EPOCH_RESET_DUPLICATE_MARKER")
+        fields=text.split(RESET,1)[1].strip().split("|")
+        if len(fields)!=4:
+            raise ValueError("EPOCH_RESET_SOURCE_FIELDS")
+        thread,iteration,sequence,old_clock=map(int,fields)
+        if thread<0 or sequence<0:
+            raise ValueError("EPOCH_RESET_INVALID_COUNTER")
+        reset_boundaries.append({
+            "thread":thread,"iteration":iteration,"sequence":sequence,
+            "previous_clock_ms":old_clock,"source_log_line":i+1})
+    if not reset_boundaries:
+        raise ValueError("EPOCH_RESET_SOURCE_BOUNDARY_NOT_OBSERVED")
     events=[]
     seen=set()
     seen_legacy=set()
@@ -106,6 +124,10 @@ def parse_epoch_native_log(raw:bytes,expected_sha256:str)->dict:
             "time_ms":t,"actor":actor,"spawn":spawn,"resource":res,
             "current":cur,"maximum":mx,"v2_log_line":i+1,
             "v1_log_line":i+2,
+            "reset_boundary_sequence":max(
+                (r["sequence"] for r in resets if r["thread"]==thread
+                 and r["iteration"]==iteration and r["sequence"]<seq),
+                default=None),
         }
         _check_legacy(event,legacy)
         if i+1 in seen_legacy:
@@ -113,6 +135,16 @@ def parse_epoch_native_log(raw:bytes,expected_sha256:str)->dict:
         seen_legacy.add(i+1)
         events.append(event)
     if not events:raise ValueError("EPOCH_NO_V2_MARKERS")
+    for entry in events:
+        prior=[r["sequence"] for r in reset_boundaries if
+               r["thread"]==entry["thread"] and
+               r["iteration"]==entry["iteration"] and
+               r["sequence"]<entry["sequence"]]
+        entry["reset_boundary_sequence"]=max(prior) if prior else None
+    all_counters=[(r["thread"],r["sequence"]) for r in reset_boundaries]
+    all_counters.extend((e["thread"],e["sequence"]) for e in events)
+    if len(set(all_counters))!=len(all_counters):
+        raise ValueError("EPOCH_RESET_SOURCE_SEQUENCE_COLLISION")
     # Legacy source hooks are all required to carry corresponding V2 stamps,
     # and every selected V1 diagnostic group must be associated with an epoch.
     legacy_positions={i for i,line in enumerate(lines)
@@ -124,6 +156,8 @@ def parse_epoch_native_log(raw:bytes,expected_sha256:str)->dict:
         "source_log_sha256":expected_sha256,
         "event_count":len(events),
         "events":events,
+        "reset_boundaries":reset_boundaries,
+        "reset_boundary_count":len(reset_boundaries),
         "source_threads":sorted({e["thread"] for e in events}),
         "source_iterations":sorted({(e["thread"],e["iteration"]) for e in events}),
         "source_actor_spawns":sorted({(e["actor"],e["spawn"]) for e in events}),
@@ -140,7 +174,21 @@ def independent_epoch_audit(raw:bytes,produced:dict)->dict:
         sha(raw)!=produced.get("source_log_sha256")):
         raise ValueError("EPOCH_INDEPENDENT_SOURCE_MISMATCH")
     expected=[]
+    resets=[]
     all_lines=raw.splitlines()
+    for i,line in enumerate(all_lines):
+        text=line.decode("utf-8")
+        if RESET not in text:continue
+        if text.count(RESET)!=1:
+            raise ValueError("EPOCH_INDEPENDENT_DUPLICATE_RESET")
+        args=text.split(RESET,1)[1].strip().split("|")
+        if len(args)!=4:
+            raise ValueError("EPOCH_INDEPENDENT_RESET_FIELDS")
+        a,b,c,d=map(int,args)
+        resets.append({"thread":a,"iteration":b,"sequence":c,
+                       "previous_clock_ms":d,"source_log_line":i+1})
+    if resets!=produced.get("reset_boundaries") or len(resets)!=produced.get("reset_boundary_count"):
+        raise ValueError("EPOCH_INDEPENDENT_RESET_PROJECTION_DIVERGENCE")
     for i,blob in enumerate(all_lines):
         text=blob.decode("utf-8")
         if MARK not in text:continue
@@ -167,7 +215,9 @@ def independent_epoch_audit(raw:bytes,produced:dict)->dict:
     if expected!=produced.get("events") or len(expected)!=produced.get("event_count"):
         raise ValueError("EPOCH_INDEPENDENT_PROJECTION_DIVERGENCE")
     keys={(v["thread"],v["sequence"]) for v in expected}
-    if len(keys)!=len(expected):raise ValueError("EPOCH_INDEPENDENT_DUPLICATE_SOURCE_SEQUENCE")
+    keys.update((r["thread"],r["sequence"]) for r in resets)
+    if len(keys)!=len(expected)+len(resets):
+        raise ValueError("EPOCH_INDEPENDENT_DUPLICATE_SOURCE_SEQUENCE")
     return {
         "status":"PASS_EPOCH_NATIVE_SOURCE_BYTES_INDEPENDENT_RECALC",
         "event_count":len(expected),"source_log_sha256":sha(raw),
@@ -187,7 +237,7 @@ def compare_epoch_bound_resources(raw:bytes,projection:dict)->dict:
     history=defaultdict(list)
     for e in events:
         if e["kind"] not in ("INIT","RECALC","GAIN","LOSS"):continue
-        ep=(e["thread"],e["iteration"],e["actor"],e["spawn"])
+        ep=(e["thread"],e["iteration"],e["reset_boundary_sequence"],e["actor"],e["spawn"])
         history[(ep,e["resource"])].append(e)
     for rows in history.values():rows.sort(key=lambda x:x["sequence"])
     counts=Counter()
@@ -198,8 +248,8 @@ def compare_epoch_bound_resources(raw:bytes,projection:dict)->dict:
         end=ends.get(group["end_line"])
         if begin is None or end is None:
             raise ValueError("EPOCH_SELECTION_GROUP_NO_NATIVE_SOURCE_STAMP")
-        ep=(begin["thread"],begin["iteration"],begin["actor"],begin["spawn"])
-        if (ep!=(end["thread"],end["iteration"],end["actor"],end["spawn"]) or
+        ep=(begin["thread"],begin["iteration"],begin["reset_boundary_sequence"],begin["actor"],begin["spawn"])
+        if (ep!=(end["thread"],end["iteration"],end["reset_boundary_sequence"],end["actor"],end["spawn"]) or
             begin["sequence"]>=end["sequence"] or
             begin["time_ms"]!=group["timestamp_ms"] or
             (begin["actor"],begin["spawn"])!=(
@@ -214,6 +264,9 @@ def compare_epoch_bound_resources(raw:bytes,projection:dict)->dict:
             records=history.get((ep,resource),[])
             for metric in ("current","max"):
                 actual=metric_row["current" if metric=="current" else "max"]
+                if begin["reset_boundary_sequence"] is None:
+                    counts["UNKNOWN_NO_NATIVE_RESET_CLOCK_EPOCH"]+=1
+                    continue
                 same=[e for e in records if e["time_ms"]==begin["time_ms"]]
                 older_seq_later_clock=[e for e in records if
                      e["sequence"]<begin["sequence"] and
@@ -287,9 +340,11 @@ def selftest():
                 (f"ZROT_NATIVE_SELECT_RESOURCE_VALUE_V1|{t}|0|1|"
                  f"rage|{cur}|100\n").encode()+
                 event("SELECT_END",seq+1,t,iteration=iteration))
-    raw=event("INIT",0,0)+diag(10,10,seq=1)+event(
-        "GAIN",3,20,cur=20)+diag(30,20,seq=4)+event(
-        "INIT",6,0,iteration=1,cur=77)+diag(10,77,iteration=1,seq=7)
+    def reset(iteration,seq):
+        return f"ZROT_NATIVE_RESET_BOUNDARY_V1|0|{iteration}|{seq}|0\\n".encode()
+    raw=reset(0,0)+event("INIT",1,0)+diag(10,10,seq=2)+event(
+        "GAIN",4,20,cur=20)+diag(30,20,seq=5)+reset(1,7)+event(
+        "INIT",8,0,iteration=1,cur=77)+diag(10,77,iteration=1,seq=9)
     parsed=parse_epoch_native_log(raw,sha(raw))
     independent=independent_epoch_audit(raw,parsed)
     assert independent["event_count"]==9
@@ -297,17 +352,17 @@ def selftest():
     assert checked["comparison_counts"]=={"CONSISTENT_PRIOR_SOURCE_VALUE":6},checked
     # Later printed earlier time from a different iteration never contaminates
     # earlier decisions; each legitimate source and decision shares epoch.
-    polluted=raw+event("INIT",9,0,iteration=2,cur=999)
+    polluted=raw+event("INIT",11,0,iteration=2,cur=999)
     assert compare_epoch_bound_resources(
         polluted,parse_epoch_native_log(polluted,sha(polluted)))["comparison_counts"]=={
         "CONSISTENT_PRIOR_SOURCE_VALUE":6}
     # A same-millisecond source is excluded independent of sequence order.
-    equal=event("INIT",0,10)+diag(10,10,seq=1)
+    equal=reset(0,0)+event("INIT",1,10)+diag(10,10,seq=2)
     checked=compare_epoch_bound_resources(equal,parse_epoch_native_log(equal,sha(equal)))
     assert checked["comparison_counts"]=={"SAME_TIMESTAMP_NOT_STRICT_PRE":2}
     # A source with timestamp earlier but sequence after the diagnostic is
     # never incorrectly used as a causal PRE transition.
-    conflict=diag(10,10,seq=0)+event("INIT",2,0,cur=10)
+    conflict=reset(0,0)+diag(10,10,seq=1)+event("INIT",3,0,cur=10)
     checked=compare_epoch_bound_resources(
         conflict,parse_epoch_native_log(conflict,sha(conflict)))
     assert checked["comparison_counts"]=={"NATIVE_SEQUENCE_TIMESTAMP_CONTRADICTION":2}
@@ -315,7 +370,7 @@ def selftest():
     try:parse_epoch_native_log(tampered,sha(tampered))
     except ValueError as e:assert str(e)=="EPOCH_LEGACY_KIND_OR_RESOURCE_DIVERGENCE"
     else:raise AssertionError("EPOCH_MISMATCH_LEGACY_ACCEPTED")
-    bad_seq=raw.replace(b"SELECT_BEGIN|0|0|1|10",b"SELECT_BEGIN|0|0|0|10")
+    bad_seq=raw.replace(b"SELECT_BEGIN|0|0|2|10",b"SELECT_BEGIN|0|0|1|10")
     try:parse_epoch_native_log(bad_seq,sha(bad_seq))
     except ValueError as e:assert str(e)=="EPOCH_NATIVE_DUPLICATE_SEQUENCE"
     else:raise AssertionError("EPOCH_DUPLICATE_SEQUENCE_ACCEPTED")
