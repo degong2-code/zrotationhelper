@@ -12,6 +12,8 @@ on:
       - "tools/research/simc_apl_observability_contract.py"
       - "tools/research/simc_apl_semantic_resolver.py"
       - "tools/research/simc_strict_pre_source_bridge.py"
+      - "tools/research/simc_raw_transition_adapter.py"
+      - "tools/research/simc_raw_transition_independent_audit.py"
       - "tools/research/simc_graph_shared_runtime_regression.py"
       - ".github/workflows/simc-public-source-coverage.yml"
   workflow_dispatch:
@@ -36,6 +38,8 @@ jobs:
           python tools/research/simc_apl_observability_contract.py --self-test
           python tools/research/simc_apl_semantic_resolver.py --self-test
           python tools/research/simc_strict_pre_source_bridge.py --self-test
+          python tools/research/simc_raw_transition_adapter.py --self-test
+          python tools/research/simc_raw_transition_independent_audit.py
           python tools/research/simc_graph_shared_runtime_regression.py
           REV="710c2408bfd3ae4df71b8cd55cdf01f63fd6c926"
           for entry in "enhancement MID2_Shaman_Enhancement" "fury MID2_Warrior_Fury" "unholy MID2_Death_Knight_Unholy" "havoc MID2_Demon_Hunter_Havoc"; do
@@ -213,4 +217,47 @@ jobs:
               assert r["non_synthetic_readiness_all_unknown"]
               print("PUBLIC_SIMC_SOURCE_PRE_BRIDGE="+spec+" STATUS=BLOCKED"
                     " OBSERVED_OPERANDS=0 CLAIM=SYNTHETIC_EMPTY_STATE_ONLY")
+          PY
+
+          python - <<'PY'
+          # Four real pinned SimC APLs, but ONLY synthetic raw feature-change
+          # lines. No source identity mapping, no observed native PRE or readiness:
+          # every playback MUST block; SHA projection is independently checked.
+          import hashlib,json,os,sys
+          from pathlib import Path
+          sys.path.insert(0,"tools/research")
+          from simc_raw_transition_adapter import replay_from_raw
+          root=Path(os.environ["RUNNER_TEMP"])
+          for spec in ("enhancement","fury","unholy","havoc"):
+              model=json.loads((root/f"{spec}-model.json").read_text())
+              event={
+                  "event_kind":"FEATURE_TRANSITION","event_id":"synthetic-marker",
+                  "timestamp_ms":700,"sequence":0,
+                  "feature_key":"synthetic_marker_only","value":7,
+                  "scope":"ACTOR","valid":True,
+              }
+              raw=(json.dumps(event,sort_keys=True)+"\n").encode()
+              capture={
+                  "schema":"ZrotGenericRawFeatureTransitionCaptureV1",
+                  "spec":spec,"source_apl_sha256":model["apl_sha256"],
+                  "source_profile_sha256":model.get("profile_sha256"),
+                  "source_simc_executable_sha256":model.get("simc_executable_sha256"),
+                  "capture_kind":"SYNTHETIC_FEATURE_TRANSITIONS",
+                  "capture_ref":"test:ci:"+spec,
+                  "source_authority":"CALLER_SUPPLIED_UNVERIFIED",
+                  "source_event_semantics":"FEATURE_CHANGE_NOT_SNAPSHOT",
+                  "source_sha256":hashlib.sha256(raw).hexdigest(),
+                  "source_bytes":len(raw),"gameplay_rule_promotion":False,
+              }
+              check=replay_from_raw(
+                  model,capture,raw,decision_timestamp_ms=1000,
+                  operand_to_feature={})
+              assert check["independent_raw_recalculation"]["raw_record_count"]==1
+              assert check["strict_pre_replay"]["trace_status"]=="BLOCKED"
+              assert check["strict_pre_replay"]["trace_candidate_action_token"] is None
+              assert check["strict_pre_replay"]["native_simc_decision_time_state"]=="NOT_CAPTURED"
+              assert check["gameplay_rule_promotion"] is False
+              print("PUBLIC_SIMC_RAW_EVENT_PRE_BOUNDARY="+spec+
+                    " RAW_RECALC=PASS RECOMMENDATION=NONE"
+                    " STATE=UNTRUSTED_SYNTHETIC_ONLY")
           PY
