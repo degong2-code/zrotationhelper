@@ -33,3 +33,23 @@ This is an **evidence join** for only instrumented resource source sites; it doe
 4. A future **new** build/spec holdout plus independent WCL candidate lock and Blizzard mechanic check are needed before any playable IF/ELSE rule can be promoted.
 
 The user has no local PyCharm steps. MAIN only owns canonical pointers and shared FROZEN state. No production/runtime gameplay rules updated.
+
+
+## Empirical V2 source run and reset-boundary successor
+
+Initial **Native monotonic sequence run** [41053700577](https://github.com/degong2-code/zrotationhelper/actions/runs/41053700577) **SUCCESS**: compiled source SHA-pinned SimC, all three Native profile runs, old V1 resource/action provenance retained, V2 raw source marker reconciliation independently PASS. Executable SHA256 `31b0f6d5e27def3c7d410cd0707052e19491e47250ba4a2591f703977d1e6b00`.
+
+| Profile | Source-stamped V2 events | thread/iteration | Sequence vs timestamp contradictory comparison fields | Same-time fields |
+| --- | ---: | --- | ---: | ---: |
+| Enhancement | 305 | `[0,0]` | 366 | 18 |
+| Fury | 536 | `[0,0]` | 640 | 32 |
+| Unholy | 283 | `[0,0]` | 384 | 12 |
+| **Total** | **1,124** | — | **1,390** | **62** |
+
+This proves genuine **runtime source emission sequence**, not causally consistent join. All resource and select-entry samples carried the **same** SimC `current_iteration=0` in each profile's log. However genuine source events with timestamp earlier than a decision had a later runtime emission sequence. The result confirms that **thread+iteration+actor/spawn is not enough to establish a continuous event clock epoch**; same iteration can contain additional reset/initialization or other time-base changes. The 1,390 contradictions are UNKNOWN, not confirmed resource write conflicts. Do not count them as priority mismatches or try to fix by moving event timestamps.
+
+**Successor minimal source addition** `tools/research/simc_native_reset_boundary_instrument.py`: patches pinned `engine/sim/sim.cpp::sim_t::reset()` to emit `ZROT_NATIVE_RESET_BOUNDARY_V1|thread|current_iteration|source_sequence|previous_clock_ms` **before** the native event manager reset. It increments the SAME `sim_t` monotonic counter as resource/selection stamps. No post-hoc log-line time sorting. Each V2 source event is now paired with the latest preceding source-stamped reset boundary **within the same thread and iteration**. This yields a reset-boundary-specific epoch key `(source_log_sha, thread, current_iteration, reset_boundary_sequence, actor, spawn)`; no reset boundary means UNKNOWN. The independently reimplemented parser verifies all reset fields/sequence uniqueness and rejects missing boundaries, tampering, same-iteration clock resets, same-ms leakage and cross-boundary state carry. This improves evidence linkage but still does not assert all state mutations are instrumented.
+
+**New Native run** [41054849471](https://github.com/degong2-code/zrotationhelper/actions/runs/41054849471): pending at the initial note update; confirm its conclusion, report counts of reset boundaries, cross-epoch same-time ambiguities and certified current/max comparisons before recording PASS. The original V2 run's C++ success cannot substitute for this new reporter.
+
+**Boundary requirement:** even if RESET-stamped pairs agree, that proves *consistency* of their observed current/max values in pinned SimC; not general readiness, optimality, Blizzard current Retail semantics, unrecorded direct writes or live WCL gameplay. More resource current/max transitions and optional native diagnostic counterfactual may be needed. The current Native log summaries are owner-branch evidence, not MAIN promotion.
