@@ -149,6 +149,7 @@ def audit(raw: bytes, expected_sha: str) -> dict:
     return dict(schema="ZrotNativeBareResourceRuntimeVsEpochStrictPreAuditV1",
                 source_log_sha256=expected_sha, native_evaluation_count=len(evals),
                 evaluations_inside_selection=in_window,
+                evaluated_resource_counts=dict(sorted(Counter(e["resource"] for e in evals).items())),
                 counts=dict(sorted(counts.items())), examples_max_25=examples,
                 independent_epoch_raw_audit=proof["status"],
                 source_row_identity="UNKNOWN",
