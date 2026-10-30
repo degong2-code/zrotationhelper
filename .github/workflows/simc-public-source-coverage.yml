@@ -11,6 +11,7 @@ on:
       - "tools/research/simc_apl_decision_graph.py"
       - "tools/research/simc_apl_observability_contract.py"
       - "tools/research/simc_apl_semantic_resolver.py"
+      - "tools/research/simc_strict_pre_source_bridge.py"
       - "tools/research/simc_graph_shared_runtime_regression.py"
       - ".github/workflows/simc-public-source-coverage.yml"
   workflow_dispatch:
@@ -34,6 +35,7 @@ jobs:
           python tools/research/simc_apl_decision_graph.py --self-test
           python tools/research/simc_apl_observability_contract.py --self-test
           python tools/research/simc_apl_semantic_resolver.py --self-test
+          python tools/research/simc_strict_pre_source_bridge.py --self-test
           python tools/research/simc_graph_shared_runtime_regression.py
           REV="710c2408bfd3ae4df71b8cd55cdf01f63fd6c926"
           for entry in "enhancement MID2_Shaman_Enhancement" "fury MID2_Warrior_Fury" "unholy MID2_Death_Knight_Unholy" "havoc MID2_Demon_Hunter_Havoc"; do
@@ -177,4 +179,38 @@ jobs:
           assert any(e.get("status")=="ALREADY_ACTIVE_SKIP" for e in row["trace"])
           print("PUBLIC_SIMC_APL_AUTO_ATTACK_PRE_SKIP=PASS "
                 "VALIDATION=REAL_SOURCE_SYNTHETIC_STATE_ONLY")
+          PY
+
+          python - <<'PY'
+          # Exercise the new bridge against all four REAL pinned APL sources.
+          # No real transition producer / readiness policy has been verified:
+          # empty evidence MUST block every possible gameplay recommendation.
+          import json, os, sys
+          from pathlib import Path
+          sys.path.insert(0,"tools/research")
+          from simc_strict_pre_source_bridge import replay_explicit_pre, transition_digest
+          base=Path(os.environ["RUNNER_TEMP"])
+          for spec in ("enhancement","fury","unholy","havoc"):
+              model=json.loads((base/f"{spec}-model.json").read_text())
+              graph=json.loads((base/f"{spec}-decision-graph.json").read_text())
+              fixture={
+                  "schema":"ZrotSimcSourceAccountableStrictPreFixtureV1",
+                  "spec":spec,"source_apl_sha256":model["apl_sha256"],
+                  "source_profile_sha256":model.get("profile_sha256"),
+                  "source_simc_executable_sha256":model.get("simc_executable_sha256"),
+                  "gameplay_rule_promotion":False,
+                  "provenance_class":"EXTERNAL_CALLER_DECLARED_UNVERIFIED",
+                  "independently_verified_producer":False,
+                  "decision_timestamp_ms":1000,"operand_to_feature":{},
+                  "transitions":[],"transitions_sha256":transition_digest([]),
+                  "unobservable_features":[],"synthetic_action_readiness":{},
+              }
+              r=replay_explicit_pre(model,fixture,graph=graph)
+              assert r["trace_status"]=="BLOCKED",(spec,r["trace_status"],r["trace_reason"])
+              assert r["trace_candidate_action_token"] is None
+              assert r["native_simc_decision_time_state"]=="NOT_CAPTURED"
+              assert r["gameplay_rule_promotion"] is False
+              assert r["non_synthetic_readiness_all_unknown"]
+              print("PUBLIC_SIMC_SOURCE_PRE_BRIDGE="+spec+" STATUS=BLOCKED"
+                    " OBSERVED_OPERANDS=0 CLAIM=SYNTHETIC_EMPTY_STATE_ONLY")
           PY
