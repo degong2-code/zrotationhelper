@@ -21,6 +21,9 @@ from simc_apl_source_engine import ingest_actions
 from simc_native_resource_change_probe import (
     native_resource_pre_gate, native_log_to_ndjson, audit_native_projection_independently
 )
+from simc_native_resource_lifecycle_probe import (
+    project_lifecycle_log, independent_lifecycle_audit, lifecycle_pre_gate
+)
 from decimal import Decimal
 
 FIXTURES=(
@@ -150,8 +153,40 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
             if raw_resource["source_event_count"]>0 and (
                 late_boundary.get("accepted_strictly_earlier_raw_events",0)<=0):
                 raise ValueError("NATIVE_RESOURCE_NO_EARLIER_EVENT_AT_LAST_SELECTION")
+            lifecycle=project_lifecycle_log(
+                blobs[names[1]],receipt["native_log_sha256"])
+            lifecycle_verified=independent_lifecycle_audit(
+                blobs[names[1]],lifecycle)
+            if lifecycle["lifecycle_row_count"]<1:
+                raise ValueError("NATIVE_LIFECYCLE_NO_INIT_OR_RECALC_MARKERS_"+spec)
+            selected_actor_identity=raw_resource["actor_identity_tuple"]
+            if selected_actor_identity is None:
+                raise ValueError("NATIVE_LIFECYCLE_NO_CONFIRMED_ACTOR_SCOPE_"+spec)
+            lifecycle_first=lifecycle_pre_gate(
+                effective_model,lifecycle,actor_identity=selected_actor_identity,
+                decision_timestamp_ms=decision_time_ms)
+            lifecycle_last=lifecycle_pre_gate(
+                effective_model,lifecycle,actor_identity=selected_actor_identity,
+                decision_timestamp_ms=last_decision_time_ms)
+            if (lifecycle_last["readiness"]!="UNKNOWN" or
+                lifecycle_last["trace_status"]!="BLOCKED"):
+                raise ValueError("NATIVE_LIFECYCLE_UNVERIFIED_READINESS_OR_TRACE_"+spec)
+            if lifecycle_last["source_rows"]<1:
+                raise ValueError("NATIVE_LIFECYCLE_NOT_SAME_ACTOR_SPAWN_"+spec)
             summaries.append({
                 "spec":spec,
+                "native_lifecycle_log_source_sha256":lifecycle["source_log_sha256"],
+                "native_lifecycle_rows":lifecycle["lifecycle_row_count"],
+                "native_lifecycle_events_by_path":lifecycle["events_by_path"],
+                "native_lifecycle_actor_spawn_identities":lifecycle["actor_spawn_identities"],
+                "native_lifecycle_independent_audit":lifecycle_verified["status"],
+                "native_lifecycle_current_actor_source_rows":lifecycle_last["source_rows"],
+                "native_lifecycle_rows_before_first_select":lifecycle_first["strictly_before_selected_action"],
+                "native_lifecycle_rows_before_final_select":lifecycle_last["strictly_before_selected_action"],
+                "native_lifecycle_last_same_timestamp_excluded":lifecycle_last.get(
+                    "strict_pre_excluded_same_timestamp",0),
+                "native_lifecycle_readiness":lifecycle_last["readiness"],
+                "native_lifecycle_semantics":"PARTIAL_INIT_MAX_RECALC_FUNCTIONS_ONLY",
                 "resource_log_source_sha256":receipt["native_log_sha256"],
                 "native_resource_event_count":raw_resource["source_event_count"],
                 "native_resource_negative_precombat_excluded":raw_resource[
