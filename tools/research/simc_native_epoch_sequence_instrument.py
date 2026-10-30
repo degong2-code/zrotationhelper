@@ -135,7 +135,8 @@ def selftest():
            '    sim->print_log( "ZROT_NATIVE_SELECT_RESOURCE_BEGIN_V1|{}",\n'
            '                    alpha );\n'
            '    sim->print_log( "ZROT_NATIVE_SELECT_RESOURCE_END_V1|{}",\n'
-           '                    alpha, beta );\n'
+           '                    alpha,\n'
+           '                    beta );\n'
         )
     }
     patched=patch_sources(fake)
