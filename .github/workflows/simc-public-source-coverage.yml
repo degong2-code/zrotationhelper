@@ -124,6 +124,11 @@ jobs:
               assert all(a["ready"]=="UNKNOWN" and
                          a["cannot_be_skipped_as_unavailable"] is True
                          for a in native_gaps["required_action_readiness"])
+              label_candidates=sorted(x["operand"] for x in native_gaps["source_operands"]
+                                      if x["upstream_resource_label_collision_candidate"])
+              print(f"PUBLIC_SIMC_NATIVE_RESOURCE_NAME_CANDIDATES={spec} "
+                    f"OPERANDS={json.dumps(label_candidates,sort_keys=True)} "
+                    "MECHANIC_IDENTITY=UNKNOWN")
               print(f"PUBLIC_SIMC_NATIVE_EVIDENCE_GAPS={spec} "
                     f"RESOURCE_GRAMMAR_CANDIDATES={native_gaps['native_resource_grammar_candidates_not_bindings']} "
                     f"BARE_RESOURCE_NAME_CANDIDATES={native_gaps['pinned_resource_label_collision_candidates_not_bindings']} "
