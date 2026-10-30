@@ -4,8 +4,8 @@
   "owner": "RESEARCH_BRANCH",
   "repository": "degong2-code/zrotationhelper",
   "branch": "work/github-ci-bootstrap",
-  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261030_V4.md",
-  "canonical_handoff_blob_sha": "9b65f1fd270d5f7421eb63f1f32204e092b358f2",
+  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V5.md",
+  "canonical_handoff_blob_sha": "ec981ecab87fcd296b1906571e2955ccd287c691",
   "research_code_evidence_sha": "45eceaa88835fe3c5deac2f8095763fd30f154f1",
   "github_main_observed_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
   "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
@@ -39,6 +39,9 @@
   "seq637_actual_local_result": "UNKNOWN",
   "seq578_and_frozen": "UNCHANGED_NO_PROMOTION",
   "shared_authoritative_state_mutated": false,
-  "next": "UNHOLY_SOURCE_ROW_REACHABILITY_AND_FURY_HAVOC_EXPRESSION_OWNER_PLUS_PARTIAL_PRODUCER_GAP",
-  "verified_as_of": "2026-10-30"
+  "next": "EXACT_SOURCE_ROW_OWNER_FOR_RAGE_FURY_USING_MINIMAL_GENERIC_EVAL_CONTEXT_PROVENANCE",
+  "verified_as_of": "2026-10-31",
+  "source_route_audit_path": "docs/DEVELOPER_NOTE_PINNED_APL_BARE_RESOURCE_EVAL_REACHABILITY_20261031.md",
+  "source_route_audit_blob_sha": "c348162d309155658fbddc9c2e715a2966b54f2d",
+  "source_route_evidence": "STATIC_PINNED_PUBLIC_APL_AND_CPP_ONLY_NOT_NATIVE_ROW_ATTRIBUTION"
 }
