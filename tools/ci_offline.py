@@ -741,6 +741,18 @@ def check_native_direct_if_guard_research() -> None:
         )
         assert proc.returncode == 0, "Native direct IF guard synthetic selftest failed"
         assert "SELF_TEST=PASS" in proc.stdout
+    # Prevent a repeated shadowing of the per-profile pointer proof
+    # by a temporary marker artifact Path later in the runner.
+    import ast
+    native_probe = ROOT / "tools" / "research" / "simc_apl_pointer_native_probe.py"
+    parsed = ast.parse(native_probe.read_text(encoding="utf-8"))
+    runner = next(node for node in parsed.body
+                  if isinstance(node, ast.FunctionDef) and node.name == "run")
+    assignments = [node for node in ast.walk(runner)
+                   if isinstance(node, ast.Name)
+                   and isinstance(node.ctx, ast.Store)
+                   and node.id == "evidence"]
+    assert len(assignments) == 1, "Native pointer evidence binding shadowed"
 
 
 def check_native_apl_eval_attempt_scopes() -> None:

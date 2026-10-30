@@ -263,14 +263,14 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None,
                 if any(independent_subset[k]!=direct_if[k] for k in exact_fields):
                     raise ValueError("NATIVE_DIRECT_IF_MARKER_SUBSET_REPLAY_DRIFT")
                 compressed=gzip.compress(marker_bytes,mtime=0)
-                evidence=marker_output_dir/(spec+".zrot_native_markers.txt.gz")
-                evidence.write_bytes(compressed)
+                marker_file=marker_output_dir/(spec+".zrot_native_markers.txt.gz")
+                marker_file.write_bytes(compressed)
                 marker_subset_receipt={
                     "marker_only_source_sha256":sha(marker_bytes),
                     "marker_only_bytes":len(marker_bytes),
                     "compressed_source_sha256":sha(compressed),
                     "compressed_bytes":len(compressed),
-                    "compressed_artifact_file":evidence.name,
+                    "compressed_artifact_file":marker_file.name,
                     "independent_replay_result":"PASS_SAME_DIRECT_IF_SOURCE_OUTCOMES",
                 }
             summaries.append({
