@@ -1,0 +1,117 @@
+name: SimC public native reference probe (research only)
+
+on:
+  push:
+    branches: [work/github-ci-bootstrap]
+    paths: [".github/workflows/simc-public-native-probe.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-native-probe:
+    name: Pinned public SimC native capture (not gameplay validation)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      SIMC_IMAGE: simulationcraftorg/simc@sha256:a6cfbc243456825d2dbecd607fe025948680219f4b4348603ed77a081b5f5895
+    steps:
+      - name: Checkout research implementation
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Capture one public-profile native SimC reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/zrot-native"
+          mkdir -p "$ROOT"
+          docker pull "$SIMC_IMAGE" >/dev/null
+          docker run --rm --entrypoint cat "$SIMC_IMAGE" /app/SimulationCraft/profiles/MID2/MID2_Shaman_Enhancement.simc > "$ROOT/public_profile.simc"
+          docker run --rm --entrypoint sha256sum "$SIMC_IMAGE" /app/SimulationCraft/simc | cut -d' ' -f1 > "$ROOT/binary_sha256.txt"
+          test -s "$ROOT/public_profile.simc"
+          docker run --rm -v "$ROOT:/capture" "$SIMC_IMAGE" \
+            profiles/MID2/MID2_Shaman_Enhancement.simc \
+            iterations=1 threads=1 calculate_scale_factors=0 \
+            max_time=60 vary_combat_length=0 \
+            log=1 log_spell_id=1 report_details=1 \
+            "save_actions=/capture/simc_effective_actions.simc" \
+            "json2=/capture/simc_native_sequence.json" \
+            "output=/capture/simc_native_log.txt"
+          test -s "$ROOT/simc_effective_actions.simc"
+          test -s "$ROOT/simc_native_log.txt"
+          test -s "$ROOT/simc_native_sequence.json"
+      - name: Hash-validate and parse native output; never upload raw output
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib, json, os, re, sys
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"]) / "zrot-native"
+          image = os.environ["SIMC_IMAGE"]
+          def digest(raw): return hashlib.sha256(raw).hexdigest()
+          files = ("simc_effective_actions.simc","simc_native_log.txt","simc_native_sequence.json")
+          raw = {name:(root/name).read_bytes() for name in files}
+          assert all(raw.values()), "NATIVE_OUTPUT_EMPTY"
+          profile = (root/"public_profile.simc").read_bytes()
+          binary_sha = (root/"binary_sha256.txt").read_text().strip()
+          assert re.fullmatch(r"[0-9a-f]{64}",binary_sha), "INVALID_NATIVE_BINARY_SHA"
+          receipt = {
+              "schema":"ZrotSimcNativeReferenceCaptureV1",
+              "status":"SIMC_NATIVE_CAPTURED_UNPARSED",
+              "source_kind":"PINNED_OFFICIAL_PUBLIC_DOCKER_IMAGE",
+              "image_digest":image.split("@",1)[1],
+              "simc_executable_sha256":binary_sha,
+              "profile_sha256":digest(profile),
+              "effective_apl_sha256":digest(raw["simc_effective_actions.simc"]),
+              "native_log_sha256":digest(raw["simc_native_log.txt"]),
+              "native_json2_sha256":digest(raw["simc_native_sequence.json"]),
+              "simc_spec":"enhancement",
+              "outputs":[{"file":name,"sha256":digest(raw[name]),"bytes":len(raw[name])} for name in files],
+          }
+          (root/"simc_reference_receipt.json").write_text(json.dumps(receipt,indent=2)+"\n")
+          sys.path.insert(0,str(Path.cwd()/"tools"/"research"))
+          from simc_native_performed_events import extract_native_reference
+          from simc_native_json_sequence import extract_json_sequence
+          events = extract_native_reference(root)
+          sequence = extract_json_sequence(root)
+          summary = {
+              "schema":"ZrotPublicNativeProofResearchV1",
+              "research_branch_sha":os.environ["GITHUB_SHA"],
+              "image_digest":receipt["image_digest"],
+              "binary_sha256":binary_sha,
+              "public_profile_sha256":receipt["profile_sha256"],
+              "effective_apl_sha256":receipt["effective_apl_sha256"],
+              "native_log_sha256":receipt["native_log_sha256"],
+              "native_json2_sha256":receipt["native_json2_sha256"],
+              "native_executable_invocation":"COMPLETED_EXIT_ZERO",
+              "native_event_parse_status":events["status"],
+              "native_performed_event_count":events["performed_event_count"],
+              "unrecognized_performs_count":events["unrecognized_performs_event_count"],
+              "json2_sequence_status":sequence["status"],
+              "json2_precombat_count":sequence["precombat_count"],
+              "json2_combat_count":sequence["combat_count"],
+              "native_foreground_certification":"NOT_RUN",
+              "same_time_json2_pre_certification":"NOT_RUN",
+              "native_priority_parity":"NOT_VALIDATED",
+              "wcl_live":"NOT_RUN",
+              "gameplay_rule_promotion":False,
+              "main_authority_promotion":False,
+              "public_only_no_private_artifacts_uploaded":True,
+          }
+          report = Path(os.environ["RUNNER_TEMP"]) / "zrot-public-native-summary.json"
+          report.write_text(json.dumps(summary,indent=2,sort_keys=True)+"\n")
+          print(json.dumps(summary,indent=2,sort_keys=True))
+          PY
+      - name: Upload summary only (exclude raw logs, profiles and APL)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-public-native-summary-${{ github.sha }}
+          path: ${{ runner.temp }}/zrot-public-native-summary.json
+          if-no-files-found: error
+          retention-days: 7
