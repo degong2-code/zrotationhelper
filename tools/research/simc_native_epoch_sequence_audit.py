@@ -124,10 +124,6 @@ def parse_epoch_native_log(raw:bytes,expected_sha256:str)->dict:
             "time_ms":t,"actor":actor,"spawn":spawn,"resource":res,
             "current":cur,"maximum":mx,"v2_log_line":i+1,
             "v1_log_line":i+2,
-            "reset_boundary_sequence":max(
-                (r["sequence"] for r in resets if r["thread"]==thread
-                 and r["iteration"]==iteration and r["sequence"]<seq),
-                default=None),
         }
         _check_legacy(event,legacy)
         if i+1 in seen_legacy:
@@ -211,6 +207,10 @@ def independent_epoch_audit(raw:bytes,produced:dict)->dict:
             "time_ms":t,"actor":actor,"spawn":spawn,"resource":resource,
             "current":cur,"maximum":mx,"v2_log_line":i+1,
             "v1_log_line":i+2,
+            "reset_boundary_sequence":max(
+                (r["sequence"] for r in resets if r["thread"]==thread
+                 and r["iteration"]==iteration and r["sequence"]<seq),
+                default=None),
         })
     if expected!=produced.get("events") or len(expected)!=produced.get("event_count"):
         raise ValueError("EPOCH_INDEPENDENT_PROJECTION_DIVERGENCE")
