@@ -83,3 +83,30 @@ No MAIN promotion, no mutation of FROZEN/Seq578/Seq637, MAIN manifests/pointers 
 **Next implementation priority:** Move from textual operand identification to a *generic semantic resolver registry* that can bind observable source-derived properties under pinned Blizzard/SimC mechanic contracts, without assuming the names are sufficient. Do not construct 90 per-spec readiness policies by hand. Group by generic operand/mechanic family, identify missing external authority, derive what can be certified, and keep unsupported readiness UNKNOWN. After that, use independently valid timestamped Strict PRE and certified native SimC foreground references for state-conditioned parity; only afterward use independently locked blind WCL candidates.
 
 **Explicit exclusions:** no actual PRE observation, no automated Blizzard identity, no verified cooldown/resource readiness, no native action parity, no WCL calls, no General Rotation FROZEN. MAIN `main`, product pointers, Work OS state, global handoff, Seq578/FROZEN unchanged; Seq637 remains UNKNOWN. Branch-only evidence.
+
+
+## Successor increment — generic grammar-semantic routing with fail-closed source binding (2026-10-30)
+
+**Product test:** This work must improve *how the engine automatically researches new SimC specs*, not produce an individual specialization rotation. We added `tools/research/simc_apl_semantic_resolver.py`, reusing the exact previous observability requirements; it does not add another APL parser, spell-priority implementation, or per-spec rule table.
+
+- `ZrotSimcGenericSemanticRoutePlanV1` groups the supplied source-derived operand tokens into reusable **lexical** query families: aura, cooldown/charges, action state, build/talent, equipment, resource, persistent variable, target, timing, encounter, pet and UNKNOWN namespace.
+- Routing is *not* SimC/Blizzard mechanical truth, spell identity, state value observation, supported readiness, or permission to evaluate a rotation. The outputs explicitly retain `identity=UNKNOWN`, `observation_feature=null`, `semantic_authority=NOT_ESTABLISHED`, `native_simc_decision_parity=NOT_VALIDATED` and `gameplay_rule_promotion=false`.
+- `ZrotSimcSemanticEvidencePackV1` is an opt-in **caller-declared** candidate mapping from exact operand tokens to external feature IDs; it requires pinned spec/APL/profile, a nonempty claimed build key, cited evidence/digest and mechanic identity. Mismatches, ambiguous feature aliases and unknown operands fail closed. Even a fully populated candidate pack is **NOT_INDEPENDENTLY_VERIFIED**; citations and self-attestation do not prove Blizzard truth, ability readiness or a valid Strict PRE producer.
+- The existing `simc_apl_readiness_provider.MANDATORY` remains the sole list of 8 readiness applicability dimensions. The semantic route plan never fills any readiness policy or declares a READY action.
+- New checks are run on the existing four immutable official MID2 profiles (official upstream `simulationcraft/simc@710c2408bfd3ae4df71b8cd55cdf01f63fd6c926`), not by coding four specialization adapters into the resolver.
+
+| Public profile | Unique source operands | Lexically routed | Unclassified | Distinct readiness tokens, all UNKNOWN |
+| --- | ---: | ---: | ---: | ---: |
+| Enhancement Shaman | 77 | 72 | 5 | 24 |
+| Fury Warrior | 68 | 66 | 2 | 26 |
+| Unholy Death Knight | 92 | 85 | 7 | 21 |
+| Havoc Demon Hunter | 57 | 56 | 1 | 19 |
+| **Sum across specs** | **294** | **279** | **15** | **90** |
+
+The 279/294 value is **grammar routing**, not **semantic coverage or valid PRE observation**. The 15 unknown grammar operands are honestly preserved, not coerced to zero or false. The source parser reported 0 unsupported expression syntax fields in these samples, but that alone cannot show correct native expression evaluation or complete modifier semantics.
+
+**Actual CI:** https://github.com/degong2-code/zrotationhelper/actions/runs/41009274017 SUCCESS, 3 synthetic spec labels selftest including source/evidence mismatch, ambiguous duplicate, caller-attestation limits. Existing 28-case shared priority-runtime synthetic regression PASS, all four pinned upstream profiles PASS. Offline CI matrix https://github.com/degong2-code/zrotationhelper/actions/runs/41009274058 Python 3.12/3.14 SUCCESS.
+
+**Most useful Exact Next:** Implement a **generic authority-backed mechanics catalog importer** that obtains identity, build/talent/replacement constraints and feature producers from pinned Blizzard/SimC data and automatically supplies candidates to the route plan; independently verify the catalog, not only its citation text. Continue with Strict PRE reconstruction from timestamped transitions and compare only certified native foreground decisions with the shared evaluator. Prefer additional held-out specialization/build fixtures for semantic generalization; do not optimize the 15 unknown lexical names merely to inflate coverage. WCL blind discovery must remain independent until candidate lock, then post-lock SimC replay and appropriate holdout/counterfactual.
+
+**Never promote** from syntax routing, synthetic state or caller-attested evidence to gameplay truth. MAIN, Seq578/FROZEN, global `LATEST_HANDOFF`, active manifest and production pointer unchanged; Seq637 and inaccessible local MAIN authoritative state remain UNKNOWN. No WCL live or native foreground parity executed during this increment.
