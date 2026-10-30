@@ -22,6 +22,8 @@ on:
       - "tools/research/simc_native_bare_resource_eval_audit.py"
       - "tools/research/simc_native_apl_eval_scope_instrument.py"
       - "tools/research/simc_native_apl_eval_scope_audit.py"
+      - "tools/research/simc_native_if_guard_instrument.py"
+      - "tools/research/simc_native_if_guard_audit.py"
       - ".github/workflows/simc-apl-pointer-provenance.yml"
   workflow_dispatch:
 
@@ -61,6 +63,8 @@ jobs:
           python tools/research/simc_native_bare_resource_eval_audit.py --self-test
           python tools/research/simc_native_apl_eval_scope_instrument.py --self-test
           python tools/research/simc_native_apl_eval_scope_audit.py --self-test
+          python tools/research/simc_native_if_guard_instrument.py --self-test
+          python tools/research/simc_native_if_guard_audit.py --self-test
       - name: Checkout exact upstream SimulationCraft source
         shell: bash
         run: |
@@ -96,6 +100,8 @@ jobs:
           test -s "$RUNNER_TEMP/simc-bare-resource-eval-source-receipt.json"
           python tools/research/simc_native_apl_eval_scope_instrument.py --upstream-root "$RUNNER_TEMP/simc-pinned" > "$RUNNER_TEMP/simc-apl-attempt-scope-source-receipt.json"
           test -s "$RUNNER_TEMP/simc-apl-attempt-scope-source-receipt.json"
+          python tools/research/simc_native_if_guard_instrument.py --upstream-root "$RUNNER_TEMP/simc-pinned" > "$RUNNER_TEMP/simc-direct-if-guard-source-receipt.json"
+          test -s "$RUNNER_TEMP/simc-direct-if-guard-source-receipt.json"
       - name: Compile separate research-only source binary (no game changes)
         shell: bash
         run: |
@@ -105,7 +111,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
           cmake --build "$RUNNER_TEMP/simc-pinned-build" --target simc -j 2
           test -s "$RUNNER_TEMP/simc-pinned-build/simc"
-      - name: Run four pinned profiles; compare source-native evaluation with epoch PRE
+      - name: Run two pinned public profiles; verify direct IF guard eval and retained markers
         shell: bash
         env:
           PROVENANCE_SUMMARY: ${{ runner.temp }}/zrot-pointer-provenance-summary.json
@@ -114,7 +120,11 @@ jobs:
           python tools/research/simc_apl_pointer_native_probe.py \
             --upstream-root "$RUNNER_TEMP/simc-pinned" \
             --binary "$RUNNER_TEMP/simc-pinned-build/simc" \
-            --summary "$PROVENANCE_SUMMARY"
+            --summary "$PROVENANCE_SUMMARY" \
+            --specs fury,havoc \
+            --marker-output-dir "$RUNNER_TEMP/zrot-marker-proof"
+          test -s "$RUNNER_TEMP/zrot-marker-proof/fury.zrot_native_markers.txt.gz"
+          test -s "$RUNNER_TEMP/zrot-marker-proof/havoc.zrot_native_markers.txt.gz"
           test -s "$PROVENANCE_SUMMARY"
       - name: Upload summary and source patch receipt only
         uses: actions/upload-artifact@v4
@@ -132,5 +142,7 @@ jobs:
             ${{ runner.temp }}/simc-reset-clock-epoch-receipt.json
             ${{ runner.temp }}/simc-bare-resource-eval-source-receipt.json
             ${{ runner.temp }}/simc-apl-attempt-scope-source-receipt.json
+            ${{ runner.temp }}/simc-direct-if-guard-source-receipt.json
+            ${{ runner.temp }}/zrot-marker-proof/*.zrot_native_markers.txt.gz
           if-no-files-found: error
           retention-days: 7

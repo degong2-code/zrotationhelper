@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import gzip
 import json
 from pathlib import Path
 import subprocess
@@ -30,6 +31,7 @@ from simc_native_epoch_sequence_audit import (
 )
 from simc_native_bare_resource_eval_audit import audit as audit_native_bare_resource_eval
 from simc_native_apl_eval_scope_audit import audit as audit_apl_attempt_scopes
+from simc_native_if_guard_audit import audit as audit_native_direct_if
 from decimal import Decimal
 
 FIXTURES=(
@@ -44,7 +46,8 @@ def sha(data:bytes)->str:
     return hashlib.sha256(data).hexdigest()
 
 
-def run(source_root:Path,binary:Path,output_path:Path|None=None):
+def run(source_root:Path,binary:Path,output_path:Path|None=None,
+        specs:tuple[str,...]|None=None, marker_output_dir:Path|None=None):
     rev=subprocess.run(["git","-C",str(source_root),"rev-parse","HEAD"],
                        check=True,capture_output=True,text=True).stdout.strip()
     if rev != UPSTREAM_SHA:
@@ -53,10 +56,20 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
     if not binary_bytes:
         raise ValueError("LIVE_POINTER_BINARY_EMPTY")
     binary_digest=sha(binary_bytes)
+    if specs is None:
+        active_fixtures=FIXTURES
+    else:
+        allowed={name:path for name,path in FIXTURES}
+        if (not specs or len(specs)!=len(set(specs))
+                or any(name not in allowed for name in specs)):
+            raise ValueError("NATIVE_PUBLIC_FIXTURE_SELECTION_INVALID")
+        active_fixtures=tuple((name,allowed[name]) for name in specs)
     summaries=[]
+    if marker_output_dir is not None:
+        marker_output_dir.mkdir(parents=True,exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="zrot_pinned_apl_pointer_") as td:
         root=Path(td)
-        for spec,relative in FIXTURES:
+        for spec,relative in active_fixtures:
             profile=source_root/relative
             if not profile.is_file():
                 raise ValueError("LIVE_POINTER_PROFILE_MISSING")
@@ -228,6 +241,38 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
                     or attempt_scopes["gameplay_rule_promotion"] is not False
                     or attempt_scopes["readiness_certified"]!=0):
                 raise ValueError("NATIVE_EVAL_ATTEMPT_SCOPE_SOURCE_OR_CLAIM_FAILURE")
+            direct_if=audit_native_direct_if(
+                blobs[names[1]],receipt["native_log_sha256"],effective_model)
+            if (direct_if["bare_eval_total"]!=bare_eval["native_evaluation_count"]
+                or direct_if["guard_begin_count"]!=direct_if["guard_end_count"]
+                or direct_if["gameplay_rule_promotion"] is not False
+                or direct_if["readiness_certified"]!=0
+                or direct_if["eval_as_state_transition"] is not False):
+                raise ValueError("NATIVE_DIRECT_IF_SOURCE_AUDIT_FAILED")
+            marker_subset_receipt=None
+            if marker_output_dir is not None:
+                # Keep public-source Native proof markers only, not full log,
+                # unneeded profile/character metadata or game credentials.
+                marker_bytes=b"\n".join(x for x in blobs[names[1]].splitlines()
+                    if b"ZROT_NATIVE_" in x)+b"\n"
+                independent_subset=audit_native_direct_if(
+                    marker_bytes,sha(marker_bytes),effective_model)
+                exact_fields=("bare_eval_total","guard_begin_count",
+                              "guard_end_count","outcomes","confirmed_owner_counts",
+                              "action_scope_count")
+                if any(independent_subset[k]!=direct_if[k] for k in exact_fields):
+                    raise ValueError("NATIVE_DIRECT_IF_MARKER_SUBSET_REPLAY_DRIFT")
+                compressed=gzip.compress(marker_bytes,mtime=0)
+                evidence=marker_output_dir/(spec+".zrot_native_markers.txt.gz")
+                evidence.write_bytes(compressed)
+                marker_subset_receipt={
+                    "marker_only_source_sha256":sha(marker_bytes),
+                    "marker_only_bytes":len(marker_bytes),
+                    "compressed_source_sha256":sha(compressed),
+                    "compressed_bytes":len(compressed),
+                    "compressed_artifact_file":evidence.name,
+                    "independent_replay_result":"PASS_SAME_DIRECT_IF_SOURCE_OUTCOMES",
+                }
             summaries.append({
                 "spec":spec,
                 "native_epoch_log_source_sha256":epoch["source_log_sha256"],
@@ -255,6 +300,14 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
                 "native_apl_attempt_scope_owner_contexts":attempt_scopes["owner_context_counts"],
                 "native_apl_attempt_scope_examples":attempt_scopes["examples_max_30"],
                 "native_apl_guard_eval_owner_certified":False,
+                "native_direct_if_guard_begin_count":direct_if["guard_begin_count"],
+                "native_direct_if_guard_true_count":direct_if["guard_success_true_count"],
+                "native_direct_if_guard_false_count":direct_if["guard_success_false_count"],
+                "native_direct_if_eval_outcomes":direct_if["outcomes"],
+                "native_direct_if_eval_owner_counts":direct_if["confirmed_owner_counts"],
+                "native_direct_if_examples":direct_if["examples_max_25"],
+                "native_direct_if_state_readiness_certified":False,
+                "native_marker_only_independent_receipt":marker_subset_receipt,
                 "select_resource_diagnostic_log_sha256":diagnostic["source_log_sha256"],
                 "select_resource_diagnostic_audit":diagnostic[
                     "source_selection_diagnostic_audit"]["status"],
@@ -328,6 +381,7 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
         "wcl_independent_discovery":"NOT_RUN",
         "gameplay_rule_promotion":False,
         "uploaded_raw_native_profiles_or_logs":False,
+        "retained_public_marker_only_proof":marker_output_dir is not None,
     }
     content=json.dumps(summary,sort_keys=True,indent=2)+"\n"
     if output_path:
@@ -342,8 +396,12 @@ def main():
     p.add_argument("--upstream-root",type=Path,required=True)
     p.add_argument("--binary",type=Path,required=True)
     p.add_argument("--summary",type=Path)
+    p.add_argument("--specs",help="Comma-separated subset of pinned public fixture slugs")
+    p.add_argument("--marker-output-dir",type=Path)
     args=p.parse_args()
-    run(args.upstream_root,args.binary,args.summary)
+    requested=tuple(args.specs.split(",")) if args.specs else None
+    run(args.upstream_root,args.binary,args.summary,
+        specs=requested,marker_output_dir=args.marker_output_dir)
 
 
 if __name__=="__main__":
