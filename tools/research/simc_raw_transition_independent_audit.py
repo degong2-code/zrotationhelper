@@ -66,6 +66,7 @@ def independent_raw_audit(model:dict,capture:dict,raw:bytes,output:dict)->dict:
             len(lines)!=output.get("source_event_count")):
         raise ValueError("INDEPENDENT_EVENT_ROW_COUNT_MISMATCH")
     observed_ids=set()
+    feature_scopes={}
     expected_transitions=[]
     expected_receipts=[]
     byte_offset=0
@@ -109,6 +110,11 @@ def independent_raw_audit(model:dict,capture:dict,raw:bytes,output:dict)->dict:
                 event["scope"] not in ("ACTOR","TARGET","ENCOUNTER")) or (
                 type(event["valid"]) is not bool):
             raise ValueError("INDEPENDENT_FEATURE_SCOPE_INVALID")
+        if event["scope"]=="TARGET":
+            raise ValueError("INDEPENDENT_UNBOUND_TARGET_SUBJECT")
+        previous_scope=feature_scopes.setdefault(key,event["scope"])
+        if previous_scope!=event["scope"]:
+            raise ValueError("INDEPENDENT_FEATURE_SCOPE_COLLISION")
         evidence=f"raw-line:{index+1}:offset:{byte_offset}:sha256:{hashlib.sha256(stripped).hexdigest()}"
         expected_transitions.append({
             "timestamp_ms":t,"sequence":n,"feature_key":key,
