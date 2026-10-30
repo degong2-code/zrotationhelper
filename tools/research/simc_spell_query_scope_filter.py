@@ -217,7 +217,7 @@ def selftest():
         raw=(f'{cls}="Fixture"\nspec={spec}\n'
              "talents=123456\n"
              f"actions={action}\n"
-             "actions+=/fallback\n").encode()
+             "actions+=/zz_fallback\n").encode()
         pin=sha(raw)
         scope=parse_pinned_profile_scope(raw,expected_spec=spec,
                                          expected_profile_sha256=pin)
