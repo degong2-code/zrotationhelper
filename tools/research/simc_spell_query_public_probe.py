@@ -23,7 +23,7 @@ from simc_apl_source_engine import ingest_actions
 from simc_apl_conditional_ir import compile_structural_ir
 from simc_apl_observability_contract import compile_requirements
 from simc_apl_semantic_resolver import compile_semantic_route_plan
-from simc_spell_query_catalog import build_catalog,make_query_plan,sha
+from simc_spell_query_catalog import build_catalog,make_query_plan,sha,link_catalog_candidates_to_route
 
 IMAGE="simulationcraftorg/simc@sha256:a6cfbc243456825d2dbecd607fe025948680219f4b4348603ed77a081b5f5895"
 PUBLIC_FIXTURES=(("enhancement","MID2_Shaman_Enhancement"),
@@ -78,6 +78,7 @@ def run():
             catalog=build_catalog(request,binary_sha256=binary_sha,
                                   image_digest=IMAGE.split("@",1)[1],
                                   query_blobs=blobs,query_sha256=hashes)
+            joined=link_catalog_candidates_to_route(route,catalog)
             if catalog["source_query_token_count"]!=5:
                 raise AssertionError("PUBLIC_SAMPLE_QUERY_COUNT_NOT_MET")
             statuses=Counter(r["resolution_status"] for r in catalog["spell_query_results"])
@@ -87,6 +88,9 @@ def run():
                 "source_row_count":model["apl_row_count"],
                 "selected_action_tokens":request["selected_query_tokens"],
                 "query_result_summary":dict(sorted(statuses.items())),
+                "source_action_requirements_count":joined["route_action_count"],
+                "unqueried_action_requirements":joined["route_action_count"]-joined["queried_action_count"],
+                "all_action_readiness":joined["all_readiness"],
                 "candidate_spell_count":sum(r["exact_name_candidate_count"]
                                            for r in catalog["spell_query_results"]),
                 "xml_receipts":[{"token":r["query_token"],
