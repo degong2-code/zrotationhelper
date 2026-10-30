@@ -21,6 +21,7 @@ from simc_apl_pointer_provenance_audit import audit_captured_native
 FIXTURES=(
     ("enhancement","profiles/MID2/MID2_Shaman_Enhancement.simc"),
     ("fury","profiles/MID2/MID2_Warrior_Fury.simc"),
+    ("unholy","profiles/MID2/MID2_Death_Knight_Unholy.simc"),
 )
 
 
@@ -83,7 +84,8 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
             }
             (dest/"simc_reference_receipt.json").write_text(
                 json.dumps(receipt,sort_keys=True))
-            evidence=audit_captured_native(dest,require_callsite_proof=True)
+            evidence=audit_captured_native(dest,require_callsite_proof=True,
+                                           require_selection_proof=True)
             status=evidence["pointer_status_counts"]
             verified=status.get("POINTER_ROW_AND_EXACT_EFFECTIVE_APL_SIGNATURE_MATCH",0)
             drift=status.get("POINTER_ROW_MATCH_SIGNATURE_DRIFT_NEEDS_REVIEW",0)
@@ -91,6 +93,15 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
                 raise ValueError("LIVE_POINTER_NO_EXACT_APL_ROW_EVIDENCE_"+spec)
             if evidence["sequence_callsite_status_counts"].get("UNKNOWN_CALLSITE",0)>0:
                 raise ValueError("LIVE_POINTER_UNCLASSIFIED_SEQUENCE_CALLSITE_"+spec)
+            if (evidence["foreground_selection_path_counts"].get(
+                "UNKNOWN_FOREGROUND_BRANCH",0)>0 or
+                evidence["foreground_selection_path_counts"].get(
+                    "MISSING_SELECTION_PROVENANCE",0)>0):
+                raise ValueError("LIVE_POINTER_UNCLASSIFIED_FOREGROUND_SELECT_"+spec)
+            selected=evidence["source_bound_native_select_action_rows"]
+            if (selected>evidence["sequence_callsite_status_counts"].get(
+                "FOREGROUND_EXECUTE_ACTION",0)):
+                raise ValueError("LIVE_POINTER_SELECT_ACTION_EXCEEDS_FOREGROUND")
             if evidence["gameplay_rule_promotion"] is not False:
                 raise ValueError("LIVE_POINTER_UNSAFE_GAMEPLAY_PROMOTION")
             summaries.append({
@@ -104,9 +115,11 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
                 "pointer_signature_drift_rows":drift,
                 "pointer_status_counts":status,
                 "sequence_callsite_status_counts":evidence["sequence_callsite_status_counts"],
+                "foreground_selection_path_counts":evidence["foreground_selection_path_counts"],
+                "source_bound_native_select_action_rows":selected,
                 "all_native_rows_matched":False
                     if verified!=evidence["native_sequence_rows"] else True,
-                "native_foreground_decision_proof":"NOT_CERTIFIED",
+                "native_foreground_decision_proof":"SOURCE_BRANCH_OBSERVED_NOT_STRICT_PRE_PARITY",
             })
     summary={
         "schema":"ZrotSimcPinnedPublicPointerSourceProbeV1",
@@ -116,6 +129,7 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
         "public_profile_count":len(summaries),
         "profiles":summaries,
         "decision_necessary_conditions_not_fully_verified":True,
+        "foreground_branch_evidence":"DIRECT_EXECUTE_ACTION_BRANCH_NOT_APPROVED_RULE",
         "strict_pre":"NOT_RUN",
         "native_foreground_equivalence":"NOT_VALIDATED",
         "blizzard_current_mechanics":"NOT_VERIFIED",
