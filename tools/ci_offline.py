@@ -799,6 +799,11 @@ def check_simc_native_pointer_action_id_synthetic() -> None:
         [sys.executable, "-B", str(p), "--self-test"],
         cwd=str(ROOT), capture_output=True, text=True, timeout=25,
     )
+    if r.returncode != 0:
+        # This subprocess runs SYNTHETIC-ONLY fixed public fixture data.
+        # Avoid logging full source/body, credentials, or live artifacts.
+        print("NATIVE_ID_SYNTHETIC_TEST_STDERR=" + r.stderr[-900:], flush=True)
+        print("NATIVE_ID_SYNTHETIC_TEST_STDOUT=" + r.stdout[-300:], flush=True)
     assert r.returncode == 0, "source-pointer numeric action ID synthetic regression"
     assert "SIMC_NATIVE_ACTION_ID_SOURCE_POINTER_SELF_TEST=PASS" in r.stdout
 
