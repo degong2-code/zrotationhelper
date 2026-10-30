@@ -43,3 +43,22 @@ All are `SOURCE_DERIVED_HYPOTHESIS_ONLY`: same generic generator, no spec-specif
 5. The research branch may offer a MAIN merge handoff, but cannot modify MAIN `CURRENT_STATE`, global `LATEST_HANDOFF`, active manifest, FROZEN, Seq578, or Seq637.
 
 MAIN local authoritative state, Work OS Runtime and actual current active Manifest remain **UNKNOWN** in this chat. No MAIN promotion, no WCL live call, and no user-private profile capture in this milestone.
+
+
+## Successor increment — generic graph -> single shared evaluator (2026-10-30)
+
+This is a **bounded bridge** beyond the earlier structural-only milestone, not native gameplay validation.
+
+- Research code/CI commit `aa54efc6698a0338978571fa97912823ef5790c6`; GitHub Action https://github.com/degong2-code/zrotationhelper/actions/runs/41008367781 **SUCCESS** (source coverage + runtime boundary); offline matrix https://github.com/degong2-code/zrotationhelper/actions/runs/41008367616 **SUCCESS** (Python 3.12 and 3.14).
+- `simc_apl_decision_graph.py` now emits `next_in_list` on each row, so ordered traversal is materialized as graph edges.
+- `simc_apl_priority_trace.py` optional `decision_graph` input / `--decision-graph` CLI flag: **existing expression evaluator, variable handling, call/run semantics, readiness and Strict PRE remain the single shared runtime**; only list traversal order uses canonical graph edges. No duplicated spell/class handler. A supplied graph must match a **full re-compilation from the supplied source model**; a mismatch fails with `DECISION_GRAPH_CANONICAL_MISMATCH`. Note: this checks the graph against the provided model, **not independently against re-read raw SimC source bytes**. Raw source SHA provenance must be verified by the ingestion boundary separately.
+- Public APL run retained the same four source profiles: enhancement 114, fury 121, unholy 63, havoc 46 source rows. Public real-APL + **synthetic/empty state** probes returned no falsely certified action: enhancement blocked on `VARIABLE_VALUE_UNKNOWN`, fury blocked on `AUTO_ATTACK_STATE_UNKNOWN`. This is correct fail-closed behavior, **not validation of generated gameplay rotation**.
+- New `simc_graph_shared_runtime_regression.py`: cross-specialization **28 focused synthetic cases PASS**, across enhancement, unholy, fury and a run-list boundary. They compare legacy direct-model evaluator vs graph-sourced traversal under identical Strict PRE snapshots/readiness, including guard true/false/UNKNOWN, readiness NOT_READY/UNKNOWN, call/run distinction, equal-time and future state exclusion, tampered graph, altered SHA. These specs are only **test labels and arbitrary synthetic token strings**, not class-specific engine logic.
+- Provenance output includes graph schema/source SHA, structural recompilation check, checked graph node IDs, shared runtime identity, explicit `native_decision_equivalence=NOT_VALIDATED` and `gameplay_promotion=false`.
+- CI result: structural graph bridge **PASS**, cross-spec synthetic-state parity **PASS**, official SimC source-APL parser coverage **PASS**, native parity **NOT_RUN**, blind WCL validation **NOT_RUN**, end-to-end automatic semantic binding/readiness **NOT_IMPLEMENTED**, real General Rotation IF/ELSE **NOT_FROZEN**.
+
+**Critical implementation self-check:** The code can now automatically *construct* a conditional graph and have the shared evaluator **traverse it** using externally supplied state, but it still cannot automatically infer all operands/readiness from official game mechanics or autonomously produce a correct general rotation for arbitrary spec/build. Do not confuse structural 4/4 and synthetic parity 28/28 with full semantic automation.
+
+**Focused next:** Programmatic operand/readiness observation contracts from pinned SimC profile + Blizzard mechanics, with completeness/coverage and UNKNOWN reporting (no class hardcodes); test semantic control/option families across new held-out profile input; then native foreground and Strict PRE parity, then separate blind WCL discovery lock/reconciliation. Keep exact-model graph verification and same-time state rejection.
+
+No MAIN promotion, no mutation of FROZEN/Seq578/Seq637, MAIN manifests/pointers or global handoffs. Exact current local MAIN and Work OS state remain UNKNOWN.
