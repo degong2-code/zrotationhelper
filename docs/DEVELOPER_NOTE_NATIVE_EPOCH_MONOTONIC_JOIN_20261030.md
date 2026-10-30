@@ -53,3 +53,24 @@ This proves genuine **runtime source emission sequence**, not causally consisten
 **New Native run** [41054849471](https://github.com/degong2-code/zrotationhelper/actions/runs/41054849471): pending at the initial note update; confirm its conclusion, report counts of reset boundaries, cross-epoch same-time ambiguities and certified current/max comparisons before recording PASS. The original V2 run's C++ success cannot substitute for this new reporter.
 
 **Boundary requirement:** even if RESET-stamped pairs agree, that proves *consistency* of their observed current/max values in pinned SimC; not general readiness, optimality, Blizzard current Retail semantics, unrecorded direct writes or live WCL gameplay. More resource current/max transitions and optional native diagnostic counterfactual may be needed. The current Native log summaries are owner-branch evidence, not MAIN promotion.
+
+
+## Reset clock epoch and source proof contract — successor
+
+The first real V2 source run at [41053700577](https://github.com/degong2-code/zrotationhelper/actions/runs/41053700577) passed compiled/native and independent log parity, but all three profiles carried `current_iteration=0` while late source emissions had earlier Native clock times than already recorded selection entries. The underlying **causal epoch** was still unidentified. We did NOT force a successful state join: 1,390 comparisons retained a source-sequence/timestamp contradiction and 62 were same-time excluded.
+
+A new **minimal reset-boundary source reporter** at `tools/research/simc_native_reset_boundary_instrument.py` instruments pinned `engine/sim/sim.cpp::sim_t::reset()` just before `event_mgr.reset()`. It emits:
+`ZROT_NATIVE_RESET_BOUNDARY_V1|thread_index|current_iteration|shared_source_sequence|previous_clock_ms`.
+The sequence is taken from the **same SimC `sim_t`-owned counter** used for all `ZROT_NATIVE_EVENT_V2` resource and selection markers. No post-hoc elapsed time / text log position is used to infer the reset.
+
+`tools/research/simc_native_epoch_sequence_audit.py` now parses and independently re-parses all reset stamps, verifies unique shared source sequences (reset and V2), then labels every V2 source event with the **most recent same-thread/same-iteration source reset whose sequence precedes its own**. The candidate causal source key is `(capture_log_sha256, thread, current_iteration, reset_boundary_sequence, actor_index, actor_spawn_index)`. Selection begins/ends must refer to the exact same reset epoch, and a resource predecessor must have both `source sequence < decision sequence` and `source timestamp < decision timestamp`. Missing reset identity, same timestamp, later sequence or contradictory time remain UNKNOWN, not false-confirmed priority conflict. Same `current_iteration` after a genuine second `sim_t::reset()` becomes a **different epoch**, with no resource carry-over.
+
+### Pipeline failure preservation
+
+- [41054849471](https://github.com/degong2-code/zrotationhelper/actions/runs/41054849471) synthetic FAIL because a fake reset row mistakenly encoded a literal backslash+n rather than a real newline. No C++ compilation commenced.
+- [41055040759](https://github.com/degong2-code/zrotationhelper/actions/runs/41055040759) synthetic FAIL because producer code initially referenced `resets` in the first parser scope before that independent parser's reset list existed. The code now binds reset boundary in the correct independent audit.
+- [41055147815](https://github.com/degong2-code/zrotationhelper/actions/runs/41055147815) synthetic FAIL due to test numerator confusion: 6 Native V2 source events **plus** 2 distinct reset markers were incorrectly asserted as 8 V2 events. Corrected assertion to 6 without hiding the two reset stamps.
+
+These are **pipeline/test failures**, not invalidated SimC APL hypotheses or evidence that a certain resource policy is wrong. Do not mark Native PASS for this successor until a compiled public-profile run independently proves reset stamps and epoch-aware comparison.
+
+**Successor CI:** [41055221198](https://github.com/degong2-code/zrotationhelper/actions/runs/41055221198). Source-pinned V2-only run 41053700577 remains separate evidence. Next exact action: inspect the actual reset-count/epoch distribution and per-resource match/conflict/unknown results from the successor, then audit what remains unverified. No user-facing recommendation or MAIN/FROZEN promotion.
