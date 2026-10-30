@@ -36,7 +36,7 @@ jobs:
           docker run --rm -v "$ROOT:/capture" "$SIMC_IMAGE" \
             profiles/MID2/MID2_Shaman_Enhancement.simc \
             iterations=1 threads=1 calculate_scale_factors=0 \
-            max_time=60 vary_combat_length=0 \
+            max_time=60 vary_combat_length=0 seed=1247695 \
             log=1 log_spell_id=1 report_details=1 \
             "save_actions=/capture/simc_effective_actions.simc" \
             "json2=/capture/simc_native_sequence.json" \
@@ -105,6 +105,7 @@ jobs:
               "schema":"ZrotPublicNativeProofResearchV1",
               "research_branch_sha":os.environ["GITHUB_SHA"],
               "image_digest":receipt["image_digest"],
+              "simc_seed":1247695,
               "binary_sha256":binary_sha,
               "public_profile_sha256":receipt["profile_sha256"],
               "effective_apl_sha256":receipt["effective_apl_sha256"],
