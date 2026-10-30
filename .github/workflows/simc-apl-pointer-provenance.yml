@@ -9,6 +9,8 @@ on:
       - "tools/research/simc_apl_pointer_native_probe.py"
       - "tools/research/simc_apl_selection_callsite_instrument.py"
       - "tools/research/simc_apl_foreground_selection_instrument.py"
+      - "tools/research/simc_native_resource_change_instrument.py"
+      - "tools/research/simc_native_resource_change_probe.py"
       - ".github/workflows/simc-apl-pointer-provenance.yml"
   workflow_dispatch:
 
@@ -35,6 +37,8 @@ jobs:
           python tools/research/simc_apl_pointer_provenance_audit.py --self-test
           python tools/research/simc_apl_selection_callsite_instrument.py --self-test
           python tools/research/simc_apl_foreground_selection_instrument.py --self-test
+          python tools/research/simc_native_resource_change_instrument.py --self-test
+          python tools/research/simc_native_resource_change_probe.py --self-test
       - name: Checkout exact upstream SimulationCraft source
         shell: bash
         run: |
@@ -56,6 +60,8 @@ jobs:
           test -s "$RUNNER_TEMP/simc-callsite-source-receipt.json"
           python tools/research/simc_apl_foreground_selection_instrument.py --upstream-root "$RUNNER_TEMP/simc-pinned" > "$RUNNER_TEMP/simc-select-branch-receipt.json"
           test -s "$RUNNER_TEMP/simc-select-branch-receipt.json"
+          python tools/research/simc_native_resource_change_instrument.py --upstream-root "$RUNNER_TEMP/simc-pinned" > "$RUNNER_TEMP/simc-resource-change-source-receipt.json"
+          test -s "$RUNNER_TEMP/simc-resource-change-source-receipt.json"
       - name: Compile separate research-only source binary (no game changes)
         shell: bash
         run: |
@@ -65,7 +71,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
           cmake --build "$RUNNER_TEMP/simc-pinned-build" --target simc -j 2
           test -s "$RUNNER_TEMP/simc-pinned-build/simc"
-      - name: Run three public profiles and audit pointer plus native select_action branch evidence
+      - name: Run three public profiles and audit action origins plus real native resource mutations
         shell: bash
         env:
           PROVENANCE_SUMMARY: ${{ runner.temp }}/zrot-pointer-provenance-summary.json
@@ -85,5 +91,6 @@ jobs:
             ${{ runner.temp }}/simc-pointer-source-receipt.json
             ${{ runner.temp }}/simc-callsite-source-receipt.json
             ${{ runner.temp }}/simc-select-branch-receipt.json
+            ${{ runner.temp }}/simc-resource-change-source-receipt.json
           if-no-files-found: error
           retention-days: 7
