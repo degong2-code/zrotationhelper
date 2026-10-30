@@ -7,6 +7,7 @@ on:
       - "tools/research/simc_apl_pointer_instrument.py"
       - "tools/research/simc_apl_pointer_provenance_audit.py"
       - "tools/research/simc_apl_pointer_native_probe.py"
+      - "tools/research/simc_apl_selection_callsite_instrument.py"
       - ".github/workflows/simc-apl-pointer-provenance.yml"
   workflow_dispatch:
 
@@ -31,6 +32,7 @@ jobs:
         run: |
           python tools/research/simc_apl_pointer_instrument.py --self-test
           python tools/research/simc_apl_pointer_provenance_audit.py --self-test
+          python tools/research/simc_apl_selection_callsite_instrument.py --self-test
       - name: Checkout exact upstream SimulationCraft source
         shell: bash
         run: |
@@ -48,6 +50,8 @@ jobs:
             --upstream-root "$RUNNER_TEMP/simc-pinned" \
             > "$RUNNER_TEMP/simc-pointer-source-receipt.json"
           test -s "$RUNNER_TEMP/simc-pointer-source-receipt.json"
+          python tools/research/simc_apl_selection_callsite_instrument.py --upstream-root "$RUNNER_TEMP/simc-pinned" > "$RUNNER_TEMP/simc-callsite-source-receipt.json"
+          test -s "$RUNNER_TEMP/simc-callsite-source-receipt.json"
       - name: Compile separate research-only source binary (no game changes)
         shell: bash
         run: |
@@ -75,5 +79,6 @@ jobs:
           path: |
             ${{ runner.temp }}/zrot-pointer-provenance-summary.json
             ${{ runner.temp }}/simc-pointer-source-receipt.json
+            ${{ runner.temp }}/simc-callsite-source-receipt.json
           if-no-files-found: error
           retention-days: 7
