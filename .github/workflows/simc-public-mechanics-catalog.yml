@@ -6,6 +6,7 @@ on:
     paths:
       - "tools/research/simc_spell_query_catalog.py"
       - "tools/research/simc_spell_query_public_probe.py"
+      - "tools/research/simc_spell_query_scope_filter.py"
       - ".github/workflows/simc-public-mechanics-catalog.yml"
   workflow_dispatch:
 
@@ -22,7 +23,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Test cross-spec candidate catalog parser, no live calls
-        run: python tools/research/simc_spell_query_catalog.py --self-test
+        run: |
+          python tools/research/simc_spell_query_catalog.py --self-test
+          python tools/research/simc_spell_query_scope_filter.py --self-test
       - name: Extract public XML from pinned actual SimC binary
         env:
           ZROT_PUBLIC_CATALOG_SUMMARY: ${{ runner.temp }}/zrot-public-mechanics-catalog-summary.json
