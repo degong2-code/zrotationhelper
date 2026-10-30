@@ -67,3 +67,12 @@ Before expanding source hooks or claiming full resource readiness:
 2. Find a *generic deterministic fixture* that actually executes `recalculate_resource_max()` and validates its C++ trace on a real event, or record it as NOT COVERED. Avoid a class-specific hack in generic engine.
 3. Inventory/classify real persistent direct-write paths across the pinned source tree without mistaking temporary `pool_resource.ready()` trials for genuine state changes. Only instrument gaps shown to materially affect user-facing condition/readiness.
 4. After state producer semantics and completeness are adequate, add buff/cooldown/charge/target state and source-backed operand mapping, then compare generic evaluator to actual select_action decisions. Independent WCL blind lane remains locked separately until candidate lock; no MAIN promotion, frozen baseline or Seq changes.
+
+
+## Later critical source-order qualification (successor 2026-10-30)
+
+The independent select-entry diagnostic source audit uncovered **noncausal/ambiguous producer joins** that earlier time-filtered counts could not detect. See [DEVELOPER_NOTE_NATIVE_SELECT_RESOURCE_DIAGNOSTIC_20261030.md](DEVELOPER_NOTE_NATIVE_SELECT_RESOURCE_DIAGNOSTIC_20261030.md) and Native run [41034104957](https://github.com/degong2-code/zrotationhelper/actions/runs/41034104957).
+
+The former **24 spawn-associated INIT observations with `timestamp < final select_action time`** and **489 gain/loss events with `timestamp < final select_action time`** are valid **source event count and timestamp-filter counts**, but **NOT independently certified members of the same causal native execution epoch**. Native comparison found 1,390 log-order ambiguous and 62 same-ms ambiguous pairs across 1,452 resource field checks; zero comparisons were eligible for a certified consistency conclusion. Earlier CI PASS remains authentic for exactly the checks it ran (source hook, log SHA, projection, local `<t` filter), not for a stronger causal state claim. This is a **producer identity/causal join insufficiency**, not evidence that SimC APL is wrong or a specific class resource rule failed.
+
+**Authoritative research Exact Next:** add runtime-generated monotonic event sequence plus genuine simulation iteration/epoch identity to ALL resource and select-entry markers at source emission, then independently verify joining and only then repeat actual PRE current/max comparison. Do not retroactively reinterpret the previous sample as full PRE, READY or user-facing General Rotation.
