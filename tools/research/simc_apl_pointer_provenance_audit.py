@@ -50,7 +50,8 @@ def _expected_rows(apl_bytes:bytes):
 def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
                                         *,effective_apl_sha256:str,
                                         expected_upstream_sha:str=UPSTREAM_SHA,
-                                        require_callsite_proof:bool=False):
+                                        require_callsite_proof:bool=False,
+                                        require_selection_proof:bool=False):
     if expected_upstream_sha!=UPSTREAM_SHA:
         raise ValueError("INSTRUMENTED_UPSTREAM_PIN_MISMATCH")
     if hashlib.sha256(apl_bytes).hexdigest()!=effective_apl_sha256:
@@ -68,6 +69,7 @@ def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
     apl=_expected_rows(apl_bytes)
     statuses=Counter()
     callsite_counts=Counter()
+    selection_counts=Counter()
     event_results=[]
     for sequence,key in [("PRECOMBAT","action_sequence_precombat"),("COMBAT","action_sequence")]:
         records=collected.get(key,[])
@@ -117,6 +119,33 @@ def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
                 raise ValueError("INSTRUMENTED_SEQUENCE_CALLSITE_MISSING")
             if (origin=="PRECOMBAT_DIRECT" and sequence!="PRECOMBAT"):
                 raise ValueError("INSTRUMENTED_PRECOMBAT_CALLSITE_ON_COMBAT_RECORD")
+            selection=record.get("zrot_foreground_selection_path")
+            is_action="name" in record and record.get("wait") is None
+            valid_selection=("SELECT_ACTION_FOREGROUND","STRICT_SEQUENCE",
+                             "SPELL_QUEUED_ACTION","NOT_APPLICABLE",
+                             "UNKNOWN_FOREGROUND_BRANCH")
+            if not is_action:
+                if selection is not None or origin not in ("WAIT_NON_ACTION",):
+                    raise ValueError("INSTRUMENTED_WAIT_HAS_SELECTION_PROVENANCE")
+                selection="WAIT_NON_ACTION"
+            else:
+                if selection is None:
+                    selection="MISSING_SELECTION_PROVENANCE"
+                if selection not in valid_selection+("MISSING_SELECTION_PROVENANCE",):
+                    raise ValueError("INSTRUMENTED_SELECTION_BRANCH_INVALID")
+                if origin=="FOREGROUND_EXECUTE_ACTION":
+                    if selection=="NOT_APPLICABLE":
+                        raise ValueError("INSTRUMENTED_FOREGROUND_BRANCH_NOT_APPLICABLE")
+                    if require_selection_proof and selection in (
+                        "MISSING_SELECTION_PROVENANCE","UNKNOWN_FOREGROUND_BRANCH"):
+                        raise ValueError("INSTRUMENTED_FOREGROUND_SELECTION_UNPROVEN")
+                else:
+                    if require_selection_proof and selection!="NOT_APPLICABLE":
+                        raise ValueError("INSTRUMENTED_NONFOREGROUND_SELECTION_CONFLICT")
+                    if selection in ("SELECT_ACTION_FOREGROUND","STRICT_SEQUENCE",
+                                     "SPELL_QUEUED_ACTION"):
+                        raise ValueError("INSTRUMENTED_SELECTION_WITHOUT_FOREGROUND_CALLSITE")
+            selection_counts[selection]+=1
             callsite_counts[origin]+=1
             statuses[status]+=1
             event_results.append({
@@ -126,7 +155,11 @@ def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
                 "native_action_timestamp_s":record.get("time"),
                 "pointer_proof_status":status,
                 "sequence_add_callsite":origin,
-                "foreground_apl_select_action_confirmed":False,
+                "foreground_selection_path":selection,
+                "foreground_apl_select_action_confirmed":
+                    selection=="SELECT_ACTION_FOREGROUND"
+                    and status=="POINTER_ROW_AND_EXACT_EFFECTIVE_APL_SIGNATURE_MATCH"
+                    and origin=="FOREGROUND_EXECUTE_ACTION",
                 "source_apl_list":matched["list"] if matched else None,
                 "source_apl_rank":matched["ordinal"] if matched else None,
                 "source_apl_file_line":matched["source_file_line"] if matched else None,
@@ -144,6 +177,9 @@ def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
         "native_sequence_rows":len(event_results),
         "pointer_status_counts":dict(sorted(statuses.items())),
         "sequence_callsite_status_counts":dict(sorted(callsite_counts.items())),
+        "foreground_selection_path_counts":dict(sorted(selection_counts.items())),
+        "source_bound_native_select_action_rows":sum(
+            int(row["foreground_apl_select_action_confirmed"]) for row in event_results),
         "sequence_provenance":event_results,
         "source_binding_proof":"NATIVE_ACTION_OBJECT_POINTER_MATCH_ONLY",
         "selected_foreground_apl_action":"NOT_CERTIFIED",
@@ -153,7 +189,8 @@ def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
     }
 
 
-def audit_captured_native(root:Path,*,require_callsite_proof:bool=False):
+def audit_captured_native(root:Path,*,require_callsite_proof:bool=False,
+                          require_selection_proof:bool=False):
     receipt,raw=_raw_verified(root)
     effective=(root/"simc_effective_actions.simc").read_bytes()
     if hashlib.sha256(effective).hexdigest()!=receipt["effective_apl_sha256"]:
@@ -169,7 +206,8 @@ def audit_captured_native(root:Path,*,require_callsite_proof:bool=False):
         raise ValueError("INSTRUMENTED_JSON2_INVALID") from e
     report=audit_native_provenance_from_parsed(
         source,effective,effective_apl_sha256=receipt["effective_apl_sha256"],
-        require_callsite_proof=require_callsite_proof)
+        require_callsite_proof=require_callsite_proof,
+        require_selection_proof=require_selection_proof)
     report.update({
         "source_profile_sha256":receipt["profile_sha256"],
         "source_native_json2_sha256":receipt["native_json2_sha256"],
@@ -216,6 +254,39 @@ def selftest():
     assert classified["sequence_callsite_status_counts"]=={"FOREGROUND_EXECUTE_ACTION":3}
     assert all(not x["foreground_apl_select_action_confirmed"]
                for x in classified["sequence_provenance"])
+    selection_report=json.loads(json.dumps(added))
+    row_list=selection_report["sim"]["players"][0]["collected_data"]["action_sequence"]
+    for rec in row_list:
+        rec["zrot_foreground_selection_path"]="SELECT_ACTION_FOREGROUND"
+    strict=audit_native_provenance_from_parsed(
+        selection_report,effective,
+        effective_apl_sha256=hashlib.sha256(effective).hexdigest(),
+        require_callsite_proof=True,require_selection_proof=True)
+    assert strict["source_bound_native_select_action_rows"]==3
+    assert strict["foreground_selection_path_counts"]=={"SELECT_ACTION_FOREGROUND":3}
+    assert all(rec["is_foreground_decision_certified"] is False
+               for rec in strict["sequence_provenance"])
+    row_list[0]["zrot_foreground_selection_path"]="STRICT_SEQUENCE"
+    row_list[1]["zrot_foreground_selection_path"]="SPELL_QUEUED_ACTION"
+    mixed=audit_native_provenance_from_parsed(
+        selection_report,effective,
+        effective_apl_sha256=hashlib.sha256(effective).hexdigest(),
+        require_callsite_proof=True,require_selection_proof=True)
+    assert mixed["source_bound_native_select_action_rows"]==1
+    row_list[1]["zrot_foreground_selection_path"]="NOT_APPLICABLE"
+    try:audit_native_provenance_from_parsed(
+        selection_report,effective,
+        effective_apl_sha256=hashlib.sha256(effective).hexdigest(),
+        require_callsite_proof=True,require_selection_proof=True)
+    except ValueError as e:assert str(e)=="INSTRUMENTED_FOREGROUND_BRANCH_NOT_APPLICABLE"
+    else:raise AssertionError("FALSE_FOREGROUND_PROOF_ACCEPTED")
+    del row_list[1]["zrot_foreground_selection_path"]
+    try:audit_native_provenance_from_parsed(
+        selection_report,effective,
+        effective_apl_sha256=hashlib.sha256(effective).hexdigest(),
+        require_callsite_proof=True,require_selection_proof=True)
+    except ValueError as e:assert str(e)=="INSTRUMENTED_FOREGROUND_SELECTION_UNPROVEN"
+    else:raise AssertionError("MISSING_FOREGROUND_PROOF_ACCEPTED")
     try:audit_native_provenance_from_parsed(
         doc,effective,effective_apl_sha256=hashlib.sha256(effective).hexdigest(),
         require_callsite_proof=True)
