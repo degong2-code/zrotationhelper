@@ -4,9 +4,9 @@
   "owner": "RESEARCH_BRANCH",
   "repository": "degong2-code/zrotationhelper",
   "branch": "work/github-ci-bootstrap",
-  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V5.md",
-  "canonical_handoff_blob_sha": "ec981ecab87fcd296b1906571e2955ccd287c691",
-  "research_code_evidence_sha": "45eceaa88835fe3c5deac2f8095763fd30f154f1",
+  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V6.md",
+  "canonical_handoff_blob_sha": "1636f64f09d96e188cf2ddaef2910da88ebbbdb8",
+  "research_code_evidence_sha": "df6d055bfd3f3e837cc703baf9c38f6ed3fe9f1b",
   "github_main_observed_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
   "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
   "actual_native_eval_ci": {
@@ -39,9 +39,32 @@
   "seq637_actual_local_result": "UNKNOWN",
   "seq578_and_frozen": "UNCHANGED_NO_PROMOTION",
   "shared_authoritative_state_mutated": false,
-  "next": "EXACT_SOURCE_ROW_OWNER_FOR_RAGE_FURY_USING_MINIMAL_GENERIC_EVAL_CONTEXT_PROVENANCE",
+  "next": "MINIMUM_IF_GUARD_EVAL_CALLSITE_AND_READINESS_EVIDENCE_GAP",
   "verified_as_of": "2026-10-31",
   "source_route_audit_path": "docs/DEVELOPER_NOTE_PINNED_APL_BARE_RESOURCE_EVAL_REACHABILITY_20261031.md",
   "source_route_audit_blob_sha": "c348162d309155658fbddc9c2e715a2966b54f2d",
-  "source_route_evidence": "STATIC_PINNED_PUBLIC_APL_AND_CPP_ONLY_NOT_NATIVE_ROW_ATTRIBUTION"
+  "source_route_evidence": "STATIC_PINNED_PUBLIC_APL_AND_CPP_ONLY_NOT_NATIVE_ROW_ATTRIBUTION",
+  "source_owner_audit_path": "docs/DEVELOPER_NOTE_PINNED_NATIVE_APL_EVAL_OWNER_20261031.md",
+  "source_owner_audit_blob_sha": "196dcaa477e7098f82682c64a021c429d9a270d5",
+  "native_apl_owner_ci": {
+    "run_id": 41080523109,
+    "conclusion": "success",
+    "code_sha": "df6d055bfd3f3e837cc703baf9c38f6ed3fe9f1b",
+    "executable_sha256": "e6562a937e81ba11c12167e83e99ffb53a55fa0bf44a8f5c7eee9a96839dbc5e",
+    "attempt_scopes": 9335,
+    "evals": 266,
+    "pointer_matched_attempt_contexts": 261,
+    "unknown_contexts": 5
+  },
+  "native_owner_offline_ci": {
+    "run_id": 41080523421,
+    "conclusion": "success",
+    "python_versions": [
+      "3.12",
+      "3.14"
+    ],
+    "code_sha": "df6d055bfd3f3e837cc703baf9c38f6ed3fe9f1b"
+  },
+  "direct_if_guard_operand_certified": 0,
+  "raw_native_marker_artifact_retained": false
 }
