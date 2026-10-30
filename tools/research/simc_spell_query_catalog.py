@@ -183,6 +183,62 @@ def build_catalog(request:dict,*,binary_sha256:str,image_digest:str,
     }
 
 
+
+def link_catalog_candidates_to_route(route:dict,catalog:dict)->dict:
+    """Join query evidence to action tokens by exact identity, not spell truth.
+
+    A unique DBC record is still NOT independently proven to be the APL
+    action used by the actor. Every readiness status stays UNKNOWN.
+    """
+    if route.get("schema")!=ROUTE_SCHEMA or catalog.get("schema")!=_SCHEMA:
+        raise ValueError("CATALOG_ROUTE_JOIN_SCHEMA")
+    for key,cat_key in (("spec","spec"),("source_apl_sha256","source_apl_sha256"),
+                        ("source_profile_sha256","source_profile_sha256")):
+        if route.get(key)!=catalog.get(cat_key):
+            raise ValueError("CATALOG_ROUTE_SOURCE_MISMATCH_"+key)
+    route_binary=route.get("source_simc_executable_sha256")
+    if route_binary is not None and route_binary!=catalog.get("simc_executable_sha256"):
+        raise ValueError("CATALOG_ROUTE_BINARY_MISMATCH")
+    if route.get("gameplay_rule_promotion") is not False or catalog.get("gameplay_rule_promotion") is not False:
+        raise ValueError("CATALOG_ROUTE_PROMOTION_FORBIDDEN")
+    allowed={x["action_token"] for x in route["readiness"]}
+    query_rows=catalog.get("spell_query_results")
+    if not isinstance(query_rows,list) or len(query_rows)!=catalog.get("source_query_token_count"):
+        raise ValueError("CATALOG_QUERY_ROW_COUNT_MISMATCH")
+    by_token={}
+    for item in query_rows:
+        token=item.get("query_token") if isinstance(item,dict) else None
+        if token not in allowed or token in by_token:
+            raise ValueError("CATALOG_QUERY_TOKEN_NOT_IN_SOURCE_APL")
+        if item.get("exact_name_candidate_count")!=len(item.get("candidate_spells",[])):
+            raise ValueError("CATALOG_CANDIDATE_COUNT_MISMATCH")
+        by_token[token]=item
+    results=[]
+    for token in sorted(allowed):
+        record=by_token.get(token)
+        candidates=(record["candidate_spells"] if record else [])
+        results.append({
+            "action_token":token,
+            "spell_id_candidates":[x["spell_id"] for x in candidates],
+            "query_status":record["resolution_status"] if record else "NOT_QUERYED",
+            "source_xml_sha256":record["raw_xml_sha256"] if record else None,
+            "identity_status":"UNVERIFIED_APL_ACTION_MAPPING",
+            "runtime_readiness":"UNKNOWN",
+            "mechanic_effect_coverage":"DBC_RECORD_ONLY_NOT_RUNTIME",
+        })
+    return {
+        "schema":"ZrotSimcGenericCatalogActionCandidateJoinV1",
+        "spec":catalog["spec"],"source_apl_sha256":catalog["source_apl_sha256"],
+        "source_simc_executable_sha256":catalog["simc_executable_sha256"],
+        "route_action_count":len(allowed),"queried_action_count":len(by_token),
+        "action_candidates":results,
+        "source_profile_and_apl_identity_pinned":route_binary is not None,
+        "apl_action_identity_certified":False,
+        "all_readiness":"UNKNOWN",
+        "gameplay_rule_promotion":False,
+    }
+
+
 def selftest():
     from simc_apl_source_engine import ingest_actions
     from simc_apl_conditional_ir import compile_structural_ir
@@ -207,6 +263,17 @@ def selftest():
         assert record["candidate_spells"][0]["dbc_fields"]["cooldown"]=="8"
         assert record["candidate_spells"][0]["dbc_subrecords"]["resource"][0]["cost"]=="30"
         assert not result["apl_action_spell_mapping_certified"] and result["readiness"]=="UNKNOWN"
+        joined=link_catalog_candidates_to_route(route,result)
+        assert joined["queried_action_count"]==1
+        assert joined["route_action_count"]==2
+        assert joined["action_candidates"][0]["identity_status"]=="UNVERIFIED_APL_ACTION_MAPPING"
+        assert joined["all_readiness"]=="UNKNOWN"
+        assert sum(x["query_status"]=="NOT_QUERYED" for x in joined["action_candidates"])==1
+        assert not joined["gameplay_rule_promotion"]
+        try:link_catalog_candidates_to_route({**route,"spec":"wrong"},result)
+        except ValueError as e:assert str(e)=="CATALOG_ROUTE_SOURCE_MISMATCH_spec"
+        else:raise AssertionError("CROSS_SPEC_IDENTITY_ACCEPTED")
+
         assert not result["gameplay_rule_promotion"]
         dup=(b'<spell_query><spell id="101" name="Alpha Strike" />'
              b'<spell id="202" name="Alpha Strike" /></spell_query>')
