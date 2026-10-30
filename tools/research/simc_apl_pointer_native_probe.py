@@ -129,15 +129,27 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
             decision_time_ms=min(
                 int(Decimal(str(x["native_action_timestamp_s"]))*1000)
                 for x in source_selected)
-            if decision_time_ms<0:
-                raise ValueError("NATIVE_RESOURCE_NEGATIVE_FIRST_SELECTION_TIME")
+            last_decision_time_ms=max(
+                int(Decimal(str(x["native_action_timestamp_s"]))*1000)
+                for x in source_selected)
+            if decision_time_ms<0 or last_decision_time_ms<decision_time_ms:
+                raise ValueError("NATIVE_RESOURCE_INVALID_SELECTION_TIME_RANGE")
             boundary=native_resource_pre_gate(
                 effective_model,blobs[names[1]],
                 expected_log_sha256=receipt["native_log_sha256"],
                 decision_timestamp_ms=decision_time_ms)
-            if boundary["readiness"]!="UNKNOWN" or (
-                    boundary["gameplay_rule_promotion"] is not False):
+            late_boundary=native_resource_pre_gate(
+                effective_model,blobs[names[1]],
+                expected_log_sha256=receipt["native_log_sha256"],
+                decision_timestamp_ms=last_decision_time_ms)
+            if (boundary["readiness"]!="UNKNOWN" or
+                late_boundary["readiness"]!="UNKNOWN" or
+                boundary["gameplay_rule_promotion"] is not False or
+                late_boundary["gameplay_rule_promotion"] is not False):
                 raise ValueError("NATIVE_RESOURCE_UNVERIFIED_READINESS")
+            if raw_resource["source_event_count"]>0 and (
+                late_boundary.get("accepted_strictly_earlier_raw_events",0)<=0):
+                raise ValueError("NATIVE_RESOURCE_NO_EARLIER_EVENT_AT_LAST_SELECTION")
             summaries.append({
                 "spec":spec,
                 "resource_log_source_sha256":receipt["native_log_sha256"],
@@ -152,6 +164,12 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
                 "resource_strict_pre_status":boundary.get("state_status"),
                 "resource_trace_status":boundary.get("trace_status","BLOCKED_UNKNOWN"),
                 "resource_readiness":boundary["readiness"],
+                "resource_event_last_select_action_decision_ms":last_decision_time_ms,
+                "resource_events_strictly_before_last_selected_action":
+                    late_boundary.get("accepted_strictly_earlier_raw_events",0),
+                "resource_last_strict_pre_status":late_boundary.get("state_status"),
+                "resource_last_trace_status":late_boundary.get("trace_status","BLOCKED_UNKNOWN"),
+                "resource_last_candidate_action":late_boundary.get("trace_candidate_action_token"),
                 "resource_semantic_coverage":"PARTIAL_GAIN_LOSS_ONLY_NOT_CERTIFIED",
                 "profile_sha256":profile_sha,
                 "effective_apl_sha256":receipt["effective_apl_sha256"],
