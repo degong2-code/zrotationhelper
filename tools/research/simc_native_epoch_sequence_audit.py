@@ -356,6 +356,20 @@ def selftest():
     assert compare_epoch_bound_resources(
         polluted,parse_epoch_native_log(polluted,sha(polluted)))["comparison_counts"]=={
         "CONSISTENT_PRIOR_SOURCE_VALUE":6}
+    # Same current_iteration can still contain a second native sim_t reset.
+    # Treat each reset boundary as its own clock epoch.
+    repeated=reset(0,0)+event("INIT",1,0,cur=10)+diag(10,10,seq=2)+(
+        reset(0,4)+event("INIT",5,0,cur=30)+diag(10,30,seq=6))
+    repeat_src=parse_epoch_native_log(repeated,sha(repeated))
+    assert repeat_src["reset_boundary_count"]==2
+    assert independent_epoch_audit(repeated,repeat_src)["event_count"]==8
+    assert compare_epoch_bound_resources(repeated,repeat_src)[
+        "comparison_counts"]=={"CONSISTENT_PRIOR_SOURCE_VALUE":4}
+    # No epoch reset stamp = not a source-verified execution window.
+    missing_reset=event("INIT",1,0)+diag(10,10,seq=2)
+    try:parse_epoch_native_log(missing_reset,sha(missing_reset))
+    except ValueError as e:assert str(e)=="EPOCH_RESET_SOURCE_BOUNDARY_NOT_OBSERVED"
+    else:raise AssertionError("MISSING_RUNTIME_RESET_BOUNDARY_ACCEPTED")
     # A same-millisecond source is excluded independent of sequence order.
     equal=reset(0,0)+event("INIT",1,10)+diag(10,10,seq=2)
     checked=compare_epoch_bound_resources(equal,parse_epoch_native_log(equal,sha(equal)))
