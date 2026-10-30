@@ -37,3 +37,36 @@ The raw resource log is a Native research binary artifact tied to source SHA, bu
 
 ## Evidence pointer
 Dedicated Native workflow: https://github.com/degong2-code/zrotationhelper/actions/runs/41022542615 (result pending as of this initial note). A subsequent branch-local evidence update shall record actual run conclusion, resource counts, patch and executable SHA and any pipeline failure. No claim of actual live WCL or Blizzard production validation.
+
+
+## Native verification successor — confirmed actual PRE events
+
+The initial resource-trace native run [41022542615](https://github.com/degong2-code/zrotationhelper/actions/runs/41022542615) **SUCCESS** with source C++ compile, three public profiles, 496 actual resource mutations, full logged-marker byte-projection and independent recomputation. Every profile's first pointer-backed `SELECT_ACTION_FOREGROUND` was at `t=0ms`, leaving zero nonnegative resource events strictly earlier than that first decision. That result was kept as a genuine boundary, not altered by negative timestamps or post-action snapshots.
+
+The **successor run** [41023255296](https://github.com/degong2-code/zrotationhelper/actions/runs/41023255296) **SUCCESS**. Same source instrumentation and fixed public profile set; Python research probe added a second event-relative anchor: **the actual final pointer-backed `SELECT_ACTION_FOREGROUND` timestamp from that exact run**. SHA receipt, native log and original effective APL identity all match the modified executable. No synthetic resource events were added or timestamps moved.
+
+| Source-pinned public profile | Native gain/loss markers | First select_action ms | Strictly before first | Final select_action ms | Strictly before final | Actual pointer-backed native select_action samples |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Enhancement Shaman | 165 | 0 | 0 | 54411 | 162 | 64 |
+| Fury Warrior | 192 | 0 | 0 | 54181 | 191 | 76 |
+| Unholy Death Knight | 139 | 0 | 0 | 54381 | 136 | 66 |
+| **Total** | **496** | — | **0** | — | **489** | **206** |
+
+Source upstream commit: `710c2408bfd3ae4df71b8cd55cdf01f63fd6c926`. Newly compiled **successor-run** executable SHA256 `55f9770682c177cc45c95a0af3c2516e6b989691bfebce4c8d05278f74170da3`. Previous initial-run executable SHA256 `a15852626098eca38b188a72c2a4de72e4aaab3496065a1431581c6f8`; they are separate run artifacts and were not conflated.
+
+**Both native runs** independently recalculated the raw logged mutation rows and byte-addressed normalized NDJSON, and ran the existing Strict PRE adapter; latest run classified all three final decision boundaries as `NATIVE_RESOURCE_MUTATIONS_OBSERVED_BUT_UNBOUND`. **All three conditional APL replays were BLOCKED with no recommended action**. This is an appropriate result: no verified SimC operand mapping, full resource state producer coverage, buff/cooldown/charge/target readiness or native decision-time semantic equivalence is in evidence.
+
+The 489 figure is the number of actual gain/loss change records strictly prior to the final selected action in these three source-locked fixture runs. It is **not** 489 fully observed actions, an instruction accuracy rate, a complete state snapshot, or 489 usable gameplay rules. The independently captured Native action-selection count 206 belongs to an action-identity evidence lane, not the same denominator as 489 resource mutation events.
+
+**Offline verification:** [41023255328](https://github.com/degong2-code/zrotationhelper/actions/runs/41023255328) Python 3.12/3.14 SUCCESS at the successor Python-probe code commit. Synthetic producer/validator tests at the native workflow step passed. No WCL API, live Blizzard patch, current game actor readiness or independent blind WCL replay was performed.
+
+### Decision and exact next
+
+The source-backed resource gain/loss producer is now empirically functioning; repeating fixed profiles or expanding lexical candidate counts is lower value than closing the *state completeness and semantics* gap.
+
+- Identify and capture native **resource initialization and max/current direct-write** paths, preferably with a bounded completeness audit against independent in-simulator snapshots. Do not infer missing resource values from last observed gain/loss or backdate snapshots to decision PRE.
+- Add verified actor/target identity, spec/build binding and a generic resource operand semantics adapter. Before mapping to `rage`, `runic_power`, etc., establish exact native expression evaluation equivalence; do not use a textual name match as truth.
+- Capture source-accountable buff/cooldown/charge changes if they alter decisions. Only then apply the shared evaluator to source-locked Native foreground rows; report match/conflict/unknown separately and use a previously unused build/spec as holdout.
+- Preserve independent WCL blind discovery until candidate lock. Native SimC source consistency is not optimality or user-facing rule validation.
+
+Owner remains BRANCH. No changes to MAIN, FROZEN/Seq578, canonical registry, global handoff or active production pointer. Seq637 UNKNOWN.
