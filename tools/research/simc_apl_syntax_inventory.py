@@ -61,6 +61,11 @@ def parse(txt: str):
                 raise ValueError('EMPTY_APL_LINE_' + str(ln))
             tokens = split_args(value)
             cmd = tokens[0]
+            # Official SimC util::string_split defaults to skip_empty_entries.
+            # Preserve the source line and record ignored empty option slots.
+            empty_option_slots = sum(token == '' for token in tokens[1:])
+            if empty_option_slots:
+                tokens = [cmd] + [token for token in tokens[1:] if token]
             if not re.fullmatch(r'[a-zA-Z0-9_]+', cmd):
                 raise ValueError('INVALID_APL_COMMAND_' + str(ln))
             params = []
@@ -87,7 +92,8 @@ def parse(txt: str):
                 'command': cmd, 'params': params,
                 'condition': cond[0] if cond else None,
                 'kind': kind, 'call_target': target[0] if target else None,
-                'source_literal': s, 'promotion': 'HYPOTHESIS_ONLY',
+                'source_literal': s, 'ignored_empty_option_slots': empty_option_slots,
+                'promotion': 'HYPOTHESIS_ONLY',
                 'readiness': 'UNKNOWN', 'playable': False,
             }
             lists[group].append(row)
@@ -161,6 +167,8 @@ def selftest():
     assert x['opaque_condition_rows'] == 4 and x['list_call_rows'] == 2
     assert x['recommendations'] == 0 and x['readiness'] == 'UNKNOWN'
     assert x['expression_semantics'] == 'OPAQUE_NOT_EVALUATED'
+    assert parse('actions=alpha,,if=x=1')[1]['default'][0]['ignored_empty_option_slots'] == 1
+    assert parse('actions=alpha,,if=x=1')[1]['default'][0]['params'] == [['if','x=1']]
     assert split_args('spell,if=(a|b)&c,use_off_gcd=1') == [
         'spell', 'if=(a|b)&c', 'use_off_gcd=1']
     cases = (
