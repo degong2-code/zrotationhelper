@@ -135,6 +135,7 @@ def compile_decision_graph(ir: dict) -> dict:
             nodes[node_id] = {
                 "kind": "IF_ELSE_PRIORITY_ROW",
                 "source_line": row.get("source_line"),
+                "source_empty_option_slots_ignored":row.get("source_empty_option_slots_ignored",0),
                 "list_name": list_name,
                 "priority_in_list": index + 1,
                 "command": command,
@@ -172,6 +173,7 @@ def compile_decision_graph(ir: dict) -> dict:
         "list_exits": list_exit,
         "nodes": nodes,
         "source_row_count": ir["total_rows"],
+        "source_empty_option_slots_ignored": ir.get("source_empty_option_slots_ignored",0),
         "action_candidate_rows": action_node_count,
         "required_state_operands": sorted(operands),
         "state_operand_namespace_counts": dict(sorted(namespace_counts.items())),
@@ -225,6 +227,13 @@ def selftest():
         assert "buff.proc.up" in out["required_state_operands"]
         assert out["state_operand_namespace_counts"]["buff"] == 1
         assert not out["gameplay_rule_promotion"]
+    normalized = (
+        b"spec=synthetic\nactions=alpha,,if=active_enemies=1\n")
+    norm_ir = compile_structural_ir(ingest_actions(normalized,expected_spec="synthetic"))
+    norm_graph = compile_decision_graph(norm_ir)
+    assert norm_graph["source_empty_option_slots_ignored"] == 1
+    assert norm_graph["nodes"]["default:1"]["source_empty_option_slots_ignored"] == 1
+    assert norm_graph["nodes"]["default:1"]["guard"] == "active_enemies=1"
     tampered = compile_structural_ir(ingest_actions(example.encode(),expected_spec="synthetic"))
     tampered["source_apl_sha256"] = "not_sha"
     try:
