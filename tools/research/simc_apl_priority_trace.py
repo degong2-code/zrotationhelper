@@ -11,7 +11,7 @@ SimC source: simulationcraft/simc Wiki ActionLists (2026).
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, replace
 from typing import Any, Mapping
 import argparse
 import json
@@ -48,6 +48,7 @@ def trace_priority(
     expected_apl_sha256: str,
     control_feature_keys: Mapping[str, str] | None = None,
     expected_profile_sha256: str | None = None,
+    decision_graph: Mapping[str, Any] | None = None,
 ) -> AplTrace:
     """Traverse one SimC APL scan. Readiness must be external/observed.
 
@@ -65,6 +66,15 @@ def trace_priority(
         raise ValueError("PROFILE_PIN_MISMATCH")
     if model.get("actionable_general_rotation") is not False:
         raise ValueError("PREMATURE_GAMEPLAY_PROMOTION")
+    graph = None
+    if decision_graph is not None:
+        # Compare against the entire recompiled structural source contract,
+        # not just SHA/row count. A tampered graph must never drive behavior.
+        from simc_apl_conditional_ir import compile_structural_ir
+        from simc_apl_decision_graph import compile_decision_graph
+        graph = compile_decision_graph(compile_structural_ir(model))
+        if decision_graph != graph:
+            raise ValueError("DECISION_GRAPH_CANONICAL_MISMATCH")
     strict_pre_state.validate()
     values = bind_strict_pre(strict_pre_state,
                              operand_to_feature=operand_to_feature)
@@ -111,6 +121,30 @@ def trace_priority(
                         decision_timestamp_ms=strict_pre_state.decision_timestamp_ms,
                         state_timestamp_max_ms=strict_pre_state.state_timestamp_max_ms)
 
+    def graph_order(group_name: str, source_rows):
+        if graph is None:
+            return source_rows
+        current = graph["list_entries"][group_name]
+        end = graph["list_exits"][group_name]
+        ordered = []
+        seen_ids = set()
+        while current != end:
+            if current in seen_ids:
+                raise ValueError("DECISION_GRAPH_CYCLE")
+            seen_ids.add(current)
+            node = graph["nodes"][current]
+            rank = node["priority_in_list"]
+            row = source_rows[rank - 1]
+            if (node["kind"] != "IF_ELSE_PRIORITY_ROW"
+                    or row["source_line"] != node["source_line"]
+                    or row["command_token"] != node["command"]):
+                raise ValueError("DECISION_GRAPH_ROW_PROVENANCE_MISMATCH")
+            ordered.append(row)
+            current = node["next_in_list"]
+        if len(ordered) != len(source_rows):
+            raise ValueError("DECISION_GRAPH_ROW_COVERAGE_MISMATCH")
+        return ordered
+
     def visit(group_name: str, active: tuple[str, ...]):
         if group_name in active or len(active) >= 32:
             return outcome(BLOCK, None, group_name, None,
@@ -118,7 +152,7 @@ def trace_priority(
         rows = groups.get(group_name)
         if rows is None:
             return outcome(BLOCK, None, group_name, None, "UNRESOLVED_LIST")
-        for row in rows:
+        for row in graph_order(group_name, rows):
             command = row["command_token"]
             line = row["source_line"]
             params = dict(row["params"])
@@ -171,6 +205,9 @@ def trace_priority(
                     return outcome(BLOCK, None, group_name, line,
                                    "UNSUPPORTED_LIST_MODIFIERS")
                 target = params["name"]
+                events.append({"list":group_name,"line":line,
+                               "command":command,"kind":"LIST_DISPATCH",
+                               "target_list":target})
                 child = visit(target, (*active, group_name))
                 if child.status != EXHAUSTED:
                     return child
@@ -211,7 +248,32 @@ def trace_priority(
         return outcome(EXHAUSTED, None, group_name, None,
                        "NO_ACTION_IN_LIST")
 
-    return visit("default", ())
+    result = visit("default", ())
+    if graph is None:
+        return result
+    # Graph is the traversal order; shared evaluator retains all semantics.
+    # This is not independent validation or certified native SimC parity.
+    mapped = {(node["list_name"],node["source_line"]):node_id
+              for node_id,node in graph["nodes"].items()
+              if node["kind"] == "IF_ELSE_PRIORITY_ROW"}
+    visited = []
+    for event in result.trace:
+        key = (event.get("list"),event.get("line"))
+        if key not in mapped:
+            raise ValueError("DECISION_GRAPH_EVENT_NOT_MAPPED")
+        node_id = mapped[key]
+        if not visited or visited[-1] != node_id:
+            visited.append(node_id)
+    return replace(result, provenance={
+        **result.provenance,
+        "decision_graph_schema":graph["schema"],
+        "decision_graph_source_apl_sha256":graph["source_apl_sha256"],
+        "decision_graph_contract":"EXACT_SOURCE_RECOMPILATION",
+        "evaluation_engine":"SHARED_SIMC_APL_PRIORITY_TRACE",
+        "graph_visited_node_ids":visited,
+        "native_decision_equivalence":"NOT_VALIDATED",
+        "gameplay_promotion":False,
+    })
 
 
 def selftest():
@@ -477,6 +539,8 @@ def main() -> int:
         description="Research-only SimC APL priority trace for a PRE snapshot")
     parser.add_argument("--model", type=Path,
                         help="JSON hypothesis emitted by simc_apl_source_engine.py")
+    parser.add_argument("--decision-graph", type=Path,
+                        help="Optional generated graph for source-pinned traversal")
     parser.add_argument("--snapshot", type=Path,
                         help="JSON with PRE transitions, operand map and readiness keys")
     parser.add_argument("--output", type=Path, help="Write trace JSON")
@@ -578,6 +642,8 @@ def main() -> int:
         control_feature_keys=data.get("control_feature_keys", {}),
         expected_apl_sha256=model["apl_sha256"],
         expected_profile_sha256=model.get("profile_sha256"),
+        decision_graph=(json.loads(options.decision_graph.read_text(encoding="utf-8"))
+                        if options.decision_graph is not None else None),
     )
     payload = {
         **asdict(result),
