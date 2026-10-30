@@ -79,6 +79,28 @@ jobs:
           from simc_native_json_sequence import extract_json_sequence
           events = extract_native_reference(root)
           sequence = extract_json_sequence(root)
+          # Cross-format identity diagnostic. This does NOT infer foreground
+          # APL origin or PRE state. Exact timestamp+token matching only.
+          from collections import Counter
+          native_rows = events["performed_events"]
+          native_available = Counter(
+              (r["timestamp_ms"], r["action_token"]) for r in native_rows)
+          at_time = Counter(r["timestamp_ms"] for r in native_rows)
+          sample_actions = [r for r in (
+              sequence["precombat_sequence"] + sequence["combat_sequence"])
+              if r["record_kind"] == "SAMPLE_ACTION"]
+          sample_exact = 0
+          sample_any_time = 0
+          sample_multi_at_time = 0
+          for r in sample_actions:
+              t = r["timestamp_ms"]
+              key = (t, r["action_token"])
+              sample_any_time += int(at_time[t] > 0)
+              sample_multi_at_time += int(at_time[t] > 1)
+              if native_available[key] > 0:
+                  native_available[key] -= 1
+                  sample_exact += 1
+          assert 0 <= sample_exact <= min(len(sample_actions),len(native_rows))
           summary = {
               "schema":"ZrotPublicNativeProofResearchV1",
               "research_branch_sha":os.environ["GITHUB_SHA"],
@@ -91,6 +113,13 @@ jobs:
               "native_executable_invocation":"COMPLETED_EXIT_ZERO",
               "native_event_parse_status":events["status"],
               "native_performed_event_count":events["performed_event_count"],
+              "diagnostic_json2_sample_action_count":len(sample_actions),
+              "diagnostic_same_time_and_token_matched_count":sample_exact,
+              "diagnostic_same_time_any_native_count":sample_any_time,
+              "diagnostic_same_time_multiple_native_count":sample_multi_at_time,
+              "diagnostic_unmatched_json2_samples":len(sample_actions)-sample_exact,
+              "diagnostic_unmatched_native_performs":len(native_rows)-sample_exact,
+              "diagnostic_scope":"CROSS_FORMAT_IDENTITY_ONLY_NOT_FOREGROUND_OR_PRE",
               "unrecognized_performs_count":events["unrecognized_performs_event_count"],
               "json2_sequence_status":sequence["status"],
               "json2_precombat_count":sequence["precombat_count"],
