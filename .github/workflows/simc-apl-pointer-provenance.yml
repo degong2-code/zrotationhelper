@@ -1,0 +1,79 @@
+name: Pinned SimC APL object-pointer provenance probe (research only)
+
+on:
+  push:
+    branches: [work/github-ci-bootstrap]
+    paths:
+      - "tools/research/simc_apl_pointer_instrument.py"
+      - "tools/research/simc_apl_pointer_provenance_audit.py"
+      - "tools/research/simc_apl_pointer_native_probe.py"
+      - ".github/workflows/simc-apl-pointer-provenance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  instrumented-native:
+    name: Build pinned source and test actual APL pointer provenance
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      PINNED_SIMC_UPSTREAM: 710c2408bfd3ae4df71b8cd55cdf01f63fd6c926
+    steps:
+      - name: Checkout isolated research code
+        uses: actions/checkout@v4
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Source-anchored synthetic fail-closed checks
+        run: |
+          python tools/research/simc_apl_pointer_instrument.py --self-test
+          python tools/research/simc_apl_pointer_provenance_audit.py --self-test
+      - name: Checkout exact upstream SimulationCraft source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/simc-pinned"
+          git -C "$RUNNER_TEMP/simc-pinned" remote add origin https://github.com/simulationcraft/simc.git
+          git -C "$RUNNER_TEMP/simc-pinned" fetch --depth 1 origin "$PINNED_SIMC_UPSTREAM"
+          git -C "$RUNNER_TEMP/simc-pinned" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/simc-pinned" rev-parse HEAD)" = "$PINNED_SIMC_UPSTREAM"
+      - name: Instrument JSON2 serializer only; hash output
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/research/simc_apl_pointer_instrument.py \
+            --upstream-root "$RUNNER_TEMP/simc-pinned" \
+            > "$RUNNER_TEMP/simc-pointer-source-receipt.json"
+          test -s "$RUNNER_TEMP/simc-pointer-source-receipt.json"
+      - name: Compile separate research-only source binary (no game changes)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S "$RUNNER_TEMP/simc-pinned" -B "$RUNNER_TEMP/simc-pinned-build" -G Ninja \
+            -DBUILD_GUI=OFF -DBUILD_TESTING=OFF -DSC_NO_NETWORKING=ON \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build "$RUNNER_TEMP/simc-pinned-build" --target simc -j 2
+          test -s "$RUNNER_TEMP/simc-pinned-build/simc"
+      - name: Run two public profiles and audit actual pointer-backed APL row identity
+        shell: bash
+        env:
+          PROVENANCE_SUMMARY: ${{ runner.temp }}/zrot-pointer-provenance-summary.json
+        run: |
+          set -euo pipefail
+          python tools/research/simc_apl_pointer_native_probe.py \
+            --upstream-root "$RUNNER_TEMP/simc-pinned" \
+            --binary "$RUNNER_TEMP/simc-pinned-build/simc" \
+            --summary "$PROVENANCE_SUMMARY"
+          test -s "$PROVENANCE_SUMMARY"
+      - name: Upload summary and source patch receipt only
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-pointer-source-summary-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/zrot-pointer-provenance-summary.json
+            ${{ runner.temp }}/simc-pointer-source-receipt.json
+          if-no-files-found: error
+          retention-days: 7
