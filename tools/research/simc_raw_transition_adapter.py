@@ -116,6 +116,7 @@ def build_fixture_from_raw(model:dict,capture:dict,raw:bytes,*,decision_timestam
         raise ValueError("RAW_OPERAND_MAPPING_REQUIRED")
     source_rows=_read_lines(raw)
     ids=set()
+    feature_scopes={}
     transitions=[]
     receipts=[]
     for row_num,offset,line,event in source_rows:
@@ -135,6 +136,13 @@ def build_fixture_from_raw(model:dict,capture:dict,raw:bytes,*,decision_timestam
             raise ValueError("RAW_EVENT_FEATURE_INVALID")
         if event["scope"] not in ("ACTOR","TARGET","ENCOUNTER"):
             raise ValueError("RAW_EVENT_SCOPE_INVALID")
+        # Without target GUID/instance identity, a target-scoped observation
+        # cannot be safely keyed across switches. Do not mix it into actor PRE.
+        if event["scope"]=="TARGET":
+            raise ValueError("RAW_TARGET_SUBJECT_IDENTITY_NOT_IMPLEMENTED")
+        previous_scope=feature_scopes.setdefault(key,event["scope"])
+        if previous_scope!=event["scope"]:
+            raise ValueError("RAW_FEATURE_SCOPE_COLLISION")
         if type(event["valid"]) is not bool or not _is_number(event["value"]):
             raise ValueError("RAW_EVENT_STATE_VALUE_INVALID")
         receipt=f"raw-line:{row_num}:offset:{offset}:sha256:{_digest(line)}"
@@ -276,6 +284,22 @@ def selftest():
              operand_to_feature={"buff.foo.stack":"stack"})
         except ValueError as e:assert str(e)=="RAW_EVENT_NOT_EXPLICIT_TRANSITION"
         else:raise AssertionError("MISSING_EVENT_ID_ACCEPTED")
+        target_event=dict(rows[0],scope="TARGET")
+        target_raw=(json.dumps(target_event)+"\n").encode()
+        target_capture=dict(manifest,source_sha256=_digest(target_raw),
+                            source_bytes=len(target_raw))
+        try:build_fixture_from_raw(model,target_capture,target_raw,
+             decision_timestamp_ms=1000,operand_to_feature={"buff.foo.stack":"stack"})
+        except ValueError as e:assert str(e)=="RAW_TARGET_SUBJECT_IDENTITY_NOT_IMPLEMENTED"
+        else:raise AssertionError("UNQUALIFIED_TARGET_STATE_ACCEPTED")
+        colliding=[dict(rows[0]),dict(rows[1],scope="ENCOUNTER",event_id="other_scope")]
+        collision_raw=b"".join((json.dumps(row)+"\n").encode() for row in colliding)
+        collision_capture=dict(manifest,source_sha256=_digest(collision_raw),
+                               source_bytes=len(collision_raw))
+        try:build_fixture_from_raw(model,collision_capture,collision_raw,
+             decision_timestamp_ms=1000,operand_to_feature={"buff.foo.stack":"stack"})
+        except ValueError as e:assert str(e)=="RAW_FEATURE_SCOPE_COLLISION"
+        else:raise AssertionError("MIXED_SCOPE_FEATURE_ACCEPTED")
         forged=dict(manifest,source_authority="BLIZZARD_VERIFIED")
         try:replay_from_raw(model,forged,raw,decision_timestamp_ms=1000,
              operand_to_feature={"buff.foo.stack":"stack"})
