@@ -9,6 +9,7 @@ on:
       - "tools/research/simc_apl_conditional_ir.py"
       - "tools/research/simc_apl_priority_trace.py"
       - "tools/research/simc_apl_decision_graph.py"
+      - "tools/research/simc_apl_observability_contract.py"
       - "tools/research/simc_graph_shared_runtime_regression.py"
       - ".github/workflows/simc-public-source-coverage.yml"
   workflow_dispatch:
@@ -30,6 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           python tools/research/simc_apl_decision_graph.py --self-test
+          python tools/research/simc_apl_observability_contract.py --self-test
           python tools/research/simc_graph_shared_runtime_regression.py
           REV="710c2408bfd3ae4df71b8cd55cdf01f63fd6c926"
           for entry in "enhancement MID2_Shaman_Enhancement" "fury MID2_Warrior_Fury" "unholy MID2_Death_Knight_Unholy" "havoc MID2_Demon_Hunter_Havoc"; do
@@ -45,6 +47,10 @@ jobs:
             python tools/research/simc_apl_decision_graph.py \
               --source-ir "$RUNNER_TEMP/$SPEC-ir.json" \
               --out "$RUNNER_TEMP/$SPEC-decision-graph.json"
+            python tools/research/simc_apl_observability_contract.py \
+              --source-ir "$RUNNER_TEMP/$SPEC-ir.json" \
+              --graph "$RUNNER_TEMP/$SPEC-decision-graph.json" \
+              --out "$RUNNER_TEMP/$SPEC-observability.json"
           done
           python - <<'PY'
           import json
@@ -55,6 +61,7 @@ jobs:
               model=json.loads((base/f"{spec}-model.json").read_text())
               ir=json.loads((base/f"{spec}-ir.json").read_text())
               graph=json.loads((base/f"{spec}-decision-graph.json").read_text())
+              obs=json.loads((base/f"{spec}-observability.json").read_text())
               assert model["source_kind"]=="SIMC_PUBLIC_REPO_INLINE_PROFILE_APL"
               assert model["actual_simc_executable_run"]=="NOT_RUN"
               actual_rows=model["apl_row_count"]
@@ -73,6 +80,21 @@ jobs:
               assert graph["actual_simc_priority_equivalence"] == "NOT_VALIDATED"
               assert graph["wcl_independent_validation"] == "NOT_RUN"
               assert len(graph["required_action_readiness_tokens"]) > 0
+              assert obs["source_apl_sha256"] == model["apl_sha256"]
+              assert obs["source_row_count"] == actual_rows
+              assert obs["operand_requirement_count"] == len(graph["required_state_operands"])
+              assert obs["readiness_requirement_count"] == len(graph["required_action_readiness_tokens"])
+              assert obs["actual_strict_pre_observation"] == "NOT_RUN"
+              assert obs["gameplay_rule_promotion"] is False
+              assert all(x["status"]=="UNKNOWN" and x["requirements_policy"]=="NOT_SUPPLIED"
+                         for x in obs["required_action_readiness"])
+              assert all(x["semantic_binding"]=="UNBOUND"
+                         for x in obs["required_state_operands"])
+              print(f"PUBLIC_SIMC_GENERIC_OBSERVABILITY={spec} "
+                    f"OPERANDS={obs['operand_requirement_count']} "
+                    f"READINESS={obs['readiness_requirement_count']} "
+                    f"UNSUPPORTED_EXPRS={obs['unsupported_expression_count']} "
+                    "VALIDATION=SOURCE_REQUIREMENTS_ONLY")
               for node in graph["nodes"].values():
                   if node["kind"] == "IF_ELSE_PRIORITY_ROW" and node["if_true"]["kind"] == "CHECK_ACTION_READINESS":
                       assert node["if_true"]["unknown"] == "BLOCK_READINESS_UNKNOWN"
