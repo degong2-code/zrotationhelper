@@ -4,47 +4,41 @@
   "owner": "RESEARCH_BRANCH",
   "repository": "degong2-code/zrotationhelper",
   "branch": "work/github-ci-bootstrap",
-  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261030_V3.md",
-  "canonical_handoff_blob_sha": "fa3430f9bb9a6693135ba0fc647b5dd079dbe069",
-  "research_code_evidence_sha": "4bbe79092fff6fc1f6eb7c4b57c6fd1555b4e36e",
+  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261030_V4.md",
+  "canonical_handoff_blob_sha": "9b65f1fd270d5f7421eb63f1f32204e092b358f2",
+  "research_code_evidence_sha": "45eceaa88835fe3c5deac2f8095763fd30f154f1",
   "github_main_observed_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
   "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
-  "required_source_ci": {
-    "run_id": 41064679658,
+  "actual_native_eval_ci": {
+    "run_id": 41075553050,
     "conclusion": "success",
-    "scope": "FOUR_PINNED_PROFILE_STATIC_SOURCE_SEMANTIC_ONLY"
+    "scope": "FOUR_PUBLIC_FIXTURES_ACTUAL_NATIVE_REF_EVAL_VS_PARTIAL_EPOCH_PRE",
+    "code_sha": "45eceaa88835fe3c5deac2f8095763fd30f154f1",
+    "source_pinned_binary_sha256": "0d234a886ceb5bb9b7addf642af311b2ad09dce60c7345dcbc90037a29d42dac"
   },
-  "required_native_ci": {
-    "run_id": 41059211056,
+  "offline_ci": {
+    "run_id": 41075553005,
     "conclusion": "success",
-    "scope": "FOUR_PUBLIC_FIXTURE_EPOCH_RESOURCE_DIAGNOSTIC_FIELD_ONLY"
+    "scope": "PYTHON_3_12_3_14_OFFLINE_ONLY",
+    "code_sha": "45eceaa88835fe3c5deac2f8095763fd30f154f1"
   },
-  "required_offline_ci": {
-    "run_id": 41064679434,
-    "conclusion": "success",
-    "scope": "PYTHON_3_12_3_14_OFFLINE_ONLY"
-  },
-  "code_evidence_head_offline_ci": {
-    "run_id": 41064894124,
-    "conclusion": "success",
-    "scope": "PYTHON_3_12_3_14_OFFLINE_ONLY"
-  },
+  "actual_resource_eval_records": 266,
+  "inside_exact_select": 151,
+  "matched_partial_producer": 146,
+  "same_timestamp_excluded": 5,
+  "outside_exact_selection": 115,
+  "actual_apl_source_row_pre_certified": 0,
+  "action_readiness_certified": 0,
+  "total_readiness_tokens": 90,
+  "gameplay_rule_promotion": false,
+  "wcl_independent_blind_candidate_lock": "NOT_RUN_IN_THIS_BRANCH",
   "main_current_state": "UNKNOWN",
   "main_global_latest_handoff": "UNKNOWN",
-  "main_active_manifest_and_production_pointer": "UNKNOWN",
+  "main_active_manifest": "UNKNOWN",
   "approved_runtime_live_boot": "NOT_VERIFIED",
   "seq637_actual_local_result": "UNKNOWN",
   "seq578_and_frozen": "UNCHANGED_NO_PROMOTION",
-  "actual_native_apl_operand_pre_certified": 0,
-  "actual_ready_tokens_certified": 0,
-  "total_source_readiness_tokens": 90,
-  "general_rotation_rule_promotion": false,
-  "strict_pre": "LATEST_VALID_TRANSITION_TIMESTAMP_LT_DECISION_AND_SAME_NATIVE_RESET_EPOCH",
-  "wcl_independent_blind_candidate_lock": "NOT_RUN_IN_THIS_BRANCH",
   "shared_authoritative_state_mutated": false,
-  "stale_base_vs_actual_local_main": "UNKNOWN",
-  "startup_behavior": "RESTORE_AND_REPORT_ONLY_THEN_WAIT_FOR_EXPLICIT_진행",
-  "next_after_approval": "SOURCE_PINNED_RUNTIME_APL_RESOURCE_EXPRESSION_VALUE_VS_NATIVE_EPOCH_STRICT_PRE_WITHOUT_SNAPSHOT_LEAK",
-  "read_before_pointer": "Current project instructions and dual lane / parallel merge contracts",
+  "next": "UNHOLY_SOURCE_ROW_REACHABILITY_AND_FURY_HAVOC_EXPRESSION_OWNER_PLUS_PARTIAL_PRODUCER_GAP",
   "verified_as_of": "2026-10-30"
 }
