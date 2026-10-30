@@ -11,6 +11,7 @@ on:
       - "tools/research/simc_apl_decision_graph.py"
       - "tools/research/simc_apl_observability_contract.py"
       - "tools/research/simc_apl_semantic_resolver.py"
+      - "tools/research/simc_apl_native_observability_gap.py"
       - "tools/research/simc_strict_pre_source_bridge.py"
       - "tools/research/simc_raw_transition_adapter.py"
       - "tools/research/simc_raw_transition_independent_audit.py"
@@ -37,6 +38,7 @@ jobs:
           python tools/research/simc_apl_decision_graph.py --self-test
           python tools/research/simc_apl_observability_contract.py --self-test
           python tools/research/simc_apl_semantic_resolver.py --self-test
+          python tools/research/simc_apl_native_observability_gap.py --self-test
           python tools/research/simc_strict_pre_source_bridge.py --self-test
           python tools/research/simc_raw_transition_adapter.py --self-test
           python tools/research/simc_raw_transition_independent_audit.py
@@ -62,6 +64,10 @@ jobs:
             python tools/research/simc_apl_semantic_resolver.py \
               --requirements "$RUNNER_TEMP/$SPEC-observability.json" \
               --output "$RUNNER_TEMP/$SPEC-semantic-route.json"
+            python tools/research/simc_apl_native_observability_gap.py \
+              --requirements "$RUNNER_TEMP/$SPEC-observability.json" \
+              --semantic-route "$RUNNER_TEMP/$SPEC-semantic-route.json" \
+              --output "$RUNNER_TEMP/$SPEC-native-observability-gaps.json"
           done
           python - <<'PY'
           import json
@@ -74,6 +80,7 @@ jobs:
               graph=json.loads((base/f"{spec}-decision-graph.json").read_text())
               obs=json.loads((base/f"{spec}-observability.json").read_text())
               semantic=json.loads((base/f"{spec}-semantic-route.json").read_text())
+              native_gaps=json.loads((base/f"{spec}-native-observability-gaps.json").read_text())
               assert model["source_kind"]=="SIMC_PUBLIC_REPO_INLINE_PROFILE_APL"
               assert model["actual_simc_executable_run"]=="NOT_RUN"
               actual_rows=model["apl_row_count"]
@@ -94,6 +101,27 @@ jobs:
               assert len(graph["required_action_readiness_tokens"]) > 0
               assert obs["source_apl_sha256"] == model["apl_sha256"]
               assert semantic["source_apl_sha256"]==model["apl_sha256"]
+              assert native_gaps["source_apl_sha256"]==model["apl_sha256"]
+              assert native_gaps["source_operand_count"]==obs["operand_requirement_count"]
+              assert native_gaps["all_action_tokens_unverified"]==obs["readiness_requirement_count"]
+              assert (native_gaps["native_resource_grammar_candidates_not_bindings"]+
+                      native_gaps["other_operand_producer_semantics_unverified"]==
+                      native_gaps["source_operand_count"])
+              assert native_gaps["strict_pre_replay"]=="NOT_RUN"
+              assert native_gaps["native_epoch_state_input"]=="NOT_CONNECTED_TO_THIS_SOURCE_APL"
+              assert native_gaps["gameplay_rule_promotion"] is False
+              assert all(o["decision_observation"]=="UNKNOWN" and
+                         o["native_operand_feature_binding"] is None and
+                         o["could_be_used_for_priority_trace"] is False
+                         for o in native_gaps["source_operands"])
+              assert all(a["ready"]=="UNKNOWN" and
+                         a["cannot_be_skipped_as_unavailable"] is True
+                         for a in native_gaps["required_action_readiness"])
+              print(f"PUBLIC_SIMC_NATIVE_EVIDENCE_GAPS={spec} "
+                    f"RESOURCE_GRAMMAR_CANDIDATES={native_gaps['native_resource_grammar_candidates_not_bindings']} "
+                    f"OTHER_UNBOUND={native_gaps['other_operand_producer_semantics_unverified']} "
+                    f"READY_UNKNOWN={native_gaps['all_action_tokens_unverified']} "
+                    "VALIDATION=NO_NATIVE_APL_SEMANTIC_BINDING_YET")
               assert semantic["operand_count"]==obs["operand_requirement_count"]
               assert semantic["action_token_count"]==obs["readiness_requirement_count"]
               assert sum(semantic["grammar_family_counts"].values())==semantic["operand_count"]
