@@ -12,6 +12,7 @@ on:
       - "tools/research/simc_apl_observability_contract.py"
       - "tools/research/simc_apl_semantic_resolver.py"
       - "tools/research/simc_apl_native_observability_gap.py"
+      - "tools/research/simc_apl_native_resource_expression_proof.py"
       - "tools/research/simc_strict_pre_source_bridge.py"
       - "tools/research/simc_raw_transition_adapter.py"
       - "tools/research/simc_raw_transition_independent_audit.py"
@@ -39,6 +40,7 @@ jobs:
           python tools/research/simc_apl_observability_contract.py --self-test
           python tools/research/simc_apl_semantic_resolver.py --self-test
           python tools/research/simc_apl_native_observability_gap.py --self-test
+          python tools/research/simc_apl_native_resource_expression_proof.py --self-test
           python tools/research/simc_strict_pre_source_bridge.py --self-test
           python tools/research/simc_raw_transition_adapter.py --self-test
           python tools/research/simc_raw_transition_independent_audit.py
@@ -48,6 +50,15 @@ jobs:
           test -s "$RUNNER_TEMP/pinned-util.cpp"
           sha256sum "$RUNNER_TEMP/pinned-util.cpp" > "$RUNNER_TEMP/pinned-util.sha256"
           UTIL_SHA="$(sha256sum "$RUNNER_TEMP/pinned-util.cpp" | cut -d' ' -f1)"
+          for SRC in engine/player/player.cpp engine/class_modules/sc_death_knight.cpp engine/class_modules/sc_demon_hunter.cpp engine/class_modules/sc_warrior.cpp; do
+            BASENAME="$(basename "$SRC")"
+            curl -fsSL --retry 2 "https://raw.githubusercontent.com/simulationcraft/simc/$REV/$SRC" -o "$RUNNER_TEMP/$BASENAME"
+            test -s "$RUNNER_TEMP/$BASENAME"
+          done
+          PLAYER_SHA="$(sha256sum "$RUNNER_TEMP/player.cpp" | cut -d' ' -f1)"
+          grep -q 'struct warrior_t : public parse_player_effects_t' "$RUNNER_TEMP/sc_warrior.cpp"
+          ! grep -q 'warrior_t::create_expression(' "$RUNNER_TEMP/sc_warrior.cpp"
+          ! grep -q 'std::unique_ptr<expr_t> create_expression(' "$RUNNER_TEMP/sc_warrior.cpp"
           for entry in "enhancement MID2_Shaman_Enhancement" "fury MID2_Warrior_Fury" "unholy MID2_Death_Knight_Unholy" "havoc MID2_Demon_Hunter_Havoc"; do
             read -r SPEC PROFILE <<< "$entry"
             python tools/research/simc_apl_source_engine.py \
@@ -74,6 +85,28 @@ jobs:
               --pinned-util-source "$RUNNER_TEMP/pinned-util.cpp" \
               --pinned-util-source-sha256 "$UTIL_SHA" \
               --output "$RUNNER_TEMP/$SPEC-native-observability-gaps.json"
+            SRC_CLASS_ARGS=()
+            if [[ "$SPEC" == "unholy" ]]; then
+              SRC_CLASS_ARGS=(
+                --pinned-class-source "$RUNNER_TEMP/sc_death_knight.cpp"
+                --pinned-class-sha256 "$(sha256sum "$RUNNER_TEMP/sc_death_knight.cpp" | cut -d' ' -f1)"
+                --class-expression-function death_knight_t::create_expression
+              )
+            elif [[ "$SPEC" == "havoc" ]]; then
+              SRC_CLASS_ARGS=(
+                --pinned-class-source "$RUNNER_TEMP/sc_demon_hunter.cpp"
+                --pinned-class-sha256 "$(sha256sum "$RUNNER_TEMP/sc_demon_hunter.cpp" | cut -d' ' -f1)"
+                --class-expression-function demon_hunter_t::create_expression
+              )
+            fi
+            python tools/research/simc_apl_native_resource_expression_proof.py \
+              --gap-report "$RUNNER_TEMP/$SPEC-native-observability-gaps.json" \
+              --pinned-util-source "$RUNNER_TEMP/pinned-util.cpp" \
+              --pinned-util-sha256 "$UTIL_SHA" \
+              --pinned-player-source "$RUNNER_TEMP/player.cpp" \
+              --pinned-player-sha256 "$PLAYER_SHA" \
+              "${SRC_CLASS_ARGS[@]}" \
+              --out "$RUNNER_TEMP/$SPEC-bare-resource-source-proof.json"
           done
           python - <<'PY'
           import json
@@ -87,6 +120,7 @@ jobs:
               obs=json.loads((base/f"{spec}-observability.json").read_text())
               semantic=json.loads((base/f"{spec}-semantic-route.json").read_text())
               native_gaps=json.loads((base/f"{spec}-native-observability-gaps.json").read_text())
+              bare_proof=json.loads((base/f"{spec}-bare-resource-source-proof.json").read_text())
               assert model["source_kind"]=="SIMC_PUBLIC_REPO_INLINE_PROFILE_APL"
               assert model["actual_simc_executable_run"]=="NOT_RUN"
               actual_rows=model["apl_row_count"]
@@ -108,6 +142,15 @@ jobs:
               assert obs["source_apl_sha256"] == model["apl_sha256"]
               assert semantic["source_apl_sha256"]==model["apl_sha256"]
               assert native_gaps["source_apl_sha256"]==model["apl_sha256"]
+              assert bare_proof["source_apl_sha256"]==model["apl_sha256"]
+              assert bare_proof["source_resolution_proof_count"]==native_gaps["pinned_resource_label_collision_candidates_not_bindings"]
+              assert bare_proof["actual_native_strict_pre_operand_values_verified"] is False
+              assert bare_proof["action_readiness_verified"]==0
+              assert bare_proof["action_readiness_unknown"]==native_gaps["all_action_tokens_unverified"]
+              assert bare_proof["gameplay_rule_promotion"] is False
+              print(f"PUBLIC_SIMC_PINNED_BARE_RESOURCE_SOURCE_PROOF={spec} "
+                    f"SOURCE_RESOLVED={bare_proof['source_resolution_proof_count']} "
+                    "NATIVE_PRE_VALUES=UNKNOWN READY=UNKNOWN")
               assert native_gaps["source_operand_count"]==obs["operand_requirement_count"]
               assert native_gaps["all_action_tokens_unverified"]==obs["readiness_requirement_count"]
               assert (native_gaps["native_resource_grammar_candidates_not_bindings"]+
