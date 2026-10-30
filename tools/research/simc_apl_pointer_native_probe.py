@@ -25,6 +25,9 @@ from simc_native_resource_lifecycle_probe import (
     project_lifecycle_log, independent_lifecycle_audit, lifecycle_pre_gate
 )
 from simc_native_select_resource_diagnostic_audit import compare_diagnostics
+from simc_native_epoch_sequence_audit import (
+    parse_epoch_native_log, independent_epoch_audit, compare_epoch_bound_resources
+)
 from decimal import Decimal
 
 FIXTURES=(
@@ -187,8 +190,31 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
             if (diagnostic["native_entry_snapshot_used_as_reconstructed_pre"] is not False
                     or diagnostic["gameplay_rule_promotion"] is not False):
                 raise ValueError("NATIVE_SELECT_RESOURCE_SNAPSHOT_PRE_LEAK")
+            epoch=parse_epoch_native_log(
+                blobs[names[1]],receipt["native_log_sha256"])
+            epoch_audit=independent_epoch_audit(blobs[names[1]],epoch)
+            if epoch_audit["status"]!="PASS_EPOCH_NATIVE_SOURCE_BYTES_INDEPENDENT_RECALC":
+                raise ValueError("NATIVE_EPOCH_SOURCE_AUDIT_FAILED")
+            epoch_comparison=compare_epoch_bound_resources(
+                blobs[names[1]],epoch)
+            if epoch_comparison["readiness"]!="UNKNOWN" or (
+                    epoch_comparison["gameplay_rule_promotion"] is not False or
+                    epoch_comparison["diagnostic_snapshot_used_as_strict_pre"] is not False):
+                raise ValueError("NATIVE_EPOCH_UNCERTIFIED_GAMEPLAY_CLAIM")
+            if epoch_comparison["native_select_entry_count"]!=diagnostic[
+                    "native_selection_entry_count"]:
+                raise ValueError("NATIVE_EPOCH_SELECT_DIAGNOSTIC_COUNT_MISMATCH")
             summaries.append({
                 "spec":spec,
+                "native_epoch_log_source_sha256":epoch["source_log_sha256"],
+                "native_epoch_source_marker_count":epoch["event_count"],
+                "native_epoch_iterations":epoch["source_iterations"],
+                "native_epoch_event_kinds":epoch["event_kind_counts"],
+                "native_epoch_independent_audit":epoch_audit["status"],
+                "native_epoch_comparison_counts":epoch_comparison["comparison_counts"],
+                "native_epoch_possible_gaps":epoch_comparison["potential_mismatch_examples"],
+                "native_epoch_selected_entry_count":epoch_comparison["native_select_entry_count"],
+                "native_epoch_snapshot_promoted_as_pre":False,
                 "select_resource_diagnostic_log_sha256":diagnostic["source_log_sha256"],
                 "select_resource_diagnostic_audit":diagnostic[
                     "source_selection_diagnostic_audit"]["status"],
