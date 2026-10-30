@@ -138,6 +138,7 @@ def compile_decision_graph(ir: dict) -> dict:
                 "source_empty_option_slots_ignored":row.get("source_empty_option_slots_ignored",0),
                 "list_name": list_name,
                 "priority_in_list": index + 1,
+                "next_in_list": next_node,
                 "command": command,
                 "guard": guard,
                 "guard_syntax": ("CONSTANT_TRUE" if guard is None
@@ -216,9 +217,11 @@ def selftest():
         assert call["if_true"]["entry"] == "single:1"
         assert call["if_true"]["on_callee_exhausted"] == "default:2"
         assert call["else_false"] == "default:2"
+        assert call["next_in_list"] == "default:2"
         assert call["if_unknown"] == "BLOCK_GUARD_UNKNOWN"
         assert run["if_true"]["on_callee_exhausted"] == "BLOCK_RUN_LIST_NO_FALLTHROUGH"
         assert out["nodes"]["default:3"]["if_true"]["not_ready"] == "default:EXHAUSTED"
+        assert out["nodes"]["default:3"]["next_in_list"] == "default:EXHAUSTED"
         assert out["nodes"]["single:1"]["if_true"]["unknown"] == "BLOCK_READINESS_UNKNOWN"
         assert out["nodes"]["single:1"]["if_true"]["action_token"] == first
         assert out["nodes"]["multi:1"]["if_true"]["kind"] == "BLOCK_UNRESOLVED_CONTROL_SEMANTICS"
