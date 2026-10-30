@@ -1,0 +1,142 @@
+{
+  "schema": "ZrotArchivedNativeMarkerObjectIdEvidenceV11",
+  "owner": "BR-SIMC-APL-BOOTSTRAP",
+  "evidence_tier": "ARCHIVED_PINNED_SIMC_NATIVE_MARKER_READ_ONLY_REPLAY",
+  "game_ability_identity_authority": "NOT_CERTIFIED",
+  "original_upstream_commit": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
+  "archived_native_code_commit": "d43374850c51420ffea82f934ffd7684faf6b414",
+  "archived_native_workflow_run": 41084262760,
+  "archived_artifact_id": 12990129697,
+  "archived_artifact_expiration_utc": "2026-11-06T15:54:14Z",
+  "downloaded_zip_sha256": "da88d27ea027b2eacaa6675c9ee22afdffa8a307852ab21b661dabdbb2faab3e",
+  "raw_full_log_retained": false,
+  "original_effective_apl_export_bytes_retained": false,
+  "effective_apl_hash_reverified_from_original_bytes": false,
+  "exact_source_row_mapping_basis": "V7_ARCHIVED_INDEPENDENT_AUDIT_PLUS_PINNED_SOURCE_PROFILE_MATCH_NOT_V11_FULL_EFFECTIVE_APL_REPLAY",
+  "audit_method": {
+    "independent_marker_parse": "SHA256 validated gz and decoded source marker byte streams against archived original proof receipt",
+    "source_pairing": "each original IF BEGIN/END paired with exactly one nested action-attempt BEGIN/END under same epoch actor/spawn/sequence and action_t::id",
+    "source_timestamp_rule": "source event sequence and reset epoch used for pairing, NEVER decision state strict PRE",
+    "no_global_source_id_assumption": true,
+    "equality_to_blizzard_or_wcl_spell_id_proven": false,
+    "note": "Audit was run on the downloaded GitHub artifact in the current session, not via a new native simulator build"
+  },
+  "profiles": [
+    {
+      "spec": "fury",
+      "pinned_profile_path": "profiles/MID2/MID2_Warrior_Fury.simc",
+      "pinned_source_profile_sha256": "e872cca507063e3d63b84e522688b4ad44b2f7f7664e50e3f5553cf3f858088c",
+      "source_profile_sha256_recomputed_from_pinned_upstream": true,
+      "source_profile_apl_row_count": 121,
+      "archived_effective_apl_row_count": 121,
+      "archived_effective_apl_sha256": "98635a684638d241000c0f9b3a78b9eb43d9579b522f864b8aaf5ebaa159e737",
+      "marker_compressed_bytes": 35635,
+      "marker_compressed_sha256": "f300242ac4bfe122e4ac301026c5537305f2dee5a3f8b9e6655f863965f952b7",
+      "marker_decoded_bytes": 498721,
+      "marker_decoded_sha256": "98b82c7ff4b17a4db44e6c5d2988b9b2aacb67e786dc13bcc781b8f2e6c4b204",
+      "reset_boundary_count": 2,
+      "native_epoch_event_count": 536,
+      "action_attempt_begin_count": 1548,
+      "original_if_guard_begin_count": 426,
+      "original_if_guard_inside_identical_source_action_scope": 426,
+      "bare_resource_eval_count": 137,
+      "rows": [
+        {
+          "apl_list": "slayer",
+          "list_ordinal": 3,
+          "source_profile_line": 65,
+          "source_action_token": "rampage",
+          "pinned_source_guard": "buff.recklessness.up&rage>=100",
+          "native_action_t_id": 184367,
+          "id_positive": true,
+          "original_guard_executions": 48,
+          "guard_true": 13,
+          "guard_false": 35,
+          "role": "SAME_SOURCE_ACTION_OBJECT_ID_NOT_GAME_ID_CERTIFIED"
+        },
+        {
+          "apl_list": "slayer",
+          "list_ordinal": 13,
+          "source_profile_line": 75,
+          "source_action_token": "rampage",
+          "pinned_source_guard": "rage>100",
+          "native_action_t_id": 184367,
+          "id_positive": true,
+          "original_guard_executions": 7,
+          "guard_true": 4,
+          "guard_false": 3,
+          "role": "SAME_SOURCE_ACTION_OBJECT_ID_NOT_GAME_ID_CERTIFIED"
+        }
+      ]
+    },
+    {
+      "spec": "havoc",
+      "pinned_profile_path": "profiles/MID2/MID2_Demon_Hunter_Havoc.simc",
+      "pinned_source_profile_sha256": "395a9458f5999a70b480151cc7ef70767720ce145dae27f9b200c38581f30452",
+      "source_profile_sha256_recomputed_from_pinned_upstream": true,
+      "source_profile_apl_row_count": 46,
+      "archived_effective_apl_row_count": 46,
+      "archived_effective_apl_sha256": "bee79d14337f12b7c98fdb426849480342f7292d3da0cb60e8a805883d65a995",
+      "marker_compressed_bytes": 94696,
+      "marker_compressed_sha256": "9ede7dbc80dae554900474e98bccddbc4bd707fbd0fb8f04850eac5780c01c9b",
+      "marker_decoded_bytes": 1315084,
+      "marker_decoded_sha256": "5b2e2646e3e20eecbde785fc86dcf74d6fe7c472b5123a519d31425ee784374f",
+      "reset_boundary_count": 2,
+      "native_epoch_event_count": 416,
+      "action_attempt_begin_count": 4868,
+      "original_if_guard_begin_count": 1749,
+      "original_if_guard_inside_identical_source_action_scope": 1749,
+      "bare_resource_eval_count": 129,
+      "rows": [
+        {
+          "apl_list": "default",
+          "list_ordinal": 26,
+          "source_profile_line": 64,
+          "source_action_token": "felblade",
+          "pinned_source_guard": "hero_tree.felscarred&fury<=100",
+          "native_action_t_id": 232893,
+          "id_positive": true,
+          "original_guard_executions": 3,
+          "guard_true": 3,
+          "guard_false": 0,
+          "role": "SOURCE_ACTION_OBJECT_ID_NOT_GAME_ID_CERTIFIED"
+        },
+        {
+          "apl_list": "default",
+          "list_ordinal": 9,
+          "source_profile_line": 47,
+          "source_action_token": "pick_up_fragment",
+          "pinned_source_guard": "fury<=40",
+          "native_action_t_id": 0,
+          "id_positive": false,
+          "original_guard_executions": 121,
+          "guard_true": 5,
+          "guard_false": 116,
+          "role": "NOT_A_CERTIFIED_GAME_ABILITY_ID"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "native_if_guard_begin_count": 2175,
+    "source_action_scope_exact_pair_count": 2175,
+    "native_positive_id_candidate_rows": 3,
+    "source_specific_game_ability_ids_certified": 0,
+    "readiness_certified": 0,
+    "gameplay_rotation_rules_promoted": 0
+  },
+  "limitations": [
+    "The archived compressed markers were replayed independently, but the full effective APL export bytes are absent, so V10's exact effective-source-model raw auditor was NOT rerun on archive.",
+    "The official pinned public profiles SHA256 match archived profile hashes, and source APL row counts match, but source profile APL text is not byte-equivalent to effective save_actions export.",
+    "Positive native action_t::id is not proof of current retail Blizzard action ID, localized skill icon, WCL cast ID, action readiness, priority, or actual performed action.",
+    "WCL blind discovery must lock candidates before any exposure to these SimC action tokens or source guards.",
+    "Do not infer state_at_action(t) from same-timestamp or future markers."
+  ],
+  "provenance": "ARCHIVED_RAW_MARKERS_AND_SOURCES_ONLY",
+  "current_blizzard_mechanic_validation": "NOT_RUN",
+  "wcl_blind_independent_validation": "NOT_RUN",
+  "native_rebuild": "NOT_RUN",
+  "original_simc_source_id_conflict_in_target_rows": false,
+  "user_facing_rotation_recommendation": false,
+  "main_authoritative_state_mutated": false
+}

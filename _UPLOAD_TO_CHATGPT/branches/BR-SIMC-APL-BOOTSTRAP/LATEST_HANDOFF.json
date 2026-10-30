@@ -4,8 +4,8 @@
   "owner": "RESEARCH_BRANCH",
   "repository": "degong2-code/zrotationhelper",
   "branch": "work/github-ci-bootstrap",
-  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V10.md",
-  "canonical_handoff_blob_sha": "8c2453a51ff9603462844374e4659398e9f84874",
+  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V11.md",
+  "canonical_handoff_blob_sha": "3306542ad708ca0994dfa7a8fd3f1b888252e3e2",
   "research_code_evidence_sha": "9b2f92091af1bb19f96d5090fd3f408ca8f90ce3",
   "github_main_observed_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
   "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
@@ -39,7 +39,7 @@
   "seq637_actual_local_result": "UNKNOWN",
   "seq578_and_frozen": "UNCHANGED_NO_PROMOTION",
   "shared_authoritative_state_mutated": false,
-  "next": "REUSABLE_ARCHIVED_MARKER_AND_MATCHED_EFFECTIVE_APL_ID_EVIDENCE_FEASIBILITY",
+  "next": "MAIN_IDENTITY_SPEC_ADAPTER_COMPATIBILITY_POST_BLIND_WCL_LOCK",
   "verified_as_of": "2026-10-31",
   "source_route_audit_path": "docs/DEVELOPER_NOTE_PINNED_APL_BARE_RESOURCE_EVAL_REACHABILITY_20261031.md",
   "source_route_audit_blob_sha": "c348162d309155658fbddc9c2e715a2966b54f2d",
@@ -146,5 +146,19 @@
     41096036252
   ],
   "actual_numeric_game_action_id_certified": 0,
-  "source_owned_id_replay_actual_archived_marker": "NOT_RUN"
+  "source_owned_id_replay_actual_archived_marker": "NOT_RUN",
+  "archived_native_source_id_evidence_path": "docs/BR_SIMC_ARCHIVED_NATIVE_ACTION_ID_EVIDENCE_20261031.json",
+  "archived_native_source_id_evidence_blob_sha": "568f1f1511d82139afb4eb5e97073e1c88796208",
+  "archived_native_workflow_run_id": 41084262760,
+  "archived_native_artifact_id": 12990129697,
+  "archived_native_marker_zip_sha256": "da88d27ea027b2eacaa6675c9ee22afdffa8a307852ab21b661dabdbb2faab3e",
+  "archived_native_evidence_replay": "PASS_MARKER_SCOPE_AND_SOURCE_PROFILE_SHA_NOT_FULL_EFFECTIVE_APL_REPLAY",
+  "archived_effective_apl_bytes": "NOT_RETAINED",
+  "simc_action_id_source_candidates": {
+    "fury_rampage": 184367,
+    "havoc_felblade": 232893
+  },
+  "candidate_numeric_game_ids_certified": 0,
+  "source_readiness_certified": 0,
+  "new_native_execution": "NOT_RUN"
 }
