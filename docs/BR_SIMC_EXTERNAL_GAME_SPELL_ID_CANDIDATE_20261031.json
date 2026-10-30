@@ -1,0 +1,173 @@
+{
+  "schema": "ZrotSimcExternalGameSpellIdentityCandidateV13",
+  "owner": "BR-SIMC-APL-BOOTSTRAP",
+  "evidence_scope": "BRANCH_POST_SIMC_SOURCE_REVIEW_NOT_WCL_BLIND_DISCOVERY",
+  "as_of": "2026-10-31",
+  "source_v12": {
+    "github_repo": "degong2-code/zrotationhelper",
+    "source_branch": "work/github-ci-bootstrap",
+    "exact_replay_sha": "fabe13596b4fbf5b30af64c5b4581b204db1f259",
+    "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
+    "raw_marker_numerical_source_id_certification": "SIMC_ACTION_OBJECT_ONLY",
+    "runtime_game_id_certified": 0
+  },
+  "candidates": [
+    {
+      "spec": "fury_warrior",
+      "action_token": "rampage",
+      "native_action_t_id": 184367,
+      "original_if_source_rows": [
+        {
+          "list": "slayer",
+          "ordinal": 3
+        },
+        {
+          "list": "slayer",
+          "ordinal": 13
+        }
+      ],
+      "candidate_game_spell_id": 184367,
+      "candidate_name_en": "Rampage",
+      "candidate_name_ko": "광란",
+      "crosscheck_status": "INDEPENDENT_PUBLIC_DATABASE_NAME_ID_CORROBORATED_NOT_CURRENT_RETAIL_VERIFIED",
+      "references": [
+        {
+          "provider": "Wowhead",
+          "url": "https://www.wowhead.com/spell=184367/rampage",
+          "role": "EXTERNAL_SPELL_ID_NAME"
+        },
+        {
+          "provider": "WoWDB",
+          "url": "https://www.wowdb.com/spells/184367-rampage",
+          "role": "EXTERNAL_SPELL_ID_NAME"
+        },
+        {
+          "provider": "Blizzard",
+          "url": "https://worldofwarcraft.blizzard.com/en-gb/news/24244472",
+          "role": "OFFICIAL_TALENT_MECHANIC_NOT_NUMERIC_SPELL_ID"
+        },
+        {
+          "provider": "Blizzard",
+          "url": "https://worldofwarcraft.blizzard.com/en-us/news/24244455",
+          "role": "OFFICIAL_RAMPAGE_SLAM_REPLACEMENT_NOT_NUMERIC_SPELL_ID"
+        }
+      ],
+      "identity_constraints": {
+        "source_simc_parent_action_id": "CANDIDATE",
+        "wcl_cast_ability_id": "UNKNOWN_BEFORE_INDEPENDENT_BLIND_LOCK",
+        "wcl_damage_child_ids": "UNKNOWN",
+        "actual_client_actionbar_id": "UNKNOWN",
+        "known_learned_action_for_pinned_build": "UNKNOWN",
+        "local_name_is_not_identity": true,
+        "base_spell_cost_from_public_database": "80_RAGE_REFERENCE_ONLY_NOT_ACTUAL_BUILD_COST",
+        "apl_rage_100_guards_are_not_actual_cost": true,
+        "requires_true_cost_build_talent_recklessness_state": true,
+        "both_weapons_required_by_pinned_simc_mechanic": true
+      }
+    },
+    {
+      "spec": "havoc_demon_hunter",
+      "action_token": "felblade",
+      "native_action_t_id": 232893,
+      "original_if_source_rows": [
+        {
+          "list": "default",
+          "ordinal": 26
+        }
+      ],
+      "candidate_game_spell_id": 232893,
+      "candidate_name_en": "Felblade",
+      "candidate_name_ko": "지옥칼",
+      "crosscheck_status": "INDEPENDENT_PUBLIC_DATABASE_NAME_ID_CORROBORATED_NOT_CURRENT_RETAIL_VERIFIED",
+      "references": [
+        {
+          "provider": "Wowhead_Korean",
+          "url": "https://www.wowhead.com/ko/spell=232893/%EC%A7%80%EC%98%A5%EC%B9%BC",
+          "role": "EXTERNAL_SPELL_ID_LOCALIZED_NAME"
+        },
+        {
+          "provider": "WoWDB",
+          "url": "https://www.wowdb.com/spells/232893-felblade",
+          "role": "EXTERNAL_SPELL_ID_NAME"
+        },
+        {
+          "provider": "Blizzard",
+          "url": "https://worldofwarcraft.blizzard.com/en-us/news/24244455",
+          "role": "OFFICIAL_MECHANIC_UPDATE_NOT_NUMERIC_SPELL_ID"
+        }
+      ],
+      "identity_constraints": {
+        "source_simc_parent_action_id": "CANDIDATE",
+        "wcl_cast_ability_id": "UNKNOWN_BEFORE_INDEPENDENT_BLIND_LOCK",
+        "wcl_damage_child_ids": "UNKNOWN",
+        "actual_client_actionbar_id": "UNKNOWN",
+        "known_learned_action_for_pinned_build": "UNKNOWN",
+        "local_name_is_not_identity": true,
+        "action_has_movement_directionality_in_simc": true,
+        "source_shared_movement_cooldown_pre_status": "UNKNOWN",
+        "apl_fury_less_or_equal_100_is_NOT_actual_cast_affordability": true
+      },
+      "same_localized_name_distinct_spell_ids_from_public_database": [
+        204497,
+        236167
+      ],
+      "same_name_warning": "Other spell IDs share localized Felblade name, but may represent aura/proc/background effects, not an actionbar cast. No equivalence inferred."
+    }
+  ],
+  "compatibility_findings": {
+    "checked_protocol_path": "02_SOURCE/runtime/raid_dps/specs/protocol.py",
+    "protocol_blob_sha": "605dfdc8cd76d0f3a8d9d811521ce56d49131cd2",
+    "checked_fury_adapter_path": "02_SOURCE/runtime/raid_dps/specs/fury_warrior/adapter.py",
+    "fury_adapter_blob_sha": "a7c35cc6f5bbbdfe47b65bc63be4bba22a60cc97",
+    "existing_action_family_stable_numeric_ids": true,
+    "existing_action_override_numeric_ids": true,
+    "existing_fury_action_families": [
+      "BLOODTHIRST_FAMILY",
+      "RAGING_BLOW_FAMILY"
+    ],
+    "existing_fury_rampage_family": false,
+    "existing_fury_known_mask": "RAMPAGE_CONTEXT_CANDIDATES_NOT_PROMOTED",
+    "per_action_source_complete_readiness_gate_interface": false,
+    "candidate_binding_mutated_existing_adapter": false,
+    "no_new_contract_approved": true,
+    "main_ownership_required": true
+  },
+  "recommended_minimal_binding_fields": [
+    "source_lane",
+    "spec_slug",
+    "profile_build_fingerprint",
+    "source_effective_apl_sha256",
+    "source_apl_list",
+    "source_apl_ordinal",
+    "simc_action_t_id",
+    "candidate_game_spell_id",
+    "candidate_game_spell_id_evidence",
+    "current_client_build_number",
+    "current_client_actual_spell_id_status",
+    "action_replacement_parent_child_relation",
+    "wcl_blind_candidate_lock_id",
+    "wcl_actor_target_and_event_kind",
+    "readiness_source_obligation_coverage",
+    "strict_pre_observation_status"
+  ],
+  "current_client_verification_plan": {
+    "status": "NOT_RUN",
+    "reference": "https://warcraft.wiki.gg/wiki/API_C_Spell.GetSpellInfo",
+    "c_spell_get_spell_info": "Returns spellID, localized name, iconID, originalIconID when query succeeds; does not prove known/actionbar/cast.",
+    "spell_icon_update_reference": "https://warcraft.wiki.gg/wiki/API_C_Spell.GetSpellTexture",
+    "spell_icon_patch_note": "12.1.0 API added conditionalIconID per community API reference",
+    "constraints": [
+      "capture live client build and spec/talents before test",
+      "verify learned/override and actionbar mapping separately",
+      "don't interpret tooltip/texture as READY",
+      "never infer actionability solely from name or id equality"
+    ],
+    "client_returned_data": "UNKNOWN"
+  },
+  "all_gameplay_ids_certified": 0,
+  "all_ready_certified": 0,
+  "wcl_blind_candidates_locked_by_this_lane": 0,
+  "gameplay_rule_promotion": false,
+  "authority_promotion": false,
+  "main_shared_files_mutated": false
+}
