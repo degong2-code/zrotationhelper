@@ -1,0 +1,50 @@
+{
+  "schema": "ZrotBranchResearchContinuityPointerV1",
+  "branch_id": "BR-SIMC-APL-BOOTSTRAP",
+  "owner": "RESEARCH_BRANCH",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/github-ci-bootstrap",
+  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261030_V3.md",
+  "canonical_handoff_blob_sha": "fa3430f9bb9a6693135ba0fc647b5dd079dbe069",
+  "research_code_evidence_sha": "4bbe79092fff6fc1f6eb7c4b57c6fd1555b4e36e",
+  "github_main_observed_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
+  "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
+  "required_source_ci": {
+    "run_id": 41064679658,
+    "conclusion": "success",
+    "scope": "FOUR_PINNED_PROFILE_STATIC_SOURCE_SEMANTIC_ONLY"
+  },
+  "required_native_ci": {
+    "run_id": 41059211056,
+    "conclusion": "success",
+    "scope": "FOUR_PUBLIC_FIXTURE_EPOCH_RESOURCE_DIAGNOSTIC_FIELD_ONLY"
+  },
+  "required_offline_ci": {
+    "run_id": 41064679434,
+    "conclusion": "success",
+    "scope": "PYTHON_3_12_3_14_OFFLINE_ONLY"
+  },
+  "code_evidence_head_offline_ci": {
+    "run_id": 41064894124,
+    "conclusion": "success",
+    "scope": "PYTHON_3_12_3_14_OFFLINE_ONLY"
+  },
+  "main_current_state": "UNKNOWN",
+  "main_global_latest_handoff": "UNKNOWN",
+  "main_active_manifest_and_production_pointer": "UNKNOWN",
+  "approved_runtime_live_boot": "NOT_VERIFIED",
+  "seq637_actual_local_result": "UNKNOWN",
+  "seq578_and_frozen": "UNCHANGED_NO_PROMOTION",
+  "actual_native_apl_operand_pre_certified": 0,
+  "actual_ready_tokens_certified": 0,
+  "total_source_readiness_tokens": 90,
+  "general_rotation_rule_promotion": false,
+  "strict_pre": "LATEST_VALID_TRANSITION_TIMESTAMP_LT_DECISION_AND_SAME_NATIVE_RESET_EPOCH",
+  "wcl_independent_blind_candidate_lock": "NOT_RUN_IN_THIS_BRANCH",
+  "shared_authoritative_state_mutated": false,
+  "stale_base_vs_actual_local_main": "UNKNOWN",
+  "startup_behavior": "RESTORE_AND_REPORT_ONLY_THEN_WAIT_FOR_EXPLICIT_진행",
+  "next_after_approval": "SOURCE_PINNED_RUNTIME_APL_RESOURCE_EXPRESSION_VALUE_VS_NATIVE_EPOCH_STRICT_PRE_WITHOUT_SNAPSHOT_LEAK",
+  "read_before_pointer": "Current project instructions and dual lane / parallel merge contracts",
+  "verified_as_of": "2026-10-30"
+}
