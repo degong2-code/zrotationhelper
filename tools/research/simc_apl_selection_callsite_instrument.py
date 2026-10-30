@@ -127,7 +127,7 @@ def selftest():
             "void player_t::sequence_add( const action_t* a, const player_t* t )\n"
             "        a->sequence_add_fn( data.action_reporting, data.target_reporting );\n"
             "        a->sequence_add_fn( data.action_reporting, data.target_reporting );\n"
-            "            sequence_add( action, action->target );\n"
+            "              sequence_add( action, action->target );\n"
             "            sequence_add( action, action->target );\n"
             "        sequence_add( action, action->target );\n"
         ),
