@@ -168,7 +168,7 @@ def selftest():
         bad=copy.deepcopy(req)
         bad["required_action_readiness"][0]["status"]="READY"
         try:audit_requirements(bad,route)
-        except ValueError as exc:assert str(exc)=="GAP_AUDIT_READINESS_PREMATURE_CERTIFICATION" or str(exc)=="GAP_AUDIT_ROUTE_NOT_CANONICAL_SOURCE_RECOMPILATION"
+        except ValueError as exc:assert str(exc)=="SOURCE_READINESS_CANNOT_BE_CERTIFIED"
         else:raise AssertionError("FABRICATED_READINESS_ACCEPTED")
         bad=copy.deepcopy(req)
         bad["required_state_operands"][0]["semantic_binding"]="NATIVE_APPROVED"
