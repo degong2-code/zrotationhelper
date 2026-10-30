@@ -191,8 +191,13 @@ def selftest() -> None:
     zero=_synthetic_raw(id2=0,scope_id2=0)
     missing=audit(zero,sha(zero),model)
     assert missing["status_counts"]["UNKNOWN_NONPOSITIVE_NATIVE_ACTION_ID"]==1
+    # A mismatched action object and action scope is UNATTRIBUTABLE,
+    # not positive evidence and not necessarily a malformed source log.
+    unmatched=_synthetic_raw(id2=200,scope_id2=100)
+    result=audit(unmatched,sha(unmatched),model)
+    assert result["status_counts"]["UNKNOWN_NO_EXACT_ACTION_ATTEMPT_SCOPE"]==1
+    assert result["source_owned_action_ids"][0]["native_action_t_ids"]=={100:1}
     for bad in (
-        _synthetic_raw(id2=200,scope_id2=100),
         raw.replace(b"|END|0|0|10|",b"|END|0|0|9|"),
         raw.replace(b"|BEGIN|0|0|4|",b"|BEGIN|0|0|5|"),
     ):
