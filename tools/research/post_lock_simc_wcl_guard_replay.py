@@ -37,6 +37,53 @@ def _pin(raw: bytes, expected_sha256: str, name: str):
         raise ValueError(name + "_SHA256_MISMATCH")
 
 
+def _unique_json_object_pairs(pairs):
+    """Ambiguous duplicate keys may not be normalized into a blind lock."""
+    out = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError("BLIND_LOCK_DUPLICATE_JSON_KEY")
+        out[key] = value
+    return out
+
+
+def _reject_nonfinite_json_constant(_value):
+    """NaN/Infinity must not become a numeric structural threshold."""
+    raise ValueError("BLIND_LOCK_NONFINITE_JSON_CONSTANT")
+
+
+def _reject_obvious_semantic_leakage(value):
+    """Known SimC/guide content is forbidden in a WCL numeric lock.
+
+    This is a conservative screening check, not a proof of historical
+    discovery independence. That requires separate raw WCL evidence,
+    provenance, and lock-before-comparison audit by the authorized owner.
+    """
+    forbidden_keys = (
+        "simc", "simulationcraft", "apl", "wowhead", "guide",
+        "spell_name", "ability_name", "action_name", "talent_name",
+        "tooltip", "blizzard", "predicted_action", "rotation",
+    )
+    forbidden_values = (
+        "simc", "simulationcraft", "wowhead", "actions+=",
+        "buff.", "debuff.", "hero_tree.", "talent.", "blizzard",
+    )
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if key not in ("semantic_names_attached", "semantic_name"):
+                name = key.casefold()
+                if any(term in name for term in forbidden_keys):
+                    raise ValueError("SIMC_SEMANTIC_CONTAMINATION")
+            _reject_obvious_semantic_leakage(child)
+    elif isinstance(value, list):
+        for child in value:
+            _reject_obvious_semantic_leakage(child)
+    elif isinstance(value, str):
+        text = value.casefold()
+        if any(term in text for term in forbidden_values):
+            raise ValueError("SIMC_SEMANTIC_CONTAMINATION")
+
+
 def _locked_numeric_actions(lock_bytes: bytes, lock_sha256: str):
     """Read lock artifact BYTES, not post-lock derived candidate lists.
 
@@ -44,7 +91,11 @@ def _locked_numeric_actions(lock_bytes: bytes, lock_sha256: str):
     independent provenance still requires MAIN review; this cannot prove it.
     """
     _pin(lock_bytes, lock_sha256, "BLIND_LOCK")
-    obj = json.loads(lock_bytes)
+    obj = json.loads(
+        lock_bytes,
+        object_pairs_hook=_unique_json_object_pairs,
+        parse_constant=_reject_nonfinite_json_constant,
+    )
     if not isinstance(obj, dict):
         raise ValueError("BLIND_LOCK_OBJECT_REQUIRED")
     if obj.get("schema") != "ZrotWave3NumericCandidateLock":
@@ -57,6 +108,7 @@ def _locked_numeric_actions(lock_bytes: bytes, lock_sha256: str):
         raise ValueError("SIMC_SEMANTIC_CONTAMINATION")
     if obj.get("gameplay_rule_claim") is not False:
         raise ValueError("BLIND_LOCK_GAMEPLAY_CLAIM")
+    _reject_obvious_semantic_leakage(obj)
     rows=obj.get("candidates")
     if not isinstance(rows, list) or not rows:
         raise ValueError("BLIND_LOCK_CANDIDATES_REQUIRED")
@@ -250,6 +302,51 @@ def selftest():
     try:replay(fx(),profile_text=profile.replace("enhancement","fury"))
     except ValueError as exc:assert str(exc)=="PROFILE_SHA256_MISMATCH"
     else:raise AssertionError("CROSS_SPEC_PROFILE_ACCEPTED")
+    # A structurally locked numeric artifact is not permitted to carry
+    # SimC answer hints in hidden top-level/nested JSON fields.
+    for tampered in (
+        dict(lock, simc_apl_guard="buff.foo.up"),
+        dict(lock, producer="SimulationCraft"),
+        dict(lock, candidates=[{**lock["candidates"][0],
+                                "unknown_context":{"action_name":"stormstrike"}},
+                               lock["candidates"][1]]),
+        dict(lock, context={"source":"WOWHEAD_GUIDE", "values":[1,2]}),
+    ):
+        encoded=json.dumps(tampered,sort_keys=True).encode()
+        try:
+            replay(fx(),blind_lock_bytes=encoded,
+                   blind_lock_sha256=hashlib.sha256(encoded).hexdigest())
+        except ValueError as exc:
+            assert str(exc)=="SIMC_SEMANTIC_CONTAMINATION", str(exc)
+        else:
+            raise AssertionError("BLIND_SEMANTIC_PAYLOAD_ACCEPTED")
+
+    # SHA alone does not make duplicate-key or nonfinite JSON unambiguous.
+    ambiguous=raw.replace(b'"status": "LOCKED_NUMERIC_ONLY"',
+                          b'"status": "LOCKED_NUMERIC_ONLY", "status": "LOCKED_NUMERIC_ONLY"')
+    assert ambiguous!=raw
+    nonfinite=json.dumps({**lock,"numeric_threshold":float("nan")},
+                         sort_keys=True).encode()
+    for payload,expected in (
+        (ambiguous,"BLIND_LOCK_DUPLICATE_JSON_KEY"),
+        (nonfinite,"BLIND_LOCK_NONFINITE_JSON_CONSTANT"),
+    ):
+        try:
+            replay(fx(),blind_lock_bytes=payload,
+                   blind_lock_sha256=hashlib.sha256(payload).hexdigest())
+        except ValueError as exc:
+            assert str(exc)==expected, (expected,str(exc))
+        else:
+            raise AssertionError("NONCANONICAL_BLIND_LOCK_ACCEPTED")
+
+    # Preserve numeric/structural discovery metadata without name inference.
+    safe=dict(lock, evidence={"source":"WCL", "report_id":42,
+                              "actor_id":1234,"resource_value":95})
+    encoded=json.dumps(safe,sort_keys=True).encode()
+    accepted=replay(fx(),blind_lock_bytes=encoded,
+                    blind_lock_sha256=hashlib.sha256(encoded).hexdigest())
+    assert accepted["category"]=="GUARD_TRUE_FOR_OBSERVED_ACTION"
+    assert accepted["blind_independence_verification"]=="NOT_RUN"
     print("POST_LOCK_SIMC_WCL_GUARD_REPLAY_SELF_TEST=PASS")
 
 
