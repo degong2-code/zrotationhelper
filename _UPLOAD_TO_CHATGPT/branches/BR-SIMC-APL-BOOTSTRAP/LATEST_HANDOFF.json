@@ -4,9 +4,9 @@
   "owner": "RESEARCH_BRANCH",
   "repository": "degong2-code/zrotationhelper",
   "branch": "work/github-ci-bootstrap",
-  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V8.md",
-  "canonical_handoff_blob_sha": "ee9587a70d0f7639be7697744fe82763206622a2",
-  "research_code_evidence_sha": "d43374850c51420ffea82f934ffd7684faf6b414",
+  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V9.md",
+  "canonical_handoff_blob_sha": "8a7b96b9ed6e4a61b3177fe0cfcef5f44aca5730",
+  "research_code_evidence_sha": "a1629b3373eb1f47124e14cb133b75796eee23a5",
   "github_main_observed_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
   "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
   "actual_native_eval_ci": {
@@ -39,7 +39,7 @@
   "seq637_actual_local_result": "UNKNOWN",
   "seq578_and_frozen": "UNCHANGED_NO_PROMOTION",
   "shared_authoritative_state_mutated": false,
-  "next": "MAIN_SPEC_ADAPTER_READINESS_EXTRA_DIMENSION_COMPATIBILITY_AND_WCL_BLIND_LOCK",
+  "next": "MAIN_SPEC_ADAPTER_READINESS_COVERAGE_COMPATIBILITY_DECISION",
   "verified_as_of": "2026-10-31",
   "source_route_audit_path": "docs/DEVELOPER_NOTE_PINNED_APL_BARE_RESOURCE_EVAL_REACHABILITY_20261031.md",
   "source_route_audit_blob_sha": "c348162d309155658fbddc9c2e715a2966b54f2d",
@@ -112,5 +112,23 @@
   "readiness_source_obligation_status": "SOURCE_ONLY_8_COMMON_PLUS_SPECIFIC_EXTRAS_UNOBSERVED",
   "readiness_adapter_missing_extra_dimension_coverage": "BLOCKED_MAIN_COMPATIBILITY",
   "readiness_certified": 0,
-  "no_new_native_execution": true
+  "no_new_native_execution": true,
+  "compatibility_review_note_path": "docs/DEVELOPER_NOTE_SIMC_READINESS_COVERAGE_COMPAT_20261031.md",
+  "compatibility_review_note_blob_sha": "685da8c6f7ae5609717d6d5bba276b5575b56988",
+  "coverage_audit_path": "tools/research/simc_readiness_source_coverage_compat.py",
+  "coverage_audit_blob_sha": "e2fc4dbb5ecea70f12bf7acebdee0c322e342932",
+  "coverage_offline_ci": {
+    "run_id": 41088639687,
+    "conclusion": "success",
+    "code_sha": "a1629b3373eb1f47124e14cb133b75796eee23a5",
+    "python_versions": [
+      "3.12",
+      "3.14"
+    ]
+  },
+  "readiness_adapter_source_completeness": "MISSING_MAIN_APPROVAL",
+  "source_coverage_audit": "PASS_SYNTHETIC_EVIDENCE_ONLY",
+  "app_gameplay_ready_certified": 0,
+  "new_native_validation": "NOT_RUN",
+  "live_wcl": "NOT_RUN"
 }
