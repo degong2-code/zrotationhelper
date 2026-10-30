@@ -106,10 +106,11 @@ def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
                 raise ValueError("INSTRUMENTED_NONACTION_WITH_POINTER")
             origin=record.get("zrot_sequence_origin_callsite")
             if origin is None:
-                origin="UNKNOWN_CALLSITE"
+                origin=("WAIT_NON_ACTION" if "wait" in record and "name" not in record
+                        else "UNKNOWN_CALLSITE")
             allowed=("PRECOMBAT_DIRECT","FOREGROUND_EXECUTE_ACTION",
                      "QUEUED_SPECIALIZED_EXECUTE","VARIABLE_SIDE_EFFECT",
-                     "UNKNOWN_CALLSITE")
+                     "UNKNOWN_CALLSITE","WAIT_NON_ACTION")
             if not isinstance(origin,str) or origin not in allowed:
                 raise ValueError("INSTRUMENTED_SEQUENCE_CALLSITE_INVALID")
             if require_callsite_proof and origin=="UNKNOWN_CALLSITE" and "name" in record:
