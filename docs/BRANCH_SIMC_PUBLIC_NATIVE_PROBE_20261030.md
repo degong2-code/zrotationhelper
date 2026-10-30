@@ -34,3 +34,37 @@
 5. MAIN alone may assess compatibility and promote after focused verification. Latest local MAIN `CURRENT_STATE`, global `LATEST_HANDOFF`, active manifest and Cloud-only Work OS boot remain UNKNOWN in this chat.
 
 No changes to MAIN `main`, shared product pointers, frozen contracts, or user-private data.
+
+
+## Follow-up: source-grounded unmatched-row and full-state coverage audit (2026-10-30)
+
+- Follow-up research commit: `12b578c64f8a629ae5c035237074207d8a8cf362`.
+- Native GitHub Actions run: https://github.com/degong2-code/zrotationhelper/actions/runs/41005702485 ; completed SUCCESS.
+- Companion offline CI: https://github.com/degong2-code/zrotationhelper/actions/runs/41005702461 ; Python 3.12 and 3.14 jobs both SUCCESS (offline only).
+- Same pinned official image, image-internal profile, executable and seed `1247695`; this run additionally requested `json2=...,full_states=1`, which the pinned SimC `engine/sim/sim.cpp` JSON report parser supports. This setting was **absent from the previous probe**. It collects supplementary snapshots, not decision PRE.
+- Exact event counts remained: 1,265 native performs, 76 JSON2 sample actions, 71 same-millisecond-and-token matches, 5 unmatched, 66 samples with multiple native events at the same millisecond.
+- Non-empty snapshot coverage: resources **76/76**, buffs **69/76**, cooldowns **69/76**, targets **76/76**. Non-empty arrays do NOT prove full spell readiness, exact prior-state timestamp, or independent decision-time observability. `full_states` is report-side evidence, not a Strict PRE authorization.
+
+### Five concrete unmatched public sample actions
+
+| Phase | Ordinal | t_ms | JSON2 sample token | ID | Interpretation boundary |
+| --- | ---: | ---: | --- | ---: | --- |
+| PRECOMBAT | 3 | 0 | `trinket1_is_weird` | 0 | APL variable; SimC `variable_t::execute` can add a sequence entry when its reported value changes, without the generic `performs Action` log |
+| PRECOMBAT | 4 | 0 | `trinket2_is_weird` | 0 | Same variable-recording mechanism |
+| PRECOMBAT | 5 | 0 | `snapshot_stats` | 0 | SimC `snapshot_stats_t::execute` emits a special `performs snapshot_stats` log format, not the narrow performed-Action pattern |
+| COMBAT | 1 | 0 | `auto_attack` | 0 | Control/action initialization candidate; actual causality remains UNKNOWN pending the player-action source path and event-level investigation |
+| COMBAT | 7 | 4693 | `use_item_voracious_heart_of_ulatek` | 0 | Item-use action/underlying effect identity is not demonstrated by same-time native token matching; remains UNKNOWN |
+
+Source references: `simulationcraft/simc@710c2408bfd3ae4df71b8cd55cdf01f63fd6c926`, `engine/action/variable.cpp`, `engine/action/snapshot_stats.cpp`, `engine/player/player.cpp`, `engine/action/action.cpp`, `engine/player/player_collected_data.cpp`, `engine/report/json/report_json.cpp` and `engine/sim/sim.cpp`. The row identities are **observed** in the public follow-up run; mechanism classifications are **source-based interpretation**, not native foreground or optimality certification.
+
+At t=0, 11 native performs events share the sample timestamp; at t=4693 ms, 10 native events share the timestamp. Thus same-time matching is ambiguous. One failed exact token match is not an APL behavioral failure. Even matching text and JSON2 tokens cannot establish APL foreground provenance independently.
+
+Public summary-only evidence artifact: `12954954228`, ZIP SHA256 `768c31d78eabf5842a63b5ab5da38635c8f0026b3742cbbedf98a35f28e6985f`, seven-day retention. No raw log/profile/APL artifact is uploaded.
+
+### Updated bounded product next
+1. Reuse this exact public fixture, avoid class-specific or boss-specific foreground labels. Distinguish `sequence_add` call origin (`do_execute` foreground, variable reporting, special snapshot, channel and control paths) with raw-event/source evidence and numeric event IDs; do not infer from JSON2 shape alone.
+2. Investigate `auto_attack` and `use_item` with action semantics and actor/target attribution; retain UNKNOWN where proof is absent.
+3. Build a provenance-carrying state timeline that admits only verified source transitions strictly earlier than a decision (`timestamp < decision_time`). Same-time JSON2 snapshots remain excluded even when captured with `full_states=1`.
+4. Compare a certified native foreground subset against source-APL replay, then independently locked blind-WCL data; do not promote source behavior to gameplay priority without appropriate verification.
+
+**Authority stays branch-local:** MAIN `CURRENT_STATE`, global `LATEST_HANDOFF`, manifest/Work OS runtime remain UNKNOWN in this chat. Seq637 UNKNOWN, Seq578 and FROZEN invariant not altered. No WCL live validation; no General Rotation or Encounter rotation promotion.
