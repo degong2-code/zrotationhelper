@@ -719,6 +719,16 @@ def check_simc_native_oracle_reconciliation() -> None:
 
 
 
+def check_simc_native_json2_sequence() -> None:
+    """Structural sample sequence, snapshot, pin and missing-details gates."""
+    p=ROOT/'tools/research/simc_native_json_sequence.py'
+    compile(p.read_bytes(),str(p),'exec',dont_inherit=True)
+    z=subprocess.run([sys.executable,'-B',str(p),'--self-test'],
+                     cwd=str(ROOT),capture_output=True,text=True,timeout=20)
+    assert z.returncode==0, 'SimC native JSON2 sample sequence extractor failed'
+    assert 'SIMC_NATIVE_JSON2_SEQUENCE_EXTRACTION_SELF_TEST=PASS' in z.stdout
+
+
 def main() -> int:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     results = []
@@ -748,6 +758,7 @@ def main() -> int:
         ('simc_precombat_to_priority_cli', check_simc_precombat_to_priority_cli),
         ('simc_native_performed_event_extractor', check_simc_native_performed_extractor),
         ('simc_native_oracle_reconciliation', check_simc_native_oracle_reconciliation),
+        ('simc_native_json2_sequence', check_simc_native_json2_sequence),
         ('simc_wcl_batch_reconciliation_research_only', check_simc_wcl_batch_reconciliation),
     )
     for name, fn in checks:
@@ -760,7 +771,7 @@ def main() -> int:
         results.append({'name':name,'status':status})
         print(name + ': ' + status, flush=True)
     rows = []
-    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py', 'tools/research/simc_apl_conditional_ir.py', 'tools/research/simc_apl_readiness_provider.py', 'tools/research/simc_native_reference_capture.py', 'tools/research/simc_apl_variable_runtime.py', 'tools/research/simc_apl_precombat_replay.py', 'tools/research/simc_native_performed_events.py', 'tools/research/simc_native_oracle_reconciliation.py'):
+    for relative in SRC_PATHS + SPEC_PATHS + ('tools/research/simc_apl_syntax_inventory.py', 'tools/research/simc_apl_condition_research.py', 'tools/research/post_lock_simc_wcl_guard_replay.py', 'tools/research/simc_apl_source_engine.py', 'tools/research/simc_apl_priority_trace.py', 'tools/research/simc_wcl_reconciliation_engine.py', 'tools/research/simc_apl_conditional_ir.py', 'tools/research/simc_apl_readiness_provider.py', 'tools/research/simc_native_reference_capture.py', 'tools/research/simc_apl_variable_runtime.py', 'tools/research/simc_apl_precombat_replay.py', 'tools/research/simc_native_performed_events.py', 'tools/research/simc_native_oracle_reconciliation.py', 'tools/research/simc_native_json_sequence.py'):
         p = ROOT / relative
         if p.is_file():
             rows.append((relative,sha256(p.read_bytes())))
@@ -789,6 +800,7 @@ def main() -> int:
         'simc_readiness_derivation':'SOURCE_DECLARED_CONSTRAINTS_NOT_EMPIRICAL',
         'simc_native_reference_capture':'SYNTHETIC_CONTRACT_ONLY_ACTUAL_NOT_RUN',
         'simc_native_oracle_comparison':'PROVISIONAL_SYNTHETIC_ONLY',
+        'simc_json2_sequence':'STRUCTURED_SOURCE_FORMAT_SYNTHETIC_ONLY',
         'simc_wcl_batch_reconciliation':'SYNTHETIC_ACTION_FAMILY_CANDIDATES_ONLY',
         'blind_wcl_independence_validation':'NOT_RUN',
         'spec_adapter_authority_contract':'NOT_RUN',

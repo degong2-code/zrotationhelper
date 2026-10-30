@@ -31,7 +31,7 @@ def _secure_capture_dir(out: Path):
     if not out.is_dir():
         raise SourceContractError("REFERENCE_OUTPUT_NOT_DIRECTORY")
     for name in ("simc_native_log.txt","simc_effective_actions.simc",
-                 "simc_reference_receipt.json"):
+                 "simc_native_sequence.json","simc_reference_receipt.json"):
         if (out/name).exists():
             raise SourceContractError("REFERENCE_OUTPUT_ALREADY_EXISTS")
 
@@ -76,10 +76,12 @@ def capture_reference(
     _secure_capture_dir(destination)
     action_file=destination/"simc_effective_actions.simc"
     log_file=destination/"simc_native_log.txt"
+    sequence_file=destination/"simc_native_sequence.json"
     command=[
         str(executable),str(profile),
         "iterations=1","threads=1","calculate_scale_factors=0",
         "log=1","log_spell_id=1",
+        "report_details=1", "json2="+str(sequence_file),
         "save_actions="+str(action_file),
         "output="+str(log_file),
     ]
@@ -98,6 +100,8 @@ def capture_reference(
         raise SourceContractError("SIMC_NATIVE_ACTION_EXPORT_MISSING")
     if not log_file.is_file() or not log_file.stat().st_size:
         raise SourceContractError("SIMC_NATIVE_LOG_MISSING")
+    if not sequence_file.is_file() or not sequence_file.stat().st_size:
+        raise SourceContractError("SIMC_NATIVE_JSON2_MISSING")
     apl_bytes=action_file.read_bytes()
     # Parse and verify source's structural integrity without interpreting log.
     model=ingest_actions(
@@ -114,6 +118,8 @@ def capture_reference(
         "profile_sha256":sha(raw),
         "effective_apl_sha256":sha(apl_bytes),
         "native_log_sha256":_fingerprint(log_file),
+        "native_json2_sha256":_fingerprint(sequence_file),
+        "native_json2_structure":"UNPARSED",
         "simc_spec":expected_spec,
         "action_list_count":model["action_list_count"],
         "apl_row_count":model["apl_row_count"],
@@ -122,6 +128,8 @@ def capture_reference(
              "bytes":action_file.stat().st_size},
             {"file":log_file.name,"sha256":_fingerprint(log_file),
              "bytes":log_file.stat().st_size},
+            {"file":sequence_file.name,"sha256":_fingerprint(sequence_file),
+             "bytes":sequence_file.stat().st_size},
         ],
         "native_action_log_parsed":"NOT_RUN",
         "state_snapshot_reconstructed":"NOT_RUN",
@@ -158,6 +166,14 @@ def selftest():
                           if x.startswith("output=")))
             action.write_text(profile.read_text(encoding="utf-8"),encoding="utf-8")
             log.write_text("SYNTHETIC LOG; NOT A REAL SIMC RUN\n",encoding="utf-8")
+            sequence=Path(next(x.split("=",1)[1] for x in command
+                               if x.startswith("json2=")))
+            assert "report_details=1" in command
+            sequence.write_text(json.dumps({"sim":{"players":[{"collected_data":{
+                "action_sequence_precombat":[],
+                "action_sequence":[{"time":0.2,"name":"stormstrike","id":17364,
+                                    "queue_failed":False,"resources":{"mana":100}}]
+            }}]}}),encoding="utf-8")
             return SimpleNamespace(returncode=0)
         receipt=capture_reference(
             profile_file=profile,expected_spec="enhancement",

@@ -49,8 +49,8 @@ def extract_native_reference(source_directory: Path) -> dict:
         if not isinstance(record,dict):
             raise ValueError("INVALID_REFERENCE_OUTPUT_RECORD")
         name=record.get("file")
-        if name not in ("simc_native_log.txt","simc_effective_actions.simc") \
-                or name in output_map:
+        if name not in ("simc_native_log.txt","simc_effective_actions.simc",
+                        "simc_native_sequence.json") or name in output_map:
             raise ValueError("UNEXPECTED_OR_DUPLICATE_REFERENCE_FILE")
         file=(folder/name)
         if file.is_symlink() or not file.is_file():
@@ -59,7 +59,7 @@ def extract_native_reference(source_directory: Path) -> dict:
         if digest(raw)!=record.get("sha256") or len(raw)!=record.get("bytes"):
             raise ValueError("REFERENCE_OUTPUT_HASH_OR_SIZE_MISMATCH")
         output_map[name]=raw
-    if len(output_map)!=2:
+    if not {"simc_native_log.txt","simc_effective_actions.simc"}.issubset(output_map):
         raise ValueError("REFERENCE_OUTPUT_INCOMPLETE")
     if digest(output_map["simc_effective_actions.simc"])!=receipt.get(
         "effective_apl_sha256"):
