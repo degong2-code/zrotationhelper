@@ -38,10 +38,10 @@ def patch_sources(sources:dict[str,str])->dict[str,str]:
     # All six V1 print calls exist in player.cpp, source-pinned by previous
     # unique exact-match reporter patches. The captured call is kept intact.
     kinds=(
-        ("GAIN", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_V1\|[^\n]*\n[^\n]*\n[^\n]*"GAIN" \);'),
-        ("LOSS", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_V1\|[^\n]*\n[^\n]*\n[^\n]*"LOSS" \);'),
-        ("INIT", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1\|[^\n]*\n[^\n]*\n[^\n]*"INIT" \);'),
-        ("RECALC", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1\|[^\n]*\n[^\n]*\n[^\n]*"RECALC" \);'),
+        ("GAIN", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_V1\|[^\n]*\n[^\n]*\n[^\n]*\n[^\n]*"GAIN" \);'),
+        ("LOSS", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_V1\|[^\n]*\n[^\n]*\n[^\n]*\n[^\n]*"LOSS" \);'),
+        ("INIT", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1\|[^\n]*\n[^\n]*\n[^\n]*\n[^\n]*"INIT" \);'),
+        ("RECALC", r'sim->print_log\( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1\|[^\n]*\n[^\n]*\n[^\n]*\n[^\n]*"RECALC" \);'),
         ("SELECT_BEGIN", r'sim->print_log\( "ZROT_NATIVE_SELECT_RESOURCE_BEGIN_V1\|[^\n]*\n[^\n]*\);'),
         ("SELECT_END", r'sim->print_log\( "ZROT_NATIVE_SELECT_RESOURCE_END_V1\|[^\n]*\n[^\n]*\n[^\n]*\);'),
     )
@@ -117,13 +117,21 @@ def selftest():
         _SIM:"struct sim_t {\n"+_FIELD_ANCHOR+"\n};",
         _PLAYER:(
            '    sim->print_log( "ZROT_NATIVE_RESOURCE_V1|{}",\n'
-           '                    alpha, beta, "GAIN" );\n'
+           '                    alpha,\n'
+           '                    beta,\n'
+           '                    gamma, "GAIN" );\n'
            '    sim->print_log( "ZROT_NATIVE_RESOURCE_V1|{}",\n'
-           '                    alpha, beta, "LOSS" );\n'
+           '                    alpha,\n'
+           '                    beta,\n'
+           '                    gamma, "LOSS" );\n'
            '    sim->print_log( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1|{}",\n'
-           '                    alpha, beta, "INIT" );\n'
+           '                    alpha,\n'
+           '                    beta,\n'
+           '                    gamma, "INIT" );\n'
            '    sim->print_log( "ZROT_NATIVE_RESOURCE_LIFECYCLE_V1|{}",\n'
-           '                    alpha, beta, "RECALC" );\n'
+           '                    alpha,\n'
+           '                    beta,\n'
+           '                    gamma, "RECALC" );\n'
            '    sim->print_log( "ZROT_NATIVE_SELECT_RESOURCE_BEGIN_V1|{}",\n'
            '                    alpha );\n'
            '    sim->print_log( "ZROT_NATIVE_SELECT_RESOURCE_END_V1|{}",\n'
