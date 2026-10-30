@@ -141,6 +141,7 @@ def ingest_actions(
                 "readiness":"UNKNOWN",
                 "numeric_spell_identity":"UNKNOWN",
                 "hypothesis_only":True,
+                "ignored_empty_option_slots":item.get("ignored_empty_option_slots",0),
             })
     requirements.update(("SPELL_IDENTITY", "SPELL_READINESS",
                          "BUILD_TO_WCL_BINDING", "BLIND_WCL_RECONCILIATION",
@@ -159,6 +160,7 @@ def ingest_actions(
         "custom_apl_in_profile":input_contains_custom_apl,
         "profile_dependencies_verified":profile_dependencies_verified,
         "action_list_count":len(lists), "apl_row_count":len(rows),
+        "source_empty_option_slots_ignored":sum(r["ignored_empty_option_slots"] for r in rows),
         "lists":list(lists), "rows":rows,
         "unresolved_requirements":sorted(requirements),
         "actionable_general_rotation":False,
