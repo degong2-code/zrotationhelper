@@ -74,3 +74,27 @@ The sequence is taken from the **same SimC `sim_t`-owned counter** used for all 
 These are **pipeline/test failures**, not invalidated SimC APL hypotheses or evidence that a certain resource policy is wrong. Do not mark Native PASS for this successor until a compiled public-profile run independently proves reset stamps and epoch-aware comparison.
 
 **Successor CI:** [41055221198](https://github.com/degong2-code/zrotationhelper/actions/runs/41055221198). Source-pinned V2-only run 41053700577 remains separate evidence. Next exact action: inspect the actual reset-count/epoch distribution and per-resource match/conflict/unknown results from the successor, then audit what remains unverified. No user-facing recommendation or MAIN/FROZEN promotion.
+
+
+## Verified Native clock-reset epoch successor — completed
+
+[Native CI run 41055221198](https://github.com/degong2-code/zrotationhelper/actions/runs/41055221198) **SUCCESS**: pinned official upstream checkout, reporter-only source patches to player.cpp/sim.hpp/sim.cpp, complete C++ compile, three actual public profile simulations, complete V1/V2 resource and selection identity checks, source-stamped `sim_t::reset` boundary parser and independent byte recalculation, epoch+source-sequence+strict-time diagnostic comparison, summary-only artifact. Exact compiled instrumented binary SHA256 **`4eb6c175cda08834ee2454c4ef183c824c727f3f4b56852d61fa0c0a3187fd79`**, upstream SHA **`710c2408bfd3ae4df71b8cd55cdf01f63fd6c926`**; do not reuse V2-only binary `31b0f6...` as proof for this run.
+
+| Pinned public profile | Source-stamped resource/selection V2 events | Native `select_action` entry diagnostics | Source-pointer-backed selected actions | Strictly older source value consistent | Same-ms excluded | Eligible contradictory |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Enhancement Shaman | 305 | 64 | 64 | 272 | 112 | 0 |
+| Fury Warrior | 536 | 168 | 76 | 372 | 300 | 0 |
+| Unholy Death Knight | 283 | 66 | 66 | 184 | 212 | 0 |
+| **Aggregate** | **1,124** | **298** | **206** | **828** | **624** | **0** |
+
+The 828 `CONSISTENT_PRIOR_SOURCE_VALUE` entries are **field comparisons**, not verified decisions or complete resource states. Every admitted predecessor was from the **same source-run/Native thread/current_iteration/actual reset boundary/actor/spawn**, with `source_sequence < native selection BEGIN sequence` and `source timestamp < selection timestamp`. The reset-boundary evidence is emitted at actual `sim_t::reset()` using the exact same SimC-owned monotonic source counter. The old 1,390 source sequence/timestamp contradictions are no longer falsely joined across clock epochs, not converted into an invented 1,390 successful conditions.
+
+The other 624 field comparisons are `SAME_TIMESTAMP_NOT_STRICT_PRE`. They remain **UNKNOWN**, even if there is a source event sequence preceding the diagnostic within that millisecond. A source-emission order alone does not change the authoritative `< action_time` rule. The 0 eligible mismatches is **not** proof of full source-mutation coverage or SimC's optimal action choice. SimC resource initial/max and gain/loss functions are still partial (direct writes in class modules and untracked state families remain). The exact number of reset boundaries is not surfaced in this run's summary: **UNKNOWN**, though each profile's validation required reset-boundary evidence. Do not invent counts.
+
+**Validation granularity:** Source anchored source/synthetic tests PASS. Python 3.12 and 3.14 offline CI for the successor code commit: [41055221257](https://github.com/degong2-code/zrotationhelper/actions/runs/41055221257) both SUCCESS. Prior synthetic failures (newline, parser binding, test denominator) are preserved above as pipeline regressions, not simulated rotation claims. A post-code documentation update is independent of the native executable receipt.
+
+### Decision and user-impact-focused Exact Next
+
+The initial state-join *identity blocker* has been resolved **for this pinned source/3 public-fixture scope**. Do not keep extending sequence/epoch gates without a concrete mismatch. Next, audit which **APL operands and actual action readiness** remain unobserved at the now source-pinned foreground decisions. Establish generic semantic bindings (resource max/current only with verified actor/build, then proc/buff/debuff/cooldown/charges/target) against actual source mechanics and Blizzard current game authority. Run bounded native `select_action` replay with match/conflict/UNKNOWN separately. A completely new build/spec or independent holdout plus post-lock independent WCL discovery remains required for gameplay priority/freeze. The 624 same-time exclusions can be studied for material user impact, but do not relax the Strict PRE timestamp rule or treat source sequence as permission to leak same-time state.
+
+**No** gameplay addon/UI recommendation is released from this evidence; no MAIN/current state/FROZEN/Seq578/canonical pointers/global handoff were altered; Seq637 UNKNOWN. Local PyCharm step is not required.
