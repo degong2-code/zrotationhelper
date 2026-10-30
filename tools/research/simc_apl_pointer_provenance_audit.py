@@ -49,7 +49,8 @@ def _expected_rows(apl_bytes:bytes):
 
 def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
                                         *,effective_apl_sha256:str,
-                                        expected_upstream_sha:str=UPSTREAM_SHA):
+                                        expected_upstream_sha:str=UPSTREAM_SHA,
+                                        require_callsite_proof:bool=False):
     if expected_upstream_sha!=UPSTREAM_SHA:
         raise ValueError("INSTRUMENTED_UPSTREAM_PIN_MISMATCH")
     if hashlib.sha256(apl_bytes).hexdigest()!=effective_apl_sha256:
@@ -66,6 +67,7 @@ def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
         raise ValueError("INSTRUMENTED_JSON2_ACTION_SEQUENCE_REQUIRED")
     apl=_expected_rows(apl_bytes)
     statuses=Counter()
+    callsite_counts=Counter()
     event_results=[]
     for sequence,key in [("PRECOMBAT","action_sequence_precombat"),("COMBAT","action_sequence")]:
         records=collected.get(key,[])
@@ -102,6 +104,19 @@ def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
                 status="QUEUE_FAILED_"+status
             if ("name" not in record or record.get("wait") is not None) and any(present):
                 raise ValueError("INSTRUMENTED_NONACTION_WITH_POINTER")
+            origin=record.get("zrot_sequence_origin_callsite")
+            if origin is None:
+                origin="UNKNOWN_CALLSITE"
+            allowed=("PRECOMBAT_DIRECT","FOREGROUND_EXECUTE_ACTION",
+                     "QUEUED_SPECIALIZED_EXECUTE","VARIABLE_SIDE_EFFECT",
+                     "UNKNOWN_CALLSITE")
+            if not isinstance(origin,str) or origin not in allowed:
+                raise ValueError("INSTRUMENTED_SEQUENCE_CALLSITE_INVALID")
+            if require_callsite_proof and origin=="UNKNOWN_CALLSITE" and "name" in record:
+                raise ValueError("INSTRUMENTED_SEQUENCE_CALLSITE_MISSING")
+            if (origin=="PRECOMBAT_DIRECT" and sequence!="PRECOMBAT"):
+                raise ValueError("INSTRUMENTED_PRECOMBAT_CALLSITE_ON_COMBAT_RECORD")
+            callsite_counts[origin]+=1
             statuses[status]+=1
             event_results.append({
                 "sequence":sequence,"ordinal":ordinal,
@@ -109,6 +124,8 @@ def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
                 "native_action_object_id":record.get("id"),
                 "native_action_timestamp_s":record.get("time"),
                 "pointer_proof_status":status,
+                "sequence_add_callsite":origin,
+                "foreground_apl_select_action_confirmed":False,
                 "source_apl_list":matched["list"] if matched else None,
                 "source_apl_rank":matched["ordinal"] if matched else None,
                 "source_apl_file_line":matched["source_file_line"] if matched else None,
@@ -125,6 +142,7 @@ def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
         "apl_source_rows":sum(len(r) for r in apl.values()),
         "native_sequence_rows":len(event_results),
         "pointer_status_counts":dict(sorted(statuses.items())),
+        "sequence_callsite_status_counts":dict(sorted(callsite_counts.items())),
         "sequence_provenance":event_results,
         "source_binding_proof":"NATIVE_ACTION_OBJECT_POINTER_MATCH_ONLY",
         "selected_foreground_apl_action":"NOT_CERTIFIED",
@@ -134,7 +152,7 @@ def audit_native_provenance_from_parsed(native_json:dict,apl_bytes:bytes,
     }
 
 
-def audit_captured_native(root:Path):
+def audit_captured_native(root:Path,*,require_callsite_proof:bool=False):
     receipt,raw=_raw_verified(root)
     effective=(root/"simc_effective_actions.simc").read_bytes()
     if hashlib.sha256(effective).hexdigest()!=receipt["effective_apl_sha256"]:
@@ -149,7 +167,8 @@ def audit_captured_native(root:Path):
     except (UnicodeDecodeError,json.JSONDecodeError) as e:
         raise ValueError("INSTRUMENTED_JSON2_INVALID") from e
     report=audit_native_provenance_from_parsed(
-        source,effective,effective_apl_sha256=receipt["effective_apl_sha256"])
+        source,effective,effective_apl_sha256=receipt["effective_apl_sha256"],
+        require_callsite_proof=require_callsite_proof)
     report.update({
         "source_profile_sha256":receipt["profile_sha256"],
         "source_native_json2_sha256":receipt["native_json2_sha256"],
@@ -186,6 +205,22 @@ def selftest():
     assert [e["source_apl_rank"] for e in first["sequence_provenance"]]==[1,2,1]
     assert first["sequence_provenance"][2]["source_apl_list"]=="burst"
     assert not first["gameplay_rule_promotion"]
+    assert first["sequence_callsite_status_counts"]=={"UNKNOWN_CALLSITE":3}
+    added=json.loads(json.dumps(doc))
+    for record in added["sim"]["players"][0]["collected_data"]["action_sequence"]:
+        record["zrot_sequence_origin_callsite"]="FOREGROUND_EXECUTE_ACTION"
+    classified=audit_native_provenance_from_parsed(
+        added,effective,effective_apl_sha256=hashlib.sha256(effective).hexdigest(),
+        require_callsite_proof=True)
+    assert classified["sequence_callsite_status_counts"]=={"FOREGROUND_EXECUTE_ACTION":3}
+    assert all(not x["foreground_apl_select_action_confirmed"]
+               for x in classified["sequence_provenance"])
+    try:audit_native_provenance_from_parsed(
+        doc,effective,effective_apl_sha256=hashlib.sha256(effective).hexdigest(),
+        require_callsite_proof=True)
+    except ValueError as e:assert str(e)=="INSTRUMENTED_SEQUENCE_CALLSITE_MISSING"
+    else:raise AssertionError("MISSING_CALLSITE_ACCEPTED")
+
     missing=json.loads(json.dumps(doc))
     for key in ("zrot_apl_object_list","zrot_apl_object_ordinal",
                 "zrot_apl_object_signature","zrot_origin_proof"):
