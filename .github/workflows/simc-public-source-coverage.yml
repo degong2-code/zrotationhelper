@@ -44,6 +44,10 @@ jobs:
           python tools/research/simc_raw_transition_independent_audit.py
           python tools/research/simc_graph_shared_runtime_regression.py
           REV="710c2408bfd3ae4df71b8cd55cdf01f63fd6c926"
+          curl -fsSL --retry 2 "https://raw.githubusercontent.com/simulationcraft/simc/$REV/engine/util/util.cpp" -o "$RUNNER_TEMP/pinned-util.cpp"
+          test -s "$RUNNER_TEMP/pinned-util.cpp"
+          sha256sum "$RUNNER_TEMP/pinned-util.cpp" > "$RUNNER_TEMP/pinned-util.sha256"
+          UTIL_SHA="$(sha256sum "$RUNNER_TEMP/pinned-util.cpp" | cut -d' ' -f1)"
           for entry in "enhancement MID2_Shaman_Enhancement" "fury MID2_Warrior_Fury" "unholy MID2_Death_Knight_Unholy" "havoc MID2_Demon_Hunter_Havoc"; do
             read -r SPEC PROFILE <<< "$entry"
             python tools/research/simc_apl_source_engine.py \
@@ -67,6 +71,8 @@ jobs:
             python tools/research/simc_apl_native_observability_gap.py \
               --requirements "$RUNNER_TEMP/$SPEC-observability.json" \
               --semantic-route "$RUNNER_TEMP/$SPEC-semantic-route.json" \
+              --pinned-util-source "$RUNNER_TEMP/pinned-util.cpp" \
+              --pinned-util-source-sha256 "$UTIL_SHA" \
               --output "$RUNNER_TEMP/$SPEC-native-observability-gaps.json"
           done
           python - <<'PY'
@@ -105,6 +111,7 @@ jobs:
               assert native_gaps["source_operand_count"]==obs["operand_requirement_count"]
               assert native_gaps["all_action_tokens_unverified"]==obs["readiness_requirement_count"]
               assert (native_gaps["native_resource_grammar_candidates_not_bindings"]+
+                      native_gaps["pinned_resource_label_collision_candidates_not_bindings"]+
                       native_gaps["other_operand_producer_semantics_unverified"]==
                       native_gaps["source_operand_count"])
               assert native_gaps["strict_pre_replay"]=="NOT_RUN"
@@ -119,6 +126,7 @@ jobs:
                          for a in native_gaps["required_action_readiness"])
               print(f"PUBLIC_SIMC_NATIVE_EVIDENCE_GAPS={spec} "
                     f"RESOURCE_GRAMMAR_CANDIDATES={native_gaps['native_resource_grammar_candidates_not_bindings']} "
+                    f"BARE_RESOURCE_NAME_CANDIDATES={native_gaps['pinned_resource_label_collision_candidates_not_bindings']} "
                     f"OTHER_UNBOUND={native_gaps['other_operand_producer_semantics_unverified']} "
                     f"READY_UNKNOWN={native_gaps['all_action_tokens_unverified']} "
                     "VALIDATION=NO_NATIVE_APL_SEMANTIC_BINDING_YET")
