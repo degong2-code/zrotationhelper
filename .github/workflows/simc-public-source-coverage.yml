@@ -7,6 +7,7 @@ on:
       - "tools/research/simc_apl_source_engine.py"
       - "tools/research/simc_apl_conditional_ir.py"
       - "tools/research/simc_apl_priority_trace.py"
+      - "tools/research/simc_apl_decision_graph.py"
       - ".github/workflows/simc-public-source-coverage.yml"
   workflow_dispatch:
 
@@ -26,6 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python tools/research/simc_apl_decision_graph.py --self-test
           REV="710c2408bfd3ae4df71b8cd55cdf01f63fd6c926"
           for entry in "enhancement MID2_Shaman_Enhancement" "fury MID2_Warrior_Fury"; do
             read -r SPEC PROFILE <<< "$entry"
@@ -37,6 +39,9 @@ jobs:
             python tools/research/simc_apl_conditional_ir.py \
               --source-model "$RUNNER_TEMP/$SPEC-model.json" \
               --out "$RUNNER_TEMP/$SPEC-ir.json"
+            python tools/research/simc_apl_decision_graph.py \
+              --source-ir "$RUNNER_TEMP/$SPEC-ir.json" \
+              --out "$RUNNER_TEMP/$SPEC-decision-graph.json"
           done
           python - <<'PY'
           import json
@@ -46,12 +51,28 @@ jobs:
           for spec,expected in (("enhancement",114),("fury",121)):
               model=json.loads((base/f"{spec}-model.json").read_text())
               ir=json.loads((base/f"{spec}-ir.json").read_text())
+              graph=json.loads((base/f"{spec}-decision-graph.json").read_text())
               assert model["source_kind"]=="SIMC_PUBLIC_REPO_INLINE_PROFILE_APL"
               assert model["actual_simc_executable_run"]=="NOT_RUN"
               assert model["apl_row_count"]==expected,(spec,model["apl_row_count"])
               assert ir["total_rows"]==expected and ir["all_rows_preserved"]
               assert ir["gameplay_rule_promotion"] is False
               assert ir["complete_simc_execution"] is False
+              assert graph["source_apl_sha256"] == model["apl_sha256"]
+              assert graph["source_row_count"] == expected
+              assert graph["all_source_rows_mapped"] is True
+              assert len(graph["nodes"]) == expected + len(ir["lists"])
+              assert graph["entrypoint"] == "default:1"
+              assert graph["gameplay_rule_promotion"] is False
+              assert graph["actual_simc_priority_equivalence"] == "NOT_VALIDATED"
+              assert graph["wcl_independent_validation"] == "NOT_RUN"
+              assert len(graph["required_action_readiness_tokens"]) > 0
+              for node in graph["nodes"].values():
+                  if node["kind"] == "IF_ELSE_PRIORITY_ROW" and node["if_true"]["kind"] == "CHECK_ACTION_READINESS":
+                      assert node["if_true"]["unknown"] == "BLOCK_READINESS_UNKNOWN"
+              print(f"PUBLIC_SIMC_AUTOMATIC_DECISION_GRAPH={spec} ROWS={expected} "
+                    f"ACTIONS={graph['action_candidate_rows']} "
+                    "VALIDATION=SOURCE_DERIVED_HYPOTHESIS_ONLY")
               print(f"PUBLIC_SIMC_SOURCE_IR={spec} ROWS={expected} "
                     f"LISTS={len(ir['lists'])} "
                     f"GUARD_SYNTAX={ir['condition_expression_diagnostics']} "
