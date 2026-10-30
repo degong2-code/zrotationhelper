@@ -1,0 +1,119 @@
+{
+  "schema": "ZrotArchivedNativeMarkerPortableCorrectionV14",
+  "owner": "BR-SIMC-APL-BOOTSTRAP",
+  "date_kst": "2026-10-31",
+  "status": "CORRECTION_OF_DERIVED_AGGREGATE_ONLY",
+  "original_source_code_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
+  "source_v12_full_row_path": "docs/BR_SIMC_ARCHIVED_NATIVE_FULL_ROW_REPLAY_20261031.json",
+  "source_v12_full_row_blob_sha": "fabe13596b4fbf5b30af64c5b4581b204db1f259",
+  "original_zip_sha256": "da88d27ea027b2eacaa6675c9ee22afdffa8a307852ab21b661dabdbb2faab3e",
+  "legacy_portable_script_sha256": "89dbb114644f371452c27cc332c572cb61b5b53cf47847e4f80ba72af0769645",
+  "legacy_portable_json_sha256": "daf9ccee994622c48f7192bfda40c460606fa342cc2ca5232cf3b30c4c6d7bd6",
+  "corrected_portable_script_sha256": "1db610ccd35d3b054c9e94d7d9ee53c314f14f9e7b9d1fed6437d35023b8958f",
+  "corrected_portable_json_sha256": "b668fce4619f01dc0615b8202f3d858a814e8722e1d7aee99f84d2df2a39b215",
+  "corrected_portable_zip_sha256": "a919566a860ee1625228b9cdf68ec36d80dd65418670917c5e5bc4e63a65a329",
+  "corrected_portable_zip_size_bytes": 130827,
+  "scope": "ARCHIVED_NATIVE_IF_SOURCE_ONLY_NOT_GAME_SPELL_ID_OR_READINESS",
+  "defect": "V12 portable replay positive_ids derived convenience summary overwrote previous rows sharing the same positive action_t numeric ID",
+  "correction": "Aggregate Counter per positive native_action_t_id across all original IF source APL list/ordinal rows",
+  "validation": {
+    "original_v12_full_row_original_2175_preserved": true,
+    "independent_v12_github_full_row_recalculation": "PASS",
+    "final_corrected_script_compile": "PASS",
+    "final_corrected_script_self_test": "PASS",
+    "synthetic_source_id_tamper_regression": "PASS",
+    "actual_native_raw_archive_replay": "PASS",
+    "corrected_json_only_positive_ids_changed": "PASS",
+    "bundle_reextract_byte_identity": "PASS",
+    "bundle_reextract_py_compile": "PASS",
+    "bundle_reextract_selftest": "PASS",
+    "bundle_reextract_exact_json_identity": "PASS",
+    "github_ci_for_new_v14_docs": "NOT_RUN_YET",
+    "new_cpp_simc_execution": "NOT_RUN",
+    "live_wcl": "NOT_RUN",
+    "current_blizzard_game_client": "NOT_RUN"
+  },
+  "profile_corrections": {
+    "fury": {
+      "source_original_if_evals": 426,
+      "original_source_row_n": 16,
+      "unchanged_zero_id_evals": 83,
+      "legacy_v12_derived_positive_ids_total": 164,
+      "corrected_positive_ids_total": 343,
+      "changed_id_rows": [
+        {
+          "source_action_object_id": 5308,
+          "legacy_v12_positive_id_if_evals": 3,
+          "corrected_if_evals": 19
+        },
+        {
+          "source_action_object_id": 184367,
+          "legacy_v12_positive_id_if_evals": 7,
+          "corrected_if_evals": 169
+        },
+        {
+          "source_action_object_id": 385059,
+          "legacy_v12_positive_id_if_evals": 1,
+          "corrected_if_evals": 2
+        }
+      ],
+      "corrected_positive_ids": {
+        "100": 68,
+        "5308": 19,
+        "6544": 72,
+        "107570": 2,
+        "184367": 169,
+        "385059": 2,
+        "446035": 9,
+        "1236616": 2
+      }
+    },
+    "havoc": {
+      "source_original_if_evals": 1749,
+      "original_source_row_n": 21,
+      "unchanged_zero_id_evals": 1286,
+      "legacy_v12_derived_positive_ids_total": 294,
+      "corrected_positive_ids_total": 463,
+      "changed_id_rows": [
+        {
+          "source_action_object_id": 201427,
+          "legacy_v12_positive_id_if_evals": 44,
+          "corrected_if_evals": 96
+        },
+        {
+          "source_action_object_id": 232893,
+          "legacy_v12_positive_id_if_evals": 3,
+          "corrected_if_evals": 34
+        },
+        {
+          "source_action_object_id": 258860,
+          "legacy_v12_positive_id_if_evals": 1,
+          "corrected_if_evals": 5
+        },
+        {
+          "source_action_object_id": 258920,
+          "legacy_v12_positive_id_if_evals": 20,
+          "corrected_if_evals": 102
+        }
+      ],
+      "corrected_positive_ids": {
+        "185123": 42,
+        "191427": 10,
+        "198793": 153,
+        "201427": 96,
+        "210152": 13,
+        "232893": 34,
+        "258860": 5,
+        "258920": 102,
+        "370965": 5,
+        "452497": 2,
+        "1236994": 1
+      }
+    }
+  },
+  "main_baseline_mutated": false,
+  "gameplay_rule_promotion": false,
+  "ready_certified": 0,
+  "game_spell_id_certified": 0,
+  "original_v12_portable_history_retained": true
+}
