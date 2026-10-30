@@ -17,6 +17,11 @@ import tempfile
 
 from simc_apl_pointer_instrument import UPSTREAM_SHA
 from simc_apl_pointer_provenance_audit import audit_captured_native
+from simc_apl_source_engine import ingest_actions
+from simc_native_resource_change_probe import (
+    native_resource_pre_gate, native_log_to_ndjson, audit_native_projection_independently
+)
+from decimal import Decimal
 
 FIXTURES=(
     ("enhancement","profiles/MID2/MID2_Shaman_Enhancement.simc"),
@@ -104,8 +109,50 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
                 raise ValueError("LIVE_POINTER_SELECT_ACTION_EXCEEDS_FOREGROUND")
             if evidence["gameplay_rule_promotion"] is not False:
                 raise ValueError("LIVE_POINTER_UNSAFE_GAMEPLAY_PROMOTION")
+            # Genuine, log-source-pinned resource gain/loss mutations; do not
+            # derive pseudo-transitions by differencing action snapshots.
+            effective_model=ingest_actions(
+                blobs[names[0]], expected_spec=spec,
+                profile_sha256=profile_sha, simc_executable_sha256=binary_digest,
+                profile_spec=spec, profile_dependencies_verified=True)
+            if effective_model["apl_sha256"]!=receipt["effective_apl_sha256"]:
+                raise ValueError("NATIVE_RESOURCE_EFFECTIVE_APL_SHA_MISMATCH")
+            raw_resource=native_log_to_ndjson(
+                blobs[names[1]], expected_log_sha256=receipt["native_log_sha256"])
+            native_resource_review=audit_native_projection_independently(
+                blobs[names[1]],raw_resource)
+            source_selected=[r for r in evidence["sequence_provenance"]
+                             if r["foreground_apl_select_action_confirmed"]
+                             and r["native_action_timestamp_s"] is not None]
+            if not source_selected:
+                raise ValueError("NATIVE_RESOURCE_NO_SELECT_ACTION_REFERENCE")
+            decision_time_ms=min(
+                int(Decimal(str(x["native_action_timestamp_s"]))*1000)
+                for x in source_selected)
+            if decision_time_ms<0:
+                raise ValueError("NATIVE_RESOURCE_NEGATIVE_FIRST_SELECTION_TIME")
+            boundary=native_resource_pre_gate(
+                effective_model,blobs[names[1]],
+                expected_log_sha256=receipt["native_log_sha256"],
+                decision_timestamp_ms=decision_time_ms)
+            if boundary["readiness"]!="UNKNOWN" or (
+                    boundary["gameplay_rule_promotion"] is not False):
+                raise ValueError("NATIVE_RESOURCE_UNVERIFIED_READINESS")
             summaries.append({
                 "spec":spec,
+                "resource_log_source_sha256":receipt["native_log_sha256"],
+                "native_resource_event_count":raw_resource["source_event_count"],
+                "native_resource_negative_precombat_excluded":raw_resource[
+                    "excluded_negative_timestamp_events"],
+                "resource_actor_identity_tuple":raw_resource["actor_identity_tuple"],
+                "resource_log_independent_audit":native_resource_review["status"],
+                "resource_event_first_select_action_decision_ms":decision_time_ms,
+                "resource_events_strictly_before_first_selected_action":
+                    boundary.get("accepted_strictly_earlier_raw_events",0),
+                "resource_strict_pre_status":boundary.get("state_status"),
+                "resource_trace_status":boundary.get("trace_status","BLOCKED_UNKNOWN"),
+                "resource_readiness":boundary["readiness"],
+                "resource_semantic_coverage":"PARTIAL_GAIN_LOSS_ONLY_NOT_CERTIFIED",
                 "profile_sha256":profile_sha,
                 "effective_apl_sha256":receipt["effective_apl_sha256"],
                 "native_json2_sha256":receipt["native_json2_sha256"],
