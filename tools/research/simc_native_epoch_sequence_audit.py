@@ -41,7 +41,7 @@ def _legacy_fields(line:str,kind:str)->list[str]:
     prefix=LEGACY[kind]
     if line.count(prefix)!=1:raise ValueError("EPOCH_LEGACY_MISSING_OR_DUPLICATE")
     fields=line.split(prefix,1)[1].strip().split("|")
-    expected=8 if kind in ("GAIN","LOSS","INIT","RECALC") else (
+    expected=7 if kind in ("GAIN","LOSS","INIT","RECALC") else (
         3 if kind=="SELECT_BEGIN" else 4)
     if len(fields)!=expected:
         raise ValueError("EPOCH_LEGACY_FIELD_COUNT")
@@ -55,7 +55,7 @@ def _check_legacy(event:dict,line:str):
     if (t,a,spawn)!=(event["time_ms"],event["actor"],event["spawn"]):
         raise ValueError("EPOCH_LEGACY_IDENTITY_DIVERGENCE")
     if kind in ("GAIN","LOSS","INIT","RECALC"):
-        if fields[3]!=event["resource"] or fields[7]!=kind:
+        if fields[3]!=event["resource"] or fields[6]!=kind:
             raise ValueError("EPOCH_LEGACY_KIND_OR_RESOURCE_DIVERGENCE")
         if not math.isclose(float(fields[4]),event["current"],rel_tol=1e-12,abs_tol=1e-7):
             raise ValueError("EPOCH_LEGACY_CURRENT_DIVERGENCE")
