@@ -20,6 +20,8 @@ on:
       - "tools/research/simc_native_reset_boundary_instrument.py"
       - "tools/research/simc_native_bare_resource_eval_instrument.py"
       - "tools/research/simc_native_bare_resource_eval_audit.py"
+      - "tools/research/simc_native_apl_eval_scope_instrument.py"
+      - "tools/research/simc_native_apl_eval_scope_audit.py"
       - ".github/workflows/simc-apl-pointer-provenance.yml"
   workflow_dispatch:
 
@@ -57,6 +59,8 @@ jobs:
           python tools/research/simc_native_reset_boundary_instrument.py --self-test
           python tools/research/simc_native_bare_resource_eval_instrument.py --self-test
           python tools/research/simc_native_bare_resource_eval_audit.py --self-test
+          python tools/research/simc_native_apl_eval_scope_instrument.py --self-test
+          python tools/research/simc_native_apl_eval_scope_audit.py --self-test
       - name: Checkout exact upstream SimulationCraft source
         shell: bash
         run: |
@@ -90,6 +94,8 @@ jobs:
           test -s "$RUNNER_TEMP/simc-reset-clock-epoch-receipt.json"
           python tools/research/simc_native_bare_resource_eval_instrument.py --upstream-root "$RUNNER_TEMP/simc-pinned" > "$RUNNER_TEMP/simc-bare-resource-eval-source-receipt.json"
           test -s "$RUNNER_TEMP/simc-bare-resource-eval-source-receipt.json"
+          python tools/research/simc_native_apl_eval_scope_instrument.py --upstream-root "$RUNNER_TEMP/simc-pinned" > "$RUNNER_TEMP/simc-apl-attempt-scope-source-receipt.json"
+          test -s "$RUNNER_TEMP/simc-apl-attempt-scope-source-receipt.json"
       - name: Compile separate research-only source binary (no game changes)
         shell: bash
         run: |
@@ -125,5 +131,6 @@ jobs:
             ${{ runner.temp }}/simc-epoch-source-receipt.json
             ${{ runner.temp }}/simc-reset-clock-epoch-receipt.json
             ${{ runner.temp }}/simc-bare-resource-eval-source-receipt.json
+            ${{ runner.temp }}/simc-apl-attempt-scope-source-receipt.json
           if-no-files-found: error
           retention-days: 7

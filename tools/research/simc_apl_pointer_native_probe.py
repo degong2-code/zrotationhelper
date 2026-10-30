@@ -29,6 +29,7 @@ from simc_native_epoch_sequence_audit import (
     parse_epoch_native_log, independent_epoch_audit, compare_epoch_bound_resources
 )
 from simc_native_bare_resource_eval_audit import audit as audit_native_bare_resource_eval
+from simc_native_apl_eval_scope_audit import audit as audit_apl_attempt_scopes
 from decimal import Decimal
 
 FIXTURES=(
@@ -217,6 +218,16 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
                     or bare_eval["eval_used_as_strict_pre"] is not False
                     or bare_eval["certified_operand_values"]!=0):
                 raise ValueError("NATIVE_BARE_RESOURCE_EVAL_PRE_CERTIFICATION_LEAK")
+            attempt_scopes=audit_apl_attempt_scopes(
+                blobs[names[1]],receipt["native_log_sha256"],effective_model)
+            if (attempt_scopes["bare_eval_total"]!=bare_eval["native_evaluation_count"]
+                    or attempt_scopes["scope_begin_count"]<1
+                    or attempt_scopes["scope_begin_count"]!=attempt_scopes["scope_end_count"]
+                    or attempt_scopes["runtime_eval_used_as_strict_pre"] is not False
+                    or attempt_scopes["guard_expression_owner_certified"] is not False
+                    or attempt_scopes["gameplay_rule_promotion"] is not False
+                    or attempt_scopes["readiness_certified"]!=0):
+                raise ValueError("NATIVE_EVAL_ATTEMPT_SCOPE_SOURCE_OR_CLAIM_FAILURE")
             summaries.append({
                 "spec":spec,
                 "native_epoch_log_source_sha256":epoch["source_log_sha256"],
@@ -238,6 +249,12 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
                 "native_bare_resource_eval_examples":bare_eval["examples_max_25"],
                 "native_bare_resource_eval_source_row_identity":"UNKNOWN",
                 "native_bare_resource_eval_strict_pre_certified":False,
+                "native_apl_attempt_scope_begin_count":attempt_scopes["scope_begin_count"],
+                "native_apl_attempt_scope_owner_counts":attempt_scopes["outcome_counts"],
+                "native_apl_attempt_scope_mode_counts":attempt_scopes["matched_mode_counts"],
+                "native_apl_attempt_scope_owner_contexts":attempt_scopes["owner_context_counts"],
+                "native_apl_attempt_scope_examples":attempt_scopes["examples_max_30"],
+                "native_apl_guard_eval_owner_certified":False,
                 "select_resource_diagnostic_log_sha256":diagnostic["source_log_sha256"],
                 "select_resource_diagnostic_audit":diagnostic[
                     "source_selection_diagnostic_audit"]["status"],
