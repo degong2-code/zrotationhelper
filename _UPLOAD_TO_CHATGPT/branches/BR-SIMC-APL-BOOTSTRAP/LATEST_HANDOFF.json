@@ -4,8 +4,8 @@
   "owner": "RESEARCH_BRANCH",
   "repository": "degong2-code/zrotationhelper",
   "branch": "work/github-ci-bootstrap",
-  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V15.md",
-  "canonical_handoff_blob_sha": "9f6acdf6bd61a26084ef041dc727f3667ab82906",
+  "canonical_handoff_path": "docs/BRANCH_SIMC_HANDOFF_20261031_V16.md",
+  "canonical_handoff_blob_sha": "76c71d12614dfc4eaab349085fa9f936305a3e9e",
   "research_code_evidence_sha": "6da1ea068ad93862f4b9973cf6ea8d639833e355",
   "github_main_observed_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
   "pinned_simc_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
@@ -39,7 +39,7 @@
   "seq637_actual_local_result": "UNKNOWN",
   "seq578_and_frozen": "UNCHANGED_NO_PROMOTION",
   "shared_authoritative_state_mutated": false,
-  "next": "WCL_INDEPENDENT_NUMERIC_LOCK_AND_MAIN_SPEC_ADAPTER_READINESS_IDENTITY_APPROVAL",
+  "next": "MAIN_COMPATIBILITY_DECISION_ON_BR_SIMC_MERGE_HANDOFF_AND_WCL_NUMERIC_LOCK",
   "verified_as_of": "2026-10-31",
   "source_route_audit_path": "docs/DEVELOPER_NOTE_PINNED_APL_BARE_RESOURCE_EVAL_REACHABILITY_20261031.md",
   "source_route_audit_blob_sha": "c348162d309155658fbddc9c2e715a2966b54f2d",
@@ -66,7 +66,7 @@
     "code_sha": "df6d055bfd3f3e837cc703baf9c38f6ed3fe9f1b"
   },
   "direct_if_guard_operand_certified": 0,
-  "raw_native_marker_artifact_retained": false,
+  "raw_native_marker_artifact_retained": true,
   "direct_if_source_audit_path": "docs/DEVELOPER_NOTE_PINNED_NATIVE_DIRECT_IF_20261031.md",
   "direct_if_source_audit_blob_sha": "834daf707738bacabafce8686c12ad43192bdde4",
   "native_direct_if_ci": {
@@ -146,7 +146,7 @@
     41096036252
   ],
   "actual_numeric_game_action_id_certified": 0,
-  "source_owned_id_replay_actual_archived_marker": "NOT_RUN",
+  "source_owned_id_replay_actual_archived_marker": "PASS_ARCHIVED_RAW_MARKER_SOURCE_SCOPE_ONLY",
   "archived_native_source_id_evidence_path": "docs/BR_SIMC_ARCHIVED_NATIVE_ACTION_ID_EVIDENCE_20261031.json",
   "archived_native_source_id_evidence_blob_sha": "568f1f1511d82139afb4eb5e97073e1c88796208",
   "archived_native_workflow_run_id": 41084262760,
@@ -214,5 +214,29 @@
   "post_lock_blind_provenance_certification": "NOT_RUN",
   "actual_wcl_blind_candidate_lock_provided": false,
   "actual_gameplay_spell_ids_certified": 0,
-  "new_live_api_or_native_simc": "NOT_RUN"
+  "new_live_api_or_native_simc": "NOT_RUN",
+  "branch_merge_handoff_path": "docs/BRANCH_BR-SIMC-APL-BOOTSTRAP_MERGE_HANDOFF_20261031.json",
+  "branch_merge_handoff_blob_sha": "bf107f961d925d38dc011bd1d1d0c8d7fcd47d18",
+  "branch_merge_decision": "MAIN_REVIEW_REQUIRED_NOT_PROMOTABLE",
+  "branch_merge_focus_revalidations": 5,
+  "branch_merge_MAIN_decisions": 4,
+  "branch_owner": "BR-SIMC-APL-BOOTSTRAP",
+  "main_authoritative_base_status": "UNKNOWN_NO_APPROVED_MAIN_HANDOFF_RESTORED",
+  "stale_base": "UNKNOWN_REQUIRE_MAIN_CHECK",
+  "historical_v10_legacy_state": {
+    "source_owned_id_replay_actual_archived_marker": "NOT_RUN_THEN",
+    "raw_native_marker_artifact_retained": false,
+    "superseded_by": "V11_V12_ACTUAL_ARCHIVED_MARKER_REPLAY"
+  },
+  "raw_native_archive_is_full_effective_APL_export": false,
+  "branch_current_evidence_status": {
+    "source_pointer_pairing_observed": 2175,
+    "source_pointer_pairing_matched": 2175,
+    "native_numeric_source_id_positive_evaluations": 806,
+    "native_zero_id_evaluations": 1369,
+    "fully_verified_current_retail_game_action_ids": 0,
+    "source_complete_readiness_verified_actions": 0,
+    "WCL_independent_blind_lock_provided": false,
+    "gameplay_rules_promoted": 0
+  }
 }

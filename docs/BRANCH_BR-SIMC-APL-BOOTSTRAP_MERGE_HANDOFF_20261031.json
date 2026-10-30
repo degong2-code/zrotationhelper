@@ -1,0 +1,229 @@
+{
+  "schema": "ZrotBranchMergeHandoffV16",
+  "branch_id": "BR-SIMC-APL-BOOTSTRAP",
+  "owner": "RESEARCH_BRANCH",
+  "branch_scope": "SIMC_FIRST_APL_BOOTSTRAP_AND_POST_LOCK_RECONCILIATION_RESEARCH",
+  "base_authority": {
+    "repo": "degong2-code/zrotationhelper",
+    "branch": "work/github-ci-bootstrap",
+    "source_branch_head_before_handoff": "f0712ed025787623083a1c795296037d92a67ca2",
+    "observed_github_main_head": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
+    "main_authoritative_current_state": "UNKNOWN",
+    "main_active_manifest": "UNKNOWN",
+    "main_runtime_live_boot": "NOT_VERIFIED",
+    "base_authoritative_handoff_sha256": "UNKNOWN",
+    "stale_base": "UNKNOWN_MUST_CHECK_BY_MAIN",
+    "contract_pins": {
+      "parallel_workstream_uploaded_sha256": "baa67f2b01e3274c88a5582560d78df1fdf58b7c892d3fccb9eb67a0fa3d582e",
+      "successor_playbook_uploaded_sha256": "cf03bbef37a002db1e6dc9665f65e45635e6f66609572ecd78fff653d1282eb7",
+      "dual_lane_core_contract_expected_sha256": "5d8051cf107a61700efeb89e94e042e64a26f0813a4c2e9689163d42872123bd",
+      "dual_lane_core_contract_bytes_reverified_in_this_turn": false,
+      "pinned_upstream_simc_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926"
+    }
+  },
+  "owned_artifacts": [
+    {
+      "path": "tools/research/post_lock_simc_wcl_guard_replay.py",
+      "blob_sha": "6c583745b8554740c9369ae8a0e8581dd293f608",
+      "role": "post_lock_numeric_artifact_input_hardening_only"
+    },
+    {
+      "path": "tools/research/simc_readiness_source_coverage_compat.py",
+      "blob_sha": "e2fc4dbb5ecea70f12bf7acebdee0c322e342932",
+      "role": "synthetic_eight_dimension_gap_and_source_obligation_detection"
+    },
+    {
+      "path": "docs/BR_SIMC_ARCHIVED_NATIVE_FULL_ROW_REPLAY_20261031.json",
+      "blob_sha": "fabe13596b4fbf5b30af64c5b4581b204db1f259",
+      "role": "actual_old_native_source_pointer_observation_not_game_id"
+    },
+    {
+      "path": "docs/BR_SIMC_NATIVE_V12_PORTABLE_CORRECTION_20261031.json",
+      "blob_sha": "8ed1a7f7d4c743c03117d117d6ac45a39bd99e76",
+      "role": "correction_of_legacy_portable_derived_id_totals"
+    },
+    {
+      "path": "docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json",
+      "blob_sha": "2e933135877704b257237ef465025e532a14b9c0",
+      "role": "third_party_numeric_name_corrob_not_current_game_id"
+    },
+    {
+      "path": "docs/BR_WCL_BLIND_SAFE_OBSERVABILITY_REQUEST_20261031.md",
+      "blob_sha": "f3c93cc8fd4e8da5ad4db0444c4d64716ee2034a",
+      "role": "ONLY_PRE_LOCK_HANDOFF_PERMITTED_TO_WCL_DISCOVERY_OWNER"
+    }
+  ],
+  "key_results": {
+    "native_original_if_pointer_pairing": {
+      "observed": 2175,
+      "matched": 2175,
+      "source_only": true
+    },
+    "archived_source_positive_id_if_evaluations": 806,
+    "archived_source_zero_id_if_evaluations": 1369,
+    "observed_source_action_row_id_groups": 37,
+    "wcl_blind_candidate_lock_supplied": false,
+    "authenticated_current_game_action_ids": 0,
+    "readiness_certified": 0,
+    "general_rotation_rules_promoted": 0,
+    "sample_source_obligation_cases_only": 2,
+    "source_obligation_exhaustiveness": "NOT_PROVEN_FOR_ANY_SPEC",
+    "source_only_internal_action_ids_not_independent_game_id": "UNKNOWN",
+    "V12_legacy_portable_derived_id_totals": "INVALID_HISTORICAL",
+    "corrected_positive_evaluations": {
+      "fury": 343,
+      "havoc": 463
+    }
+  },
+  "implementation_compatibility_review": {
+    "existing_spec_adapter_protocol": {
+      "path": "02_SOURCE/runtime/raid_dps/specs/protocol.py",
+      "blob_sha": "605dfdc8cd76d0f3a8d9d811521ce56d49131cd2",
+      "numeric_action_family_and_override": true,
+      "source_complete_per_action_readiness_declarations": false
+    },
+    "existing_pre_provider": {
+      "path": "02_SOURCE/runtime/raid_dps/core/behavioral_evaluator.py",
+      "blob_sha": "cee6a06cad8836e04d0a585f15e0ff3c60fbf6c2",
+      "strict_less_than_decision_timestamp": true,
+      "proves_WCL_producer_readiness": false
+    },
+    "existing_readiness_hypothesis": {
+      "path": "tools/research/simc_apl_readiness_provider.py",
+      "blob_sha": "e59d2ea46455fc3e764daddd0abc3a8b6cce4c0c",
+      "mandatory_dimensions": [
+        "ability_learned",
+        "cooldown_or_charge",
+        "resource",
+        "gcd",
+        "cast_state",
+        "movement",
+        "range",
+        "target"
+      ],
+      "extra_dimensions_rejected": true,
+      "unconditionally_complete_source_obligation_proof": false
+    },
+    "existing_reconciler": {
+      "path": "tools/research/simc_wcl_reconciliation_engine.py",
+      "blob_sha": "4959371cbedf06ce9c02f94df8d50a73a614c8d2",
+      "requires_lock_sha_and_numeric_mapping": true,
+      "independent_lock_WCL_provenance_certified": false
+    },
+    "recommended_minimal_change": "MAIN_DECIDES_VERSIONED_SOURCE_OBLIGATION_AND_GAME_ID_BINDING_DATA_RECORD_REUSE_EIGHT_DIMENSION_EVALUATOR_NO_PARALLEL_ENGINE",
+    "out_of_scope": "NO_SPEC_HARDCODE_IN_GENERIC_NO_MAIN_SPEC_ADAPTER_MODIFICATION_BY_BRANCH"
+  },
+  "main_required_decisions": [
+    {
+      "id": "M1",
+      "owner": "MAIN",
+      "question": "Approve source-complete per-action readiness obligation source of truth in SpecAdapter or companion semantic registry",
+      "recommendation": "versioned data record keyed by actual build/variant/action source ID and verified source gate inventory; checker emits UNKNOWN unless exhaustive requirements and PRE features are validated",
+      "rationale": "Existing eight dimensions can return research READY despite undeclared additional subclass gates",
+      "status": "NOT_APPROVED"
+    },
+    {
+      "id": "M2",
+      "owner": "MAIN",
+      "question": "Approve mapping of SimC action_t::id to actual current-game client action and WCL CAST identity",
+      "recommendation": "provenance-pinned many-to-many identity relation, parent/child/proc/replacement and actor/event kind; no same-name normalization or assumed one-to-one",
+      "rationale": "Source action ID and third-party spell name are not current game action button or WCL cast proof",
+      "status": "NOT_APPROVED"
+    },
+    {
+      "id": "M3",
+      "owner": "MAIN",
+      "question": "Specify strict PRE producer completeness and dynamic affordability evidence",
+      "recommendation": "use earliest/latest valid source transition strictly before action; preserve unknown when requirement or evidence missing; dynamic cost source mechanic and state, not APL threshold",
+      "rationale": "Current provider uses pre timestamps but doesn't certify all applicable mechanic producers",
+      "status": "NOT_APPROVED"
+    },
+    {
+      "id": "M4",
+      "owner": "MAIN",
+      "question": "Provide authoritative runtime and integration base pins, and compatibility review merge owner",
+      "recommendation": "compare branch input schema to approved CURRENT_STATE, runtime manifest, canonical registry, FROZEN and generation baseline; focused revalidate only impacted boundaries",
+      "rationale": "GitHub main SHA is not proof of current approved MAIN runtime",
+      "status": "NOT_APPROVED"
+    }
+  ],
+  "cross_branch_dependencies": [
+    "cross_branch_dependency: MAIN needs to approve SpecAdapter source-complete per-action readiness and numeric game identity interface and provide authoritative CURRENT_STATE/runtime base.",
+    "cross_branch_dependency: WCL discovery owner needs to independently lock numeric/structural candidate identity, thresholds, discovery cohort and holdout, with strict PRE/UNKNOWN observability and raw source receipts BEFORE any SimC semantically rich artifact is shared."
+  ],
+  "focused_revalidation_required": [
+    {
+      "id": "R1",
+      "claim": "no READY for undeclared source-specific gating",
+      "test": "remove one required gate from a source-pinned policy; ensure UNKNOWN not READY; verify evidence-backed NOT_APPLICABLE",
+      "method": "synthetic+source_completeness",
+      "status": "MAIN_NOT_RUN"
+    },
+    {
+      "id": "R2",
+      "claim": "strict PRE",
+      "test": "same timestamp/future transitions excluded; missing producer stays UNKNOWN; observed negative gate distinguishes NOT_READY",
+      "method": "offline_synthetic_then_actual_WCL_provider",
+      "status": "MAIN_NOT_RUN"
+    },
+    {
+      "id": "R3",
+      "claim": "dynamic resource and identity",
+      "test": "talent/build/replacement/cost and parent cast vs child hit IDs validated with build pin and official mechanics",
+      "method": "Blizzard_or_actual_game_client_plus_post_lock_WCL",
+      "status": "MAIN_NOT_RUN"
+    },
+    {
+      "id": "R4",
+      "claim": "blind independent comparison",
+      "test": "raw WCL candidate lock SHA precedes SimC exposure; no post-lock threshold retuning; held-out cohort independently verified",
+      "method": "raw_evidence_plus_frozen_lock",
+      "status": "WCL_NOT_RUN"
+    },
+    {
+      "id": "R5",
+      "claim": "nonregression and negative controls",
+      "test": "current unrelated eight-dimension source-complete policy maintains legacy synthetic result; unknown excluded from mismatch denominator; invalid numeric lock rejected",
+      "method": "targeted_existing_offline_CI",
+      "status": "MAIN_NOT_RUN"
+    }
+  ],
+  "validation": {
+    "V15_code_commit": "6da1ea068ad93862f4b9973cf6ea8d639833e355",
+    "V15_code_offline_ci_run": 41105867712,
+    "V15_code_offline_ci": "PASS_PYTHON_3_12_AND_3_14_SYNTHETIC",
+    "V15_branch_handoff_commit": "f0712ed025787623083a1c795296037d92a67ca2",
+    "V15_branch_final_offline_ci_run": 41106200589,
+    "V15_branch_final_offline_ci": "PASS_PYTHON_3_12_AND_3_14",
+    "source_blob_pin_comparison": "PASS_READ_ONLY",
+    "V16_merge_payload_internal_logic": "PASS_SCHEMA_AND_ARITHMETIC_SELF_CHECK",
+    "real_current_game_Blizzard_API_validation": "NOT_RUN",
+    "real_WCL_independent_discovery": "NOT_RUN",
+    "new_live_SimC_native": "NOT_RUN"
+  },
+  "unresolved_blockers": [
+    "MAIN_APPROVED_RUNTIME_AND_BASE_UNKNOWN",
+    "SOURCE_REQUIREMENT_INVENTORY_NOT_EXHAUSTIVE",
+    "CURRENT_GAME_ACTION_ID_UNKNOWN",
+    "WCL_BLIND_CANDIDATE_LOCK_NOT_SUPPLIED",
+    "FULL_EFFECTIVE_APL_EXPORT_BYTES_MISSING"
+  ],
+  "merge_risks": [
+    "stale_MAIN_base_unknown",
+    "SIMC_WCL_blind_contamination_if_shared_early",
+    "wrong_spell_id_by_name_or_parent_child_confusion",
+    "eight_dimension_only_false_READY",
+    "legacy_V12_portable_derived_ID_count_bug"
+  ],
+  "proposed_successor_artifacts": [
+    "MAIN-owned per-action identity/requirement contract proposal (pending owner approval)",
+    "WCL numeric lock and observability independent fixture (WCL owner)"
+  ],
+  "evidence_level": "BRANCH_VALIDATED_SYNTHETIC_AND_ARCHIVED_SOURCE_OBSERVATIONS_NOT_GAMEPLAY",
+  "promotion_state": "NOT_ELIGIBLE",
+  "shared_authoritative_state_mutated": false,
+  "canonical_registry_modified": false,
+  "main_current_state_modified": false,
+  "general_rotation_baseline_modified": false,
+  "global_latest_handoff_modified": false
+}
