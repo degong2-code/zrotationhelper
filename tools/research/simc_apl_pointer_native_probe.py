@@ -24,6 +24,7 @@ from simc_native_resource_change_probe import (
 from simc_native_resource_lifecycle_probe import (
     project_lifecycle_log, independent_lifecycle_audit, lifecycle_pre_gate
 )
+from simc_native_select_resource_diagnostic_audit import compare_diagnostics
 from decimal import Decimal
 
 FIXTURES=(
@@ -173,8 +174,33 @@ def run(source_root:Path,binary:Path,output_path:Path|None=None):
                 raise ValueError("NATIVE_LIFECYCLE_UNVERIFIED_READINESS_OR_TRACE_"+spec)
             if lifecycle_last["source_rows"]<1:
                 raise ValueError("NATIVE_LIFECYCLE_NOT_SAME_ACTOR_SPAWN_"+spec)
+            diagnostic=compare_diagnostics(
+                blobs[names[1]],expected_log_sha256=receipt["native_log_sha256"],
+                resource_projection=raw_resource,lifecycle_projection=lifecycle)
+            if (diagnostic["source_selection_diagnostic_audit"]["status"] !=
+                    "PASS_EXACT_DIAGNOSTIC_NATIVE_RAW_RECALC"):
+                raise ValueError("NATIVE_SELECT_RESOURCE_DIAG_SOURCE_AUDIT_FAILED")
+            if diagnostic["native_selection_entry_count"]<1 or (
+                    diagnostic["selection_entry_status_counts"].get(
+                    "positive_return_action_entries",0)<1):
+                raise ValueError("NATIVE_SELECT_RESOURCE_NO_REAL_SELECT_ENTRIES_"+spec)
+            if (diagnostic["native_entry_snapshot_used_as_reconstructed_pre"] is not False
+                    or diagnostic["gameplay_rule_promotion"] is not False):
+                raise ValueError("NATIVE_SELECT_RESOURCE_SNAPSHOT_PRE_LEAK")
             summaries.append({
                 "spec":spec,
+                "select_resource_diagnostic_log_sha256":diagnostic["source_log_sha256"],
+                "select_resource_diagnostic_audit":diagnostic[
+                    "source_selection_diagnostic_audit"]["status"],
+                "select_resource_native_entry_count":diagnostic[
+                    "native_selection_entry_count"],
+                "select_resource_selection_status":diagnostic[
+                    "selection_entry_status_counts"],
+                "select_resource_comparison_counts":diagnostic["comparison_counts"],
+                "select_resource_possible_missing_transition_examples":
+                    diagnostic["conflict_examples_at_most_25"],
+                "select_resource_snapshot_used_as_pre":False,
+                "select_resource_incomplete_source_coverage":True,
                 "native_lifecycle_log_source_sha256":lifecycle["source_log_sha256"],
                 "native_lifecycle_rows":lifecycle["lifecycle_row_count"],
                 "native_lifecycle_events_by_path":lifecycle["events_by_path"],
