@@ -7,6 +7,8 @@ on:
       - "tools/research/simc_spell_query_catalog.py"
       - "tools/research/simc_spell_query_public_probe.py"
       - "tools/research/simc_spell_query_scope_filter.py"
+      - "tools/research/simc_native_action_id_reconcile.py"
+      - "tools/research/simc_native_action_id_public_probe.py"
       - ".github/workflows/simc-public-mechanics-catalog.yml"
   workflow_dispatch:
 
@@ -16,7 +18,7 @@ permissions:
 jobs:
   native-dbc-xml:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,14 +28,21 @@ jobs:
         run: |
           python tools/research/simc_spell_query_catalog.py --self-test
           python tools/research/simc_spell_query_scope_filter.py --self-test
+          python tools/research/simc_native_action_id_reconcile.py --self-test
       - name: Extract public XML from pinned actual SimC binary
         env:
           ZROT_PUBLIC_CATALOG_SUMMARY: ${{ runner.temp }}/zrot-public-mechanics-catalog-summary.json
         run: python tools/research/simc_spell_query_public_probe.py
+      - name: Compare sampled native action_t IDs against DBC candidates for the exact effective APL
+        env:
+          ZROT_PUBLIC_NATIVE_ID_SUMMARY: ${{ runner.temp }}/zrot-native-action-id-summary.json
+        run: python tools/research/simc_native_action_id_public_probe.py
       - name: Upload summary only; no XML, profile or private input
         uses: actions/upload-artifact@v4
         with:
           name: zrot-public-mechanics-summary-${{ github.sha }}
-          path: ${{ runner.temp }}/zrot-public-mechanics-catalog-summary.json
+          path: |
+            ${{ runner.temp }}/zrot-public-mechanics-catalog-summary.json
+            ${{ runner.temp }}/zrot-native-action-id-summary.json
           if-no-files-found: error
           retention-days: 7
