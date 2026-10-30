@@ -1,0 +1,394 @@
+{
+  "schema": "ZrotArchivedNativeMarkerIndependentRawReplayV12",
+  "owner": "BR-SIMC-APL-BOOTSTRAP",
+  "source_kind": "ARCHIVED_REAL_SIMC_NATIVE_MARKER_BYTES",
+  "original_native_run_id": 41084262760,
+  "original_github_artifact_id": 12990129697,
+  "upstream_simc_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
+  "original_research_code_commit": "d43374850c51420ffea82f934ffd7684faf6b414",
+  "original_zip_sha256": "da88d27ea027b2eacaa6675c9ee22afdffa8a307852ab21b661dabdbb2faab3e",
+  "independently_replayed_local_source_script_sha256": "89dbb114644f371452c27cc332c572cb61b5b53cf47847e4f80ba72af0769645",
+  "local_audit_receipt_sha256": "daf9ccee994622c48f7192bfda40c460606fa342cc2ca5232cf3b30c4c6d7bd6",
+  "audit_methods": [
+    "sha256 ZIP+gz+uncompressed bytes",
+    "original reset epoch and unique monotonic per-thread source sequence",
+    "stack-paired scope BEGIN/END and IF BEGIN/END",
+    "exact matching original IF action_t object ID, list/ordinal, actor/spawn, same source timestamp",
+    "complete list of all IF source row/action ID owners"
+  ],
+  "scope_warning": "Direct original IF evaluation context only; never game readiness, selected action, actual performed cast, current retail spell ID, Strict PRE state transition, or optimality.",
+  "original_effective_apl_export_bytes_available": false,
+  "native_binary_rerun": false,
+  "archive_replay_source_model_with_exact_effective_apl_bytes": "NOT_RUN",
+  "wcl_blind_independent_discovery": "NOT_RUN",
+  "current_game_blizzard_verification": "NOT_RUN",
+  "readiness_certified": 0,
+  "game_action_spell_identity_certified": 0,
+  "gameplay_rule_promotion": false,
+  "profiles": {
+    "fury": {
+      "marker_compressed_sha256": "f300242ac4bfe122e4ac301026c5537305f2dee5a3f8b9e6655f863965f952b7",
+      "marker_decoded_sha256": "98b82c7ff4b17a4db44e6c5d2988b9b2aacb67e786dc13bcc781b8f2e6c4b204",
+      "native_if_guard_count": 426,
+      "scope_begin_count": 1548,
+      "reset_count": 2,
+      "archived_effective_apl_sha256": "98635a684638d241000c0f9b3a78b9eb43d9579b522f864b8aaf5ebaa159e737",
+      "all_original_if_guard_source_rows": [
+        {
+          "apl_list": "default",
+          "ordinal": 15,
+          "native_action_t_id": 0,
+          "if_evaluations": 82,
+          "guard_true": 82,
+          "guard_false": 0
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 2,
+          "native_action_t_id": 100,
+          "if_evaluations": 68,
+          "guard_true": 1,
+          "guard_false": 67
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 3,
+          "native_action_t_id": 6544,
+          "if_evaluations": 72,
+          "guard_true": 0,
+          "guard_false": 72
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 4,
+          "native_action_t_id": 1236616,
+          "if_evaluations": 2,
+          "guard_true": 1,
+          "guard_false": 1
+        },
+        {
+          "apl_list": "slayer",
+          "ordinal": 10,
+          "native_action_t_id": 5308,
+          "if_evaluations": 3,
+          "guard_true": 0,
+          "guard_false": 3
+        },
+        {
+          "apl_list": "slayer",
+          "ordinal": 12,
+          "native_action_t_id": 385059,
+          "if_evaluations": 1,
+          "guard_true": 0,
+          "guard_false": 1
+        },
+        {
+          "apl_list": "slayer",
+          "ordinal": 13,
+          "native_action_t_id": 184367,
+          "if_evaluations": 7,
+          "guard_true": 4,
+          "guard_false": 3
+        },
+        {
+          "apl_list": "slayer",
+          "ordinal": 2,
+          "native_action_t_id": 184367,
+          "if_evaluations": 49,
+          "guard_true": 1,
+          "guard_false": 48
+        },
+        {
+          "apl_list": "slayer",
+          "ordinal": 22,
+          "native_action_t_id": 107570,
+          "if_evaluations": 2,
+          "guard_true": 2,
+          "guard_false": 0
+        },
+        {
+          "apl_list": "slayer",
+          "ordinal": 3,
+          "native_action_t_id": 184367,
+          "if_evaluations": 48,
+          "guard_true": 13,
+          "guard_false": 35
+        },
+        {
+          "apl_list": "slayer",
+          "ordinal": 4,
+          "native_action_t_id": 184367,
+          "if_evaluations": 35,
+          "guard_true": 2,
+          "guard_false": 33
+        },
+        {
+          "apl_list": "slayer",
+          "ordinal": 5,
+          "native_action_t_id": 446035,
+          "if_evaluations": 9,
+          "guard_true": 2,
+          "guard_false": 7
+        },
+        {
+          "apl_list": "slayer",
+          "ordinal": 6,
+          "native_action_t_id": 5308,
+          "if_evaluations": 16,
+          "guard_true": 4,
+          "guard_false": 12
+        },
+        {
+          "apl_list": "slayer",
+          "ordinal": 7,
+          "native_action_t_id": 184367,
+          "if_evaluations": 30,
+          "guard_true": 11,
+          "guard_false": 19
+        },
+        {
+          "apl_list": "slayer",
+          "ordinal": 9,
+          "native_action_t_id": 385059,
+          "if_evaluations": 1,
+          "guard_true": 0,
+          "guard_false": 1
+        },
+        {
+          "apl_list": "trinkets",
+          "ordinal": 2,
+          "native_action_t_id": 0,
+          "if_evaluations": 1,
+          "guard_true": 1,
+          "guard_false": 0
+        }
+      ],
+      "source_row_native_id_unique": true,
+      "observed_apl_rows": 16,
+      "positive_numeric_id_rows": 14,
+      "unique_positive_numeric_action_ids": [
+        100,
+        5308,
+        6544,
+        107570,
+        184367,
+        385059,
+        446035,
+        1236616
+      ],
+      "positive_id_if_evaluations": 343,
+      "zero_id_if_evaluations": 83,
+      "source_source_profile_and_full_apl_export_byte_parity": "NOT_VERIFIED_IN_V12",
+      "current_retail_game_ability_identity": "UNKNOWN"
+    },
+    "havoc": {
+      "marker_compressed_sha256": "9ede7dbc80dae554900474e98bccddbc4bd707fbd0fb8f04850eac5780c01c9b",
+      "marker_decoded_sha256": "5b2e2646e3e20eecbde785fc86dcf74d6fe7c472b5123a519d31425ee784374f",
+      "native_if_guard_count": 1749,
+      "scope_begin_count": 4868,
+      "reset_count": 2,
+      "archived_effective_apl_sha256": "bee79d14337f12b7c98fdb426849480342f7292d3da0cb60e8a805883d65a995",
+      "all_original_if_guard_source_rows": [
+        {
+          "apl_list": "default",
+          "ordinal": 11,
+          "native_action_t_id": 201427,
+          "if_evaluations": 52,
+          "guard_true": 0,
+          "guard_false": 52
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 12,
+          "native_action_t_id": 258860,
+          "if_evaluations": 4,
+          "guard_true": 2,
+          "guard_false": 2
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 13,
+          "native_action_t_id": 210152,
+          "if_evaluations": 13,
+          "guard_true": 6,
+          "guard_false": 7
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 14,
+          "native_action_t_id": 201427,
+          "if_evaluations": 44,
+          "guard_true": 8,
+          "guard_false": 36
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 15,
+          "native_action_t_id": 185123,
+          "if_evaluations": 42,
+          "guard_true": 0,
+          "guard_false": 42
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 16,
+          "native_action_t_id": 258920,
+          "if_evaluations": 25,
+          "guard_true": 0,
+          "guard_false": 25
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 17,
+          "native_action_t_id": 452497,
+          "if_evaluations": 2,
+          "guard_true": 2,
+          "guard_false": 0
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 19,
+          "native_action_t_id": 258920,
+          "if_evaluations": 24,
+          "guard_true": 0,
+          "guard_false": 24
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 2,
+          "native_action_t_id": 0,
+          "if_evaluations": 582,
+          "guard_true": 0,
+          "guard_false": 582
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 20,
+          "native_action_t_id": 232893,
+          "if_evaluations": 31,
+          "guard_true": 0,
+          "guard_false": 31
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 21,
+          "native_action_t_id": 258860,
+          "if_evaluations": 1,
+          "guard_true": 0,
+          "guard_false": 1
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 24,
+          "native_action_t_id": 258920,
+          "if_evaluations": 20,
+          "guard_true": 0,
+          "guard_false": 20
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 26,
+          "native_action_t_id": 232893,
+          "if_evaluations": 3,
+          "guard_true": 3,
+          "guard_false": 0
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 3,
+          "native_action_t_id": 0,
+          "if_evaluations": 582,
+          "guard_true": 0,
+          "guard_false": 582
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 4,
+          "native_action_t_id": 258920,
+          "if_evaluations": 33,
+          "guard_true": 0,
+          "guard_false": 33
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 5,
+          "native_action_t_id": 191427,
+          "if_evaluations": 10,
+          "guard_true": 1,
+          "guard_false": 9
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 6,
+          "native_action_t_id": 370965,
+          "if_evaluations": 5,
+          "guard_true": 1,
+          "guard_false": 4
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 7,
+          "native_action_t_id": 198793,
+          "if_evaluations": 153,
+          "guard_true": 2,
+          "guard_false": 151
+        },
+        {
+          "apl_list": "default",
+          "ordinal": 9,
+          "native_action_t_id": 0,
+          "if_evaluations": 121,
+          "guard_true": 5,
+          "guard_false": 116
+        },
+        {
+          "apl_list": "items",
+          "ordinal": 1,
+          "native_action_t_id": 1236994,
+          "if_evaluations": 1,
+          "guard_true": 1,
+          "guard_false": 0
+        },
+        {
+          "apl_list": "items",
+          "ordinal": 4,
+          "native_action_t_id": 0,
+          "if_evaluations": 1,
+          "guard_true": 1,
+          "guard_false": 0
+        }
+      ],
+      "source_row_native_id_unique": true,
+      "observed_apl_rows": 21,
+      "positive_numeric_id_rows": 17,
+      "unique_positive_numeric_action_ids": [
+        185123,
+        191427,
+        198793,
+        201427,
+        210152,
+        232893,
+        258860,
+        258920,
+        370965,
+        452497,
+        1236994
+      ],
+      "positive_id_if_evaluations": 463,
+      "zero_id_if_evaluations": 1286,
+      "source_source_profile_and_full_apl_export_byte_parity": "NOT_VERIFIED_IN_V12",
+      "current_retail_game_ability_identity": "UNKNOWN"
+    }
+  },
+  "totals": {
+    "if_evaluations": 2175,
+    "all_pairwise_source_scope_matches": 2175,
+    "positive_numeric_source_object_id_if_evaluations": 806,
+    "zero_numeric_source_object_id_if_evaluations": 1369,
+    "observed_source_row_id_groups": 37,
+    "positive_numeric_row_id_groups": 31
+  },
+  "lifecycle": "OBSERVED_SOURCE_ONLY_NO_GAMEPLAY_PROMOTION",
+  "main_shared_files_modified": false,
+  "evidence_retention_note": "Original GitHub Actions artifact expires 2026-11-06T15:54:14Z UTC; ZIP separately saved in chat artifact path, not committed to Git history."
+}
