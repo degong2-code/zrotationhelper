@@ -96,7 +96,8 @@ def parse(txt: str):
             if k in ('spec', 'level', 'talents', 'source', 'race', 'role',
                      'position', 'shaman', 'warrior', 'mage', 'death_knight',
                      'paladin', 'hunter', 'druid', 'priest', 'rogue', 'warlock',
-                     'evoker', 'monk', 'demon_hunter'):
+                     'evoker', 'monk', 'demon_hunter', 'deathknight',
+                     'demonhunter'):
                 meta[k] = v
     if 'default' not in lists or not lists['default']:
         raise ValueError('MAIN_APL_MISSING')
