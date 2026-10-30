@@ -29,7 +29,7 @@ from simc_apl_syntax_inventory import parse as parse_apl
 _SHA = re.compile(r"^[0-9a-f]{64}$")
 _SPEC = re.compile(r"^[a-z][a-z0-9_]*$")
 _ACTOR = re.compile(
-    r"^(?:death_knight|demon_hunter|druid|evoker|hunter|mage|monk|"
+    r"^(?:deathknight|death_knight|demonhunter|demon_hunter|"druid|evoker|hunter|mage|monk|"
     r"paladin|priest|rogue|shaman|warlock|warrior)\s*=", re.I
 )
 _NON_ACTION = {
@@ -303,6 +303,16 @@ def selftest():
     try:ingest_actions(a,expected_spec="fury",profile_spec="enhancement")
     except SourceContractError:pass
     else:raise AssertionError("CROSS_SPEC_PROFILE_ACCEPTED")
+    # Official upstream actor directives are unseparated for these classes.
+    # A generic profile ingester must not fail before it reads their APL.
+    for cls, spec in (("deathknight", "unholy"), ("demonhunter", "havoc")):
+        specimen=(f'{cls}="Synthetic"\\nspec={spec}\\n'
+                  'actions=auto_attack\\nactions+=/synthetic_action\\n').encode()
+        fields=_profile_fields(_text(specimen))
+        assert fields["actor_count"]==1 and fields["spec"]==spec
+        extracted=ingest_actions(specimen,expected_spec=spec,
+                                 profile_spec=spec,profile_dependencies_verified=True)
+        assert extracted["apl_row_count"]==2
     upstream=(
         b'shaman="Synthetic"\n'
         b'spec=enhancement\n'
