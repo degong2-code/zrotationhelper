@@ -48,3 +48,38 @@ Even a new source-backed `SELECT_ACTION_FOREGROUND` count is **NOT** equivalent 
 Next: use source-locked new profile/build to test the exact path and preserved UNKNOWN; then reconstruct **only** Strict PRE observable operand states from source-accountable transitions, and replay the shared generic APL evaluator without future/same timestamp leakage. WCL blind candidate lock remains independent of SimC labels and hypotheses; counterfactual SimC selectively when decision ambiguity affects gameplay.
 
 Owner: BRANCH. No changes to MAIN `CURRENT_STATE`, FROZEN, Seq578, active manifest/production pointer, canonical registry or global `LATEST_HANDOFF`. Seq637 UNKNOWN.
+
+
+## Verified Native evidence — new 3-spec holdout (same research increment)
+
+**Native C++ run:** https://github.com/degong2-code/zrotationhelper/actions/runs/41017244770 — **SUCCESS**, including source-pin checkout, all three independent synthetic source-module selftests, complete C++ compile, 3 public-profile executions, provenance audit and summary-only artifact upload.
+
+- Upstream `simulationcraft/simc@710c2408bfd3ae4df71b8cd55cdf01f63fd6c926`.
+- Newly compiled modified executable SHA256 **`cd218f6479a22b11e32d85dce0feb764f8c17bbddb6873f1512e117550c72df3`**; no previous binary SHA or execution evidence was substituted.
+- Actual Native run captures **243** JSON2 sequence entries: **241** pointer-matched source action objects with exact effective APL row signatures, **2** confirmed nonaction waits, 0 signature drift or unknown genuine action calls.
+- **206** source-pointer-backed action entries were directly labeled `SELECT_ACTION_FOREGROUND` inside the `player_t::execute_action` branch, **35** PRECOMBAT actions were `NOT_APPLICABLE`. No strict sequence, spell queue, variable or specialized queue records appeared in this limited fixed-seed fixture run. Those source variants passed synthetic/static checks but were not empirically covered by this Native sample.
+
+| Public fixed-source profile | Effective APL rows | Native records | Exact source-pointer action rows | Real selected foreground branch, pointer matched | Precombat | Nonaction waits |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Enhancement Shaman | 114 | 71 | 71 | 64 | 7 | 0 |
+| Fury Warrior | 121 | 94 | 92 | 76 | 16 | 2 |
+| Unholy Death Knight (**new held-out profile**) | 63 | 78 | 78 | 66 | 12 | 0 |
+| **Total** | **298** | **243** | **241** | **206** | **35** | **2** |
+
+Pinned exact effective APL SHA256:
+- Enhancement: `298594da9057781c67f8ec90161d9e5529523b1797e73f5b7aef3c5c400d4bc4`.
+- Fury: `98635a684638d241000c0f9b3a78b9eb43d9579b522f864b8aaf5ebaa159e737`.
+- Unholy: `0e17b8c00c7d03b83f6560d57d19f3844e665ba1fba34d929c289e31ee92c097`.
+
+Pinned source profile SHA256:
+- Enhancement: `b9f78fb9043cd6596ce5f4b025a4998d631bde96def9ec1abdf591c2e8d06abf`.
+- Fury: `e872cca507063e3d63b84e522688b4ad44b2f7f7664e50e3f5553cf3f858088c`.
+- Unholy: `6a931073fc75752615f56eaa0a054d5e36d85109d0d6c2c650ba3e08f34de102`.
+
+Python 3.12 and 3.14 offline CI at the feature commit: https://github.com/degong2-code/zrotationhelper/actions/runs/41017244704 — both SUCCESS. Independent audit synthetic tests included duplicated same-time action name but different APL ordinal, strict/queued vs `SELECT_ACTION_FOREGROUND`, missing source branch, invalid category crossover and source SHA mismatches.
+
+**Exactly what is proven:** The actual executable in the pinned run returned these 206 sampled actions through the normal `select_action` branch, and the instantiated action objects point to and match their precise effective APL source rows. It does **not** establish that every APL condition, readiness input or target is semantically reconstructed; that a missing action should have been available; that `SimC` rules are optimally correct; or that Blizzard's current Retail combat mechanics match this pinned data. This is **Native source event identity verification**, not **shared generic engine priority parity**. Only one fixed seed and one profile per spec were tested; 206/206 is not a population accuracy statistic or independent WCL validation.
+
+**Next focused user-impactful research:** a generic Strict PRE operand/feature producer contract with precise source event time and state provenance, then evaluate the already-built structural conditional IR/graph against the independently captured Native foreground selected APL rows. Keep unknown ability readiness, unobservable variables and target changes UNKNOWN, and hold off on gameplay advice until cross-spec comparison and post-lock independent WCL validation. An explicit strict/queued selection fixture is useful if these source routes become relevant to actual rule decisions, but do not repeat expensive native builds merely to increase a superficial branch-count metric.
+
+MAIN-only authority unchanged. No global handoff, General Rotation FROZEN, Seq578, Seq637 (UNKNOWN), product manifest, production pointer or MAIN branch edits.
