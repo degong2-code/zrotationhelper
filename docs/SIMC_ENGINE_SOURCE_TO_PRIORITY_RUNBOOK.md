@@ -183,6 +183,30 @@ must remain private and must not be uploaded to this public GitHub repository.
 The only completed validation is **offline synthetic**, not actual local
 SimulationCraft production.
 
+## Native JSON2 action-state sequence
+
+The native reference producer also requests \`report_details=1\` and \`json2\`,
+creating \`simc_native_sequence.json\` alongside the existing text log and APL.
+All three files are hash-pinned in the reference receipt.
+
+\`\`\`powershell
+python tools/research/simc_native_json_sequence.py --reference-dir "C:\zrot\simc_native_reference" --out "C:\zrot\simc_json2_sequence.json"
+\`\`\`
+
+This input separates \`action_sequence_precombat\` and \`action_sequence\`,
+with action id/name/time, and available resources, buffs, cooldowns and
+target snapshots. The SimC upstream basis is
+\`simulationcraft/simc@710c2408bfd3ae4df71b8cd55cdf01f63fd6c926\`
+(\`engine/report/json/report_json.cpp\`). It **does not assert that a snapshot
+at time t is a Strict-PRE event at t**; observed snapshot equality and
+foreground APL origin remain separate questions. Missing \`report_details\`
+output, corrupted files, multiple actors and unsupported schemas fail closed.
+
+This extractor is *not* yet connected as a verified state/readiness provider.
+The JSON2 shape has been tested synthetically against the upstream C++ writer
+structure, but **real local SimC production capture remains NOT RUN**.
+Do not add private character/gear logs to the public repository.
+
 ## 4. Missing before engine completion
 
 - Verify effective default APL exports from the current actual SimC binary across representative specs/builds.

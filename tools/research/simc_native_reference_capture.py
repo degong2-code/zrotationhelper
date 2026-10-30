@@ -184,6 +184,15 @@ def selftest():
         assert receipt["apl_row_count"]==1
         assert receipt["actionable_rotation"] is False
         assert (output/"simc_reference_receipt.json").exists()
+        from simc_native_json_sequence import extract_json_sequence
+        from simc_native_performed_events import extract_native_reference
+        json2=extract_json_sequence(output)
+        performed=extract_native_reference(output)
+        assert json2["source_apl_sha256"]==receipt["effective_apl_sha256"]
+        assert json2["combat_count"]==1
+        assert json2["source_capture_status"]=="SYNTHETIC_CAPTURE_TEST"
+        assert performed["effective_apl_sha256"]==receipt["effective_apl_sha256"]
+        assert performed["performed_event_count"]==0  # synthetic log was not a native action log
         try:
             capture_reference(
                 profile_file=profile,expected_spec="enhancement",
