@@ -62,3 +62,24 @@ This is a **bounded bridge** beyond the earlier structural-only milestone, not n
 **Focused next:** Programmatic operand/readiness observation contracts from pinned SimC profile + Blizzard mechanics, with completeness/coverage and UNKNOWN reporting (no class hardcodes); test semantic control/option families across new held-out profile input; then native foreground and Strict PRE parity, then separate blind WCL discovery lock/reconciliation. Keep exact-model graph verification and same-time state rejection.
 
 No MAIN promotion, no mutation of FROZEN/Seq578/Seq637, MAIN manifests/pointers or global handoffs. Exact current local MAIN and Work OS state remain UNKNOWN.
+
+
+## Successor increment — automatically derived observation/readiness requirements (2026-10-30)
+
+**Goal:** The generic engine must be capable of processing arbitrary SimC specs/builds automatically, not code each spec's rotation manually. This increment implements requirements extraction, **not semantic binding or empirical readiness proof**.
+
+- Code: `tools/research/simc_apl_observability_contract.py`, a small adapter over existing canonical Structural IR + Decision Graph. It does not implement another expression parser or second priority engine.
+- Outputs `ZrotSimcGenericObservationRequirementsV1`: source SHA/spec, every parsed operand with exact source node/list/line/expression-field, required readiness actions, eight applicability dimensions shared with `simc_apl_readiness_provider.MANDATORY`, generic unresolved control/target/timing obligations, and explicit syntax gaps. Default semantic binding is UNBOUND, readiness is UNKNOWN, ability identity is UNKNOWN, and gameplay promotion is false.
+- Supports an optional **explicit caller-supplied** Strict-PRE observation audit. It requires an exact operand-to-feature map; without that mapping an identically named feature is **not automatically considered observed**. For supplied states, only numeric OBSERVED values with source timestamp strictly earlier than the decision produce `OBSERVED_STRICT_PRE_CLAIM`. Unobservable, unbound, missing/unknown or nonnumeric features remain UNKNOWN/UNOBSERVABLE. Same-timestamp/future event counts are surfaced; they cannot enter the observation set. This is not measured WCL or actual SimulationCraft state.
+- Graph must exactly equal canonical recompilation from the source IR. Mutated graph/identities are rejected. An APL syntax expression that fails parsing is separately reported as unsupported, not treated as zero or false.
+- Public CI `41008851039` **SUCCESS** on fixed upstream `simulationcraft/simc@710c2408bfd3ae4df71b8cd55cdf01f63fd6c926`. Offline matrix `41008851075` Python 3.12/3.14 **SUCCESS**. Four fixed pinned public profiles (source requirements only):
+    - Enhancement Shaman: 77 operand requirements, 24 distinct readiness action tokens.
+    - Fury Warrior: 68 operand requirements, 26 readiness action tokens.
+    - Unholy Death Knight: 92 operand requirements, 21 readiness action tokens.
+    - Havoc Demon Hunter: 57 operand requirements, 19 readiness action tokens.
+    - Aggregate: 294 per-spec unique operands and 90 per-spec unique action tokens, **not observed/ready gameplay abilities**. Parsed syntax reported zero unsupported expressions for these four inputs, which **does not establish semantics coverage**; source-specific modifiers and action control remain unresolved.
+- Synthetic selftest `SIMC_GENERIC_OBSERVABILITY_CONTRACT_SELF_TEST=PASS SPECS=3` checks cross-spec arbitrary labels, unknown syntax, source/graph tamper, explicit mapping, excluded equal/future timestamps, unknown readiness, and no gameplay promotion. Same SHA shared-runtime regression 28 synthetic cases PASS. Full profile sample structure and graph coverage previously recorded.
+
+**Next implementation priority:** Move from textual operand identification to a *generic semantic resolver registry* that can bind observable source-derived properties under pinned Blizzard/SimC mechanic contracts, without assuming the names are sufficient. Do not construct 90 per-spec readiness policies by hand. Group by generic operand/mechanic family, identify missing external authority, derive what can be certified, and keep unsupported readiness UNKNOWN. After that, use independently valid timestamped Strict PRE and certified native SimC foreground references for state-conditioned parity; only afterward use independently locked blind WCL candidates.
+
+**Explicit exclusions:** no actual PRE observation, no automated Blizzard identity, no verified cooldown/resource readiness, no native action parity, no WCL calls, no General Rotation FROZEN. MAIN `main`, product pointers, Work OS state, global handoff, Seq578/FROZEN unchanged; Seq637 remains UNKNOWN. Branch-only evidence.
