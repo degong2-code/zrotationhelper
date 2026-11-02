@@ -138,9 +138,18 @@ def scope_replay(raw: dict, gate: dict) -> dict:
     if not isinstance(identity, dict) or any(
         identity.get(key) != gate[gkey] for key, gkey in
         (("report_code", "report_code"), ("fight_id", "fight_id"),
-         ("revision", "report_revision"), ("start", "fight_start_ms"),
-         ("end", "fight_end_ms"))
+         ("revision", "report_revision"), ("start", "fight_start_ms"))
     ):
+        raise ActorGateError("SOURCE_REPLAY_FIGHT_IDENTITY_MISMATCH")
+    if identity.get("evidence_window") == "FIGHT_START_BOUNDED":
+        if (identity.get("full_fight_end") != gate["fight_end_ms"]
+                or type(identity.get("requested_window_ms")) is not int
+                or not 1000 <= identity["requested_window_ms"] <= 60000
+                or type(identity.get("end")) not in (int, float)
+                or identity["end"] != min(gate["fight_end_ms"],
+                                        gate["fight_start_ms"] + identity["requested_window_ms"])):
+            raise ActorGateError("SOURCE_WINDOW_PROVENANCE_MISMATCH")
+    elif identity.get("end") != gate["fight_end_ms"]:
         raise ActorGateError("SOURCE_REPLAY_FIGHT_IDENTITY_MISMATCH")
     if raw.get("cooldown_or_resource_readiness") != "UNKNOWN" or raw.get("candidate_lock") != "NOT_IMPLEMENTED":
         raise ActorGateError("PRELOCK_READINESS_OR_SEMANTIC_MUTATION")
