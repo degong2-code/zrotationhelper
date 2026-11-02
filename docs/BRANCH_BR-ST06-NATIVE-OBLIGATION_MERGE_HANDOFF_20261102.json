@@ -1,0 +1,94 @@
+{
+  "schema": "ZrotBranchST06ActualNativeObligationHandoffV1",
+  "branch_id": "BR-ST06-NATIVE-OBLIGATION",
+  "branch": "work/st06-native-obligation-hook-20261102",
+  "owner": "BRANCH_ISOLATED_SIMC_HYPOTHESIS_RESEARCH",
+  "baseline": "ec111e45938e48650ea014c5ed0c282c014d6103",
+  "actual_validated_code_commit": "1b3a76dd303d3a01efff055a472db5c63c0a15fc",
+  "source_identity": {
+    "pinned_upstream": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
+    "fury_class_source_git_blob": "275a56a140f6800030b61df6958ee50b48c32821",
+    "havoc_class_source_git_blob": "d7ee195c60e83f48cca16400a51bd3f68c94b710",
+    "profile_scope": "PINNED_OFFICIAL_PUBLIC_MID2_FURY_AND_HAVOC",
+    "scope_note": "Historical upstream source/hypothesis, NOT current Blizzard Retail authority"
+  },
+  "owned_new_files": [
+    "tools/research/ST06_pinned_native_source_gate_instrument_v1.py",
+    "tools/research/ST06_native_source_gate_independent_audit_v1.py",
+    ".github/workflows/zrot-st06-native-source-obligation-fixtures.yml"
+  ],
+  "validation": {
+    "ci_run": 41375416081,
+    "ci_link": "https://github.com/degong2-code/zrotationhelper/actions/runs/41375416081",
+    "python312_source_contract": "PASS",
+    "python314_source_contract": "PASS",
+    "actual_cpp_native_build": "PASS",
+    "actual_pinned_public_fury_havoc_simc_execution": "PASS",
+    "source_epoch_independent_raw_recalculation": "PASS",
+    "no_raw_native_profile_or_private_log_uploaded": true,
+    "summary_artifact_id": 13110424540,
+    "artifact_sha256": "4182af1ffff1d003b8862bc11a9fdb4247564f7e8f03740f21a5e253612a1544",
+    "artifact_github_expiration": "7_days_from_run",
+    "initial_failed_ci": {
+      "run_id": 41374743411,
+      "cause": "integer weapon flag formatted with float-only :.17g native log formatter",
+      "classification": "INSTRUMENTATION_FORMAT_PIPELINE_FAILURE_NOT_GAME_MECHANIC",
+      "fixed_in_code_commit": "1b3a76dd303d3a01efff055a472db5c63c0a15fc",
+      "prior_failure_retained": true
+    }
+  },
+  "actual_native": {
+    "fury": {
+      "MAIN_AND_OFF_HAND_WEAPON": 323,
+      "DYNAMIC_RESOURCE_COST": 354,
+      "total_source_gate_eval": 677,
+      "OBSERVED_INSIDE_NATIVE_SELECT_EVAL_ONLY": 646,
+      "UNKNOWN_NOT_IN_EXACT_SELECT": 31
+    },
+    "havoc": {
+      "SHARED_MOVEMENT_COOLDOWN": 46,
+      "total_source_gate_eval": 46,
+      "OBSERVED_INSIDE_NATIVE_SELECT_EVAL_ONLY": 46
+    },
+    "overall_source_eval_count": 723,
+    "observed_in_exact_native_selection": 692,
+    "not_attributed_to_exact_selection": 31,
+    "native_epoch_independent_audit": "PASS"
+  },
+  "claim_boundaries": {
+    "per_action_gate_function_call_actual_native_evidence": "OBSERVED",
+    "native_source_action_id": "SIMC_ACTION_OBJECT_ID_ONLY",
+    "game_spell_id_current_client": "UNKNOWN",
+    "strict_pre_gate_transition_verified": false,
+    "source_event_producer_completeness": "NOT_VERIFIED",
+    "source_truth_valid_for_current_Retail": "NOT_VERIFIED",
+    "DIRECTIONAL_MOVEMENT": "STATIC_SOURCE_CONSTRUCTOR_ONLY_NOT_RUNTIME_VERIFIED",
+    "full_source_gate_coverage": "NOT_VERIFIED",
+    "per_decision_ready_certified": 0,
+    "gameplay_rule_promoted": 0,
+    "WCL_blind_candidates": "NOT_RUN",
+    "wcl_blind_semantic_leakage": "FORBIDDEN",
+    "blizzard_verification": "NOT_RUN",
+    "SimC_counterfactual": "NOT_RUN",
+    "holdout": "NOT_RUN"
+  },
+  "design": {
+    "generic_IR_direction": "Data driven source obligation and typed identity; actual class C++ hooks are fixture-specific research instrumentation only; not added to generic engine",
+    "same_timestamp_rule": "Evaluation markers are NOT retroactive PRE transitions",
+    "actor_target": "Native actor/spawn/selection epoch preserved; target readiness not certified",
+    "producer_validator": "Independent reviewer reads raw marker strings and existing separately audited epoch source; shared failure risk still present for source hook truth"
+  },
+  "cross_branch_dependency": [
+    "SimC producer owner must verify complete source gate read context and actual per-decision readiness timing; evaluation time must not be backdated to PRE",
+    "MAIN must approve SpecAdapter/source coverage and restore canonical Runtime/CurrentState/Registry/active pointer for any promotion",
+    "WCL owner must independently lock numeric candidates and Strict PRE observability before post-lock semantic reconciliation"
+  ],
+  "product_exact_next": "Seq637 one-click result remains UNKNOWN pending MAIN authority restoration",
+  "session_exact_next": "ST07 scoped source-gate-to-decision causal time/provenance + independent mechanism assertions; do not turn eval into PRE without independent proof",
+  "frozen_mutated": false,
+  "main_mutated": false,
+  "seq578": "FAILED_QUARANTINED_PRESERVED",
+  "seq637": "UNKNOWN",
+  "branch_ready_for_review": true,
+  "main_promotion": false
+}
