@@ -100,7 +100,7 @@ def validate_entrypoints()->dict:
       "AGENTS.md":["General Rotation + Dummy Trainer","OUT OF SCOPE","PRODUCT_SCOPE_LOCK_V1.json","validate_scope_continuity_v1.py"],
       "docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md":["ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1","General Rotation opener","target-dummy","NSRT","HANDOFF_CONTINUITY_PROTOCOL_V1.md"],
       "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md":["PRODUCT_SCOPE_LOCK_V1.json","HANDOFF_CONTINUITY_PROTOCOL_V1.md","오프닝"],
-      "docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md":["EVERY","policy_snapshot","five sequential","new user","MAIN"],
+      "docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md":["EVERY","policy_snapshot","five sequential","explicit user","MAIN"],
       "handoff/NEW_CHAT_BOOT_PROMPT.md":["SimC APL/profile","WCL","OPENER","OUT OF SCOPE","scope_continuity.policy_snapshot"],
     }
     for name,tokens in markers.items():
