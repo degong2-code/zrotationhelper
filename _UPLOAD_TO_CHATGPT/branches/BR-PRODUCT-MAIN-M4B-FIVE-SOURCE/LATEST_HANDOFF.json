@@ -1,0 +1,84 @@
+{
+  "schema": "ZrotM4BFiveMissingSourceRecoveryBranchHandoffV1",
+  "owner": "BR-PRODUCT-MAIN-M4B-SOURCE-RECOVERY",
+  "scope": "Historical M4B direct-import graph correction plus read-only exact-five local source recovery tool",
+  "branch": "work/m4b-five-module-closure-20261102",
+  "review_parent_commit": "956649567662cbff530eea33f2abb2950287341f",
+  "ci_validated_code_commit": "fcd3734174b481c773e6cf8ad73e115b8481b75c",
+  "ci": {
+    "run_id": 41386215946,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41386215946",
+    "python_3_12": "SUCCESS",
+    "python_3_14": "SUCCESS",
+    "windows_powershell_parser": "SUCCESS",
+    "collector_synthetic_negatives": [
+      "MISSING",
+      "SIZE_DIFFERENT",
+      "SHA_DIFFERENT"
+    ],
+    "artifacts": [
+      13114794132,
+      13114529671
+    ],
+    "prior_ci_error": {
+      "run": 41386057707,
+      "reason": "Workflow token expression GHOPEN not interpolated; Python setup failed",
+      "retained": true
+    }
+  },
+  "raw_offline_evidence": {
+    "archive": "PRIVATE_M4B_118_FILE_SOURCE_ZIP",
+    "archive_sha256": "1cfdff330d90fbf1f25081cc92955e1dddf287840bc015fcc4707bfb1f0098af",
+    "historical_python_files_ast_parsed": 15,
+    "historical_python_file_sha_checked": 15,
+    "direct_module_import_occurrences": 14,
+    "distinct_module_imports": 8,
+    "research_only_present_modules": 3,
+    "missing_historical_direct_modules": 5,
+    "manifest_local_sha256": "c1d0b64ce737c98a6771fe5837f48305ec70c317cfdb3e8ffca4c375f031ae6e",
+    "archive_not_committed_to_public_git": true
+  },
+  "correction": "Previous source recovery identified 3 missing modules; actual direct import AST audit of M4B finds 5. Cohort and evidence were omitted in prior count. Original older report retained as historical finding; newer successor manifest overrides the missing-module count.",
+  "missing_modules": [
+    "02_SOURCE/runtime/raid_dps/core/cohort.py",
+    "02_SOURCE/runtime/raid_dps/core/evidence.py",
+    "02_SOURCE/runtime/raid_dps/core/renderer.py",
+    "02_SOURCE/runtime/raid_dps/core/wcl_client.py",
+    "02_SOURCE/runtime/raid_dps/pipelines/orchestrator.py"
+  ],
+  "local_collector": {
+    "path": "tools/recovery/ZROT_M4B_MISSING_FIVE_COLLECT_READONLY.ps1",
+    "autodiscovery": true,
+    "script_parameters_required": false,
+    "optional_override": "-ProjectRoot or ZRAID_PROJECT_ROOT",
+    "results": "Desktop ZIP+receipt only if exact five historical original file hashes and sizes match; else receipt only and no ZIP",
+    "original_private_PC_execution": "NOT_RUN",
+    "no_api_wcl_simc_live": true,
+    "source_contents_public_upload": false,
+    "sharing_instruction": "Local ZIP must remain private, user reviews before uploading to this conversation; do not auto-upload to GitHub",
+    "reason": "No access from connected GitHub or personal Library to the five original source bytes."
+  },
+  "authority": {
+    "current_MAIN_runtime": "NOT_RESTORED",
+    "registry": "MISSING",
+    "pointer": "MISSING",
+    "historical_workflow_conflicts": 3,
+    "full_dynamic_or_transitive_dependency_closure": "NOT_VERIFIED",
+    "product_execution": "DISABLED",
+    "current_game_readiness": 0,
+    "wcl_blind_candidate_lock": "NOT_RUN_IN_THIS_LANE",
+    "frozen_modified": false,
+    "shared_MAIN_promoted": false,
+    "github_main_modified": false,
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN"
+  },
+  "cross_branch_dependencies": [
+    "cross_branch_dependency: product MAIN source owner needs to provide actual historic exact-five module bytes or a separately authorized and clearly distinct successor implementation; source metadata alone cannot recreate code",
+    "cross_branch_dependency: MAIN needs current approved Runtime, canonical Registry, Pointer, and resolved control-plane workflow pins before any production promotion",
+    "cross_branch_dependency: WCL blind discovery remains isolated and cannot ingest this SimC semantic packet before candidate lock"
+  ],
+  "exact_next": "When private exact-five ZIP and receipt become available, verify bytes against five pinned historical SHA256, merge into non-executable composite staging, then inspect transitive/dynamic dependencies and run focused product integration regression",
+  "product_MAIN_promotion": "BLOCKED",
+  "branch_status": "OFFLINE_CI_VALIDATED_COLLECTOR_NOT_YET_EXECUTED_ON_USER_PC"
+}
