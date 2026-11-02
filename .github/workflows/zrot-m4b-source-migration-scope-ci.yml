@@ -1,0 +1,91 @@
+name: zrot-m4b-source-migration-scope-ci
+
+on:
+  push:
+    branches:
+      - work/product-main-source-recovery-20261102
+    paths:
+      - .github/workflows/zrot-m4b-source-migration-scope-ci.yml
+      - docs/PRODUCT_MAIN_HISTORICAL_SOURCE_RECOVERY_20261102.json
+      - tools/research/m4b_historical_source_migration_scope_v1.py
+      - 02_SOURCE/runtime/raid_dps/core/renderer.py
+      - 02_SOURCE/runtime/raid_dps/core/wcl_client.py
+      - 02_SOURCE/runtime/raid_dps/pipelines/orchestrator.py
+
+permissions:
+  contents: read
+
+jobs:
+  source-closure:
+    name: M4B recoverability Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12","3.14"]
+    steps:
+      - name: Checkout isolated research recovery only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify bootstrap main unchanged, never invoke legacy product
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin refs/heads/main
+          test "$(git rev-parse FETCH_HEAD)" = "4790f77f76a75f26ff0558d1d18c16cd9d630c4b"
+          test "$(git ls-tree -r --name-only FETCH_HEAD)" = "README.md"
+      - name: Audit M4B external source receipt and missing runtime closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/m4b
+          python -B -m py_compile tools/research/m4b_historical_source_migration_scope_v1.py
+          python -B tools/research/m4b_historical_source_migration_scope_v1.py --self-test > ci_artifacts/m4b/receipt.json
+          python - <<'PY'
+          import json,os,hashlib,platform
+          from pathlib import Path
+          d=json.loads(Path("ci_artifacts/m4b/receipt.json").read_text())
+          assert d["status"]=="PASS_GITHUB_DEPENDENCY_TRIAGE__MAIN_EXECUTION_BLOCKED"
+          assert d["historical_original_file_count"]==118
+          assert d["historical_exact_bytes_verified_by"]=="LOCAL_ARCHIVE_AUDIT_NOT_BY_GITHUB_CI"
+          assert d["missing_runtime_dependency_count"]==3
+          assert d["original_source_not_in_research_count"]==4
+          assert d["github_research_only_dependency_count"]==3
+          assert d["known_main_authority_conflict_count"]==3
+          assert d["synthetic_policy_negative_cases"]==8
+          assert d["current_main_authority"]=="UNKNOWN"
+          assert d["product_run_executed"] is False and d["production_promotion"] is False
+          e={"schema":"ZrotM4bGithubDependencyScopeCIReceiptV1",
+             "result":"PASS_SCOPE_CHECK__PRODUCT_MAIN_BLOCKED",
+             "github_sha":os.getenv("GITHUB_SHA","UNKNOWN"),
+             "github_run_id":os.getenv("GITHUB_RUN_ID","UNKNOWN"),
+             "python":platform.python_version(),
+             "private_M4B_zip_in_runner":"ABSENT_INTENTIONALLY",
+             "historical_raw_file_verification":"OFFLINE_LOCAL_118_OF_118_NOT_RERUN",
+             "repository_missing_runtime_modules":3,
+             "archive_missing_current_registry_pointer":2,
+             "production_execution":"DISABLED",
+             "main_promotion":False,
+             "seq578":"FAILED_QUARANTINED_PRESERVED",
+             "seq637":"UNKNOWN",
+             "code_sha256":hashlib.sha256(Path(
+               "tools/research/m4b_historical_source_migration_scope_v1.py"
+             ).read_bytes()).hexdigest()}
+          Path("ci_artifacts/m4b/github_receipt.json").write_text(
+            json.dumps(e,sort_keys=True,indent=2)+"\n")
+          print("M4B_MIGRATION_SCOPE_CI=PASS_MAIN_BLOCKED")
+          PY
+      - name: Upload only sanitized receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m4b-source-scope-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/m4b/*.json
+          if-no-files-found: warn
+          retention-days: 7
