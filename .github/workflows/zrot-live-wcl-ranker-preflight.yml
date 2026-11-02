@@ -1,0 +1,84 @@
+name: zrot-live-wcl-ranker-preflight
+
+on:
+  push:
+    branches:
+      - work/gr-wcl-ranker-live-coldstart-20261102
+    paths:
+      - tools/engine_first/wcl_ranker_discovery_preflight_v1.py
+      - .github/workflows/zrot-live-wcl-ranker-preflight.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile final file and offline negative and positive test
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/engine_first/wcl_ranker_discovery_preflight_v1.py
+          python -B tools/engine_first/wcl_ranker_discovery_preflight_v1.py --self-test > offline.json
+          python - <<'PY'
+          import json
+          x=json.load(open("offline.json"))
+          assert x["result"]=="PASS"
+          assert x["offline_assertions"]>=8
+          assert x["live_WCL_requests"]==0
+          print("OFFLINE_RANKER_PREFLIGHT=PASS")
+          PY
+
+  credential-gated-live-preflight:
+    needs: synthetic-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
+      WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Try bounded official OAuth and metadata-only top Fury ranking discovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/wcl_ranker
+          python -B tools/engine_first/wcl_ranker_discovery_preflight_v1.py \
+            --live --zone-match "Voidspire" \
+            --out ci_artifacts/wcl_ranker/live_preflight.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("ci_artifacts/wcl_ranker/live_preflight.json")
+          d=json.loads(p.read_text())
+          assert d["schema"]=="ZrotFreshWCLRankedFuryPreflightV1"
+          assert d["WCL_blind_candidate_lock"]=="NOT_CREATED"
+          assert d["WCL_ranker_exact_actor_verified"] is False
+          assert d["rotation_priority_proven"] is False
+          print("ACTUAL_WCL_PREFLIGHT_STATUS="+d["status"])
+          print("ACTUAL_WCL_REQUEST_INVOKED="+str(d["wcl_api_invoked"]))
+          if d.get("rankings"):
+              print("RANKING_SCHEMA_KEYS="+str(d["rankings"].get("first_ranking_row_keys",[])))
+              print("RANKING_REPORT_SCHEMA_KEYS="+str(d["rankings"].get("first_report_keys",[])))
+          PY
+      - name: Upload only metadata receipt without credentials, raw player names or tokens
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcl-ranked-preflight-${{ github.sha }}
+          path: ci_artifacts/wcl_ranker/live_preflight.json
+          retention-days: 7
+          if-no-files-found: warn
