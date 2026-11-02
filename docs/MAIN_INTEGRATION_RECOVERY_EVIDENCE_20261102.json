@@ -1,0 +1,85 @@
+{
+  "schema": "ZrotMainIntegrationRecoveryEvidenceV1",
+  "date": "2026-11-02",
+  "owner": "MAIN_INTEGRATION_REVIEW_CANDIDATE_NOT_SHARED_PROMOTION",
+  "historical_handoff_zip_sha256": "1299be440731d0fbf2b520d32b68f85c2c7dbdfc1ccd1632fe581ecf13574243",
+  "historical_snapshots": [
+    {
+      "id": "M4A",
+      "source_zip_sha256": "abe061cb7e2edae0012228e5eb46f5f190871b9f173debf92598f2be8fe5dfde",
+      "crc": "PASS",
+      "manifest_payload_hashes": "54/54_PASS",
+      "authority_claim": "NONE_SOURCE_BYTES_FOR_REVIEW_ONLY"
+    },
+    {
+      "id": "M4B",
+      "source_zip_sha256": "d42991109b6d6576c2ce0d61006c54d0aefb447e94c2c026cb69e75cc05849e8",
+      "crc": "PASS",
+      "manifest_payload_hashes": "118/118_PASS",
+      "authority_claim": "NONE_SOURCE_BYTES_FOR_REVIEW_ONLY"
+    }
+  ],
+  "missing_current_authority": [
+    "03_DATA/03_MANIFESTS/CANONICAL_REGISTRY.json",
+    "03_DATA/03_MANIFESTS/CURRENT_POINTER.json",
+    "LATEST_APPROVED_RUNTIME_WORK_STATE",
+    "CONTEMPORARY_PRODUCT_MAIN_BASE_AND_ACTIVE_MANIFEST"
+  ],
+  "archival_control_conflicts": [
+    {
+      "id": "WORKFLOW_ID",
+      "control": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+      "entrypoint": "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1"
+    },
+    {
+      "id": "ACTIVE_WORKFLOW_SHA",
+      "control": "c9ba0657c0f5ed936acf41a839780d6b3c245e08757107a96fef6cc675b1dc2f",
+      "prompt": "a3a30cc8f406216f9281109a3ffc357dba8306fafeb7b7a6f4fe090785e2d080"
+    },
+    {
+      "id": "DEFAULT_ACTION",
+      "control": "RUN_ACTIVE",
+      "entrypoint": "STATUS"
+    }
+  ],
+  "github": {
+    "observed_main_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
+    "observed_main_files": [
+      "README.md"
+    ],
+    "research_st06_sha": "0817d2de80ee5a23b011e1591be1543a52855226",
+    "old_m4b_to_research_exact_git_blob_sha": {
+      "02_SOURCE/runtime/raid_dps/specs/protocol.py": "605dfdc8cd76d0f3a8d9d811521ce56d49131cd2",
+      "02_SOURCE/runtime/raid_dps/specs/enhancement_shaman/adapter.py": "bed008c02627bbf9a14c097df7e27c3fe148030e",
+      "02_SOURCE/runtime/raid_dps/specs/fury_warrior/adapter.py": "a7c35cc6f5bbbdfe47b65bc63be4bba22a60cc97",
+      "02_SOURCE/validation/generalization/CROSS_SPEC_SYNTHETIC_PROBE_v1.py": "a2870bce6504831d40845897bdcf57fc3837cc32"
+    },
+    "known_missing_from_research_branch": [
+      "RUN_zRAID_MAIN.py",
+      "02_SOURCE/runtime/raid_dps/pipelines/discovery_mining.py",
+      "02_SOURCE/runtime/raid_dps/pipelines/independent_validation.py",
+      "02_SOURCE/validation/generalization/FEX_FULL_ENGINE_SYNTHETIC_PROBE_v1.py"
+    ]
+  },
+  "current_authority_recovered": false,
+  "research_adapter_historical_byte_compatibility": "PASS_4_OF_4",
+  "full_product_code_equivalence": "NOT_PROVEN",
+  "research_ST01_ST06_production_promotion": false,
+  "actual_current_client_spell_identity": "UNKNOWN",
+  "actual_gameplay_ready_certified": 0,
+  "main_product_promotion": "BLOCKED",
+  "github_main_mutated": false,
+  "frozen_mutated": false,
+  "seq578": "FAILED_QUARANTINED_PRESERVED",
+  "seq637": "UNKNOWN",
+  "owner_action": "MAIN owner must reconcile actual current canonical Runtime, Registry, Pointer, approved active workflow, then perform focused compatibility validation; no automatic overwrite",
+  "user_approval": "GRANTED_INTEGRATION_IN_PRINCIPLE_NOT_EVIDENCE_SUBSTITUTE",
+  "provenance": "Independent local byte-level M4A/M4B ZIP/hash audit and GitHub source/tree read-only comparison; local source bytes not uploaded",
+  "limitations": [
+    "M4 snapshot integrity verifies historical byte identity only",
+    "All reconciled Git blobs cover only selected adapter and probe files",
+    "A field in historical handoff says PROMOTED_CURRENT_MAIN, but same handoff timestamps and active workflow pins conflict",
+    "README-only GitHub main cannot be assumed product MAIN",
+    "No live PC or WCL/Blizzard/game product authority was accessed in this review"
+  ]
+}
