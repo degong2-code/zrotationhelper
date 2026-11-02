@@ -1,0 +1,96 @@
+{
+  "schema": "ZrotProductMainHistoricalSourceRecoveryHandoffV1",
+  "branch_id": "BR-PRODUCT-MAIN-M4B-SOURCE-RECOVERY",
+  "branch_name": "work/product-main-source-recovery-20261102",
+  "date": "2026-11-02",
+  "owner": "MAIN_INTEGRATION_REVIEW",
+  "purpose": "Reconstruct historical 118-file product source precisely, identify genuine missing dependency and MAIN authority blockers; no unsafe promotion",
+  "base_branch": "work/research-successor-baseline-20261102",
+  "base_sha": "ef51a58219cfc3e21683e81bfc6637f8ae54f3ee",
+  "validated_code_sha": "5a8aafbb5049369fc2d415f6d6f401fdfa3d6129",
+  "source_evidence": {
+    "original_portable_handoff_sha256": "1299be440731d0fbf2b520d32b68f85c2c7dbdfc1ccd1632fe581ecf13574243",
+    "original_M4B_sha256": "d42991109b6d6576c2ce0d61006c54d0aefb447e94c2c026cb69e75cc05849e8",
+    "read_only_recovery_zip_sha256": "1cfdff330d90fbf1f25081cc92955e1dddf287840bc015fcc4707bfb1f0098af",
+    "read_only_recovery_bytes": 227947,
+    "source_count": 118,
+    "python_n": 15,
+    "json_n": 100,
+    "markdown_n": 3,
+    "same_source_bytes": "118/118_PASS",
+    "zip_crc": "PASS",
+    "negative_tamper_tests": "2/2_PASS",
+    "inventory_digest_sha256": "510bb8341d1018e05eda7183e3f87c24d6f1c638a9f06498840c58f87888a6f8",
+    "storage": "PRIVATE_CHAT_ATTACHMENT_ONLY_NOT_COMMITTED_TO_PUBLIC_GITHUB",
+    "original_product_execution": "NOT_RUN",
+    "current_product_authority": "NOT_RESTORED"
+  },
+  "dependency_gap": {
+    "missing_from_M4B_and_GitHub": [
+      "02_SOURCE/runtime/raid_dps/core/renderer.py",
+      "02_SOURCE/runtime/raid_dps/core/wcl_client.py",
+      "02_SOURCE/runtime/raid_dps/pipelines/orchestrator.py"
+    ],
+    "reference_sha_candidates": "SOURCE_INVENTORY.json metadata only; bytes unavailable; don't claim restored",
+    "present_M4B_but_missing_GitHub": [
+      "RUN_zRAID_MAIN.py",
+      "02_SOURCE/runtime/raid_dps/pipelines/discovery_mining.py",
+      "02_SOURCE/runtime/raid_dps/pipelines/independent_validation.py",
+      "02_SOURCE/validation/generalization/FEX_FULL_ENGINE_SYNTHETIC_PROBE_v1.py"
+    ],
+    "present_research_but_not_M4B": [
+      "02_SOURCE/runtime/raid_dps/core/coverage.py",
+      "02_SOURCE/runtime/raid_dps/core/identity.py",
+      "02_SOURCE/runtime/raid_dps/core/prestate.py"
+    ],
+    "dynamic_dependency_closure": "NOT_VERIFIED",
+    "full_product_runtime": "INCOMPLETE"
+  },
+  "authority": {
+    "missing_registry": "03_DATA/03_MANIFESTS/CANONICAL_REGISTRY.json",
+    "missing_pointer": "03_DATA/03_MANIFESTS/CURRENT_POINTER.json",
+    "historical_conflicts": [
+      "WORKFLOW_ID",
+      "ACTIVE_WORKFLOW_SHA",
+      "DEFAULT_ACTION"
+    ],
+    "historical_package_manifest_date": "2026-09-28__NOT_CURRENT",
+    "main_active_pointer_status": "UNKNOWN",
+    "default_execution": "DISABLED",
+    "main_product_promotion": false,
+    "github_main_modification": false,
+    "frozen_modification": false,
+    "Seq578": "FAILED_QUARANTINED_PRESERVED",
+    "Seq637": "UNKNOWN",
+    "current_game_readiness_certified": 0,
+    "WCL_blind_semantic_lock": "INDEPENDENT_NO_MIX"
+  },
+  "github_verification": {
+    "run_id": 41384958030,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41384958030",
+    "python312": "SUCCESS",
+    "python314": "SUCCESS",
+    "scope": "SANITIZED_PRIVATE_SOURCE_RECOVERY_RECEIPT_AND_DEPENDENCY_STATUS_ONLY",
+    "unavailable_private_raw_zip": "NOT_REPLAYED_IN_GITHUB_CI",
+    "product_code_execution": "NOT_RUN",
+    "fail_closed_synthetic_cases_each": 9,
+    "artifacts": [
+      13115285590,
+      13114539418
+    ],
+    "source_files_uploaded": 0
+  },
+  "owned_files": [
+    "docs/PRODUCT_MAIN_HISTORICAL_SOURCE_RECOVERY_20261102.json",
+    "tools/research/m4b_historical_source_migration_scope_v1.py",
+    ".github/workflows/zrot-m4b-source-migration-scope-ci.yml"
+  ],
+  "cross_branch_dependencies": [
+    "cross_branch_dependency: historical product source owner needs to provide exact renderer.py, wcl_client.py and orchestrator.py bytes with SHA verification, or MAIN must approve independently reviewed replacement as NEW successor semantics rather than claim old equivalence",
+    "cross_branch_dependency: MAIN needs latest true Runtime/Work State and canonical Registry/Pointer, resolve historical workflow/default SHA conflicts before product enablement",
+    "cross_branch_dependency: integration reviewer needs to assemble non-executable full-product staging and verify imports/compatibility, then MAIN-only promotion of active configuration",
+    "cross_branch_dependency: WCL blind owner must preserve numeric candidate lock and Strict PRE independently of SimC semantics"
+  ],
+  "next_work": "Recover 3 actual missing runtime code artifacts from historical source packaging; then full source closure and nonexecuting compatibility, with MAIN authority still blocked",
+  "promotion_status": "NOT_PROMOTED_PRODUCT__BRANCH_REVIEW_VALIDATED"
+}
