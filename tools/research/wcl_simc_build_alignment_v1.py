@@ -177,8 +177,11 @@ def observed_tree(events:list,actor:int)->dict:
             if any(type(x) is not int or x<0 for x in (node,entry,rank)):
                 raise BuildSourceError("INVALID_WCL_TALENT_NODE_OR_RANK")
             if rank>0: normalized.append((node,entry,rank))
-        if len(normalized)!=len(set(x[0] for x in normalized)):
-            raise BuildSourceError("DUPLICATE_WCL_SELECTED_NODE")
+        # WCL may carry multi-entry side-system selections (e.g. a node
+        # with several different entry/rank tuples). Preserve all of them;
+        # the spec-tree index must classify, never silently pick one.
+        if len(normalized)!=len(set(normalized)):
+            raise BuildSourceError("EXACT_DUPLICATE_WCL_TALENT_TUPLE")
         sample.append((e["timestamp"],tuple(sorted(normalized))))
     if not sample:raise BuildSourceError("NO_STRICT_PRE_BUILD_SNAPSHOT")
     if len(set(x[1] for x in sample))!=1:
@@ -195,20 +198,32 @@ def compare_one(decoded:dict, observed:dict,tree:dict)->dict:
     sim=set(tuple(x) for x in decoded["selected"])
     wcl=set(tuple(x) for x in observed["selected"])
     known=set(tree["node_order"])
-    if any(x[0] not in known for x in wcl):
-        verdict="UNVERIFIED_WCL_NODE_NOT_IN_PINNED_TREE"
+    external=sorted({x[0] for x in wcl if x[0] not in known})
+    normal_wcl={x for x in wcl if x[0] in known}
+    normal_counts=Counter(x[0] for x in normal_wcl)
+    duplicates=sorted(n for n,count in normal_counts.items() if count>1)
+    if external:
+        verdict="UNKNOWN_EXTERNAL_WCL_TALENT_NODES"
+    elif duplicates:
+        verdict="UNKNOWN_WCL_MULTIENTRY_SPEC_TREE_NODE"
     else:
-        verdict="NUMERIC_SELECTION_MATCH" if sim==wcl else "NUMERIC_SELECTION_DIFFERENCE"
+        verdict=("NUMERIC_SELECTION_MATCH" if sim==normal_wcl
+                 else "NUMERIC_SELECTION_DIFFERENCE")
     sim_by_node={x[0]:x[1:] for x in sim}
-    wcl_by_node={x[0]:x[1:] for x in wcl}
+    wcl_by_node={x[0]:x[1:] for x in normal_wcl}
     missing=sorted(sim_by_node.keys()-wcl_by_node.keys())
     extra=sorted(wcl_by_node.keys()-sim_by_node.keys())
     different=sorted(n for n in sim_by_node.keys() & wcl_by_node.keys()
                      if sim_by_node[n]!=wcl_by_node[n])
     return {"status":verdict,
-            "WCL_selected_node_count":len(wcl),
+            "WCL_selected_talent_entry_count":len(wcl),
+            "WCL_selected_node_count":len({x[0] for x in wcl}),
+            "WCL_selected_spec_tree_entry_count":len(normal_wcl),
+            "WCL_node_ids_outside_public_spec_tree":external,
+            "WCL_multientry_spec_tree_nodes":duplicates,
+            "external_side_system_semantics":"UNKNOWN",
             "SimC_decoded_selected_node_count":len(sim),
-            "shared_identical_selected_nodes":len(sim&wcl),
+            "shared_identical_selected_nodes":len(sim&normal_wcl),
             "simc_only_nodes_count":len(missing),
             "wcl_only_nodes_count":len(extra),
             "choice_or_rank_mismatched_node_count":len(different),
@@ -284,6 +299,11 @@ def selftest()->dict:
     bad=compare_one(d,{"selected":[(1,101,1)]},tree)
     assert bad["status"]=="NUMERIC_SELECTION_DIFFERENCE"
     assert bad["SimC_APL_ready_to_apply_to_WCL"] is False
+    off_tree=compare_one(d,{"selected":d["selected"]+[
+        (110412,137002,1),(110412,137003,2),(110412,137004,1)]},tree)
+    assert off_tree["status"]=="UNKNOWN_EXTERNAL_WCL_TALENT_NODES"
+    assert off_tree["WCL_node_ids_outside_public_spec_tree"]==[110412]
+    assert off_tree["external_side_system_semantics"]=="UNKNOWN"
     try:decode(pack([(8,3),(16,72)]+[(8,0)]*16+values[18:]),tree)
     except BuildSourceError as e:assert "VERSION" in str(e)
     else:raise AssertionError("ACCEPTED_WRONG_VERSION")
@@ -291,7 +311,7 @@ def selftest()->dict:
     except BuildSourceError as e:assert "SPEC_ID" in str(e)
     else:raise AssertionError("ACCEPTED_WRONG_SPEC")
     return {"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":7,"external_WCL_or_SimC_source_loaded":False,
+            "checks":10,"external_WCL_or_SimC_source_loaded":False,
             "full_build_equivalence_proven":False}
 
 
