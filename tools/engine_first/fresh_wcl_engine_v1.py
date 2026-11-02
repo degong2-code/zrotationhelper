@@ -199,12 +199,20 @@ def recover_orphan_page(folder:Path,state:dict)->bool:
     return True
 
 
-def collect(query:Callable[[str,dict],dict],code:str,fight:int,out:Path,max_pages:int=100)->dict:
+def collect(query:Callable[[str,dict],dict],code:str,fight:int,out:Path,max_pages:int=100,*,window_ms:int|None=None)->dict:
     if not REPORT_RE.fullmatch(code) or not isinstance(fight,int) or fight<=0:
         raise EngineError("REPORT_OR_FIGHT_ID_INVALID")
     if not 1<=max_pages<=1000:raise EngineError("MAX_PAGES_OUT_OF_RANGE")
     folder=out/code/f"fight_{fight}"
     info=validate_report(code,fight,_report(query(META_QUERY,{"code":code,"fight":fight})))
+    if window_ms is not None:
+        if type(window_ms) is not int or not 1000<=window_ms<=60000:
+            raise EngineError("INVALID_BOUNDED_OPENER_WINDOW")
+        full_end=info["end"]
+        info={**info,"full_fight_end":full_end,
+              "end":min(full_end,info["start"]+window_ms),
+              "requested_window_ms":window_ms,
+              "evidence_window":"FIGHT_START_BOUNDED"}
     state_path=folder/"checkpoint.json"
     if state_path.is_file():
         state=json.loads(state_path.read_bytes())
@@ -250,7 +258,8 @@ def collect(query:Callable[[str,dict],dict],code:str,fight:int,out:Path,max_page
         state["cursor"]=nxt
         state["complete"]=nxt is None
         write_atomic(state_path,canonical(state))
-    return {"status":"COMPLETE" if state["complete"] else "PARTIAL", "pages":len(state["pages"]),
+    return {"status":("COMPLETE_WINDOW" if window_ms is not None else "COMPLETE")
+            if state["complete"] else "PARTIAL", "pages":len(state["pages"]),
             "events":sum(x["event_count"] for x in state["pages"]), "identity":info,
             "checkpoint":str(state_path),"live_api_invoked":"INJECTED_TRANSPORT"}
 
