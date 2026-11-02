@@ -1,0 +1,36 @@
+{
+  "schema": "ZrotHistoricalMainAuthoritySafeStatusHandoffV1",
+  "date": "2026-11-02",
+  "owner": "BRANCH_INTEGRATION_REVIEW_ONLY",
+  "source_archive_sha256": "46e3a2dd1b51465429932a03efb7345cae781c756137dea9a39c9c4bed152bf6",
+  "independent_private_audit_receipt_sha256": "c0b0b385abae10d4e7dd96812a94500b0ab9ff6650c3d088b060c8449cc67571",
+  "actual_private_audit": "LOCAL_OFFLINE_NOT_GITHUB_CI",
+  "findings": {
+    "historical_SHA_links_match": 3,
+    "historical_SHA_links_mismatch": 2,
+    "mismatched_authority_pins": [
+      "MAIN_ENTRYPOINT_AUTHORITY.entrypoint_sha256",
+      "MAIN_ENTRYPOINT_AUTHORITY.control_config_sha256"
+    ],
+    "control_plane_bound_FEX_SHA": "MATCH",
+    "standalone_control_plane_self_test": "6_OF_6_PASS",
+    "direct_control_plane_status": "PASS_JSON_NO_PRODUCT_RUN",
+    "bad_SHA_active_execution": "FAIL_CLOSED_EXIT_2_NO_SUBPROCESS",
+    "product_entrypoint_pre_cli_dispatcher": "OBSERVED_MAY_RUN_INBOX",
+    "canonical_registry_current_pointer_direct_runtime_reference": "NOT_PRESENT_IN_ARCHIVED_124_SOURCE",
+    "missing_registry_pointer": "NOT_ALONE_A_STANDALONE_STATUS_BLOCKER",
+    "status_entrypoint_safe": "DIRECT_CONTROL_PLANE_ONLY_NOT_RUN_zRAID_MAIN"
+  },
+  "interpretation": "Control Plane and FEX historical bytes are internally pinned, but stale EntryPointAuthority and prompt/control divergences preclude automatic product active workflow selection. Current product Runtime authority remains UNKNOWN.",
+  "current_MAIN_pointer_promoted": false,
+  "github_main_mutated": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED_PRESERVED",
+  "Seq637": "UNKNOWN",
+  "added_review_files": [
+    "docs/HISTORICAL_MAIN_SAFE_STATUS_AUTHORITY_BOUNDARY_20261102.json"
+  ],
+  "not_delivered": "Read-only inspection code GitHub write was blocked by connector safety check; no code or CI acceptance claimed",
+  "next": "MAIN owner review and authorize specific active workflow with exact current runner/config/entrypoint pins; then build fail-closed safe status adapter before testing product integration; no current PC read occurred",
+  "status": "HISTORICAL_DIRECT_CONTROL_PLANE_SMOKE_PASS__CURRENT_PRODUCT_MAIN_AUTHORITY_UNKNOWN"
+}
