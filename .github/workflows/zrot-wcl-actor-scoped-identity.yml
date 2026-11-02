@@ -1,0 +1,53 @@
+name: zrot-wcl-actor-scoped-identity-and-blind
+
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/engine_first/wcl_actor_scoped_cohort_v1.py
+      - .github/workflows/zrot-wcl-actor-scoped-identity.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-actor-identity:
+    name: Actor/spec + Strict PRE + Blind lock Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile all linked delivered files
+        run: |
+          python -m py_compile tools/engine_first/fresh_wcl_engine_v1.py tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py tools/engine_first/wcl_actor_scoped_cohort_v1.py
+      - name: Actor identity and blind numeric isolation synthetic regression
+        run: |
+          set -euo pipefail
+          python -B tools/engine_first/wcl_actor_scoped_cohort_v1.py --self-test > /tmp/actor-check.json
+          python -B tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py --self-test > /tmp/blind-check.json
+          python -B tools/engine_first/fresh_wcl_engine_v1.py self-test > /tmp/fresh-check.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/actor-check.json'))
+          b=json.load(open('/tmp/blind-check.json'))
+          c=json.load(open('/tmp/fresh-check.json'))
+          assert a['status']=='PASS_OFFLINE_SYNTHETIC' and a['assertion_groups']>=19
+          assert a['actual_WCL_requests']==0 and a['real_ranker_verified'] is False
+          assert a['real_gameplay_rule'] is False and a['live_readiness']=='UNKNOWN'
+          assert b['result']=='PASS' and b['actual_WCL_API_calls']==0
+          assert c['result']=='PASS' and c['real_api_requests']==0
+          print('ACTOR_SCOPED_SYNTHETIC_GATES=PASS_NO_LIVE_API')
+          PY
+      - name: Print delivered source SHA256
+        run: sha256sum tools/engine_first/wcl_actor_scoped_cohort_v1.py
