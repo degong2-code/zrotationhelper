@@ -90,6 +90,21 @@ def evaluate(doc:dict,root:Path=ROOT)->dict:
             should_exist=(field=="available_in_research_but_not_in_archival_m4b")
             if present!=should_exist:
                 raise MigrationScopeError("CHECKOUT_CHANGE_NEEDS_REAUDIT_"+path)
+    inventory = deps.get("missing_module_inventory_candidates")
+    if not isinstance(inventory,dict) or set(inventory)!=OLD_MISSING:
+        raise MigrationScopeError("MISSING_REFERENCE_INVENTORY_DRIFT")
+    expected_refs = {
+        "02_SOURCE/runtime/raid_dps/core/renderer.py":(13229,"7c0bf5e1b09d10aec09c89438b18cd302906acf73ef4f24fd6349526e004ca52"),
+        "02_SOURCE/runtime/raid_dps/core/wcl_client.py":(13129,"452fb44c4c577b5bbb08ceb431013e165de57e62ef72f59500777d703e42ce24"),
+        "02_SOURCE/runtime/raid_dps/pipelines/orchestrator.py":(19606,"fe398aa9238908c21af433ac5652f1730f66cd5dd0209722ebf6371b68d68d0d"),
+    }
+    for name,(size,pin) in expected_refs.items():
+        item=inventory.get(name,{})
+        if item.get("bytes")!=size or item.get("sha256")!=pin or item.get("file_bytes_present") is not False:
+            raise MigrationScopeError("REFERENCE_INVENTORY_NOT_SOURCE_BYTES:"+name)
+    if (deps.get("missing_inventory_provenance")!="HISTORICAL_SOURCE_INVENTORY_JSON_FILE_METADATA_NOT_SOURCE_BYTES"
+        or deps.get("missing_inventory_not_current_runtime_authority") is not True):
+        raise MigrationScopeError("REFERENCE_CANDIDATE_FALSE_AUTHORITY")
     if deps.get("full_product_dependency_closure")!="NOT_COMPLETE" or deps.get("exact_source_merging_performed") is not False:
         raise MigrationScopeError("FALSE_PRODUCTION_COMPLETENESS")
     pins=doc.get("selected_historical_source_sha256",{})
@@ -133,6 +148,7 @@ def self_test(doc:dict)->int:
     reject_case(lambda d:d["runtime_dependencies"].update({"full_product_dependency_closure":"COMPLETE"}),"FALSE_PRODUCTION_COMPLETENESS")
     reject_case(lambda d:d["source"].update({"private_recovery_zip_n":119}),"UNVERIFIED_PRIVATE_ARCHIVE")
     reject_case(lambda d:d["source"].update({"snapshot_currentness":"PROMOTED_MAIN"}),"UNVERIFIED_PRIVATE_ARCHIVE")
+    reject_case(lambda d:d["runtime_dependencies"]["missing_module_inventory_candidates"]["02_SOURCE/runtime/raid_dps/core/wcl_client.py"].update({"file_bytes_present":True}),"REFERENCE_INVENTORY_NOT_SOURCE_BYTES")
     return n
 
 
