@@ -1,0 +1,91 @@
+{
+  "schema": "ZrotSimcOpenerPriorityReplayInputV1",
+  "spec": "enhancement",
+  "mode": "EXPLICIT_STRICT_PRE_SYNTHETIC_OR_ATTESTED",
+  "operand_to_feature": {
+    "active_enemies": "targets",
+    "resource": "resources"
+  },
+  "decisions": [
+    {
+      "timestamp_ms": 1000,
+      "phase": "OPENER",
+      "transitions": [
+        {
+          "timestamp_ms": 900,
+          "key": "targets",
+          "value": 1
+        },
+        {
+          "timestamp_ms": 900,
+          "key": "resources",
+          "value": 90
+        }
+      ],
+      "action_readiness": {
+        "alpha": "READY"
+      },
+      "target_count_label": 1
+    },
+    {
+      "timestamp_ms": 1200,
+      "phase": "OPENER",
+      "transitions": [
+        {
+          "timestamp_ms": 1100,
+          "key": "targets",
+          "value": 1
+        },
+        {
+          "timestamp_ms": 1100,
+          "key": "resources",
+          "value": 20
+        }
+      ],
+      "action_readiness": {
+        "beta": "READY"
+      },
+      "target_count_label": 1
+    },
+    {
+      "timestamp_ms": 1400,
+      "phase": "POST_OPENER",
+      "transitions": [
+        {
+          "timestamp_ms": 1300,
+          "key": "targets",
+          "value": 3
+        },
+        {
+          "timestamp_ms": 1400,
+          "key": "targets",
+          "value": 1
+        },
+        {
+          "timestamp_ms": 1500,
+          "key": "targets",
+          "value": 1
+        }
+      ],
+      "action_readiness": {
+        "gamma": "READY"
+      },
+      "target_count_label": 3
+    },
+    {
+      "timestamp_ms": 1600,
+      "phase": "POST_OPENER",
+      "transitions": [
+        {
+          "timestamp_ms": 1500,
+          "key": "resources",
+          "value": 30
+        }
+      ],
+      "action_readiness": {
+        "gamma": "READY"
+      },
+      "target_count_label": "UNKNOWN"
+    }
+  ]
+}
