@@ -65,7 +65,7 @@
     "seq637": "UNKNOWN"
   },
   "observed_outcome": "FRESH_ENGINE_V1_OFFLINE_END_TO_END_PASS__LIVE_API_UNVERIFIED",
-  "next_owner_exact_next": "Authorized small live public report smoke with user's local .env + real report/fight IDs. Verify API response contract, point budget, revision-safe checkpoint/replay, then build true resource/readiness observability and independent numeric candidate lock. In parallel bootstrap SimC APL/profile with no semantic contamination before WCL lock.",
+  "next_owner_exact_next": "Build SimC APL/profile opener and conditional baseline IR, independently WCL high-ranker blind candidates after Strict PRE and readiness, candidate lock prior SimC semantic comparison, then replay to correct General Rotation opener and ST/2-target/AoE IF/ELSE priorities. Build lightweight target-dummy own-cast telemetry capability fixture; when full state unavailable, develop official combat log post-session feedback. No raid, encounter-specific plans, NSRT.",
   "cross_branch_dependency": [
     "cross_branch_dependency: MAIN should review Engine-First Charter before any production or active pointer promotion; branch code stands independently of old MAIN",
     "cross_branch_dependency: WCL credentials owner must provide legitimate .env at local runtime for live collection; never put credentials in GitHub or handoff",
@@ -73,11 +73,46 @@
   ],
   "shared_authoritative_state_mutated": false,
   "project_wide_FROZEN_changed": false,
-  "promotion_state": "BRANCH_VALIDATED__MAIN_REVIEW_REQUIRED",
+  "promotion_state": "BRANCH_SCOPE_OVERRIDE_USER_APPROVED__SHARED_MAIN_NOT_PROMOTED",
   "read_first": [
+    "docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md",
     "AGENTS.md",
     "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md",
     "docs/ENGINE_FIRST_FRESH_WCL_VERTICAL_SLICE_V1.md",
     "_UPLOAD_TO_CHATGPT/branches/BR-ENGINE-FIRST-FRESH-WCL-VSLICE/LATEST_HANDOFF.json"
-  ]
+  ],
+  "user_approved_product_scope_override": {
+    "effective_date": "2026-11-02",
+    "status": "EXPLICIT_USER_DECLARED_CURRENT_PRODUCT_SCOPE",
+    "read_first": "docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md",
+    "end_goal": "VERIFIED_GENERAL_ROTATION_OPENER_AND_IF_ELSE_PRIORITY",
+    "user_delivery": "LIGHTWEIGHT_TARGET_DUMMY_TRAINING_ADDON_OR_POST_SESSION_LOG_FEEDBACK",
+    "research_order": "SIMC_APL_BASELINE_THEN_WCL_HIGH_RANKER_VALIDATION_CORRECTION",
+    "blind_wcl_protection": "INDEPENDENT_WCL_CANDIDATE_LOCK_BEFORE_INJECTING_SIMC_ANSWER",
+    "general_target_scenarios": [
+      "SINGLE_TARGET",
+      "TWO_TARGET_CLEAVE",
+      "AOE",
+      "OPENER"
+    ],
+    "excludes": [
+      "RAID_EXECUTION_UI",
+      "ENCOUNTER_ROTATION_PLAN",
+      "BOSS_SPECIFIC_DEVIATION_OUTPUT",
+      "NSRT_EXPORT",
+      "HTML_RAID_TIMELINE",
+      "BOSS_GUIDE_EXPORT"
+    ],
+    "real_time_fidelity": "UNKNOWN_UNTIL_CLIENT_API_CAPABILITY_TEST",
+    "analysis_fallback": "POST_SESSION_OFFICIAL_COMBAT_LOG_WITH_STRICT_PRE_UNKNOWN",
+    "full_combat_log_events_addon_available": false,
+    "addon_dev_principle": "TINY_TELEMETRY_AND_FEEDBACK_UI_DECOUPLED_FROM_RESEARCH_ENGINE",
+    "exception": "OLDER_BOSS_LOGS_MAY_BE_USED_AS_GENERAL_ROTATION_FIXTURES_NOT_ENCOUNTER_PLANS",
+    "current_legacy_FROZEN_status": "UNMODIFIED",
+    "shared_MAIN_state_changed": false
+  },
+  "previous_next_before_product_scope_change": "Authorized small live public report smoke with user's local .env + real report/fight IDs. Verify API response contract, point budget, revision-safe checkpoint/replay, then build true resource/readiness observability and independent numeric candidate lock. In parallel bootstrap SimC APL/profile with no semantic contamination before WCL lock.",
+  "product_exact_next": "Complete validated General Rotation opener and conditional priorities; user can practice target dummy and receive specific evidence-bounded correction of actual mistakes.",
+  "branch_exact_next": "Keep Fresh-WCL V1 code and offline CI stable as input capability. Add SimC bootstrap candidate with opener and neutral IR; separate WCL blind evidence lane, then support dummy trainer evaluator on same IR.",
+  "scope_declaration_replaces_prior_raid_direction": true
 }
