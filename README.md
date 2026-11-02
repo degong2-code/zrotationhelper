@@ -1,3 +1,24 @@
+# zRotationHelper — CURRENT USER-APPROVED PRODUCT GOAL (2026-11-02)
+
+> **Complete the General Rotation OPENER and verified IF/ELSE spell priority**, then help users correct their rotation while practicing on a target dummy. Initial hypothesis comes from **SimC APL/profile**, verified and corrected using **high-ranking WCL player logs**, with independent blind WCL candidate lock before receiving SimC answers. Practice feedback is live only when supported WoW APIs reveal enough evidence; otherwise use post-session combat-log analysis.
+
+**NOT product targets:** raid execution, encounter-specific boss rotation plans, NSRT, HTML raid timelines or boss guide export. Raid logs may be reused as **general ST / two-target / AoE evidence**. Historical files and CI bootstrap descriptions below are NOT the current roadmap.
+
+**Mandatory read-first (including any future chat / handoff):**
+1. [Machine-readable user scope lock](docs/PRODUCT_SCOPE_LOCK_V1.json)
+2. [Full official scope declaration](docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md)
+3. [Agent instructions](AGENTS.md) + [Engine-First Charter](docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md)
+4. [Five-or-more-handoff protocol](docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md) + [new chat boot prompt](handoff/NEW_CHAT_BOOT_PROMPT.md)
+5. The newest verified branch-local `LATEST_HANDOFF.json` for the task at hand. Historic handoffs are evidence, not scope authority.
+
+**Continuity check:** `python tools/governance/validate_scope_continuity_v1.py --validate` then `--self-test`. The test simulates five *future* handoffs and must not be reported as five real handoffs.
+
+The source of truth is the **explicit user scope decision**, not a previous assistant-generated plan. Only the MAIN integration owner can promote shared project state; this branch records the approved goal without rewriting FROZEN or global pointers.
+
+---
+
+## Archived development/CI bootstrap description (historical context)
+
 # zRotationHelper — offline CI bootstrap (candidate)
 
 This repository snapshot is a **development/CI experiment**, not the complete WoW Rotation Helper product or an authoritative gameplay baseline. Its eight source/contract files are copied byte-for-byte from a selected local Windows Source Snapshot. No Warcraft Logs, Blizzard API or SimulationCraft credentials, reports, raw evidence or local deployment state are included.
