@@ -1,0 +1,69 @@
+{
+  "schema": "ZrotHistoricalMainSafeStatusAuthorityBoundaryV1",
+  "date": "2026-11-02",
+  "scope": "ARCHIVED_M4B_PLUS_STAGE_124_SOURCE__OFFLINE_CONTROL_PLANE_ONLY",
+  "historical_private_audit": {
+    "source_archive_sha256": "46e3a2dd1b51465429932a03efb7345cae781c756137dea9a39c9c4bed152bf6",
+    "sanitized_receipt_sha256": "c0b0b385abae10d4e7dd96812a94500b0ab9ff6650c3d088b060c8449cc67571",
+    "file_paths_in_archive": "124_UNMODIFIED_SOURCE_FILES",
+    "archive_crc": "PASS",
+    "pinned_hash_links_total": 5,
+    "matched": 3,
+    "mismatched": 2,
+    "exact_mismatch_labels": [
+      "entrypoint_authority.entrypoint_sha256",
+      "entrypoint_authority.config_sha256"
+    ],
+    "matched_labels": [
+      "entrypoint_authority.control_plane_sha256",
+      "entrypoint_authority.active_workflow_sha256",
+      "control_plane.active_workflow_sha256"
+    ],
+    "control_plane_active_workflow": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+    "control_plane_default_action": "RUN_ACTIVE",
+    "entrypoint_authority_active_workflow": "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1",
+    "entrypoint_authority_default_action": "STATUS",
+    "handoff_active_workflow": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+    "prompt_manifest_workflow_id": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+    "prompt_manifest_workflow_sha_matches": "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1",
+    "current_state_workflow_id": "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1",
+    "entrypoint_calls_dispatch_inbox_before_cli": true,
+    "dispatcher_may_execute_inbox_package_before_status": true,
+    "legacy_main_code_run": false,
+    "legacy_control_plane_direct_offline_tests": {
+      "direct_self_test": {
+        "status": "PASS",
+        "count": 6
+      },
+      "direct_status_json": {
+        "status": "PASS",
+        "command": "CONTROL_PLANE_DIRECT_ONLY"
+      },
+      "synthetic_bad_SHA_negative": {
+        "status": "PASS_FAIL_CLOSED",
+        "returncode": 2,
+        "no_executable_launched": true
+      }
+    },
+    "archived_CANONICAL_REGISTRY_json_found": false,
+    "archived_CURRENT_POINTER_json_found": false,
+    "historical_source_text_uses_those_exact_file_names": false
+  },
+  "recommendation": {
+    "product_MAIN_current_authority": "UNKNOWN",
+    "historical_direct_control_plane_status": "SAFE_ONLY_WHEN_CALLING_CONTROL_PLANE_DIRECT_WITH_EXPLICIT_STATUS",
+    "legacy_RUN_zRAID_MAIN_status_safe_to_execute": "NOT_CERTIFIED_INBOX_EARLY_DISPATCH",
+    "historical_FEX_hash_binding": "VALID_IN_CONTROL_PLANE_NOT_FULL_PRODUCT_AUTHORIZATION",
+    "register_or_pointer_synthetic_creation": "FORBIDDEN",
+    "automatic_resolve_to_FEX_or_FIRST_CROSS_SPEC": "FORBIDDEN",
+    "default_product_execution": "DISABLED_IN_REVIEW",
+    "WCL_or_SimC_or_Blizzard_API": "NOT_RUN",
+    "gameplay_ready_certified": 0,
+    "product_MAIN_promotion": false,
+    "frozen_modified": false,
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN"
+  },
+  "authority_nuance": "Registry and pointer absent from historical standalone execution path. Their absence alone cannot prove archived control plane unusable; MAIN promotion remains dependent on approved authority, current Runtime and review of outdated pins.",
+  "next": "Build a safe status-only migration candidate with zero import/dispatcher path, synthetic regression and no promotion; request current canonical authority only if required for actual product activation"
+}
