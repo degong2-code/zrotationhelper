@@ -23,7 +23,7 @@ REQUIRED=(
     "03_DATA/03_MANIFESTS/CURRENT_POINTER.json",
 )
 RESEARCH_ONLY={
-    "product_main_promotion":"BLOCKED",
+    "main_product_promotion":"BLOCKED",
     "research_ST01_ST06_production_promotion":False,
     "frozen_mutated":False,
     "github_main_mutated":False,
