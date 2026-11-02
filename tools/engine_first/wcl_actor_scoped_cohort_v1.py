@@ -21,7 +21,7 @@ from fresh_wcl_engine_v1 import (
 from wcl_blind_numeric_candidate_lock_v1 import lock_candidates, BlindInputError
 
 META_QUERY = """query ZrotActorGate($code:String!, $fight:Int!){
-  reportData { report(code:$code) { code revision
+  reportData { report(code:$code) { code revision startTime
     fights(fightIDs:[$fight],translate:false) {
       id startTime endTime inProgress encounterID difficulty
       friendlyPlayers friendlySpecs
