@@ -178,7 +178,7 @@ def scope_replay(raw: dict, gate: dict) -> dict:
 
 
 def prepare(meta: dict, raw: dict, *, code: str, fight: int, actor: int,
-            spec: str, player_class: str, min_observations: int) -> tuple[dict, dict, dict]:
+            spec: str, player_class: str, min_observations: int) -> tuple[dict, dict, dict, dict]:
     gate = identity_gate(meta, code, fight, actor, spec, player_class)
     view = scope_replay(raw, gate)
     lock = lock_candidates([view], min_observations=min_observations,
@@ -327,6 +327,8 @@ def main():
             or a.raw_replay is not None and a.live):
         ap.error("explicit identity/output inputs required; live and offline modes are exclusive")
     if a.live:
+        if not re.fullmatch(r"[A-Za-z0-9]{6,40}", a.report_code) or not 1 <= a.max_pages <= 1000 or not 1 <= a.min_observations <= 1000:
+            ap.error("invalid report, page limit or predeclared observation threshold")
         # No network or credential access without an explicit --live.
         client_id, client_secret = credentials(a.env)
         token = oauth_token(client_id, client_secret)
