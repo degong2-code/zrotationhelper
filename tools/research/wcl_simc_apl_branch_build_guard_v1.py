@@ -49,6 +49,37 @@ def unique_node_for_token(tree,token):
     return matches[0] if len(matches)==1 else None
 
 
+def _selector_status(tree:dict, talent_nid:int|None, selections:list)->dict:
+    """Only explicit active hero-tree chooser entries can prove activation."""
+    if talent_nid is None:
+        return {"active":None,"status":"UNKNOWN_NO_TALENT_NODE_MAPPING"}
+    node=tree["nodes"].get(talent_nid)
+    subtree=node.get("subTreeId") if isinstance(node,dict) else None
+    if type(subtree) is not int or subtree<=0:
+        return {"active":None,"status":"UNKNOWN_NO_SUBTREE_MEMBERSHIP"}
+    matches=[]
+    for parent_nid,parent in tree["nodes"].items():
+        if parent.get("type")!="subtree":continue
+        for entry in parent.get("entries",[]):
+            if entry.get("traitSubTreeId")==subtree:
+                matches.append((parent_nid,entry.get("id")))
+    if len(matches)!=1:
+        return {"active":None,"status":"UNKNOWN_HERO_SELECTOR_NOT_UNIQUE",
+                "subtree_id":subtree,"selector_matches":len(matches)}
+    parent_nid,expected_entry=matches[0]
+    observed=[entry for nid,entry,rank in selections
+              if nid==parent_nid and rank>0]
+    if len(observed)!=1:
+        return {"active":None,"status":"UNKNOWN_HERO_SELECTOR_SELECTION_MISSING_OR_MULTIPLE",
+                "subtree_id":subtree,"selector_node_id":parent_nid,
+                "selection_count":len(observed)}
+    return {"active":observed[0]==expected_entry,
+            "status":"EXPLICIT_PARENT_HERO_SELECTOR_EVIDENCE",
+            "subtree_id":subtree,"selector_node_id":parent_nid,
+            "actual_selector_entry_id":observed[0],
+            "required_selector_entry_id":expected_entry}
+
+
 def evaluate(profile_raw:bytes,tree:dict,branches:list,actual:dict):
     sim=decode(parse_profile(profile_raw)["export"],tree)
     sim_nodes={row[0] for row in sim["selected"]}
@@ -69,16 +100,23 @@ def evaluate(profile_raw:bytes,tree:dict,branches:list,actual:dict):
             elif not sim_selected and wcl_selected:
                 source_state="WCL_SELECTED_PROFILE_NOT_SELECTED"
             else:source_state="NEITHER_SELECTED"
+        sim_active=_selector_status(tree,nid,sim["selected"])
+        wcl_active=_selector_status(tree,nid,actual["selected"])
         out.append({**row,"resolved_node_id":nid,
-                    "simc_profile_talent_selected":sim_selected,
-                    "wcl_strict_pre_talent_selected":wcl_selected,
-                    "structural_talent_applicability":source_state,
+                    "simc_profile_raw_node_selected":sim_selected,
+                    "wcl_strict_pre_raw_node_selected":wcl_selected,
+                    "raw_node_selection_comparison":source_state,
+                    "simc_hero_selector_state":sim_active,
+                    "wcl_hero_selector_state":wcl_active,
+                    "hero_talent_enabled_same_in_both":(
+                        sim_active["active"]==wcl_active["active"]
+                        if isinstance(sim_active["active"],bool) and
+                           isinstance(wcl_active["active"],bool) else None),
                     "active_enemies_at_wcl_decision":"UNKNOWN",
                     "simc_foreground_action_replay":"NOT_RUN",
                     "profile_action_list_priority_transfer":"BLOCKED",
                     "validated_rotation_rule":False})
     return out
-
 
 def study(profile:Path,tree_data:Path,discovery:Path,holdout:Path):
     profile_raw=profile.read_bytes()
@@ -121,10 +159,22 @@ def selftest():
     assert unique_node_for_token(tree,"slayers_dominance")==7
     assert unique_node_for_token(tree,"warpaint")==8
     assert unique_node_for_token(tree,"unmapped_ability") is None
+    selector={"nodes":{
+      5:{"name":"Lightning Strikes","subTreeId":500},
+      9:{"name":"Slayer's Dominance","subTreeId":501},
+      99:{"type":"subtree","name":"Hero Choice",
+          "entries":[{"id":1900,"traitSubTreeId":500},
+                     {"id":1901,"traitSubTreeId":501}]}}}
+    sel_yes=_selector_status(selector,5,[(99,1900,1)])
+    sel_no=_selector_status(selector,5,[(99,1901,1)])
+    assert sel_yes["active"] is True and sel_no["active"] is False
+    assert sel_yes["status"]=="EXPLICIT_PARENT_HERO_SELECTOR_EVIDENCE"
+    assert _selector_status(selector,5,[])["active"] is None
+    assert _selector_status(tree,5,[])["active"] is None
     try:source_branches(b"actions+=/rampage,if=rage>=80\n")
     except APLBranchError:pass
     else:raise AssertionError("NON_BRANCH_APL_ACCEPTED")
-    return {"status":"PASS_OFFLINE_SYNTHETIC","checks":7,
+    return {"status":"PASS_OFFLINE_SYNTHETIC","checks":11,
             "actual_SimC_or_WCL_sources_read":False,
             "priority_validated":False}
 
