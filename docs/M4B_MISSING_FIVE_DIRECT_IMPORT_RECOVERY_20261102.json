@@ -1,0 +1,89 @@
+{
+  "schema": "ZrotM4BMissingFiveDirectImportRecoveryV1",
+  "owner": "BR-PRODUCT-MAIN-M4B-SOURCE-RECOVERY",
+  "generated": "2026-11-02",
+  "source": "actual archived M4B 15 Python modules independently AST parsed locally; source inventory SHA metadata separately retrieved",
+  "source_zip_sha256": "1cfdff330d90fbf1f25081cc92955e1dddf287840bc015fcc4707bfb1f0098af",
+  "historical_modules_ast_parsed": 15,
+  "historical_python_sha_verified": 15,
+  "required_raid_dps_module_imports": 14,
+  "distinct_target_modules": 8,
+  "missing_direct_modules": 5,
+  "research_only_modules": 3,
+  "missing": [
+    {
+      "path": "02_SOURCE/runtime/raid_dps/core/cohort.py",
+      "expected_size_bytes": 6147,
+      "expected_sha256": "e506e7a7073b88b3bad6909822f5289363bba92218de71f1003a7fc3fc2da600",
+      "imported_by": [
+        "02_SOURCE/runtime/raid_dps/pipelines/independent_validation.py"
+      ],
+      "source_bytes_recovered": false,
+      "sha_evidence": "historical SOURCE_INVENTORY metadata only"
+    },
+    {
+      "path": "02_SOURCE/runtime/raid_dps/core/evidence.py",
+      "expected_size_bytes": 8791,
+      "expected_sha256": "a5a4261168ffb172d95b655c9d320591e5400fe5bdb1425b1d3a54a0b581d27b",
+      "imported_by": [
+        "02_SOURCE/runtime/raid_dps/pipelines/discovery_mining.py",
+        "02_SOURCE/runtime/raid_dps/pipelines/independent_validation.py"
+      ],
+      "source_bytes_recovered": false,
+      "sha_evidence": "historical SOURCE_INVENTORY metadata only"
+    },
+    {
+      "path": "02_SOURCE/runtime/raid_dps/core/renderer.py",
+      "expected_size_bytes": 13229,
+      "expected_sha256": "7c0bf5e1b09d10aec09c89438b18cd302906acf73ef4f24fd6349526e004ca52",
+      "imported_by": [
+        "02_SOURCE/runtime/raid_dps/pipelines/handlers_offline.py"
+      ],
+      "source_bytes_recovered": false,
+      "sha_evidence": "historical SOURCE_INVENTORY metadata only"
+    },
+    {
+      "path": "02_SOURCE/runtime/raid_dps/core/wcl_client.py",
+      "expected_size_bytes": 13129,
+      "expected_sha256": "452fb44c4c577b5bbb08ceb431013e165de57e62ef72f59500777d703e42ce24",
+      "imported_by": [
+        "02_SOURCE/runtime/raid_dps/pipelines/independent_validation.py",
+        "02_SOURCE/runtime/raid_dps/pipelines/wcl_bootstrap.py"
+      ],
+      "source_bytes_recovered": false,
+      "sha_evidence": "historical SOURCE_INVENTORY metadata only"
+    },
+    {
+      "path": "02_SOURCE/runtime/raid_dps/pipelines/orchestrator.py",
+      "expected_size_bytes": 19606,
+      "expected_sha256": "fe398aa9238908c21af433ac5652f1730f66cd5dd0209722ebf6371b68d68d0d",
+      "imported_by": [
+        "02_SOURCE/runtime/raid_dps/pipelines/discovery_mining.py",
+        "02_SOURCE/runtime/raid_dps/pipelines/handlers_offline.py",
+        "02_SOURCE/runtime/raid_dps/pipelines/independent_validation.py",
+        "02_SOURCE/runtime/raid_dps/pipelines/prestate_coverage.py",
+        "02_SOURCE/runtime/raid_dps/pipelines/wcl_bootstrap.py"
+      ],
+      "source_bytes_recovered": false,
+      "sha_evidence": "historical SOURCE_INVENTORY metadata only"
+    }
+  ],
+  "research_only": [
+    "02_SOURCE/runtime/raid_dps/core/coverage.py",
+    "02_SOURCE/runtime/raid_dps/core/identity.py",
+    "02_SOURCE/runtime/raid_dps/core/prestate.py"
+  ],
+  "scope_limit": "direct static package imports only; runtime dynamic/transitive dependency completeness NOT_PROVEN",
+  "original_bytes_in_git": false,
+  "original_source_restored": false,
+  "product_main_authority": "UNKNOWN",
+  "main_active_pointer": "MISSING",
+  "canonical_registry": "MISSING",
+  "default_product_execution": "DISABLED",
+  "current_gameplay_ready_certified": 0,
+  "main_or_frozen_promotion": false,
+  "seq578": "FAILED_QUARANTINED_PRESERVED",
+  "seq637": "UNKNOWN",
+  "same_source_zip_public": false,
+  "recovery_next": "local read-only exact-five SHA collector; no automatic upload; MAIN integration only after full source + authority"
+}
