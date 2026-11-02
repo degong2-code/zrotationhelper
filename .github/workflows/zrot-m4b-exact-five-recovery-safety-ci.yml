@@ -1,0 +1,106 @@
+name: zrot-m4b-exact-five-recovery-safety-ci
+
+on:
+  push:
+    branches:
+      - work/m4b-five-module-closure-20261102
+    paths:
+      - .github/workflows/zrot-m4b-exact-five-recovery-safety-ci.yml
+      - docs/M4B_MISSING_FIVE_DIRECT_IMPORT_RECOVERY_20261102.json
+      - tools/recovery/m4b_five_missing_source_gate_v1.py
+      - tools/recovery/ZROT_M4B_MISSING_FIVE_COLLECT_READONLY.ps1
+
+permissions:
+  contents: read
+
+jobs:
+  static-gate:
+    name: M4B static metadata Python GHOPEN matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12","3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: GHOPEN matrix.python-version }}
+      - name: Verify no product runtime authority changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin refs/heads/main
+          test "$(git rev-parse FETCH_HEAD)" = "4790f77f76a75f26ff0558d1d18c16cd9d630c4b"
+          test "$(git ls-tree -r --name-only FETCH_HEAD)" = "README.md"
+      - name: Fail-closed missing five module metadata scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/m4b_five
+          python -B -m py_compile tools/recovery/m4b_five_missing_source_gate_v1.py
+          python -B tools/recovery/m4b_five_missing_source_gate_v1.py --self-test > ci_artifacts/m4b_five/python_gate_receipt.json
+          python - <<'PY'
+          import hashlib, json, os, platform
+          from pathlib import Path
+          r=json.loads(Path("ci_artifacts/m4b_five/python_gate_receipt.json").read_text())
+          assert r["status"]=="PASS_METADATA_AND_REPOSITORY_ABSENCE__MAIN_BLOCKED"
+          assert r["previous_missing_count"]==3
+          assert r["corrected_minimum_direct_missing_count"]==5
+          assert r["negative_contract_tests"]==8
+          assert r["safe_recovered_original_bytes"]==0
+          assert r["promotion"] is False
+          manifest=Path("docs/M4B_MISSING_FIVE_DIRECT_IMPORT_RECOVERY_20261102.json")
+          j=json.loads(manifest.read_text())
+          assert j["missing_direct_modules"]==5
+          assert j["required_raid_dps_module_imports"]==14
+          assert j["historical_python_sha_verified"]==15
+          assert j["original_source_restored"] is False
+          out={"schema":"ZrotM4BFiveClosureGithubStaticReceiptV1",
+               "status":"PASS","python_version":platform.python_version(),
+               "run_id":os.getenv("GITHUB_RUN_ID","UNKNOWN"),
+               "head_sha":os.getenv("GITHUB_SHA","UNKNOWN"),
+               "read_original_archive_from_ci":False,
+               "historical_actual_raw_ast_audit":"INDEPENDENT_LOCAL_ONLY",
+               "five_missing_source_file_bytes_available":False,
+               "generic_research_components_modified":False,
+               "existing_frozen_main_mutated":False,
+               "main_promotion":False,
+               "source_manifest_sha256":hashlib.sha256(manifest.read_bytes()).hexdigest(),
+               "seq578":"FAILED_QUARANTINED_PRESERVED","seq637":"UNKNOWN"}
+          Path("ci_artifacts/m4b_five/github_receipt.json").write_text(
+              json.dumps(out,sort_keys=True,indent=2)+"\n")
+          print("M4B_FIVE_IMPORT_CLOSURE_CI=PASS_BLOCKED_MAIN")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: m4b-five-static-GHOPEN matrix.python-version }}-GHOPEN github.sha }}
+          path: ci_artifacts/m4b_five/
+          if-no-files-found: warn
+          retention-days: 7
+
+  windows-collector:
+    name: Windows PowerShell no-source static & self-test
+    runs-on: windows-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Parse and run exact-five recovery collector self-test only
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $script = (Resolve-Path "tools/recovery/ZROT_M4B_MISSING_FIVE_COLLECT_READONLY.ps1").Path
+          $t = $null; $e = $null
+          $null = [System.Management.Automation.Language.Parser]::ParseFile($script,[ref]$t,[ref]$e)
+          if ($e.Count -ne 0) { throw ("SCRIPT_PARSE_FAILED: "+($e | Out-String)) }
+          $result = & $script -SelfTest | ConvertFrom-Json
+          if ($result.status -ne "PASS" -or $result.count -ne 5 -or $result.promotion -ne $false) {
+            throw ("POWER_SHELL_SELF_TEST_BAD_RECEIPT: "+($result | ConvertTo-Json))
+          }
+          Write-Output "M4B_FIVE_WINDOWS_COLLECTOR_STATIC_SELFTEST=PASS"
