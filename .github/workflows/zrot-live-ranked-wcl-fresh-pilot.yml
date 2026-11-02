@@ -1,0 +1,87 @@
+name: zrot-live-ranked-wcl-fresh-pilot
+
+on:
+  push:
+    branches:
+      - work/gr-wcl-ranker-live-coldstart-20261102
+    paths:
+      - tools/engine_first/wcl_ranker_fresh_e2e_pilot_v1.py
+      - tools/engine_first/wcl_ranked_actor_resolution_v1.py
+      - .github/workflows/zrot-live-ranked-wcl-fresh-pilot.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cold-start-and-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
+      WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile WCL raw producer, numeric blind lock and ranked identity bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/engine_first/wcl_ranker_fresh_e2e_pilot_v1.py
+          python -m py_compile tools/engine_first/fresh_wcl_engine_v1.py
+          python -m py_compile tools/engine_first/wcl_ranked_actor_resolution_v1.py
+          python -m py_compile tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py
+          mkdir -p ci_artifacts/wcl_ranked
+      - name: Run full synthetic ranked Fight->Snapshot->PRE->Blind candidate lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/engine_first/wcl_ranker_fresh_e2e_pilot_v1.py --self-test > ci_artifacts/wcl_ranked/offline_selftest.json
+          python -B tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py --self-test > ci_artifacts/wcl_ranked/blind_selftest.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          folder=Path("ci_artifacts/wcl_ranked")
+          a=json.loads((folder/"offline_selftest.json").read_text())
+          b=json.loads((folder/"blind_selftest.json").read_text())
+          assert a["result"]=="PASS" and a["offline_case_count"]>=16
+          assert a["live_WCL_API_invocations"]==0
+          assert a["simc_semantic_imports"]==0
+          assert b["result"]=="PASS"
+          print("RANKED_FIGHT_FULL_OFFLINE_E2E=PASS")
+          PY
+      - name: Auth-gated official high-ranked public fight 6-page max pilot
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/engine_first/wcl_ranker_fresh_e2e_pilot_v1.py \
+            --live --zone-match "Voidspire" --max-pages 6 \
+            --out ci_artifacts/wcl_ranked/live_receipt.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("ci_artifacts/wcl_ranked/live_receipt.json").read_text())
+          assert d["schema"]=="ZrotRankerOneFightFreshWCLPilotV1"
+          assert d["scope_policy_id"]=="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
+          assert d["addon_or_gameplay_rules_validated"] is False
+          assert d["WCL_blind_candidate_lock"] in (
+            "NOT_CREATED","LOCKED_NUMERIC_ONLY_RAW_AUDIT_REQUIRED")
+          print("RANKED_WCL_LIVE_ACTUAL_STATUS="+d["status"])
+          print("RANKED_WCL_LIVE_PAGES="+str(d.get("fresh_pages_written",0)))
+          print("RANKED_WCL_LIVE_EVENT_COUNT="+str(d.get("fresh_event_count",0)))
+          PY
+      - name: Upload safe bounded metadata only; never upload raw player names, OAuth or full combat events
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcl-ranked-fresh-${{ github.sha }}
+          path: |
+            ci_artifacts/wcl_ranked/offline_selftest.json
+            ci_artifacts/wcl_ranked/blind_selftest.json
+            ci_artifacts/wcl_ranked/live_receipt.json
+          retention-days: 7
+          if-no-files-found: warn
