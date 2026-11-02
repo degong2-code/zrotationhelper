@@ -1,0 +1,99 @@
+name: zrot-main-status-only-successor-review
+
+on:
+  push:
+    branches:
+      - work/main-status-only-successor-20261102
+    paths:
+      - .github/workflows/zrot-main-status-only-successor-review.yml
+      - active/branches/BR-MAIN-STATUS-ONLY-20261102/MAIN_AUTHORITY_STATUS_ONLY_CANDIDATE_V1.json
+      - tools/recovery/main_status_only_successor_review_v1.py
+
+permissions:
+  contents: read
+
+jobs:
+  fail-closed-review:
+    name: Status-only authority Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Confirm main remains README-only bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin refs/heads/main
+          test "$(git rev-parse FETCH_HEAD)" = "4790f77f76a75f26ff0558d1d18c16cd9d630c4b"
+          test "$(git ls-tree -r --name-only FETCH_HEAD)" = "README.md"
+      - name: Compile and test status-only successor review
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/status_only
+          python -B -m py_compile tools/recovery/main_status_only_successor_review_v1.py
+          python -B tools/recovery/main_status_only_successor_review_v1.py --status > ci_artifacts/status_only/status.json
+          python -B tools/recovery/main_status_only_successor_review_v1.py --self-test > ci_artifacts/status_only/self_test.json
+          python - <<'PY'
+          import json, os, platform
+          from pathlib import Path
+          a=Path("ci_artifacts/status_only")
+          status=json.loads((a/"status.json").read_text())
+          test=json.loads((a/"self_test.json").read_text())
+          assert status["result"]=="PASS_STATUS_ONLY_PROPOSAL__NO_MAIN_PROMOTION"
+          assert status["selected_workflow_id"] is None
+          assert status["runtime_or_inbox_executed"] is False
+          assert status["product_MAIN_promoted"] is False
+          assert status["latest_authoritative_runtime"]=="UNKNOWN"
+          assert status["latest_authoritative_work_state"]=="UNKNOWN"
+          assert test["self_test"]["status"]=="PASS"
+          assert test["self_test"]["negative_regressions"]==12
+          assert test["self_test"]["source_code_execution"] is False
+          assert test["Seq578"]=="FAILED_QUARANTINED_PRESERVED"
+          assert test["Seq637"]=="UNKNOWN"
+          output={
+             "schema":"ZrotMainStatusOnlySuccessorGithubCIReceiptV1",
+             "result":"PASS_BRANCH_STATUS_ONLY__ACTIVE_MAIN_UNRESOLVED",
+             "github_sha":os.environ["GITHUB_SHA"],
+             "run_id":os.environ["GITHUB_RUN_ID"],
+             "python":platform.python_version(),
+             "negative_regression_cases":test["self_test"]["negative_regressions"],
+             "historical_alternatives":status["verified_historical_alternatives"],
+             "selected_workflow":None,
+             "workflow_executed":False,
+             "inbox_dispatched":False,
+             "approved_runtime_found":False,
+             "main_product_promotion":False,
+             "frozen_mutation":False,
+             "seq578":"FAILED_QUARANTINED_PRESERVED",
+             "seq637":"UNKNOWN"
+          }
+          (a/"ci_receipt.json").write_text(json.dumps(output,indent=2,sort_keys=True)+"\n")
+          print("ZROT_STATUS_ONLY_SUCCESSOR_REVIEW=PASS_NO_MAIN_PROMOTION")
+          PY
+      - name: Refuse any execution flags in isolated status checker
+        shell: bash
+        run: |
+          set -euo pipefail
+          if python -B tools/recovery/main_status_only_successor_review_v1.py --execute > /dev/null 2>&1; then
+            echo "DANGEROUS_EXECUTION_FLAG_ACCEPTED"
+            exit 1
+          fi
+          echo "UNKNOWN_EXECUTION_FLAG_REJECTED=PASS"
+      - name: Save sanitized review receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: status-only-review-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/status_only/
+          if-no-files-found: warn
+          retention-days: 7
