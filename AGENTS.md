@@ -1,10 +1,12 @@
 # zRotationHelper — Development Agent Instructions (branch-local proposal)
 
-**Read first:** [Engine-First / Reproducible Research Charter](docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md).
+**Read first (newest user-approved product scope):** [General Rotation + Dummy Trainer Scope](docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md), then [Engine-First / Reproducible Research Charter](docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md).
 
 ## Non-negotiable product objective
 
-Build a **reproducible, generic World of Warcraft Retail rotation research engine**, not a museum of historic scripts, hashes and snapshots. Existing source/evidence is useful but must not become a prerequisite that prevents new development. The ability to acquire fresh legitimate data, replay it, discover conditional decisions, validate them, and expand across specializations and encounters is the product.
+Build a **reproducible, generic World of Warcraft Retail rotation research engine**, not a museum of historic scripts, hashes and snapshots. Existing source/evidence is useful but must not become a prerequisite that prevents new development. The ability to acquire fresh legitimate data, replay it, discover conditional decisions, validate them, and expand across specializations and general combat situations (ST, 2-target, AoE) is the product.
+
+**Official scope override (user 2026-11-02):** The final output is a validated **General Rotation opener and IF/ELSE spell priority**, with a **lightweight target-dummy practice analyzer/addon** that flags observable rotation mistakes live when permitted, otherwise diagnoses from post-session logs. Raid encounter-specific rotation plans, live raid assist, NSRT and raid timeline exports are explicitly **OUT OF SCOPE** unless the user reauthorizes them. Real-time feedback must respect Midnight secret combat state and unavailable combat-log events; never infer unobserved readiness. The addon is a thin consumer of the verified research IR, not the engine itself.
 
 ## How to prioritize work
 
@@ -16,7 +18,7 @@ Build a **reproducible, generic World of Warcraft Retail rotation research engin
 6. Do not casually modify shared authority. **MAIN alone** promotes CURRENT_STATE, contracts, registry, General Rotation baseline, active manifest/pointer and FROZEN. Branches produce validated candidates and merge handoff only.
 7. At every task ask: **Does this make the engine more capable of re-collecting data and making a correct, generalizable user-facing rotation decision?** If not, justify why it is necessary on the critical path.
 
-**Current product direction:** Safe minimal development entrypoint → fresh WCL sample collection/snapshot → offline strict PRE and UNKNOWN replay → independent WCL candidate lock + SimC bootstrap → verified conditional General Rotation IR → encounter deviation and UI.
+**Current product direction:** Safe independent data collection/replay → SimC APL conditional baseline + opener → WCL high-ranker independent blind validation/candidate lock → post-lock comparison and corrected General Rotation IF/ELSE IR → lightweight target-dummy practice evaluation (in-game only where supported, otherwise post-session log analysis). No encounter plan, NSRT or raid execution output.
 
 **Important distinction:** Historical inability to reproduce an original dataset may result from external WCL availability/log retention or patch changes. Separate these from engine defects.
 
