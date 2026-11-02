@@ -1,0 +1,64 @@
+{
+  "schema": "ZrotM4BHistorical124ReconciliationV1",
+  "date": "2026-11-02",
+  "owner": "BR-PRODUCT-MAIN-M4B-SOURCE-RECOVERY",
+  "scope": "PRIVATE_124_FILE_SOURCE_RECONCILIATION_AND_PUBLIC_RESEARCH_SOURCE_COMPAT_DIAGNOSTIC",
+  "private_inputs": {
+    "original_stage_registry_zip_sha256": "10375e43ac660e9cfa7e3d1b996aaedc08bac2dbd1eb6b431df030120cac379d",
+    "stage_registry_byte_count": 5833,
+    "stage_registry_sha256": "9b424b101e615c2f692a16e4aac9b2223a5f19048a3cad7bc5d9729d290bd16e",
+    "prior_123_source_zip_sha256": "4b2a27cc99410df8c81ecd9ffc7953bb51d104b15ef234d61d62737547349a5b",
+    "composite_124_sha256": "46e3a2dd1b51465429932a03efb7345cae781c756137dea9a39c9c4bed152bf6",
+    "total_unmodified_source_bytes_count": 124,
+    "python_compiled_static": 21,
+    "json_parsed_static": 100,
+    "md_files": 3,
+    "stage_registry_o0_o8_topological_ast": "PASS",
+    "raid_dps_static_import_target_occurrences": 24,
+    "raid_dps_import_resolved_in_124": 21,
+    "raid_dps_import_not_in_124": 3,
+    "archive_original_bytes_uploaded_to_GitHub": false,
+    "prior_private_validation": "ACTUAL_OFFLINE_BYTES_AND_ZIP_CRC_PASS",
+    "dynamic_import_and_full_product_runtime": "NOT_VERIFIED"
+  },
+  "research_direct_modules": {
+    "source_branch": "work/m4b-exact-five-attested-20261102",
+    "inventory_origin": "OLDER_HISTORICAL_SOURCE_INVENTORY_JSON_METADATA_NOT_CURRENT_MAIN",
+    "modules": [
+      {
+        "path": "02_SOURCE/runtime/raid_dps/core/coverage.py",
+        "expected_historical_size": 2007,
+        "expected_historical_sha256": "30daad468f43ab012f4d85cb457ba838899bef5ddaf32acb4d14645043ba8147",
+        "expected_research_git_blob_sha1": "b10d3ac8338a1734c8ff853b551445749959541f"
+      },
+      {
+        "path": "02_SOURCE/runtime/raid_dps/core/identity.py",
+        "expected_historical_size": 1880,
+        "expected_historical_sha256": "d2328bef5f7db3fa973cbb99b2125f13d796a5249be3c007219c38509965f8b6",
+        "expected_research_git_blob_sha1": "191688a2bf2ce4cebe545f93b2ef56f2a0671a99"
+      },
+      {
+        "path": "02_SOURCE/runtime/raid_dps/core/prestate.py",
+        "expected_historical_size": 7448,
+        "expected_historical_sha256": "889fdd114f5a07d31612c0fc2a548ac0dfab1dc1d5738e8741f573194efd7d50",
+        "expected_research_git_blob_sha1": "93e3ceacabf348d5fd9cdcc6aa612e940eccc54c"
+      }
+    ],
+    "equality_test": "GITHUB_CI_COMPUTES_ACTUAL_CHECKOUT_SHA256_AND_SIZE__REPORT_CONFLICTS_NOT_AUTO_MERGE",
+    "byte_equality_to_current_product": "NOT_ESTABLISHED"
+  },
+  "safety": {
+    "MAIN_current_authority": "UNKNOWN",
+    "CANONICAL_REGISTRY": "MISSING",
+    "CURRENT_POINTER": "MISSING",
+    "historical_pins_conflict_count": 3,
+    "product_entrypoint_run": false,
+    "WCL_SimC_Blizzard_live_calls": false,
+    "product_MAIN_promotion": false,
+    "FROZEN_mutation": false,
+    "github_main_mutation": false,
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN"
+  },
+  "next": "Use CI to distinguish exact historical inventory equality vs source variant, then require separately validated compatibility on a real current MAIN base before any runtime promotion"
+}
