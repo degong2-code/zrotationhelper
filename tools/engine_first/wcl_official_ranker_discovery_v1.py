@@ -62,13 +62,23 @@ def ranked_rows(data, *, encounter, class_name, spec_name, difficulty, min_rank=
     if not isinstance(rows, list) or len(rows) > 100:
         raise RankSourceError("RANKING_ROWS_MISSING_OR_EXCESSIVE")
     candidates = []
-    for item in rows:
+    for ordinal, item in enumerate(rows, start=1):
         if not isinstance(item, dict):
             continue
         rank = item.get("rank")
         if type(rank) is float and rank.is_integer():
-            rank = int(rank)  # provider JSON may emit exact integral ranks as Float
-        if type(rank) is not int or not min_rank <= rank <= max_rank:
+            rank = int(rank)  # provider JSON may emit integral Float
+        if rank is None:
+            # V2 rankings JSON may omit a numeric rank: page-1 ordinal is
+            # only collection order, NEVER a proven official numeric rank.
+            position = ordinal
+            rank_authority = "PAGE1_ORDER_ONLY_OFFICIAL_RANK_UNKNOWN"
+        elif type(rank) is int and rank > 0:
+            position = rank
+            rank_authority = "EXPLICIT_NUMERIC_RANK"
+        else:
+            continue
+        if not min_rank <= position <= max_rank:
             continue
         report = item.get("report")
         if isinstance(report, dict):
@@ -95,20 +105,26 @@ def ranked_rows(data, *, encounter, class_name, spec_name, difficulty, min_rank=
         if item.get("class") is not None and isinstance(item["class"], str) and item["class"].casefold() != class_name.casefold():
             continue
         candidates.append({
-            "rank": rank, "code": code, "fight": fight,
+            "rank": rank, "ranking_page_position": ordinal,
+            "rank_authority": rank_authority, "code": code, "fight": fight,
             "ranked_actor_name": actor, "encounter": encounter,
             "zone": zone["id"], "difficulty": difficulty,
             "expected_spec": spec_name, "expected_class": class_name,
         })
-    candidates.sort(key=lambda x: (x["rank"], x["code"], x["fight"]))
+    candidates.sort(key=lambda x: (x["ranking_page_position"], x["code"], x["fight"]))
     if not candidates:
         # No secret, report code, or player name in diagnostic: only keys
         # and JSON types. This is a response-contract inspection, not a retry.
         shapes = []
         for row in rows[:2]:
             if isinstance(row, dict):
-                shapes.append({k: type(v).__name__ for k, v in sorted(row.items())
-                               if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,40}", k)})
+                shape = {k: type(v).__name__ for k, v in sorted(row.items())
+                         if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,40}", k)}
+                if isinstance(row.get("report"), dict):
+                    shape["report_fields"] = {k: type(v).__name__
+                        for k, v in sorted(row["report"].items())
+                        if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,40}", k)}
+                shapes.append(shape)
         details = {"row_count": len(rows), "sample_shapes": shapes}
         raise RankSourceError("NO_RANKING_WITH_REPORT_FIGHT_AND_NAME__SHAPE=" +
                               json.dumps(details, separators=(",", ":"), sort_keys=True))
@@ -155,7 +171,9 @@ def select_verified(query, rankings_data, *, encounter, class_name, spec_name,
             public_receipt = {
                 "schema": "ZrotOfficialRankerSelectionV1",
                 "status": "PUBLIC_RANK_MATCHED_TO_VERIFIED_FIGHT_ACTOR",
-                "rank": c["rank"],
+                "explicit_official_rank": c["rank"],
+                "ranking_page_position": c["ranking_page_position"],
+                "rank_authority": c["rank_authority"],
                 "report_code": c["code"],
                 "fight_id": c["fight"],
                 "actor_id": actor_id,
@@ -169,6 +187,7 @@ def select_verified(query, rankings_data, *, encounter, class_name, spec_name,
                 "talent_build": "UNKNOWN",
                 "readiness": "UNKNOWN",
                 "rank_in_current_top_table": True,
+                "exact_rank_verified": c["rank_authority"] == "EXPLICIT_NUMERIC_RANK",
                 "rankings_not_frozen": True,
                 "holdout": "NOT_USED_FOR_DISCOVERY",
                 "actual_gameplay_priority": "NOT_VALIDATED",
@@ -228,7 +247,8 @@ def run_live(*, encounter, class_name, spec_name, difficulty, max_pages,
                            ("receipt.json", receipt)):
         write_once(out / filename, data)
     return {"status": "LIVE_WCL_ACTOR_SCOPED_NUMERIC_DISCOVERY_ONLY",
-            "rank": selection["rank"],
+            "ranking_page_position": selection["ranking_page_position"],
+            "explicit_official_rank": selection["explicit_official_rank"],
             "fight_age_days": selection["source_age_days"],
             "pages": info["pages"], "events": info["events"],
             "candidate_count": lock["candidate_n"],
@@ -265,18 +285,19 @@ def selftest():
         query, ranking, encounter=enc, class_name="Warrior",
         spec_name="Fury", difficulty=4, now=mock_now)
     assert cand["rank"] == 3 and gate["actor_id"] == 7
+    assert proof["exact_rank_verified"] is True
     assert proof["talent_build"] == "UNKNOWN" and proof["rank_in_current_top_table"]
     assert len(queries) == 1
     import copy
     tested = 4
-    for mutation in ("zone-frozen", "wrong-encounter", "no-rank", "no-report"):
+    for mutation in ("zone-frozen", "wrong-encounter", "bad-rank", "no-report"):
         bad = copy.deepcopy(ranking)
         e = bad["worldData"]["encounter"]
         if mutation == "zone-frozen":
             e["zone"]["frozen"] = True
         if mutation == "wrong-encounter":
             e["id"] = 999
-        if mutation == "no-rank":
+        if mutation == "bad-rank":
             e["characterRankings"]["rankings"][0]["rank"] = 200
         if mutation == "no-report":
             e["characterRankings"]["rankings"][0].pop("report")
@@ -310,6 +331,14 @@ def selftest():
     numeric = ranked_rows(variant, encounter=enc, class_name="Warrior",
                           spec_name="Fury", difficulty=4)
     assert len(numeric) == 1 and numeric[0]["fight"] == 9
+    tested += 1
+    no_rank = copy.deepcopy(ranking)
+    no_rank["worldData"]["encounter"]["characterRankings"]["rankings"][0].pop("rank")
+    no_rank_rows = ranked_rows(no_rank, encounter=enc, class_name="Warrior",
+                               spec_name="Fury", difficulty=4)
+    assert len(no_rank_rows) == 1 and no_rank_rows[0]["rank"] is None
+    assert no_rank_rows[0]["ranking_page_position"] == 1
+    assert no_rank_rows[0]["rank_authority"] == "PAGE1_ORDER_ONLY_OFFICIAL_RANK_UNKNOWN"
     tested += 1
     return {"status": "PASS_OFFLINE_SYNTHETIC",
             "negative_cases": 8, "assertion_groups": tested,
