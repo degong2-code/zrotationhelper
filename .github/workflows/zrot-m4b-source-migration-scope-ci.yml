@@ -58,7 +58,7 @@ jobs:
           assert d["original_source_not_in_research_count"]==4
           assert d["github_research_only_dependency_count"]==3
           assert d["known_main_authority_conflict_count"]==3
-          assert d["synthetic_policy_negative_cases"]==8
+          assert d["synthetic_policy_negative_cases"]==9
           assert d["current_main_authority"]=="UNKNOWN"
           assert d["product_run_executed"] is False and d["production_promotion"] is False
           e={"schema":"ZrotM4bGithubDependencyScopeCIReceiptV1",
