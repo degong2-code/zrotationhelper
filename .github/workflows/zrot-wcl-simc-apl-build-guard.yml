@@ -35,7 +35,7 @@ jobs:
           import json
           d=json.load(open('/tmp/branch-selftest.json'))
           assert d['status']=='PASS_OFFLINE_SYNTHETIC'
-          assert d['checks']>=11
+          assert d['checks']>=12
           assert d['actual_SimC_or_WCL_sources_read'] is False
           assert d['priority_validated'] is False
           print('SOURCE_DERIVED_APL_BRANCH_GUARD_SYNTHETIC=PASS')
@@ -126,10 +126,16 @@ jobs:
               assert all(x['simc_hero_selector_state']['active'] in (None,True,False) for x in rows)
               assert all(x['wcl_hero_selector_state']['active'] in (None,True,False) for x in rows)
               assert all(x['profile_action_list_priority_transfer']=='BLOCKED' for x in rows)
+              slayer=[x for x in rows if x['talent_token']=='slayers_dominance']
+              assert slayer and all(x['simc_profile_hero_talent_guard']=='TRUE' and x['wcl_pre_hero_talent_guard']=='TRUE' for x in slayer)
+              assert all(x['conditional_branch_state']=='HERO_GUARD_AGREES_TARGET_COUNT_UNKNOWN' for x in slayer)
+              assert all(x['simc_profile_hero_talent_guard']=='FALSE' and x['wcl_pre_hero_talent_guard']=='FALSE' for x in lightning)
+              assert all(x['conditional_branch_state']=='BOTH_INACTIVE_HERO_BRANCH' for x in lightning)
+              assert all(x['branch_action_priority_verified'] is False and x['target_count_at_wcl_decision']=='UNKNOWN' for x in rows)
           print('REAL_WCL_PINNED_SIMC_BUILD_GUARD_BRANCH_APPLICABILITY_PASS')
           print('STRUCTURAL_APL_BRANCH_SUMMARY',json.dumps({
               role:[{k:x[k] for k in ('action_list','talent_token','resolved_node_id',
-                   'raw_node_selection_comparison','simc_hero_selector_state','wcl_hero_selector_state')} for x in a[role]['branch_statuses']]
+                   'raw_node_selection_comparison','simc_profile_hero_talent_guard','wcl_pre_hero_talent_guard','conditional_branch_state')} for x in a[role]['branch_statuses']]
               for role in ('discovery','holdout')},sort_keys=True))
           PY
       - name: Retain numeric structured receipt only (7 days)
