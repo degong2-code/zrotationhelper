@@ -1,0 +1,125 @@
+{
+  "schema": "ZrotResearchSuccessorBaselineCandidateV1",
+  "created_date": "2026-11-02",
+  "identity": "BR-RESEARCH-SUCCESSOR-20261102",
+  "designation": "CANDIDATE_RESEARCH_BASELINE_NOT_PRODUCT_MAIN",
+  "owner_scope": "BRANCH_LOCAL_PORTABLE_CANDIDATE",
+  "parent_review_ref": "work/main-integration-recovery-20261102",
+  "parent_review_sha": "9cc87e3f8ac6a717e32563ff3269ad4fc83fffc2",
+  "historical_product_baseline": {
+    "status": "NOT_RECOVERED",
+    "source_handoff_sha256": "1299be440731d0fbf2b520d32b68f85c2c7dbdfc1ccd1632fe581ecf13574243",
+    "M4A_payload": "54/54_OFFLINE_SHA_CRC_PASS_HISTORICAL_ONLY",
+    "M4B_payload": "118/118_OFFLINE_SHA_CRC_PASS_HISTORICAL_ONLY",
+    "historical_frozen_immutable": true,
+    "missing_required": [
+      "03_DATA/03_MANIFESTS/CANONICAL_REGISTRY.json",
+      "03_DATA/03_MANIFESTS/CURRENT_POINTER.json",
+      "APPROVED_CURRENT_RUNTIME_WORK_STATE",
+      "ACTIVE_PRODUCTION_MANIFEST"
+    ],
+    "conflicting_historical_pins": [
+      "WORKFLOW_ID",
+      "ACTIVE_WORKFLOW_SHA",
+      "DEFAULT_ACTION"
+    ],
+    "default_execution": "DISABLED"
+  },
+  "github_main": {
+    "commit": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
+    "role": "README_ONLY_BOOTSTRAP_NOT_PRODUCT_RUNTIME",
+    "modify": false
+  },
+  "research_source": {
+    "purpose": "FROZEN_FILE_SET_FOR_REUSABLE_OFFLINE_HYPOTHESIS_AND_AUDIT",
+    "pinned_git_blobs": {
+      "tools/research/ST01_existing_simc_readiness_gate_regression_v1.py": "f9f8509e8937d4ba28f2c52e405bccfea176f412",
+      "tools/research/ZROT_Source_Obligation_Gate_v1.py": "1714a21117c94b7b343a159eace62f8635c573a9",
+      "tools/research/simc_apl_readiness_provider.py": "e59d2ea46455fc3e764daddd0abc3a8b6cce4c0c",
+      "tools/research/ST02_source_identity_reconciliation_v1.py": "7f5a90e46763025cc9edd27bdf9748780088f4d2",
+      "tools/research/ST02_source_identity_regression_v1.py": "3b8cd17d3b315039c2b864473d7a4bead887197a",
+      "tools/research/ST03_source_pre_observability_v1.py": "57586c14a5d6de06d693aa1668a21032fb93aba0",
+      "tools/research/ST03_source_pre_observability_regression_v1.py": "bcdb0bf3a5f15ea25df968fe40e8013475140752",
+      "tools/research/ST04_raw_pre_capture_adapter_v1.py": "c5a9ed32451b57e1ab0eda92c58d567076816e1d",
+      "tools/research/ST04_independent_raw_pre_audit_v1.py": "e9978c26c93230c71f7ac13c55b34be5c3cf18e7",
+      "tools/research/ST04_raw_pre_independent_regression_v1.py": "85c61e5fdeafa20e51c696ba8a7fd4c9597137fe",
+      "tools/research/ST05_actual_archived_native_producer_audit_v1.py": "2fc998f14d26f831a2df0741081d7198352ed00c",
+      "tools/research/ST06_pinned_native_source_gate_instrument_v1.py": "c722007d8a7f51e185147088ab70a60f9ab6f6aa",
+      "tools/research/ST06_native_source_gate_independent_audit_v1.py": "99dd7698e8af664440cbfbe4e1f4c99a12270628",
+      "02_SOURCE/runtime/raid_dps/core/behavioral_evaluator.py": "cee6a06cad8836e04d0a585f15e0ff3c60fbf6c2",
+      "02_SOURCE/runtime/raid_dps/specs/protocol.py": "605dfdc8cd76d0f3a8d9d811521ce56d49131cd2",
+      "02_SOURCE/runtime/raid_dps/specs/enhancement_shaman/adapter.py": "bed008c02627bbf9a14c097df7e27c3fe148030e",
+      "02_SOURCE/runtime/raid_dps/specs/fury_warrior/adapter.py": "a7c35cc6f5bbbdfe47b65bc63be4bba22a60cc97",
+      "02_SOURCE/validation/generalization/CROSS_SPEC_SYNTHETIC_PROBE_v1.py": "a2870bce6504831d40845897bdcf57fc3837cc32",
+      "docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json": "e437da47d632737c9eacc3901c945590aff0308b",
+      "docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json": "2e933135877704b257237ef465025e532a14b9c0",
+      "docs/MAIN_INTEGRATION_RECOVERY_EVIDENCE_20261102.json": "5e5a473980b6b370ad782f497094bdcbe99ef5b8"
+    },
+    "all_pins": "EXACT_PIN_MATCH_REQUIRED"
+  },
+  "lifecycle": {
+    "status": "BRANCH_VALIDATED_RESEARCH_CANDIDATE_ONLY",
+    "source_complete": "NOT_PROVEN",
+    "source_producer_complete": "NOT_PROVEN",
+    "current_game_id": "UNKNOWN",
+    "gameplay_ready_certified": 0,
+    "user_action_eligible": false,
+    "wcl_independent_blind_lock": "NOT_RUN_IN_THIS_BUNDLE",
+    "simc_blind_join": "FORBIDDEN_PRE_LOCK",
+    "WCL_causality_or_priority": "NOT_CERTIFIED",
+    "blizzard_current": "NOT_VERIFIED",
+    "main_product_promotion": false,
+    "frozen_promotion": false,
+    "shared_runtime_mutation": false,
+    "active_pointer_mutation": false,
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN"
+  },
+  "validation": {
+    "prior_evidence": {
+      "ST01": {
+        "run_id": 41369448396,
+        "level": "OFFLINE_SYNTHETIC"
+      },
+      "ST02": {
+        "run_id": 41370974046,
+        "level": "OFFLINE_SYNTHETIC_SOURCE_PINNED"
+      },
+      "ST03": {
+        "run_id": 41372465581,
+        "level": "OFFLINE_SYNTHETIC_STRICT_PRE"
+      },
+      "ST04": {
+        "run_id": 41373179846,
+        "level": "OFFLINE_SYNTHETIC_RAW_INDEPENDENT"
+      },
+      "ST05": {
+        "run_id": 41373890693,
+        "level": "REAL_ARCHIVED_NATIVE_SOURCE_NOT_LIVE_GAME"
+      },
+      "ST06": {
+        "run_id": 41375416081,
+        "level": "ACTUAL_PINNED_SIMC_CPP_NATIVE_FIXTURE_ONLY"
+      },
+      "MAIN_REVIEW": {
+        "run_id": 41377618743,
+        "level": "OFFLINE_HISTORICAL_COMPAT_BLOCKED"
+      }
+    },
+    "successor_ci": "NOT_VALIDATED_UNTIL_ACTUAL_GITHUB_RUN",
+    "successor_focus": "COMBINED_ST01_ST04_OFFLINE_AND_ST05_ST06_STATIC_SELFTEST",
+    "ST05_live_native_reexecution": "NOT_INCLUDED_REUSE_PINNED_RUN",
+    "ST06_cpp_rebuild": "NOT_INCLUDED_REUSE_PINNED_RUN",
+    "product_main_integration": "NOT_EXECUTED"
+  },
+  "acceptance_preconditions": [
+    "Verify all 21 source git blobs unchanged on candidate branch",
+    "Run ST01 gate and actual-provider bridge, ST02, ST03, ST04 same-HEAD regression",
+    "Compile ST05 and ST06 and run ST06 contract self-tests without re-running C++",
+    "Enforce missing canonical authority and fail-closed MAIN/active pointer state",
+    "If later main source supplied, rerun producer-independent focused acceptance under exact approved source hash",
+    "Do not copy source-specific semantics into independent WCL candidate discovery"
+  ],
+  "product_next": "RESTORE_ACTUAL_MAIN_AUTHORITY_AND_RECONCILE_PIN_CONFLICTS_BEFORE_PRODUCT_PROMOTION",
+  "branch_next": "FOCUSED_RESEARCH_BUNDLE_SUCCESSOR_CI_AND_NO_MAIN_WRITE"
+}
