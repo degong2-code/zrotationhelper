@@ -7,7 +7,7 @@
   "base_sha": "5411e34d0cae4d6e354433666c17240d37188148",
   "base_source": "work/main-six-pin-consistency-20261102",
   "base_evidence_git_blob_sha1": "675b081a5ff82b58a2b5497ca3aa0a9dc6a38b0e",
-  "latest_validated_code_sha": "25a6f8919f13ad468edb2c31c719bf60b41f11e3",
+  "latest_validated_code_sha": "35568e83d3f1e756968269296c21585383a5a3c8",
   "purpose": "Status-only successor authority candidate that cannot select or run either conflicted historical workflow, and cannot mutate MAIN, FROZEN, Registry or Pointer.",
   "outcomes": {
     "candidate_schema": "ZrotMainAuthoritySuccessorStatusOnlyCandidateV1",
@@ -39,24 +39,29 @@
     "gameplay_rule_readiness_certified": 0
   },
   "github_ci": {
-    "final_run_id": 41396524667,
-    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41396524667",
+    "final_run_id": 41397724757,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41397724757",
     "final_conclusion": "SUCCESS",
-    "final_tested_sha": "25a6f8919f13ad468edb2c31c719bf60b41f11e3",
+    "final_tested_sha": "35568e83d3f1e756968269296c21585383a5a3c8",
     "python312": "PASS",
     "python314": "PASS",
     "negative_cases_each": 15,
     "independent_raw_JSON_review": "PASS",
     "unknown_execution_option_rejected": "PASS",
-    "artifact_id_python312": 13119517705,
-    "artifact_id_python314": 13118903645,
+    "artifact_id_python312": 13119328782,
+    "artifact_id_python314": 13120365013,
     "intermediate_failed_run_preserved": {
       "id": 41396492724,
       "reason": "expected self-test count was 12 when hardening introduced 15; corrected in next workflow commit"
     },
     "live_product_run": "NOT_RUN",
     "WCL_SimC_api": "NOT_RUN",
-    "current_PC_files_reaccessed": "NO"
+    "current_PC_files_reaccessed": "NO",
+    "earlier_status_only_run_id": 41396524667,
+    "source_scope_failure_preserved": {
+      "id": 41397609754,
+      "reason": "first new static source gate copied a truncated prestate historical SHA256 into test fixture, corrected from original independent CI byte receipt; not an actual source mismatch"
+    }
   },
   "owned_files": [
     "active/branches/BR-MAIN-STATUS-ONLY-20261102/MAIN_AUTHORITY_STATUS_ONLY_CANDIDATE_V1.json",
@@ -95,6 +100,35 @@
     "Run source complete focused compatibility with research sources and multi-spec fixtures in sandbox; preserve gameplay UNKNOWN if not verified",
     "Only MAIN accepts or rejects production promotion; branch handoff itself cannot promote"
   ],
-  "next": "Seek evidence that establishes current Runtime/Work State authority; do not repeat existing six-file hashes, M4B 124 byte audit, or ST01-ST06 CI without source change.",
-  "status": "MERGE_READY_FOR_MAIN_REVIEW_ONLY__NOT_PRODUCT_RUNTIME_AUTHORIZED"
+  "next": "MAIN must first restore/authorize current Runtime and Work State. Then construct sandbox-only behavioral fixture with explicit no-network/no-inbox guards using the source-complete 124+3 historical AST-compatible baseline. Do not promote FEX declared 11 capability areas as gameplay-valid rules.",
+  "status": "BRANCH_LOCAL_STATUS_ONLY_PLUS_FOCUSED_SOURCE_INTERFACE_CI_PASS__CURRENT_PRODUCT_MAIN_UNAUTHORIZED",
+  "focused_source_interface_evidence": {
+    "independent_private_local_receipt_sha256": "7a3dfc30bad818199f15288f2f380867a7a8997105c20bc9c7e39024fb5f97a7",
+    "historical_unmodified_source_files": 124,
+    "ast_python_sources_parsed": 21,
+    "source_json_files_parsed": 100,
+    "archived_raid_dps_direct_import_edges": 43,
+    "resolved_archived_symbol_name_exports": 29,
+    "archived_source_submodule_import_edges": 11,
+    "research_external_module_edges": 3,
+    "actual_checkout_sha256_exact_historical_research_three": "3/3_PASS",
+    "actual_checkout_ast_expected_export_and_call_form": "3/3_PASS",
+    "original_FEX_manifest_exact_source_sha256_pins": "10/10_PASS",
+    "original_FEX_synthetic_cases": "2/2_PASS_HISTORICAL_ONLY",
+    "original_FEX_declared_capability_areas": 11,
+    "all_11_gameplay_semantics_validated": "NO__ONLY_DECLARED_COVERAGE",
+    "full_behavioral_general_rotation_engine_cross_spec_validation": "PARTIAL",
+    "static_research_interface_negative_contract_and_ast_tests": 10,
+    "current_gameplay_readiness_certified": 0,
+    "WCL_SimC_Blizzard_live_calls": "NOT_RUN",
+    "product_entrypoint_called": false,
+    "public_GitHub_archive_copy": false
+  },
+  "delivered_files": [
+    "active/branches/BR-MAIN-STATUS-ONLY-20261102/MAIN_AUTHORITY_STATUS_ONLY_CANDIDATE_V1.json",
+    "tools/recovery/main_status_only_successor_review_v1.py",
+    ".github/workflows/zrot-main-status-only-successor-review.yml",
+    "docs/MAIN_124_FEX_STATIC_INTERFACE_COMPATIBILITY_20261102.json",
+    "tools/recovery/main_124_fex_source_interface_gate_v1.py"
+  ]
 }
