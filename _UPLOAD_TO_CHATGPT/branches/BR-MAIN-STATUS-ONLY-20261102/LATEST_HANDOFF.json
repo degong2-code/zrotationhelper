@@ -7,7 +7,7 @@
   "base_sha": "5411e34d0cae4d6e354433666c17240d37188148",
   "base_source": "work/main-six-pin-consistency-20261102",
   "base_evidence_git_blob_sha1": "675b081a5ff82b58a2b5497ca3aa0a9dc6a38b0e",
-  "latest_validated_code_sha": "35568e83d3f1e756968269296c21585383a5a3c8",
+  "latest_validated_code_sha": "87e6f828f7f22b32239739e9d9b05fe49a2e784c",
   "purpose": "Status-only successor authority candidate that cannot select or run either conflicted historical workflow, and cannot mutate MAIN, FROZEN, Registry or Pointer.",
   "outcomes": {
     "candidate_schema": "ZrotMainAuthoritySuccessorStatusOnlyCandidateV1",
@@ -39,10 +39,10 @@
     "gameplay_rule_readiness_certified": 0
   },
   "github_ci": {
-    "final_run_id": 41397724757,
-    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41397724757",
+    "final_run_id": 41399705088,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41399705088",
     "final_conclusion": "SUCCESS",
-    "final_tested_sha": "35568e83d3f1e756968269296c21585383a5a3c8",
+    "final_tested_sha": "87e6f828f7f22b32239739e9d9b05fe49a2e784c",
     "python312": "PASS",
     "python314": "PASS",
     "negative_cases_each": 15,
@@ -61,12 +61,23 @@
     "source_scope_failure_preserved": {
       "id": 41397609754,
       "reason": "first new static source gate copied a truncated prestate historical SHA256 into test fixture, corrected from original independent CI byte receipt; not an actual source mismatch"
-    }
+    },
+    "original_source_behavioral_failure_preserved": {
+      "id": 41398991492,
+      "classification": "REAL_BEHAVIOR_DEFECT_STACK_ZERO_DROPPED_BY_OR_FALLBACK"
+    },
+    "successful_candidate_run_id": 41399406241,
+    "private_124_original_runtime_ci": "NOT_IN_PUBLIC_GITHUB_LOCAL_ONLY",
+    "patch_git_apply_check": "PASS_NOT_APPLIED",
+    "original_prestate_source_modified": false
   },
   "owned_files": [
     "active/branches/BR-MAIN-STATUS-ONLY-20261102/MAIN_AUTHORITY_STATUS_ONLY_CANDIDATE_V1.json",
     "tools/recovery/main_status_only_successor_review_v1.py",
-    ".github/workflows/zrot-main-status-only-successor-review.yml"
+    ".github/workflows/zrot-main-status-only-successor-review.yml",
+    "tools/recovery/zrot_research_strict_pre_offline_behavior_v1.py",
+    "docs/MAIN_124_OFFLINE_BEHAVIOR_AND_PRESTATE_ZERO_STACK_FINDING_20261102.json",
+    "active/branches/BR-PRESTATE-ZERO-STACK-20261102/PRESTATE_REMOVE_STACK_ZERO_FIX_V1.patch"
   ],
   "remains_blocked": [
     "Current approved Runtime and Work State are UNKNOWN; six local files match historical snapshot but do not prove current authority",
@@ -79,7 +90,9 @@
     "cross_branch_dependency: MAIN owner needs provide/verify latest authoritative Runtime & Work State and choose current active workflow based on evidence, not inferred preference",
     "cross_branch_dependency: MAIN owner needs resolve old entrypoint/config SHA pin conflicts and maintain separate successor authority objects",
     "cross_branch_dependency: product integration owner needs nonexecuting full source compatibility and independent side-effect behavior regression before future activation",
-    "cross_branch_dependency: WCL blind discovery owner needs preserve numeric candidate lock and Strict PRE independent of SimC semantics"
+    "cross_branch_dependency: WCL blind discovery owner needs preserve numeric candidate lock and Strict PRE independent of SimC semantics",
+    "cross_branch_dependency: MAIN semantic/runtime owner needs to review and independently validate branch-local PRE-state zero-stack fix before authoritative generic SpecAdapter release; no original source overwrite is authorized",
+    "cross_branch_dependency: observability owner needs to preserve UNKNOWN readiness when post-event stacks or actor streams are unobserved; do not infer absence from default state alone"
   ],
   "invariants": {
     "GitHub_main_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
@@ -100,8 +113,8 @@
     "Run source complete focused compatibility with research sources and multi-spec fixtures in sandbox; preserve gameplay UNKNOWN if not verified",
     "Only MAIN accepts or rejects production promotion; branch handoff itself cannot promote"
   ],
-  "next": "MAIN must first restore/authorize current Runtime and Work State. Then construct sandbox-only behavioral fixture with explicit no-network/no-inbox guards using the source-complete 124+3 historical AST-compatible baseline. Do not promote FEX declared 11 capability areas as gameplay-valid rules.",
-  "status": "BRANCH_LOCAL_STATUS_ONLY_PLUS_FOCUSED_SOURCE_INTERFACE_CI_PASS__CURRENT_PRODUCT_MAIN_UNAUTHORIZED",
+  "next": "MAIN should accept/reject minimal PRE-state explicit-zero fix after independent focused O4 state/coverage integration; current Runtime/Work State active authority remains UNKNOWN. Avoid repeating 124 source hashes and old 42 original checks unless code changes.",
+  "status": "MERGE_READY_FOR_MAIN_REVIEW_OF_BOUNDED_ZERO_STACK_PATCH__PRODUCT_MAIN_NOT_PROMOTED",
   "focused_source_interface_evidence": {
     "independent_private_local_receipt_sha256": "7a3dfc30bad818199f15288f2f380867a7a8997105c20bc9c7e39024fb5f97a7",
     "historical_unmodified_source_files": 124,
@@ -130,5 +143,43 @@
     ".github/workflows/zrot-main-status-only-successor-review.yml",
     "docs/MAIN_124_FEX_STATIC_INTERFACE_COMPATIBILITY_20261102.json",
     "tools/recovery/main_124_fex_source_interface_gate_v1.py"
-  ]
+  ],
+  "offline_original_historical_engine_behavior": {
+    "archive_sha256": "46e3a2dd1b51465429932a03efb7345cae781c756137dea9a39c9c4bed152bf6",
+    "local_behavior_script_sha256": "3a00d4ab9d906e3eca2d868cc194134af6ff495b4fb7155f099170a40489083c",
+    "local_behavior_receipt_sha256": "2023a6ba0a3e8eb87e77a134579e42c34d5bbe4797e7e00f71fde7fe89df17e7",
+    "source_modules_verified": 6,
+    "original_imported_modules": 4,
+    "synthetic_actual_behavioral_checks": "42/42_PASS",
+    "checkpoint_recovery_and_stage_order": "PASS",
+    "injected_missing_stage_handler": "FAIL_CLOSED_PASS",
+    "fingerprint_and_package_lock_tamper": "REJECTED_PASS",
+    "distinct_cohort_and_overlap": "PASS",
+    "evidence_promotion_observation_vs_causality": "PASS",
+    "private_original_source_uploaded_to_public_GitHub": false,
+    "general_rotation_current_gameplay_certified": false
+  },
+  "strict_pre_discovered_defect": {
+    "source_path": "02_SOURCE/runtime/raid_dps/core/prestate.py",
+    "source_sha256": "889fdd114f5a07d31612c0fc2a548ac0dfab1dc1d5738e8741f573194efd7d50",
+    "branch_patch": "active/branches/BR-PRESTATE-ZERO-STACK-20261102/PRESTATE_REMOVE_STACK_ZERO_FIX_V1.patch",
+    "raw_event": "removebuffstack at timestamp=110, stack=0, previously applied=3",
+    "original_state_at_timestamp_111": [
+      true,
+      1
+    ],
+    "correct_state_at_timestamp_111": [
+      false,
+      0
+    ],
+    "source_defect": "as_int(stack) or as_int(stacks) discards explicit int zero",
+    "candidate_patch": "replace truthiness fallback with explicit is None guard",
+    "exact_original_repro_ci_id": 41398991492,
+    "final_ci_id": 41399705088,
+    "candidate_in_memory_behaviors": "37/37_PASS",
+    "patch_dry_run": "PASS",
+    "result": "BRANCH_LOCAL_CANDIDATE_VALIDATED__ORIGINAL_STILL_HAS_DEFECT",
+    "user_facing_risk": "POTENTIAL_WRONG_BUFF_ACTIVE_DECISION",
+    "missing_stack_count_remains_unknown_for_readiness": "NOT_CLOSED"
+  }
 }
