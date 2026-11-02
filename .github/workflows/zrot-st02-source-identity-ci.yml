@@ -1,0 +1,87 @@
+name: zrot-st02-source-identity-ci
+
+on:
+  push:
+    branches:
+      - work/st02-source-identity-20261102
+    paths:
+      - .github/workflows/zrot-st02-source-identity-ci.yml
+      - tools/research/ST02_source_identity_reconciliation_v1.py
+      - tools/research/ST02_source_identity_regression_v1.py
+      - tools/research/ST01_existing_simc_readiness_gate_regression_v1.py
+      - tools/research/ZROT_Source_Obligation_Gate_v1.py
+      - tools/research/simc_apl_readiness_provider.py
+      - docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json
+      - docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json
+
+permissions:
+  contents: read
+
+jobs:
+  st02:
+    name: ST02 Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Pinned source and focused regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/st02
+          test "$(git hash-object docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json)" = "e437da47d632737c9eacc3901c945590aff0308b"
+          test "$(git hash-object docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json)" = "2e933135877704b257237ef465025e532a14b9c0"
+          python -B -m py_compile tools/research/ST02_source_identity_reconciliation_v1.py tools/research/ST02_source_identity_regression_v1.py
+          python -B tools/research/ST02_source_identity_regression_v1.py > ci_artifacts/st02/st02_receipt.json
+          python -B tools/research/ST01_existing_simc_readiness_gate_regression_v1.py --self-test > ci_artifacts/st02/st01_regression.json
+          python - <<'PY'
+          from pathlib import Path
+          import json, hashlib, os, platform
+          a = json.loads(Path("ci_artifacts/st02/st02_receipt.json").read_text())
+          b = json.loads(Path("ci_artifacts/st02/st01_regression.json").read_text())
+          assert a["status"] == "PASS" and a["count"] == 30, a
+          assert b["result"] == "PASS" and b["passed"] == 24, b
+          assert a["current_gameplay_ready_certified"] == 0
+          assert a["typed_identity"] == "UNVERIFIED_CANDIDATE"
+          assert a["wcl_blind_candidate_lock"] == "NOT_RUN"
+          assert a["main_or_frozen_promotion"] is False
+          sha = {name: hashlib.sha256(Path(name).read_bytes()).hexdigest() for name in (
+              "tools/research/ST02_source_identity_reconciliation_v1.py",
+              "tools/research/ST02_source_identity_regression_v1.py",
+              "tools/research/ST01_existing_simc_readiness_gate_regression_v1.py",
+              "docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json",
+              "docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json")}
+          receipt = {"schema":"ZrotST02GithubCIReceiptV1","status":"PASS",
+                     "st02_case_n":a["count"],"st01_reused_regression_n":b["passed"],
+                     "github_sha":os.getenv("GITHUB_SHA","UNKNOWN"),
+                     "github_run_id":os.getenv("GITHUB_RUN_ID","UNKNOWN"),
+                     "python":platform.python_version(), "sha256":sha,
+                     "evidence":"PINNED_SOURCE_DOCUMENT_STRUCTURAL_AND_SYNTHETIC_ONLY",
+                     "retail_blizzard_current_game":"NOT_VERIFIED",
+                     "simc_live":"NOT_RUN","wcl_live":"NOT_RUN",
+                     "wcl_blind_lock":"NOT_RUN",
+                     "gameplay_ready_certified":0,
+                     "authority_promotion":False,"seq637":"UNKNOWN"}
+          Path("ci_artifacts/st02/github_receipt.json").write_text(
+              json.dumps(receipt,sort_keys=True,indent=2)+"\n")
+          print("ST02_PINNED_SOURCE_IDENTITY_CI=PASS")
+          PY
+      - name: Upload scoped receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: st02-source-identity-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/st02/
+          if-no-files-found: warn
+          retention-days: 7
