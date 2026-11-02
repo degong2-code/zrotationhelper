@@ -1,0 +1,86 @@
+name: zrot-st03-pre-observability-ci
+
+on:
+  push:
+    branches:
+      - work/st03-strict-pre-observability-20261102
+    paths:
+      - .github/workflows/zrot-st03-pre-observability-ci.yml
+      - tools/research/ST03_source_pre_observability_v1.py
+      - tools/research/ST03_source_pre_observability_regression_v1.py
+      - tools/research/ST02_source_identity_reconciliation_v1.py
+      - tools/research/ST01_existing_simc_readiness_gate_regression_v1.py
+      - tools/research/ZROT_Source_Obligation_Gate_v1.py
+      - tools/research/simc_apl_readiness_provider.py
+      - 02_SOURCE/runtime/raid_dps/core/behavioral_evaluator.py
+      - docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json
+      - docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json
+
+permissions:
+  contents: read
+
+jobs:
+  st03:
+    name: ST03 Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - name: Checkout isolated branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify pins and execute focused Strict PRE regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/st03
+          test "$(git hash-object docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json)" = "e437da47d632737c9eacc3901c945590aff0308b"
+          test "$(git hash-object docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json)" = "2e933135877704b257237ef465025e532a14b9c0"
+          python -B -m py_compile tools/research/ST03_source_pre_observability_v1.py tools/research/ST03_source_pre_observability_regression_v1.py
+          python -B tools/research/ST03_source_pre_observability_regression_v1.py > ci_artifacts/st03/strict_pre_receipt.json
+          python - <<'PY'
+          import hashlib, json, os, platform
+          from pathlib import Path
+          receipt=json.loads(Path("ci_artifacts/st03/strict_pre_receipt.json").read_text())
+          assert receipt["result"]=="PASS" and receipt["count"]==39, receipt
+          assert receipt["gameplay_readiness_certified"]==0
+          assert receipt["authority_promotion"] is False
+          assert receipt["independent_wcl_blind"]=="NOT_RUN"
+          sha={p:hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in (
+              "tools/research/ST03_source_pre_observability_v1.py",
+              "tools/research/ST03_source_pre_observability_regression_v1.py",
+              "tools/research/ST02_source_identity_reconciliation_v1.py",
+              "tools/research/ST01_existing_simc_readiness_gate_regression_v1.py",
+              "02_SOURCE/runtime/raid_dps/core/behavioral_evaluator.py",
+          )}
+          result={"schema":"ZrotST03GithubOfflineReceiptV1",
+                  "result":"PASS","focused_cases":receipt["count"],
+                  "source_sha256":sha,
+                  "github_sha":os.getenv("GITHUB_SHA","UNKNOWN"),
+                  "github_run_id":os.getenv("GITHUB_RUN_ID","UNKNOWN"),
+                  "python_version":platform.python_version(),
+                  "scope":"SYNTHETIC_STRICT_PRE_DECLARED_SOURCE_UNVERIFIED",
+                  "wcl_blind":"NOT_RUN","real_wcl_simc_blizzard":"NOT_RUN",
+                  "gameplay_ready_certified":0,"main_frozen_promotion":False,
+                  "seq578":"FAILED_QUARANTINED_PRESERVED",
+                  "seq637":"UNKNOWN"}
+          Path("ci_artifacts/st03/github_receipt.json").write_text(
+              json.dumps(result,indent=2,sort_keys=True)+"\n")
+          print("ST03_STRICT_PRE_OBSERVABILITY_CI=PASS")
+          PY
+      - name: Upload scoped receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: st03-pre-observability-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/st03/
+          if-no-files-found: warn
+          retention-days: 7
