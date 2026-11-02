@@ -9,6 +9,7 @@ on:
       - tools/research/simc_native_reference_capture.py
       - tools/research/simc_native_json_sequence.py
       - tools/research/simc_native_performed_events.py
+      - tools/research/simc_native_opener_window_v1.py
   workflow_dispatch:
 
 permissions:
@@ -89,24 +90,33 @@ jobs:
           python -B tools/research/simc_native_reference_capture.py --self-test
           python -B tools/research/simc_native_json_sequence.py --self-test
           python -B tools/research/simc_native_performed_events.py --self-test
+          python -B tools/research/simc_native_opener_window_v1.py --self-test
           python - <<'PY'
           import json,sys
           from pathlib import Path
           sys.path.insert(0,"tools/research")
           from simc_native_performed_events import extract_native_reference
           from simc_native_json_sequence import extract_json_sequence
+          from simc_native_opener_window_v1 import build as build_opener
           folder=Path("ci_artifacts/native_simc/reference")
           source=json.loads((folder/"simc_reference_receipt.json").read_text())
           seq=extract_json_sequence(folder)
           performed=extract_native_reference(folder)
+          opener=build_opener(folder,expected_spec="fury",window_seconds=15.)
           assert source["status"]=="SIMC_NATIVE_CAPTURED_UNPARSED"
           assert seq["source_capture_status"]=="SIMC_NATIVE_CAPTURED_UNPARSED"
           assert seq["source_apl_sha256"]==source["effective_apl_sha256"]
           assert seq["combat_count"]>0,seq["status"]
           assert performed["performed_event_count"]>0,performed["status"]
           assert performed["status"]=="NATIVE_PERFORMED_EVENT_SYNTAX_EXTRACTED"
+          assert opener["actual_SimC_executable_capture"] is True
+          assert opener["precombat_observed_record_count"]>0
+          assert opener["opener_observed_action_count"]>0
+          assert opener["snapshot_state_is_not_strict_PRE"] is True
+          assert opener["ready_for_target_dummy_mistake_feedback"] is False
+          assert opener["WCL_ranker_validation"]=="NOT_RUN"
           first=[
-            {"time_s":a["timestamp_s"] if "timestamp_s" in a else a.get("timestamp_ms"),
+            {"time_ms":a["timestamp_ms"],
              "token":a.get("action_token"),"id":a.get("spell_id")}
             for a in performed["performed_events"]
             if a["timestamp_ms"]>=0
@@ -124,6 +134,13 @@ jobs:
             "performed_event_count":performed["performed_event_count"],
             "json2_precombat_count":seq["precombat_count"],
             "json2_combat_count":seq["combat_count"],
+            "true_JSON2_precombat_count":opener["precombat_observed_record_count"],
+            "observed_first_15_seconds_count":opener["opener_observed_action_count"],
+            "observed_first_15_seconds_actions":[{"timestamp_ms":x["timestamp_ms"],"token":x["action_token"],"id":x["numeric_spell_id"]} for x in opener["opener_observed_actions"][:30]],
+            "observed_opener_queue_failed_records":opener["opener_queue_failed_record_count"],
+            "observed_opener_wait_records":opener["opener_wait_record_count"],
+            "native_JSON2_snapshot_is_not_strict_PRE":True,
+            "combat_opener_sequence_complete":"NOT_PROVEN",
             "first_native_performed_actions":first,
             "native_extractor_format_basis":performed["format_reference_upstream_commit"],
             "native_extractor_format_equivalence":performed["native_executable_format_equivalence"],
