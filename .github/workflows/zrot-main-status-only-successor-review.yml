@@ -11,6 +11,8 @@ on:
       - docs/MAIN_124_FEX_STATIC_INTERFACE_COMPATIBILITY_20261102.json
       - tools/recovery/main_124_fex_source_interface_gate_v1.py
       - tools/recovery/zrot_research_strict_pre_offline_behavior_v1.py
+      - docs/MAIN_124_OFFLINE_BEHAVIOR_AND_PRESTATE_ZERO_STACK_FINDING_20261102.json
+      - active/branches/BR-PRESTATE-ZERO-STACK-20261102/PRESTATE_REMOVE_STACK_ZERO_FIX_V1.patch
 
 permissions:
   contents: read
@@ -183,6 +185,35 @@ jobs:
           assert d["seq578"]=="FAILED_QUARANTINED_PRESERVED"
           assert d["seq637"]=="UNKNOWN"
           print("RESEARCH_STRICT_PRE_OFFLINE_BEHAVIOR=PASS")
+          PY
+      - name: Independently check branch-local minimal patch and external private receipt limits
+        shell: bash
+        run: |
+          set -euo pipefail
+          patch="active/branches/BR-PRESTATE-ZERO-STACK-20261102/PRESTATE_REMOVE_STACK_ZERO_FIX_V1.patch"
+          git apply --check "$patch"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("docs/MAIN_124_OFFLINE_BEHAVIOR_AND_PRESTATE_ZERO_STACK_FINDING_20261102.json").read_text())
+          r=json.loads(Path("ci_artifacts/status_only/research_pre_behavior.json").read_text())
+          o=json.loads(Path("ci_artifacts/status_only/research_original_bug.json").read_text())
+          assert d["private_historical_runtime"]["synthetic_behavioral_assertions"]==42
+          assert d["private_historical_runtime"]["actual_private_source_in_public_GitHub"] is False
+          assert d["private_historical_runtime"]["strict_PRE_included_in_private_42"] is False
+          assert d["strict_pre"]["prior_failing_original_ci_id"]==41398991492
+          assert d["strict_pre"]["original_result"]=="FAIL_CONFIRMED_LEGACY_ZERO_STACK_DEFECT"
+          assert d["strict_pre"]["candidate_applied_to_PRODUCT_MAIN"] is False
+          assert d["strict_pre"]["candidate_applied_to_public_original"] is False
+          assert d["strict_pre"]["candidate_behavior_assertions"]==r["behavioral_assertion_count"]
+          assert d["strict_pre"]["historical_state_at_t_111"]==o["original_next_timestamp_state"]
+          assert d["strict_pre"]["corrected_expected_state_at_t_111"]==o["expected_next_timestamp_state"]
+          assert d["strict_pre"]["original_missing_stack_semantics"]=="RETURNS_ACTIVE_STACK_1__OBSERVABILITY_UNCERTAINTY_NOT_CLOSED"
+          assert d["authority"]["Seq578"]=="FAILED_QUARANTINED_PRESERVED"
+          assert d["authority"]["Seq637"]=="UNKNOWN"
+          assert d["authority"]["shared_MAIN_source_modified"] is False
+          assert d["authority"]["shared_GENERAL_ROTATION_modified"] is False
+          print("ZERO_STACK_REVIEW_PATCH_DRY_RUN_AND_EVIDENCE_LIMITS=PASS")
           PY
       - name: Save sanitized review receipts
         if: always()
