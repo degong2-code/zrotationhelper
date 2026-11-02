@@ -56,7 +56,7 @@ jobs:
           assert status["latest_authoritative_runtime"]=="UNKNOWN"
           assert status["latest_authoritative_work_state"]=="UNKNOWN"
           assert test["self_test"]["status"]=="PASS"
-          assert test["self_test"]["negative_regressions"]==12
+          assert test["self_test"]["negative_regressions"]==15
           assert test["self_test"]["source_code_execution"] is False
           assert test["Seq578"]=="FAILED_QUARANTINED_PRESERVED"
           assert test["Seq637"]=="UNKNOWN"
@@ -79,6 +79,40 @@ jobs:
           }
           (a/"ci_receipt.json").write_text(json.dumps(output,indent=2,sort_keys=True)+"\n")
           print("ZROT_STATUS_ONLY_SUCCESSOR_REVIEW=PASS_NO_MAIN_PROMOTION")
+          PY
+      - name: Independent direct JSON audit of no-execution authority (not validator replay)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          c=json.loads(Path("active/branches/BR-MAIN-STATUS-ONLY-20261102/MAIN_AUTHORITY_STATUS_ONLY_CANDIDATE_V1.json").read_bytes())
+          b=json.loads(Path("docs/MAIN_SIX_LIVE_HASHES_SNAPSHOT_CONSISTENCY_20261102.json").read_bytes())
+          w=c["workflow_authority"]
+          assert w["selected_workflow_id"] is None and w["preferred_workflow_id"] is None
+          assert w["selection_state"]=="UNRESOLVED_NEEDS_MAIN_APPROVED_EVIDENCE"
+          assert w["current_approved_runtime"]=="UNKNOWN" and w["current_approved_work_state"]=="UNKNOWN"
+          assert {x["id"] for x in w["candidates"]}=={
+              "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1","FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1"}
+          assert len(b["verified_user_pc_files"])==6
+          assert b["verdict"]["current_MAIN_authority"]=="UNKNOWN"
+          assert len(b["verified_historical_internal_disagreements"])==6
+          a=c["status_adapter_contract"]
+          assert a["only_command"]=="STATUS_ONLY"
+          assert a["default_operation"]=="READ_CANDIDATE_STATUS"
+          assert set(a["allowed_operations"])=={
+              "READ_CANDIDATE_STATUS","VALIDATE_CANDIDATE_CONTRACT"}
+          assert "RUN_ACTIVE" in a["forbidden_operations"]
+          assert "DISPATCH_INBOX" in a["forbidden_operations"]
+          assert a["execution_backend"]=="NONE_NO_DISPATCHER_NO_SUBPROCESS_NO_IMPORT_LEGACY_MODULES"
+          assert c["promotion_gates"]["total_authorized_for_live_activation"] is False
+          assert all(value is False for value in c["promotion_gates"].values())
+          assert c["invariants"]["FROZEN_changed"] is False
+          assert c["invariants"]["Seq578"]=="FAILED_QUARANTINED_PRESERVED"
+          assert c["invariants"]["Seq637"]=="UNKNOWN"
+          assert c["verdict"]=="REVIEW_ONLY_STATUS_SAFE__ACTIVE_AUTHORITY_NOT_SELECTED"
+          print("INDEPENDENT_RAW_JSON_STATUS_ONLY=PASS")
           PY
       - name: Refuse any execution flags in isolated status checker
         shell: bash
