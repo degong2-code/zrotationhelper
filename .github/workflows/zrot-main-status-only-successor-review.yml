@@ -156,13 +156,21 @@ jobs:
         run: |
           set -euo pipefail
           python -B -m py_compile tools/recovery/zrot_research_strict_pre_offline_behavior_v1.py
-          python -B tools/recovery/zrot_research_strict_pre_offline_behavior_v1.py --self-test > ci_artifacts/status_only/research_pre_behavior.json
+          python -B tools/recovery/zrot_research_strict_pre_offline_behavior_v1.py --original-defect-repro > ci_artifacts/status_only/research_original_bug.json
+          python -B tools/recovery/zrot_research_strict_pre_offline_behavior_v1.py --candidate-patch --self-test > ci_artifacts/status_only/research_pre_behavior.json
           python - <<'PY'
           import json
           from pathlib import Path
           p=Path("ci_artifacts/status_only/research_pre_behavior.json")
           d=json.loads(p.read_text())
+          original=json.loads(Path("ci_artifacts/status_only/research_original_bug.json").read_text())
+          assert original["result"]=="KNOWN_LEGACY_DEFECT_REPRODUCED"
+          assert original["original_next_timestamp_state"]==[True,1]
+          assert original["expected_next_timestamp_state"]==[False,0]
+          assert original["original_code_modified"] is False
           assert d["result"]=="PASS"
+          assert d["mode"]=="BRANCH_ONLY_IN_MEMORY_ZERO_STACK_CANDIDATE"
+          assert d["candidate_only_in_memory"] is True and d["original_research_source_modified"] is False
           assert d["research_module_original_sha_exact_n"]==3
           assert d["behavioral_assertion_count"]>=30
           assert d["strict_PRE_bisect_left_timestamp_less_than_t"]=="PASS"
