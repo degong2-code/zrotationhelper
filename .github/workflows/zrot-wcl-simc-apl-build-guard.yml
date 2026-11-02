@@ -1,0 +1,140 @@
+name: zrot-wcl-simc-talent-branch-applicability
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/wcl_simc_apl_branch_build_guard_v1.py
+      - .github/workflows/zrot-wcl-simc-apl-build-guard.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Final source compile + synthetic semantics guard
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/wcl_simc_apl_branch_build_guard_v1.py
+          python -B tools/research/wcl_simc_apl_branch_build_guard_v1.py >/tmp/branch-selftest.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/branch-selftest.json'))
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['checks']>=7
+          assert d['actual_SimC_or_WCL_sources_read'] is False
+          assert d['priority_validated'] is False
+          print('SOURCE_DERIVED_APL_BRANCH_GUARD_SYNTHETIC=PASS')
+          PY
+          sha256sum tools/research/wcl_simc_apl_branch_build_guard_v1.py
+
+  pinned-real-source-audit:
+    runs-on: ubuntu-latest
+    needs: [offline-regression]
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-pinned
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41463589665
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          path: /tmp/omnium-wcl-discovery
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41473060401
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          path: /tmp/omnium-wcl-holdout
+          github-token: ${{ github.token }}
+      - name: Acquire pinned public talent tree snapshot and reconstruct WCL evidence ZIPs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          import hashlib,urllib.request,json
+          req=urllib.request.Request('https://www.raidbots.com/static/data/live/talents.json',
+              headers={'User-Agent':'zRotationHelperPostLockOmniumResearch/1'})
+          with urllib.request.urlopen(req,timeout=30) as f:blob=f.read(8000001)
+          assert 100000<len(blob)<8000000
+          actual=hashlib.sha256(blob).hexdigest()
+          assert actual=='53bb1b612f140b666d66b75314db501bb1fa31923b66ad3f3cb02edbc5f3a07c',actual
+          json.loads(blob)
+          Path('/tmp/omnium-talent-db-pinned.json').write_bytes(blob)
+          for cohort in ('discovery','holdout'):
+              folder=Path('/tmp/omnium-wcl-'+cohort)
+              paths=sorted(f for f in folder.rglob('*') if f.is_file())
+              assert 1<=len(paths)<=40
+              with ZipFile('/tmp/omnium-wcl-'+cohort+'.zip','w',ZIP_DEFLATED) as z:
+                  for p in paths:z.write(p,arcname=str(p.relative_to(folder)))
+          print('PUBLIC_TALENT_DB_AND_RAW_INPUT_SHA_GUARD=PASS')
+          PY
+      - name: Verify actual WCL node entries and SimC Omnium ID namespaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/wcl_simc_apl_branch_build_guard_v1.py \
+            --profile simc-pinned/profiles/MID2/MID2_Warrior_Fury.simc \
+            --tree-data /tmp/omnium-talent-db-pinned.json \
+            --discovery-zip /tmp/omnium-wcl-discovery.zip \
+            --holdout-zip /tmp/omnium-wcl-holdout.zip \
+            --out /tmp/apl-branch-build-guard.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/apl-branch-build-guard.json'))
+          assert a['schema']=='ZrotPostlockSimcTalentBranchApplicabilityV1'
+          assert a['source_branch_count']>=4
+          assert a['SimC_action_selection_replayed'] is False
+          assert a['complete_SimC_build_equivalence']=='UNKNOWN'
+          assert a['WCL_cooldown_resource_action_readiness']=='UNKNOWN'
+          assert a['trainer_model_eligible'] is False
+          for role in ('discovery','holdout'):
+              rows=a[role]['branch_statuses']
+              assert len(rows)==a['source_branch_count']
+              lightning=[x for x in rows if x['talent_token']=='lightning_strikes']
+              assert lightning and all(x['simc_profile_talent_selected'] is True for x in lightning)
+              assert all(x['wcl_strict_pre_talent_selected'] is False for x in lightning)
+              assert all(x['structural_talent_applicability']=='PROFILE_SELECTED_WCL_NOT_SELECTED' for x in lightning)
+              assert all(x['profile_action_list_priority_transfer']=='BLOCKED' for x in rows)
+          print('REAL_WCL_PINNED_SIMC_BUILD_GUARD_BRANCH_APPLICABILITY_PASS')
+          print('STRUCTURAL_APL_BRANCH_SUMMARY',json.dumps({
+              role:[{k:x[k] for k in ('action_list','talent_token','resolved_node_id',
+                   'structural_talent_applicability')} for x in a[role]['branch_statuses']]
+              for role in ('discovery','holdout')},sort_keys=True))
+          PY
+      - name: Retain numeric structured receipt only (7 days)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postlock-apl-branch-build-guard-${{ github.sha }}
+          path: /tmp/apl-branch-build-guard.json
+          retention-days: 7
+          if-no-files-found: error
