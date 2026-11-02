@@ -56,7 +56,7 @@ jobs:
         with:
           repository: simulationcraft/simc
           ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
-          path: /tmp/simc-fixed-source
+          path: simc-fixed-source
           persist-credentials: false
           sparse-checkout: |
             profiles/MID2/MID2_Warrior_Fury.simc
@@ -113,7 +113,7 @@ jobs:
           python -B tools/research/wcl_simc_build_alignment_v1.py \
             --discovery-zip /tmp/wcl-discovery.zip \
             --holdout-zip /tmp/wcl-holdout.zip \
-            --profile /tmp/simc-fixed-source/profiles/MID2/MID2_Warrior_Fury.simc \
+            --profile simc-fixed-source/profiles/MID2/MID2_Warrior_Fury.simc \
             --tree-data /tmp/talent-tree-pinned-input.json \
             --out /tmp/wcl-simc-build-alignment.json
           python - <<'PY'
