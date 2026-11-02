@@ -100,7 +100,7 @@ jobs:
           $null = [System.Management.Automation.Language.Parser]::ParseFile($script,[ref]$t,[ref]$e)
           if ($e.Count -ne 0) { throw ("SCRIPT_PARSE_FAILED: "+($e | Out-String)) }
           $result = & $script -SelfTest | ConvertFrom-Json
-          if ($result.status -ne "PASS" -or $result.count -ne 5 -or $result.promotion -ne $false) {
+          if ($result.status -ne "PASS" -or $result.count -ne 5 -or $result.synthetic_negative_cases -ne 3 -or $result.promotion -ne $false) {
             throw ("POWER_SHELL_SELF_TEST_BAD_RECEIPT: "+($result | ConvertTo-Json))
           }
           Write-Output "M4B_FIVE_WINDOWS_COLLECTOR_STATIC_SELFTEST=PASS"
