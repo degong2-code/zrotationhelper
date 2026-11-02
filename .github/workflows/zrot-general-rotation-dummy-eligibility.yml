@@ -1,0 +1,118 @@
+name: zrot-general-rotation-dummy-eligibility-audit
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_dummy_eligibility_gate_v1.py
+      - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/MODEL_ELIGIBILITY_EVIDENCE_SOURCES_V1.json
+      - .github/workflows/zrot-general-rotation-dummy-eligibility.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile exact source and prove no premature trainer mistake labels
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_dummy_eligibility_gate_v1.py
+          python -B tools/research/general_rotation_dummy_eligibility_gate_v1.py >/tmp/eligibility-selftest.json
+          python - <<'PY'
+          import json
+          v=json.load(open('/tmp/eligibility-selftest.json'))
+          assert v['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert v['assertion_groups']>=7
+          assert v['real_gameplay_priority_proven'] is False
+          print('DUMMY_PRIORITY_SAFETY_GATE_SYNTHETIC=PASS')
+          PY
+          sha256sum tools/research/general_rotation_dummy_eligibility_gate_v1.py
+
+  actual-four-source-evaluation:
+    needs: [offline]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41475935231
+          name: wcl-simc-talent-alignment-f41e0485c1f75f812f9ffb62e52273d533b624ff
+          path: /tmp/eligibility-build
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41473887781
+          name: wcl-dual-cohort-observability-7d73fcc27839f3164e23c4b76f427a290351aeed
+          path: /tmp/eligibility-state
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41466009694
+          name: postlock-real-wcl-simc-audit-8c8d0e8cdec5443e9e62cce081f8d3d9390740bf
+          path: /tmp/eligibility-postlock
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41473060401
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          path: /tmp/eligibility-holdout
+          github-token: ${{ github.token }}
+      - name: Evaluate canonical 4 actual source receipts with all SHA gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_dummy_eligibility_gate_v1.py \
+            --contract docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/MODEL_ELIGIBILITY_EVIDENCE_SOURCES_V1.json \
+            --build /tmp/eligibility-build/wcl-simc-build-alignment.json \
+            --state /tmp/eligibility-state/wcl-dual-cohort-state-observability.json \
+            --postlock /tmp/eligibility-postlock/postlock-comparison.json \
+            --holdout /tmp/eligibility-holdout/derived/holdout_observed_metrics.json \
+            --out /tmp/wcl-rotation-trainer-eligibility.json
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          o=json.loads(Path('/tmp/wcl-rotation-trainer-eligibility.json').read_bytes())
+          assert o['status']=='SOURCE_CONSISTENT_BUT_REQUIRED_GAMEPLAY_STATES_UNKNOWN'
+          assert o['frozen_lock_unchanged'] is True
+          assert o['observed_same_spec_id_in_both_WCL_cohorts'] is True
+          assert o['same_talent_build_across_WCL_cohorts'] is False
+          assert o['observed_candidate_count']==4
+          assert o['disjoint_report_holdout_reobserved_candidates']==4
+          assert len(o['required_evidence_gates'])==8
+          assert all(x['verdict']=='UNKNOWN' for x in o['required_evidence_gates'].values())
+          assert o['general_rotation_model_eligible'] is False
+          assert o['opener_priority_rule_eligible'] is False
+          assert o['dummy_practice_wrong_action_verdict']=='UNKNOWN'
+          assert o['automatic_wrong_cast_flags']==0
+          assert o['actual_user_play_evaluated'] is False
+          print('ACTUAL_WCL_SIMC_FOUR_SOURCE_DUMMY_UNKNOWN_AUTHORITY_GATE=PASS')
+          PY
+      - name: Retain small reusable no-false-error verdict receipt
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: general-rotation-dummy-evidence-eligibility-${{ github.sha }}
+          path: /tmp/wcl-rotation-trainer-eligibility.json
+          retention-days: 7
+          if-no-files-found: error
