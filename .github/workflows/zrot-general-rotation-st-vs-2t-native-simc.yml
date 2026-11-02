@@ -1,0 +1,178 @@
+name: zrot-general-rotation-st-vs-2t-native-simc
+
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/research/simc_native_reference_capture.py
+      - tools/research/simc_native_target_count_compare_v1.py
+      - .github/workflows/zrot-general-rotation-st-vs-2t-native-simc.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-contract:
+    name: Offline native target-count contract 3.12/3.14
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12","3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile exactly delivered research files
+        run: |
+          python -m py_compile tools/research/simc_native_reference_capture.py
+          python -m py_compile tools/research/simc_native_target_count_compare_v1.py
+      - name: Existing native capture self-test plus ST 2T comparator self-test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_reference_capture.py --self-test
+          python -B tools/research/simc_native_json_sequence.py --self-test
+          python -B tools/research/simc_native_target_count_compare_v1.py --self-test > scope_target_receipt.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path("scope_target_receipt.json").read_text())
+          assert x["result"]=="PASS"
+          assert x["synthetic_case_count"]>=20
+          assert x["WCL_API_calls"]=="NOT_RUN"
+          assert x["native_SimC_executions"]=="NOT_RUN_IN_SELFTEST"
+          print("ST_VS_2T_CONTRACT_OFFLINE=PASS")
+          PY
+
+  native-controlled-comparison:
+    name: Real official SimC 1-target and 2-target same binary/build
+    needs: offline-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      SIMC_COMMIT: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout exact upstream SimulationCraft
+        uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - name: Source identity and official Fury profile pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = "$SIMC_COMMIT"
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          raw=Path("simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc").read_bytes()
+          blob=hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\0"+raw).hexdigest()
+          assert blob=="3225992ed5b754ad5d61e8b785d9d859f1eed1be"
+          print("SIMC_SOURCE_PROFILE_IDENTITY=PASS")
+          PY
+      - name: Install and restore build cache
+        shell: bash
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ccache
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: simc-ubuntu-gcc-b522cded8c26b97dac03fdf56e57a03ec7e8faa6-v1
+      - name: Build exact official native engine once
+        shell: bash
+        run: |
+          set -euo pipefail
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-simc-build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_GUI=OFF -DBUILD_TESTING=OFF -DSC_NO_NETWORKING=ON \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-simc-build --target simc --parallel 3
+          /tmp/zrot-simc-build/simc display_build=2
+          ccache --show-stats
+      - name: Collect REAL 1-target reference with identical build and fixed seed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --spec fury --simc-bin /tmp/zrot-simc-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 75 \
+            --out-dir ci_artifacts/target_count/st \
+            --timeout 180
+      - name: Collect REAL 2-target reference using only desired_targets override
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --spec fury --simc-bin /tmp/zrot-simc-build/simc \
+            --targets 2 --seed 31459 --fight-seconds 75 \
+            --out-dir ci_artifacts/target_count/two \
+            --timeout 180
+      - name: Compare evidence only after verifying exact identity and complete file hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_target_count_compare_v1.py \
+            --st-reference ci_artifacts/target_count/st \
+            --two-target-reference ci_artifacts/target_count/two \
+            --window-seconds 15 \
+            --out ci_artifacts/target_count/comparison.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path=Path("ci_artifacts/target_count/comparison.json")
+          a=json.loads(path.read_text())
+          assert a["schema"]=="ZrotNativeSimcStTwoTargetOpenerComparisonV1"
+          assert a["scope_policy_id"]=="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
+          assert a["source_provenance"]=="SIMC_NATIVE_CAPTURED_UNPARSED"
+          assert a["same_actor_build_apl_binary_seed_fight_window_verified"] is True
+          assert a["ST"]["window_observed_action_count"]>0
+          assert a["TWO_TARGET"]["window_observed_action_count"]>0
+          assert a["WCL_blind_candidate_lock"]=="NOT_RUN"
+          assert a["target_count_caused_specific_decision"]=="UNPROVEN"
+          assert a["dummy_trainer_rules_ready"] is False
+          receipt={k:a[k] for k in (
+            "schema","scope_policy_id","source_provenance","spec",
+            "native_binary_sha256","input_profile_sha256","effective_apl_sha256",
+            "fixed_seed","fixed_fight_seconds","window_seconds",
+            "same_actor_build_apl_binary_seed_fight_window_verified",
+            "opening_action_sequences_identical","common_prefix_action_count",
+            "observed_target_count_association","target_count_caused_specific_decision",
+            "WCL_blind_candidate_lock","WCL_high_ranker_validation",
+            "dummy_trainer_rules_ready"
+          )}
+          receipt["ST_sample_actions"]=a["ST"]["window_observed_action_count"]
+          receipt["TWO_TARGET_sample_actions"]=a["TWO_TARGET"]["window_observed_action_count"]
+          receipt["ST_first_12"]=[{k:r[k] for k in ("time_ms","spell_token","spell_id")} for r in a["ST"]["actions"][:12]]
+          receipt["TWO_TARGET_first_12"]=[{k:r[k] for k in ("time_ms","spell_token","spell_id")} for r in a["TWO_TARGET"]["actions"][:12]]
+          receipt["same_time_STRICT_PRE_mechanics"]="UNKNOWN"
+          receipt["player_General_Rotation_finalized"]=False
+          out=Path("ci_artifacts/target_count/public_receipt.json")
+          out.write_text(json.dumps(receipt,indent=2,ensure_ascii=False)+"\n")
+          print("NATIVE_SIMC_ST_TWO_TARGET=PASS")
+          print("ASSOCIATION="+a["observed_target_count_association"])
+          print("FIRST_ST="+str(receipt["ST_first_12"]))
+          print("FIRST_TWO="+str(receipt["TWO_TARGET_first_12"]))
+          PY
+      - name: Publish metadata ONLY (no full raw native log or personal data)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simc-st-two-target-${{ github.sha }}
+          path: ci_artifacts/target_count/public_receipt.json
+          retention-days: 7
+          if-no-files-found: warn
