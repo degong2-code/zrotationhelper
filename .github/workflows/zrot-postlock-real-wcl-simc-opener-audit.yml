@@ -1,0 +1,140 @@
+name: zrot-postlock-real-wcl-simc-opener-evidence-audit
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/research/wcl_simc_postlock_real_audit_v1.py
+      - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/POSTLOCK_FURY_WCL_SIMC_FIXTURE_V1.json
+      - .github/workflows/zrot-postlock-real-wcl-simc-opener-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-contract:
+    name: Postlock independent PRE synthetic regression Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and self-test final source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/wcl_simc_postlock_real_audit_v1.py
+          python -B tools/research/wcl_simc_postlock_real_audit_v1.py > /tmp/postlock-offline.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/postlock-offline.json'))
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert x['checks']>=6
+          assert x['actual_WCL_source']=='NOT_ACCESSED'
+          assert x['actual_SimC_source']=='NOT_ACCESSED'
+          print('POSTLOCK_STRICT_PRE_SYNTHETIC=PASS')
+          PY
+          sha256sum tools/research/wcl_simc_postlock_real_audit_v1.py
+
+  independent-artifact-replay:
+    name: Real pinned WCL raw + postlock SimC independent replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [offline-contract]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Retrieve frozen-input WCL opener evidence (7-day temporary artifact)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41463589665
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          path: /tmp/wcl-evidence
+          github-token: ${{ github.token }}
+      - name: Retrieve pinned native SimC ST versus 2T evidence (7-day temporary artifact)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41422148326
+          name: simc-st-two-target-e15b790e870ab28b9d56ec138859f7374e3ad052
+          path: /tmp/simc-evidence
+          github-token: ${{ github.token }}
+      - name: Repack verified public input bytes without source changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          for name in ('wcl','simc'):
+              root=Path('/tmp/'+name+'-evidence')
+              paths=sorted(p for p in root.rglob('*') if p.is_file())
+              assert paths and len(paths)<=40
+              with ZipFile('/tmp/'+name+'-input.zip','w',compression=ZIP_DEFLATED) as z:
+                  for p in paths: z.write(p,arcname=str(p.relative_to(root)))
+              print('PREPARED_VERIFIABLE_INPUT',name,len(paths))
+          PY
+      - name: Independent raw Strict-PRE validation before pinned SimC comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/wcl_simc_postlock_real_audit_v1.py \
+            --wcl-zip /tmp/wcl-input.zip --simc-zip /tmp/simc-input.zip \
+            --contract docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/POSTLOCK_FURY_WCL_SIMC_FIXTURE_V1.json \
+            --out /tmp/postlock-comparison.json
+          python - <<'PY'
+          from pathlib import Path
+          import importlib.util,json
+          p=Path('tools/research/wcl_simc_postlock_real_audit_v1.py')
+          spec=importlib.util.spec_from_file_location('postlock_audit',p)
+          m=importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(m)
+          cfg=json.loads(Path('docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/POSTLOCK_FURY_WCL_SIMC_FIXTURE_V1.json').read_text())
+          o=json.loads(Path('/tmp/postlock-comparison.json').read_text())
+          assert o['status']=='POSTLOCK_OBSERVATION_ONLY'
+          assert o['verified_wcl_raw_events']==17083
+          assert o['verified_wcl_event_pages']==2
+          assert o['actor_cast_decisions']==54
+          assert {r['spell_id']:r['observations'] for r in o['blind_locked_candidate_counts']}=={
+              1:30,184367:9,335096:2,335097:6}
+          assert o['strict_pre_recomputed_from_raw'] is True
+          assert o['simc_first_12_prefix_comparison']['ST']['overlap_numeric_ids']==[100,1719,184367,335097,446035]
+          assert o['simc_first_12_prefix_comparison']['2T']['overlap_numeric_ids']==[100,1719,184367,446035]
+          assert o['WCL_target_count_at_cast']=='UNKNOWN'
+          assert o['WCL_current_build_vs_SimC_equivalence']=='UNKNOWN'
+          assert o['readiness_and_alternative_actions']=='UNKNOWN'
+          assert o['independent_holdout']=='NOT_RUN'
+          assert o['trainer_model_eligible'] is False
+          assert o['priority_or_optimality_proven'] is False
+          # Negative control: modified PRE-lock artifact must be rejected before SimC.
+          w=m._zip(Path('/tmp/wcl-input.zip'))
+          s=m._zip(Path('/tmp/simc-input.zip'))
+          corrupted=dict(w)
+          corrupted['derived/blind_lock.json']=w['derived/blind_lock.json']+b' '
+          try: m.compare(corrupted,s,cfg)
+          except m.EvidenceError as e:
+              assert 'WCL_LOCK_SHA' in str(e)
+          else: raise AssertionError('BLIND_LOCK_TAMPER_UNDETECTED')
+          print('REAL_WCL_STRICT_PRE_POSTLOCK_SIMC_AUDIT=PASS_NO_PRIORITY_CLAIM')
+          PY
+      - name: Retain only small derived comparison receipt, not duplicate raw logs
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postlock-real-wcl-simc-audit-${{ github.sha }}
+          path: /tmp/postlock-comparison.json
+          retention-days: 7
+          if-no-files-found: error
