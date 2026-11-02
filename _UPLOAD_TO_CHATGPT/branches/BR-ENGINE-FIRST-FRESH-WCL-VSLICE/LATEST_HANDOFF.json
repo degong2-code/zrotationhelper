@@ -226,7 +226,8 @@
     "parent_handoff_sha256": null,
     "carried_forward_at": "2026-11-02",
     "scope_override": false,
-    "new_user_scope_override_evidence": null
+    "new_user_scope_override_evidence": null,
+    "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295"
   },
   "scope_handoff_protocol": "docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md",
   "scope_boot_prompt": "handoff/NEW_CHAT_BOOT_PROMPT.md",
@@ -251,6 +252,7 @@
     "global_MAIN_pointer_promoted": false,
     "main_branch_docs_merged": false,
     "source_of_truth_note": "User 2026-11-02 explicit decision supersedes historical encounter/NSRT product goals; full scope snapshot must carry every future handoff.",
-    "actual_real_handoff_generation": 0
+    "actual_real_handoff_generation": 0,
+    "expected_negative_cases": 14
   }
 }
