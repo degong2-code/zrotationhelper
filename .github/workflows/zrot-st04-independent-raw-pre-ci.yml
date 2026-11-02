@@ -1,0 +1,94 @@
+name: zrot-st04-independent-raw-pre-ci
+
+on:
+  push:
+    branches:
+      - work/st04-independent-raw-pre-audit-20261102
+    paths:
+      - .github/workflows/zrot-st04-independent-raw-pre-ci.yml
+      - tools/research/ST04_raw_pre_capture_adapter_v1.py
+      - tools/research/ST04_independent_raw_pre_audit_v1.py
+      - tools/research/ST04_raw_pre_independent_regression_v1.py
+      - tools/research/ST03_source_pre_observability_v1.py
+      - tools/research/ST02_source_identity_reconciliation_v1.py
+      - tools/research/ST01_existing_simc_readiness_gate_regression_v1.py
+      - tools/research/ZROT_Source_Obligation_Gate_v1.py
+      - tools/research/simc_apl_readiness_provider.py
+      - docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json
+      - docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    name: ST04 Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Raw independent audit and focused regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/st04
+          test "$(git hash-object docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json)" = "e437da47d632737c9eacc3901c945590aff0308b"
+          test "$(git hash-object docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json)" = "2e933135877704b257237ef465025e532a14b9c0"
+          python -B -m py_compile tools/research/ST04_raw_pre_capture_adapter_v1.py tools/research/ST04_independent_raw_pre_audit_v1.py tools/research/ST04_raw_pre_independent_regression_v1.py
+          python -B tools/research/ST04_raw_pre_independent_regression_v1.py > ci_artifacts/st04/new_regression.json
+          python -B tools/research/ST03_source_pre_observability_regression_v1.py > ci_artifacts/st04/st03_unchanged.json
+          python - <<'PY'
+          import hashlib,json,os,platform
+          from pathlib import Path
+          fresh=json.loads(Path("ci_artifacts/st04/new_regression.json").read_text())
+          prior=json.loads(Path("ci_artifacts/st04/st03_unchanged.json").read_text())
+          assert fresh["status"]=="PASS" and fresh["passed"]==33, fresh
+          assert prior["result"]=="PASS" and prior["count"]==39, prior
+          assert fresh["native_simc_feature_producer"]=="NOT_VERIFIED"
+          assert fresh["live_ready_certified"]==0
+          assert fresh["authority_promotion"] is False
+          pins={p:hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in (
+              "tools/research/ST04_raw_pre_capture_adapter_v1.py",
+              "tools/research/ST04_independent_raw_pre_audit_v1.py",
+              "tools/research/ST04_raw_pre_independent_regression_v1.py",
+              "tools/research/ST03_source_pre_observability_v1.py",
+              "tools/research/ST02_source_identity_reconciliation_v1.py",
+              "tools/research/ZROT_Source_Obligation_Gate_v1.py",
+              "docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json",
+              "docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json"))
+          receipt={
+              "schema":"ZrotST04GithubOfflineCIReceiptV1","result":"PASS",
+              "new_regression_n":fresh["passed"],
+              "unchanged_st03_regression_n":prior["count"],
+              "source_sha256":pins,"github_sha":os.getenv("GITHUB_SHA","UNKNOWN"),
+              "github_run_id":os.getenv("GITHUB_RUN_ID","UNKNOWN"),
+              "python_version":platform.python_version(),
+              "validation":"RAW_BYTE_PROJECTION_INDEPENDENT_PRE_CONSISTENCY_ONLY",
+              "raw_source_authenticity":"NOT_VERIFIED",
+              "native_simc_real_producer":"NOT_RUN",
+              "wcl_blind":"NOT_RUN","blizzard_gameplay":"NOT_VERIFIED",
+              "gameplay_ready_certified":0,"authority_promotion":False,
+              "seq578":"FAILED_QUARANTINED_PRESERVED","seq637":"UNKNOWN"}
+          Path("ci_artifacts/st04/github_receipt.json").write_text(
+              json.dumps(receipt,sort_keys=True,indent=2)+"\n")
+          print("ST04_RAW_INDEPENDENT_PRE_CI=PASS")
+          PY
+      - name: Upload scoped offline evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: st04-independent-pre-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/st04/
+          if-no-files-found: warn
+          retention-days: 7
