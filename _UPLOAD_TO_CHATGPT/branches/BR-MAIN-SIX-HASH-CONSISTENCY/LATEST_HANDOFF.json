@@ -1,0 +1,75 @@
+{
+  "schema": "ZrotMainSixLocalHashReconciliationHandoffV1",
+  "date": "2026-11-02",
+  "owner": "MAIN_AUTHORITY_REVIEW_BRANCH_ONLY",
+  "branch": "work/main-six-pin-consistency-20261102",
+  "parent_branch": "work/main-authority-status-boundary-20261102",
+  "parent_sha": "f60b5f8d861efe79965f564d7d90738adf0af648",
+  "validated_code_sha": "ea9b604982317001ed9dba11bc150982200541b4",
+  "validation": {
+    "user_PC_reported_six_SHA": "ALL_SIX_MATCH_PRIVATE_ARCHIVED_M4B_124_BYTES",
+    "user_PC_actual_file_contents_access": "NOT_AVAILABLE_ONLY_SHA_REPORTED",
+    "actual_private_archive_byte_comparison": "OFFLINE_VERIFIED_BY_HASH",
+    "archived_124_zip_sha256": "46e3a2dd1b51465429932a03efb7345cae781c756137dea9a39c9c4bed152bf6",
+    "live_reported_sha_count": 6,
+    "in_archive_sha_matches": 6,
+    "github_ci_run_id": 41393126105,
+    "github_ci_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41393126105",
+    "github_ci_python312": "SUCCESS",
+    "github_ci_python314": "SUCCESS",
+    "synthetic_negative_contract_tests_per_python": 6,
+    "private_archive_directly_replayed_by_ci": false,
+    "source_metadata_published_only": true,
+    "current_PC_launcher_or_dispatcher_executed": false
+  },
+  "authority_reconciliation": {
+    "file_content_consistent_with_old_snapshot": true,
+    "inherited_historical_inconsistency": true,
+    "current_state_workflow": "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1",
+    "control_plane_workflow": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+    "latest_handoff_workflow": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+    "entrypoint_authority_workflow": "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1",
+    "prompt_workflow_ID": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+    "prompt_workflow_SHA_points_to": "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1",
+    "stale_embedded_SHA_occurrences": 4,
+    "auth_entrypoint_old_sha_vs_live_sha": "MISMATCH",
+    "auth_control_config_old_sha_vs_live_sha": "MISMATCH",
+    "handoff_entrypoint_old_sha_vs_live_sha": "MISMATCH",
+    "current_source_default_action_conflict": "RUN_ACTIVE_vs_STATUS",
+    "archive_current_state_canonical_root_is_historical_migrated_path": true,
+    "current_product_MAIN_authority": "UNKNOWN",
+    "local_snapshot_SAME_AS_OLD_SOURCE": "TRUE_FOR_SIX_SELECTED_FILES_NOT_ENTIRE_RUNTIME",
+    "source_input_origin": "USER_REPORTED_SHA_VS_PRIVATE_ARCHIVED_FILE_BYTES",
+    "candidate_latest_active_workflow": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1__UNAUTHORIZED_HYPOTHESIS_ONLY"
+  },
+  "safety": {
+    "automatic_rewrite_historical_frozen_authority": false,
+    "MAIN_CURRENT_STATE_promoted": false,
+    "active_manifest_pointer_modified": false,
+    "github_main_modified": false,
+    "product_entrypoint_run": false,
+    "WCL_SimC_Blizzard_live_run": false,
+    "FROZEN_changed": false,
+    "gameplay_ready_certified": 0,
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN"
+  },
+  "delivered_files": [
+    "docs/MAIN_SIX_LIVE_HASHES_SNAPSHOT_CONSISTENCY_20261102.json",
+    "tools/recovery/main_six_hash_consistency_gate_v1.py",
+    ".github/workflows/zrot-main-six-fingerprint-authority-review.yml"
+  ],
+  "next_process": [
+    "Use existing six-file byte-equality evidence; do not re-hash or re-collect the same files again",
+    "Review current approved Runtime/Work State to determine whether successor active workflow should be FEX or FIRST; never guess from old docs",
+    "Produce replacement successor authority objects in isolated staging with explicit version/hash and STATUS_ONLY default",
+    "Apply focused independent source/behavior/side-effect tests to staged data",
+    "Only MAIN may promote shared CURRENT_STATE, registry/pointer, runtime default or active workflow after evidence acceptance"
+  ],
+  "cross_branch_dependency": [
+    "cross_branch_dependency: MAIN needs authoritative Runtime/Work State and active workflow selection evidence; ambiguous historical six-file snapshot is insufficient",
+    "cross_branch_dependency: MAIN needs safe status path that cannot execute Inbox dispatch before CLI parsing",
+    "cross_branch_dependency: WCL owner must maintain independent blind candidate lock before any SimC semantic join"
+  ],
+  "result": "BRANCH_LOCAL_SIX_SNAPSHOT_RECONCILIATION_CI_PASS__PRODUCT_MAIN_PROMOTION_BLOCKED"
+}
