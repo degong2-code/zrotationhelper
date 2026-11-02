@@ -1,0 +1,100 @@
+{
+  "schema": "ZrotMainStatusOnlySuccessorBranchHandoffV1",
+  "date": "2026-11-02",
+  "branch_id": "BR-MAIN-STATUS-ONLY-20261102",
+  "owner": "BRANCH_REVIEW_NOT_MAIN_PRODUCTION_PROMOTION",
+  "branch": "work/main-status-only-successor-20261102",
+  "base_sha": "5411e34d0cae4d6e354433666c17240d37188148",
+  "base_source": "work/main-six-pin-consistency-20261102",
+  "base_evidence_git_blob_sha1": "675b081a5ff82b58a2b5497ca3aa0a9dc6a38b0e",
+  "latest_validated_code_sha": "25a6f8919f13ad468edb2c31c719bf60b41f11e3",
+  "purpose": "Status-only successor authority candidate that cannot select or run either conflicted historical workflow, and cannot mutate MAIN, FROZEN, Registry or Pointer.",
+  "outcomes": {
+    "candidate_schema": "ZrotMainAuthoritySuccessorStatusOnlyCandidateV1",
+    "candidate_status": "BRANCH_CANDIDATE_NOT_PROMOTED",
+    "candidate_workflow_selected": null,
+    "historic_candidate_FEX_source_sha256": "c9ba0657c0f5ed936acf41a839780d6b3c245e08757107a96fef6cc675b1dc2f",
+    "historic_candidate_FIRST_source_sha256": "a3a30cc8f406216f9281109a3ffc357dba8306fafeb7b7a6f4fe090785e2d080",
+    "source_classification": "HISTORICAL_CHOICES_UNAPPROVED",
+    "default_operation": "READ_CANDIDATE_STATUS",
+    "allowed_operations": [
+      "READ_CANDIDATE_STATUS",
+      "VALIDATE_CANDIDATE_CONTRACT"
+    ],
+    "forbidden_operations": [
+      "RUN_ACTIVE",
+      "LEGACY_RUN_zRAID_MAIN",
+      "DISPATCH_INBOX",
+      "RUN_SIMC",
+      "CALL_WCL",
+      "WRITE_MAIN_STATE",
+      "WRITE_POINTER",
+      "PROMOTE_FROZEN"
+    ],
+    "status_command_runnable_without_product_runtime": true,
+    "does_not_execute_or_import_old_runner": true,
+    "actual_current_runtime_approved": "UNKNOWN",
+    "actual_current_work_state_approved": "UNKNOWN",
+    "wcl_blind_candidates_affected": false,
+    "gameplay_rule_readiness_certified": 0
+  },
+  "github_ci": {
+    "final_run_id": 41396524667,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41396524667",
+    "final_conclusion": "SUCCESS",
+    "final_tested_sha": "25a6f8919f13ad468edb2c31c719bf60b41f11e3",
+    "python312": "PASS",
+    "python314": "PASS",
+    "negative_cases_each": 15,
+    "independent_raw_JSON_review": "PASS",
+    "unknown_execution_option_rejected": "PASS",
+    "artifact_id_python312": 13119517705,
+    "artifact_id_python314": 13118903645,
+    "intermediate_failed_run_preserved": {
+      "id": 41396492724,
+      "reason": "expected self-test count was 12 when hardening introduced 15; corrected in next workflow commit"
+    },
+    "live_product_run": "NOT_RUN",
+    "WCL_SimC_api": "NOT_RUN",
+    "current_PC_files_reaccessed": "NO"
+  },
+  "owned_files": [
+    "active/branches/BR-MAIN-STATUS-ONLY-20261102/MAIN_AUTHORITY_STATUS_ONLY_CANDIDATE_V1.json",
+    "tools/recovery/main_status_only_successor_review_v1.py",
+    ".github/workflows/zrot-main-status-only-successor-review.yml"
+  ],
+  "remains_blocked": [
+    "Current approved Runtime and Work State are UNKNOWN; six local files match historical snapshot but do not prove current authority",
+    "Historic CURRENT_STATE and EntryPoint Authority select FIRST, Control Plane and Handoff select FEX, prompt ID/SHA mismatch",
+    "Legacy RUN_zRAID_MAIN may dispatch Inbox before CLI processing",
+    "Product source runtime behavior and dynamic imports not independently validated against approved current MAIN",
+    "Canonical registry/pointer absent in recovered private snapshot, but not direct dependency of historical status-only execution"
+  ],
+  "cross_branch_dependency": [
+    "cross_branch_dependency: MAIN owner needs provide/verify latest authoritative Runtime & Work State and choose current active workflow based on evidence, not inferred preference",
+    "cross_branch_dependency: MAIN owner needs resolve old entrypoint/config SHA pin conflicts and maintain separate successor authority objects",
+    "cross_branch_dependency: product integration owner needs nonexecuting full source compatibility and independent side-effect behavior regression before future activation",
+    "cross_branch_dependency: WCL blind discovery owner needs preserve numeric candidate lock and Strict PRE independent of SimC semantics"
+  ],
+  "invariants": {
+    "GitHub_main_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
+    "github_main_modified": false,
+    "shared_CURRENT_STATE_modified": false,
+    "canonical_registry_created": false,
+    "active_pointer_changed": false,
+    "archived_control_plane_changed": false,
+    "FROZEN_changed": false,
+    "Seq578": "FAILED_QUARANTINED_PRESERVED",
+    "Seq637": "UNKNOWN",
+    "product_MAIN_promoted": false
+  },
+  "focused_revalidation_if_MAIN_authority_arrives": [
+    "Independent compare approved current Runtime & Work State fingerprints to historical candidate",
+    "Predeclare selected active workflow and compile immutable exact source+policy hash in new successor version; never edit prior frozen authority bytes",
+    "Prove status path bypasses Inbox and cannot dispatch any package",
+    "Run source complete focused compatibility with research sources and multi-spec fixtures in sandbox; preserve gameplay UNKNOWN if not verified",
+    "Only MAIN accepts or rejects production promotion; branch handoff itself cannot promote"
+  ],
+  "next": "Seek evidence that establishes current Runtime/Work State authority; do not repeat existing six-file hashes, M4B 124 byte audit, or ST01-ST06 CI without source change.",
+  "status": "MERGE_READY_FOR_MAIN_REVIEW_ONLY__NOT_PRODUCT_RUNTIME_AUTHORIZED"
+}
