@@ -1,0 +1,22 @@
+# BRANCH-LOCAL REVIEW PATCH ONLY — DO NOT APPLY TO HISTORICAL/FROZEN SOURCE
+# target: 02_SOURCE/runtime/raid_dps/core/prestate.py
+# historical SHA256: 889fdd114f5a07d31612c0fc2a548ac0dfab1dc1d5738e8741f573194efd7d50
+# diagnosis: int(0) is falsy; "or" discards observed zero stack.
+# original source remains unchanged; in-memory fixture validates exact replacement.
+--- a/02_SOURCE/runtime/raid_dps/core/prestate.py
++++ b/02_SOURCE/runtime/raid_dps/core/prestate.py
+@@ -1,11 +1,7 @@
+     if typ == "removebuffstack":
+-        stack = (
+-            as_int(
+-                event.get("stack")
+-            )
+-            or as_int(
+-                event.get("stacks")
+-            )
+-        )
++        stack = as_int(event.get("stack"))
++        if stack is None:
++            stack = as_int(event.get("stacks"))
+ 
+         # WCL payloads can omit the post-event stack count. In that case we
