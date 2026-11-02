@@ -6,7 +6,9 @@ on:
       - work/gr-native-simc-smoke-20261102
     paths:
       - .github/workflows/zrot-native-simc-opener-smoke.yml
-      - tools/research/native_simc_opener_ingest_v1.py
+      - tools/research/simc_native_reference_capture.py
+      - tools/research/simc_native_json_sequence.py
+      - tools/research/simc_native_performed_events.py
   workflow_dispatch:
 
 permissions:
@@ -19,11 +21,11 @@ jobs:
     env:
       SIMC_COMMIT: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
     steps:
-      - name: Checkout zRotationHelper research (no credentials persisted)
+      - name: Checkout zRotationHelper without credentials
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Checkout exact upstream public SimulationCraft source
+      - name: Checkout pinned upstream official SimulationCraft
         uses: actions/checkout@v4
         with:
           repository: simulationcraft/simc
@@ -31,7 +33,7 @@ jobs:
           path: simc-upstream
           persist-credentials: false
           submodules: false
-      - name: Check source and profile pins
+      - name: Pin exact source and profile
         shell: bash
         run: |
           set -euo pipefail
@@ -43,108 +45,105 @@ jobs:
           raw=p.read_bytes()
           blob=hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\0"+raw).hexdigest()
           assert blob=="3225992ed5b754ad5d61e8b785d9d859f1eed1be",blob
-          print("PINNED_NATIVE_SIMC_SOURCE_AND_FURY_PROFILE=PASS")
+          print("NATIVE_SRC_AND_PROFILE_PINS=PASS")
           PY
-      - name: Build official C++ SimulationCraft CLI from pinned source
+      - name: Install ccache
+        shell: bash
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ccache
+      - name: Restore compiler cache for same native source
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: simc-ubuntu-gcc-b522cded8c26b97dac03fdf56e57a03ec7e8faa6-v1
+      - name: Build official SimC CLI once using pinned source
         shell: bash
         run: |
           set -euo pipefail
+          ccache --max-size=2G
           cmake -S simc-upstream -B /tmp/zrot-simc-build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_GUI=OFF -DBUILD_TESTING=OFF -DSC_NO_NETWORKING=ON
+            -DBUILD_GUI=OFF -DBUILD_TESTING=OFF -DSC_NO_NETWORKING=ON \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build /tmp/zrot-simc-build --target simc --parallel 3
           test -x /tmp/zrot-simc-build/simc
           /tmp/zrot-simc-build/simc display_build=2
-      - name: Execute real native SimC one-actor ST with bounded log and deterministic seed
+          ccache --show-stats
+      - name: Run official native CLI via existing pinned reference capture module
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p ci_artifacts/native_simc
-          /tmp/zrot-simc-build/simc \
-            "simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc" \
-            iterations=1 max_time=45 fixed_time=1 seed=31459 log=1 \
-            log_spell_id=1 "output=$PWD/ci_artifacts/native_simc/fury_st.log" \
-            > ci_artifacts/native_simc/native_stdout.txt 2>&1
-          test -s ci_artifacts/native_simc/fury_st.log
-          echo "=== native stdout (capped) ==="
-          head -c 2000 ci_artifacts/native_simc/native_stdout.txt
-          echo "=== native log sample first 90 lines, max 15000 bytes ==="
-          head -n 90 ci_artifacts/native_simc/fury_st.log | head -c 15000 || true
-          echo
-      - name: Parse real performed actions with strict scope and no gameplay promotion
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --spec fury \
+            --simc-bin /tmp/zrot-simc-build/simc \
+            --out-dir ci_artifacts/native_simc/reference \
+            --timeout 180
+          test -s ci_artifacts/native_simc/reference/simc_reference_receipt.json
+          test -s ci_artifacts/native_simc/reference/simc_native_log.txt
+          test -s ci_artifacts/native_simc/reference/simc_native_sequence.json
+          test -s ci_artifacts/native_simc/reference/simc_effective_actions.simc
+      - name: Independently extract native event records and structured JSON2 action state
         shell: bash
         run: |
           set -euo pipefail
-          python -B -m py_compile tools/research/native_simc_opener_ingest_v1.py
-          python -B tools/research/native_simc_opener_ingest_v1.py --self-test > ci_artifacts/native_simc/parser_selftest.json
-          python -B tools/research/native_simc_opener_ingest_v1.py \
-            --log-file ci_artifacts/native_simc/fury_st.log \
-            --actor MID2_Warrior_Fury \
-            --source-commit "$SIMC_COMMIT" \
-            --profile-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
-            --seed 31459 \
-            --out ci_artifacts/native_simc/native_actions.json
+          python -B tools/research/simc_native_reference_capture.py --self-test
+          python -B tools/research/simc_native_json_sequence.py --self-test
+          python -B tools/research/simc_native_performed_events.py --self-test
           python - <<'PY'
-          import json
+          import json,sys
           from pathlib import Path
-          a=Path("ci_artifacts/native_simc")
-          t=json.loads((a/"parser_selftest.json").read_text())
-          n=json.loads((a/"native_actions.json").read_text())
-          assert t["result"]=="PASS" and t["case_count"]>=20
-          assert n["observed_log_actor_found"] is True
-          assert n["observed_performs_event_count"]>=3
-          assert len(n["opening_window_actions"])>=1
-          assert n["combat_opener_automatically_proven"] is False
-          assert n["cooldown_readiness_reconstructed"] is False
-          assert n["player_facing_general_rotation_rule_ready"] is False
-          print("NATIVE_SIMC_LOG_OBSERVED_ACTIONS="+str(n["observed_performs_event_count"]))
-          print("NATIVE_SIMC_FIRST_15_SECONDS="+str([
-            (x["simulation_time_s"],x["action_as_logged"])
-            for x in n["opening_window_actions"][:16]
-          ]))
-          PY
-      - name: Prove genuine execution and record bounded evidence only
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          import hashlib,json
-          p=Path("ci_artifacts/native_simc/fury_st.log")
-          raw=p.read_bytes()
-          assert len(raw)>200,"NATIVE_LOG_EMPTY"
-          lines=raw.decode("utf-8",errors="replace").splitlines()
-          r={
-           "schema":"ZrotPinnedNativeSimcExecutionRawReceiptV1",
-           "upstream_commit":"b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
-           "profile_path":"profiles/MID2/MID2_Warrior_Fury.simc",
-           "profile_git_blob_sha1":"3225992ed5b754ad5d61e8b785d9d859f1eed1be",
-           "native_executable_run":"PASS_NATIVE_SIMC_CLI_EXIT_0",
-           "seed":31459,"iterations":1,"fight_style":"DEFAULT_PATCHWERK",
-           "native_log_sha256":hashlib.sha256(raw).hexdigest(),
-           "native_log_lines":len(lines),
-           "native_log_size_bytes":len(raw),
-           "native_observed_action_count":json.loads(Path("ci_artifacts/native_simc/native_actions.json").read_text())["observed_performs_event_count"],
-           "native_first_15_sec_observed_actions":[{"t":x["simulation_time_s"],"name":x["action_as_logged"]} for x in json.loads(Path("ci_artifacts/native_simc/native_actions.json").read_text())["opening_window_actions"][:20]],
-           "native_log_preview_first_30_lines":lines[:30],
-           "native_action_sequence_parsed":"STRUCTURAL_PERFORMED_EVENTS_ONLY",
-           "strict_pre_readiness_verified":False,
-           "WCL_ranker_reconciliation":"NOT_RUN",
-           "opener_complete":False,
-           "General_Rotation_model_validated":False,
-           "historical_MAIN_executed":False,
+          sys.path.insert(0,"tools/research")
+          from simc_native_performed_events import extract_native_reference
+          from simc_native_json_sequence import extract_json_sequence
+          folder=Path("ci_artifacts/native_simc/reference")
+          source=json.loads((folder/"simc_reference_receipt.json").read_text())
+          seq=extract_json_sequence(folder)
+          performed=extract_native_reference(folder)
+          assert source["status"]=="SIMC_NATIVE_CAPTURED_UNPARSED"
+          assert seq["source_capture_status"]=="SIMC_NATIVE_CAPTURED_UNPARSED"
+          assert seq["source_apl_sha256"]==source["effective_apl_sha256"]
+          assert seq["combat_count"]>0,seq["status"]
+          assert performed["performed_event_count"]>0,performed["status"]
+          assert performed["status"]=="NATIVE_PERFORMED_EVENT_SYNTAX_EXTRACTED"
+          first=[
+            {"time_s":a["timestamp_s"] if "timestamp_s" in a else a.get("timestamp_ms"),
+             "token":a.get("action_token"),"id":a.get("spell_id")}
+            for a in performed["performed_events"]
+            if a["timestamp_ms"]>=0
+          ][:20]
+          report={
+            "schema":"ZrotNativeSimcVerifiedSourceExecutionReceiptV1",
+            "result":"PASS_OFFICIAL_CLI_EXECUTED_WITH_REFERENCE_MODULE",
+            "upstream_commit":"b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+            "profile_git_blob_sha1":"3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+            "native_executable_sha256":source["simc_executable_sha256"],
+            "native_profile_sha256":source["profile_sha256"],
+            "native_effective_apl_sha256":source["effective_apl_sha256"],
+            "native_log_sha256":source["native_log_sha256"],
+            "native_json2_sha256":source["native_json2_sha256"],
+            "performed_event_count":performed["performed_event_count"],
+            "json2_precombat_count":seq["precombat_count"],
+            "json2_combat_count":seq["combat_count"],
+            "first_native_performed_actions":first,
+            "native_extractor_format_basis":performed["format_reference_upstream_commit"],
+            "native_extractor_format_equivalence":performed["native_executable_format_equivalence"],
+            "native_action_sequence_not_paired_to_WCL":True,
+            "strict_pre_readiness_for_WCL":"NOT_RECONSTRUCTED",
+            "actual_WCL_high_ranker_validation":"NOT_RUN",
+            "player_ready_General_Rotation":"NOT_PROVEN",
+            "target_dummy_feedback":"NOT_RUN",
+            "production_authority_promoted":False,
           }
-          Path("ci_artifacts/native_simc/native_receipt.json").write_text(
-           json.dumps(r,indent=2,ensure_ascii=False)+"\n")
-          print("NATIVE_SIMC_EXECUTION=PASS_EXIT_0")
+          Path("ci_artifacts/native_simc/receipt.json").write_text(
+             json.dumps(report,ensure_ascii=False,indent=2)+"\n")
+          print("NATIVE_SIMC_REFERENCE_CAPTURE_JSON2_AND_PERFORMS=PASS")
+          print("NATIVE_ACTIONS_FIRST_20="+str(first))
           PY
-      - name: Retain bounded execution metadata, not private or full logs
+      - name: Publish small receipt only (not raw source logs)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: native-simc-evidence-${{ github.sha }}
-          path: |
-            ci_artifacts/native_simc/native_receipt.json
-            ci_artifacts/native_simc/native_actions.json
-            ci_artifacts/native_simc/parser_selftest.json
+          name: native-simc-verified-${{ github.sha }}
+          path: ci_artifacts/native_simc/receipt.json
           retention-days: 7
           if-no-files-found: warn
