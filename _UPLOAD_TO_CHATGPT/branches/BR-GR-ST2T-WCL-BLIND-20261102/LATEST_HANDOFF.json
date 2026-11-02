@@ -119,7 +119,7 @@
     "new_user_scope_override_evidence": null
   },
   "product_exact_next": "Complete empirically verified SimC-first General Rotation opener and ST/2-target/AoE IF/ELSE priority; then precise target-dummy practice feedback.",
-  "chat_exact_next": "Confirm pinned official native Fury 1-target and 2-target real sample capture/JSON2 difference, then acquire WCL high-ranker logs on a separate blind cohort to validate and correct target-count conditional priorities.",
+  "chat_exact_next": "Acquire independently selected WCL high-ranker raw snapshots (actor/spec/build verified) with legitimate owner credentials; reconstruct opportunity/readiness Strict PRE and numeric candidate lock before exposing SimC labels. Only then compare SimC 1T/2T opener states and derive confidence-bounded IF/ELSE General Rotation thresholds. Continue 3+ target SimC studies if useful after WCL integration.",
   "new_source_files": [
     "tools/research/simc_native_reference_capture.py (bounded new --targets/--seed/--fight-seconds overrides)",
     "tools/research/simc_native_target_count_compare_v1.py",
@@ -130,7 +130,7 @@
   "validation": {
     "simc_target_offline_run_id": 41422148326,
     "simc_target_offline": "PASS_PYTHON_3_12_AND_3_14",
-    "simc_native_target_capture": "IN_PROGRESS_NOT_YET_PASS",
+    "simc_native_target_capture": "PASS_REAL_PINNED_NATIVE_SIMC_ST_AND_TWO_TARGET",
     "WCL_blind_numeric_lock_offline_run_id": 41422536988,
     "WCL_blind_numeric_lock_offline": "PASS_PYTHON_3_12_AND_3_14",
     "WCL_blind_live_ranker_acquisition": "NOT_RUN",
@@ -139,7 +139,23 @@
     "post_lock_SimC_WCL_reconciliation": "NOT_RUN",
     "Blizzard_current_spell_truth": "NOT_RUN",
     "General_Rotation_validated": false,
-    "dummy_trainer_feedback_validated": false
+    "dummy_trainer_feedback_validated": false,
+    "simc_native_target_capture_run_id": 41422148326,
+    "real_target_count_source": "OFFICIAL_SIMC_DESIRED_TARGETS_1_VS_2",
+    "actual_SimC_executable_reused": true,
+    "actual_SimC_profile_reused": true,
+    "actual_SimC_seed_fixed": 31459,
+    "actual_SimC_fight_seconds_fixed": 75,
+    "first_15_seconds_ST_observed_actions": 24,
+    "first_15_seconds_TWO_observed_actions": 24,
+    "common_prefix_observed_actions": 9,
+    "actual_sample_action_sequence_difference": "OBSERVED_NOT_CAUSALLY_PROVEN",
+    "native_st_two_public_receipt_sha256": "a878a2b5720e842faa14ac1375e526c153d7d1852033a3757b6097d88d393f37",
+    "native_st_two_public_receipt_artifact_id": 13131110674,
+    "native_binary_sha256": "f85553adbd4df104cd59f01be8543d620aefddd591d1f593f650932539e035f9",
+    "simc_APL_sha256": "98635a684638d241000c0f9b3a78b9eb43d9579b522f864b8aaf5ebaa159e737",
+    "handoff_product_scope_continuity_run_id": 41423090479,
+    "handoff_product_scope_continuity": "PASS_FIVE_SIMULATED_HOPS_14_NEGATIVE_CASES"
   },
   "evidence_claim_boundaries": {
     "same_simc_profile_binary_seed_fight_time_before_comparison": true,
@@ -165,6 +181,34 @@
   "Seq637": "UNKNOWN",
   "MAIN_promoted": false,
   "blockers": [
-    "Real WCL high-ranker samples with correctly attested actor/spec/build/readiness remain unavailable in this branch."
-  ]
+    "WCL high-ranker real fight/actor sample selection and authenticated API collection are not yet demonstrated in this branch. Numeric blind lock is offline synthetic-tested only; no actual ranker holdout.",
+    "The same-seed SimC target comparison is an observed association, not causal action priority or a verified opener rule."
+  ],
+  "actual_simc_observation": {
+    "source_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "profile": "profiles/MID2/MID2_Warrior_Fury.simc",
+    "target_counts": [
+      1,
+      2
+    ],
+    "first_15_seconds_counts": [
+      24,
+      24
+    ],
+    "first_divergence_ordinal_zero_based": 9,
+    "first_divergence_ST": {
+      "timestamp_ms": 3800,
+      "action_token": "crushing_blow",
+      "spell_id": 335097
+    },
+    "first_divergence_TWO": {
+      "timestamp_ms": 3786,
+      "action_token": "rampage",
+      "spell_id": 184367
+    },
+    "difference_claim": "ASSOCIATION_ONLY; SAMPLED_ACTIONS_AND_TIMESTAMP_MAY_DEPEND_ON_RNG_AND_STATE",
+    "numeric_or_apl_priority_claim": "NONE",
+    "native_runtime_logs_stored_on_GitHub": false
+  },
+  "result_summary": "REAL_NATIVE_SIMC_ST_2TARGET_COMPARISON_PASS; WCL_BLIND_LOCK_OFFLINE_PASS; WCL_RANKER_VALIDATION_NOT_RUN; GENERAL_ROTATION_NOT_FROZEN"
 }
