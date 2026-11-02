@@ -1,0 +1,82 @@
+name: zrot-main-six-fingerprint-authority-review
+
+on:
+  push:
+    branches:
+      - work/main-six-pin-consistency-20261102
+    paths:
+      - docs/MAIN_SIX_LIVE_HASHES_SNAPSHOT_CONSISTENCY_20261102.json
+      - tools/recovery/main_six_hash_consistency_gate_v1.py
+      - .github/workflows/zrot-main-six-fingerprint-authority-review.yml
+
+permissions:
+  contents: read
+
+jobs:
+  static-attestation:
+    name: Static six-pin scope Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify unchanged bootstrap main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin refs/heads/main
+          test "$(git rev-parse FETCH_HEAD)" = "4790f77f76a75f26ff0558d1d18c16cd9d630c4b"
+      - name: Validate immutable user reported SHA evidence and fail-closed authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/six_pins
+          python -B -m py_compile tools/recovery/main_six_hash_consistency_gate_v1.py
+          python -B tools/recovery/main_six_hash_consistency_gate_v1.py --self-test > ci_artifacts/six_pins/receipt.json
+          python - <<'PY'
+          import json,os,platform
+          from pathlib import Path
+          p=Path("ci_artifacts/six_pins/receipt.json")
+          d=json.loads(p.read_text())
+          assert d["status"]=="PASS_SIX_PIN_ATTESTATION__PRODUCT_MAIN_AUTHORITY_STILL_UNKNOWN"
+          assert d["reported_pc_hashes_match_original_archive"]==6
+          assert d["historical_cross_doc_disagreements_preserved"]==6
+          assert d["explicit_stale_embedded_source_hashes"]==4
+          assert d["negative_tests_passed"]==6
+          assert d["current_main_promotion"] is False and d["original_source_run"] is False
+          assert d["automatic_repair"] is False and d["frozen_modified"] is False
+          assert d["seq578"]=="FAILED_QUARANTINED_PRESERVED"
+          assert d["seq637"]=="UNKNOWN"
+          evidence={
+            "schema":"ZrotMainSixPinSafeReviewCIReceiptV1",
+            "status":"PASS_SIX_HISTORICAL_PINS__BLOCKED_MAIN_PRODUCT_PROMOTION",
+            "github_sha":os.environ.get("GITHUB_SHA","UNKNOWN"),
+            "run_id":os.environ.get("GITHUB_RUN_ID","UNKNOWN"),
+            "python":platform.python_version(),
+            "live_user_machine_access":False,
+            "private_archive_raw_bytes_in_runner":False,
+            "source_basis":"USER_PROVIDED_HASHES_RECONCILED_WITH_PRIVATE_M4B_BY_OFFLINE_AUDIT",
+            "historical_stale_pin_occurrences":4,
+            "candidate_automatic_execution":False,
+            "product_MAIN_promoted":False,
+            "seq578":"FAILED_QUARANTINED_PRESERVED","seq637":"UNKNOWN"
+          }
+          Path("ci_artifacts/six_pins/github_receipt.json").write_text(json.dumps(evidence,sort_keys=True,indent=2)+"\n")
+          print("MAIN_SIX_HASH_SCOPE_CI=PASS_NO_PROMOTION")
+          PY
+      - name: Upload bounded receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-six-hash-review-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/six_pins/*.json
+          if-no-files-found: warn
+          retention-days: 7
