@@ -1,0 +1,85 @@
+name: zrot-general-opener-priority-simc-baseline
+
+on:
+  push:
+    branches:
+      - work/gr-simc-opener-priority-vslice-20261102
+    paths:
+      - tools/research/simc_general_opener_priority_bridge_v1.py
+      - tools/research/fixtures/general_rotation_opener_*
+      - .github/workflows/zrot-general-opener-priority-simc-baseline.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-opener-hypothesis:
+    name: General opener/PRE hypothesis Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile exact bridge delivered on branch
+        run: |
+          python -m py_compile tools/research/simc_general_opener_priority_bridge_v1.py
+      - name: Synthetic SimC-first opener-to-post-opener behavioral replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/general_opener
+          python -B tools/research/simc_general_opener_priority_bridge_v1.py --self-test > ci_artifacts/general_opener/bridge_selftest.json
+          python -B tools/research/simc_general_opener_priority_bridge_v1.py \
+            --actions-file tools/research/fixtures/general_rotation_opener_synthetic.simc \
+            --spec enhancement \
+            --fixture tools/research/fixtures/general_rotation_opener_strict_pre_synthetic.json \
+            --out ci_artifacts/general_opener/replay.json
+      - name: Validate actual replay JSON without elevating hypothetical priority
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a=Path("ci_artifacts/general_opener")
+          test=json.loads((a/"bridge_selftest.json").read_text())
+          x=json.loads((a/"replay.json").read_text())
+          assert test["result"]=="PASS"
+          assert test["synthetic_assertion_count"]>=22
+          assert x["schema"]=="ZrotSimcFirstGeneralOpenerPriorityHypothesisV1"
+          assert x["scope_id"]=="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
+          assert x["source_spec"]=="enhancement"
+          assert x["explicit_opener_sample_count"]==2
+          assert x["post_opener_sample_count"]==2
+          assert len(x["precombat_apl_directives_not_combat_opener"])==1
+          assert [r["hypothesis_action_token"] for r in x["decision_samples"][:3]]==["alpha","beta","gamma"]
+          assert x["decision_samples"][2]["same_timestamp_events_excluded"]==1
+          assert x["decision_samples"][2]["future_events_excluded"]==1
+          assert x["decision_samples"][3]["hypothesis_action_token"] is None
+          assert x["decision_samples"][3]["status"]!="CANDIDATE"
+          assert x["opener_sequence_proven_complete"] is False
+          assert x["validated_general_rotation_IR"] is False
+          assert x["WCL_blind_lane_consumed"] is False
+          assert x["training_mistake_feedback_eligible"] is False
+          print("SIMC_FIRST_OPENER_PRIORITY_REPLAY_PASS_WITH_UNKNOWN_GUARD")
+          PY
+      - name: Confirm existing generic source and graph self-tests
+        run: |
+          python -B tools/research/simc_apl_source_engine.py --self-test
+          python -B tools/research/simc_apl_conditional_ir.py --self-test
+          python -B tools/research/simc_apl_decision_graph.py --self-test
+      - name: Preserve small synthetic receipts only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simc-opener-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/general_opener/
+          retention-days: 7
+          if-no-files-found: warn
