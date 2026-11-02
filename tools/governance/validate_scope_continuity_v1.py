@@ -104,12 +104,16 @@ def validate_entrypoints()->dict:
       "docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md":["ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1","General Rotation opener","target-dummy","NSRT","HANDOFF_CONTINUITY_PROTOCOL_V1.md"],
       "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md":["PRODUCT_SCOPE_LOCK_V1.json","HANDOFF_CONTINUITY_PROTOCOL_V1.md","오프닝"],
       "docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md":["EVERY","policy_snapshot","five sequential","explicit user","MAIN"],
+      "docs/PARALLEL_WORKSTREAM_AND_MERGE_CONTRACT.md":["ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1","General Rotation / Dummy Training state","Encounter Plan은 현재 제품 산출물이 아니며","policy SHA256","5회 연속 인계"],
       "handoff/NEW_CHAT_BOOT_PROMPT.md":["SimC APL/profile","WCL","OPENER","OUT OF SCOPE","scope_continuity.policy_snapshot"],
     }
     for name,tokens in markers.items():
         t=(ROOT/name).read_text(encoding="utf-8")
         for token in tokens:
             if token not in t:raise ScopeDrift("ENTRYPOINT_MISSING_REQUIRED_MARKER:"+name+":"+token)
+    parallel=(ROOT/"docs/PARALLEL_WORKSTREAM_AND_MERGE_CONTRACT.md").read_text(encoding="utf-8")
+    if "Encounter generic assumptions" in parallel or "General Rotation 또는 Encounter plan" in parallel:
+        raise ScopeDrift("PARALLEL_CONTRACT_REVIVED_OLD_ENCOUNTER_GOAL")
     return {"checked":len(markers),"read_first_policy":"PASS"}
 
 def validate_handoff(h:dict,p:dict,blob:str,*,template:bool=False)->int:
