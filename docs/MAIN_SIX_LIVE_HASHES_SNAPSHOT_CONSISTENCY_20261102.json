@@ -1,0 +1,91 @@
+{
+  "schema": "ZrotMainSixPinLocalSnapshotConsistencyV1",
+  "created_at": "2026-11-02",
+  "review_owner": "MAIN_AUTHORITY_REVIEW_BRANCH_ONLY",
+  "source_provenance": {
+    "six_hashes": "USER_PC_READ_ONLY_POWERSHELL_GET_FILEHASH_2026_11_02",
+    "baseline": "M4B_ARCHIVED_ORIGINAL_SOURCE_BYTES_IN_PRIVATE_124_COMPOSITE",
+    "historical_composite_sha256": "46e3a2dd1b51465429932a03efb7345cae781c756137dea9a39c9c4bed152bf6",
+    "current_runtime_whole_tree": "NOT_VERIFIED",
+    "sha256_comparison": "SIX_OF_SIX_EXACT",
+    "private_source_uploaded_to_public_repo": false
+  },
+  "verified_user_pc_files": {
+    "CURRENT_STATE.md": "eaaf836b3df05af8c75cea4e8d64bda1aed765c118b7b2c9b560ba7d59d54dc4",
+    "RUN_zRAID_MAIN.py": "52f3f1222c601c6fe63b6c826cd1f9db7072c9c324c0386f18a1446194361ec5",
+    "01_WORKFLOW/config/MAIN_CONTROL_PLANE.json": "2108740762ac2575d4f0c7a7ff86d086d674b7e531138f62b9dfd8d7aa6cd8f2",
+    "03_DATA/03_MANIFESTS/MAIN_ENTRYPOINT_AUTHORITY.json": "334b9334f36578dcf052bb03c86882c8805a07d5fdc89829b108ec7aa1c64ac2",
+    "01_WORKFLOW/prompts/current/PROMPT_SET_MANIFEST.json": "5a8d51d1d47a179b1bb8558fc5202a36354842794b7aa99acadb894d886bcbfa",
+    "07_PACKAGES/03_HANDOFFS/LATEST_HANDOFF.json": "2a21b46ec6b3f6d225c5b01edf4eb9871bc8770868b902042646b8d1fe338ad6"
+  },
+  "archived_source_sha256": {
+    "01_WORKFLOW/launchers/zraid_main_control_plane.py": "1f7330cd88b26b47cf3a08a0e9e12d4f3bbf4f1db80f34dd85fae55b987a0973",
+    "02_SOURCE/validation/generalization/FEX_FULL_ENGINE_SYNTHETIC_PROBE_v1.py": "c9ba0657c0f5ed936acf41a839780d6b3c245e08757107a96fef6cc675b1dc2f",
+    "02_SOURCE/validation/generalization/CROSS_SPEC_SYNTHETIC_PROBE_v1.py": "a3a30cc8f406216f9281109a3ffc357dba8306fafeb7b7a6f4fe090785e2d080"
+  },
+  "verified_historical_internal_disagreements": {
+    "CURRENT_STATE_vs_CONTROL": {
+      "current_state_workflow": "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1",
+      "control_plane_workflow": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+      "type": "WORKFLOW_SELECTION_CONFLICT"
+    },
+    "ENTRYPOINT_AUTHORITY_ENTRYPOINT_SHA": {
+      "embedded_sha256": "b5838b0e0644b0efb7ec502d5adbb6c26e5006c4fe7da52fba2233c5d8d1a537",
+      "actual_sha256": "52f3f1222c601c6fe63b6c826cd1f9db7072c9c324c0386f18a1446194361ec5",
+      "type": "STALE_PIN"
+    },
+    "ENTRYPOINT_AUTHORITY_CONFIG_SHA": {
+      "embedded_sha256": "40b5a0197fa3e90b354128729f5019630857577da2d326ef301af5be345e2e8a",
+      "actual_sha256": "2108740762ac2575d4f0c7a7ff86d086d674b7e531138f62b9dfd8d7aa6cd8f2",
+      "type": "STALE_PIN"
+    },
+    "PROMPT_MANIFEST_FEX_SHA": {
+      "declared_workflow": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+      "embedded_sha256": "a3a30cc8f406216f9281109a3ffc357dba8306fafeb7b7a6f4fe090785e2d080",
+      "FEX_actual_sha256": "c9ba0657c0f5ed936acf41a839780d6b3c245e08757107a96fef6cc675b1dc2f",
+      "embedded_sha_is_valid_for": "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1",
+      "type": "ID_SHA_MISBIND"
+    },
+    "LATEST_HANDOFF_ENTRYPOINT_SHA": {
+      "embedded_sha256": "b5838b0e0644b0efb7ec502d5adbb6c26e5006c4fe7da52fba2233c5d8d1a537",
+      "actual_sha256": "52f3f1222c601c6fe63b6c826cd1f9db7072c9c324c0386f18a1446194361ec5",
+      "type": "STALE_PIN"
+    },
+    "DEFAULT_ACTION_DISAGREEMENT": {
+      "control_plane": "RUN_ACTIVE",
+      "prompt": "RUN_ACTIVE",
+      "entrypoint_authority": "STATUS",
+      "type": "UNRESOLVED_EXECUTION_MODE"
+    }
+  },
+  "conditional_successor_proposal": {
+    "goal": "PRODUCE_NONEXECUTABLE_MANIFEST_ONLY_UNTIL_MAIN_AUTHORITY_APPROVAL",
+    "tentative_workflow_candidate": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+    "candidate_basis": "CONTROL_PLANE_AND_LATEST_HANDOFF_POINT_TO_FEX_WITH_CORRECT_FEX_SOURCE_SHA; NOT_AN_APPROVED_CURRENT_SELECTION",
+    "required_reviews": [
+      "Independently confirm latest approved Runtime and Work State; existing six-file snapshot shows historical continuity only",
+      "Resolve FIRST_CROSS_SPEC vs FEX workflow selection and preserve historical evidence",
+      "Rebind source SHA in successor manifest from actual source bytes, without rewriting archived authority objects",
+      "Ensure status command cannot dispatch Inbox package before parsing and cannot write production state",
+      "Prove full dependency and behavior compatibility with ST01-ST06 independent research source before product activation",
+      "Separate actual offline CI from live API-WCL-SimC production claims"
+    ],
+    "auto_modify_current_state": false,
+    "auto_modify_legacy_control_plane": false,
+    "auto_modify_legacy_handoff": false,
+    "auto_modify_registry_or_pointer": false,
+    "auto_RUN_ACTIVE": false
+  },
+  "verdict": {
+    "six_local_files_match_archive": true,
+    "pc_root_different_from_historical_state_claim": "SOURCE_CONTENT_CONTAINS_HISTORICAL_MACHINE_PATH_ONLY",
+    "stale_pin_conflict_persists": true,
+    "current_MAIN_authority": "UNKNOWN",
+    "FULL_ENGINE_CROSS_SPEC_GAMEPLAY_READY": "NOT_PROVEN",
+    "product_main_promotion": false,
+    "github_main_changed": false,
+    "frozen_changed": false,
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN"
+  }
+}
