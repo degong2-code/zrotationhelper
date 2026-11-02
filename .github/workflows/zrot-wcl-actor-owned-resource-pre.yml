@@ -1,0 +1,130 @@
+name: zrot-wcl-actor-owned-resource-pre-audit
+
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/wcl_actor_resource_owner_strict_pre_v1.py
+      - .github/workflows/zrot-wcl-actor-owned-resource-pre.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-contract:
+    name: Actor-owned PRE regression Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile exact source and prove enemy resource/same-time exclusion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/wcl_actor_resource_owner_strict_pre_v1.py
+          python -B tools/research/wcl_actor_resource_owner_strict_pre_v1.py >/tmp/resource-selftest.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/resource-selftest.json'))
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=9 and r['WCL_live_API_calls']==0
+          assert r['priority_claim'] is False
+          print('ACTOR_OWNED_RESOURCE_STRICT_PRE_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/wcl_actor_resource_owner_strict_pre_v1.py
+
+  two-real-cohort-evidence:
+    name: Independent WCL raw source/target actor resource gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [offline-contract]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore original discovery report raw and frozen lock artifact
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41463589665
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          path: /tmp/source-discovery
+          github-token: ${{ github.token }}
+      - name: Restore disjoint report holdout raw artifact
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41473060401
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          path: /tmp/source-holdout
+          github-token: ${{ github.token }}
+      - name: Repack identical verified source bytes into two zip envelopes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          for name in ('discovery','holdout'):
+              root=Path('/tmp/source-'+name)
+              members=sorted(x for x in root.rglob('*') if x.is_file())
+              assert 1<=len(members)<=40
+              with ZipFile('/tmp/'+name+'-actor-resource.zip','w',ZIP_DEFLATED) as z:
+                  for p in members:z.write(p,arcname=str(p.relative_to(root)))
+          PY
+      - name: Independently verify original raw hashes, PRE decisions, and corrected owned resource states
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/wcl_actor_resource_owner_strict_pre_v1.py \
+            --discovery-zip /tmp/discovery-actor-resource.zip \
+            --holdout-zip /tmp/holdout-actor-resource.zip \
+            --out /tmp/actor-resource-provenance.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/actor-resource-provenance.json'))
+          assert d['schema']=='ZrotActorOwnedWclResourceStrictPreCorrectionV1'
+          assert d['wrong_owner_resource_contamination_prevented'] is True
+          assert d['readiness_or_priority_verified'] is False
+          assert d['actual_active_target_count']=='UNKNOWN'
+          for role,raw,casts in (('discovery',17083,54),('holdout',9101,51)):
+              r=d[role]
+              assert r['raw_event_count']==raw
+              assert r['actor_cast_count']==casts
+              assert r['actor_owned_raw_resource_type_sample_counts'].keys()=={'1'}
+              assert set(r['strict_pre_cast_coverage_by_raw_power_type'])=={'1'}
+              assert r['wrong_or_unproven_owner_events_rejected'].get('DIFFERENT_TARGET',0)>=100
+              assert r['casts_with_any_owned_strict_pre_snapshot']==casts-1
+              assert r['resource_state_at_first_cast']=={}
+              assert r['resource_cost_cooldown_charge_or_gcd_readiness']=='UNKNOWN'
+              assert all(v['resource_pre'].get('3') is None for v in r['candidate_pre_snapshots'])
+              assert all(all(x['source_timestamp']<v['timestamp'] for x in v['resource_pre'].values())
+                         for v in r['candidate_pre_snapshots'])
+          print('REAL_TWO_WCL_COHORT_ACTOR_RESOURCE_OWNER_STRICT_PRE_REVALIDATED=PASS')
+          print('CORRECTED_RESOURCE_COUNTS',json.dumps({
+            key:{k:d[key][k] for k in
+              ('actor_cast_count','actor_owned_resource_snapshot_events',
+               'wrong_or_unproven_owner_events_rejected','casts_with_any_owned_strict_pre_snapshot',
+               'strict_pre_cast_coverage_by_raw_power_type')}
+            for key in ('discovery','holdout')},sort_keys=True))
+          PY
+      - name: Retain compact actor-owned PRE diagnostics, not duplicate raw evidence
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcl-actor-owned-strict-pre-${{ github.sha }}
+          path: /tmp/actor-resource-provenance.json
+          retention-days: 7
+          if-no-files-found: error
