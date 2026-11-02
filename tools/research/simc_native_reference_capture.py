@@ -52,6 +52,9 @@ def capture_reference(
     simc_executable: Path | None = None, timeout_seconds: int = 180,
     runner=None,
     synthetic_test: bool = False,
+    target_count: int | None = None,
+    seed: int | None = None,
+    fight_seconds: int | None = None,
 ) -> dict[str, Any]:
     """Capture native log from exactly one actor; no actions are inferred.
 
@@ -60,6 +63,13 @@ def capture_reference(
     """
     if runner is not None and not synthetic_test:
         raise SourceContractError("INJECTED_RUNNER_MUST_BE_SYNTHETIC")
+    for label,value,minimum,maximum in (
+        ("target_count",target_count,1,8),
+        ("seed",seed,1,2**31-1),
+        ("fight_seconds",fight_seconds,20,3600),
+    ):
+        if value is not None and (type(value) is not int or not minimum<=value<=maximum):
+            raise SourceContractError("INVALID_NATIVE_"+label.upper())
     if timeout_seconds < 1 or timeout_seconds > 3600:
         raise SourceContractError("INVALID_REFERENCE_TIMEOUT")
     profile=profile_file.expanduser().resolve(strict=True)
@@ -85,6 +95,13 @@ def capture_reference(
         "save_actions="+str(action_file),
         "output="+str(log_file),
     ]
+    if target_count is not None:
+        command.append("desired_targets="+str(target_count))
+    if seed is not None:
+        command.append("seed="+str(seed))
+    if fight_seconds is not None:
+        command.extend(("max_time="+str(fight_seconds),
+                        "fixed_time=1","vary_combat_length=0"))
     if runner is None:
         runner=subprocess.run
     try:
@@ -114,6 +131,10 @@ def capture_reference(
         "schema":"ZrotSimcNativeReferenceCaptureV1",
         "status":"SYNTHETIC_CAPTURE_TEST" if synthetic_test else "SIMC_NATIVE_CAPTURED_UNPARSED",
         "source_kind":"LOCAL_SIMC_EXECUTABLE",
+        "controlled_target_count":target_count,
+        "controlled_seed":seed,
+        "controlled_fight_seconds":fight_seconds,
+        "controlled_fixed_time":fight_seconds is not None,
         "simc_executable_sha256":_fingerprint(executable),
         "profile_sha256":sha(raw),
         "effective_apl_sha256":sha(apl_bytes),
@@ -160,6 +181,11 @@ def selftest():
         def fake_simc(command, **kwargs):
             assert kwargs["shell"] is False and kwargs["check"] is False
             assert "log=1" in command and "log_spell_id=1" in command
+            assert "desired_targets=2" in command
+            assert "seed=31459" in command
+            assert "max_time=75" in command
+            assert "fixed_time=1" in command
+            assert "vary_combat_length=0" in command
             action=Path(next(x.split("=",1)[1] for x in command
                              if x.startswith("save_actions=")))
             log=Path(next(x.split("=",1)[1] for x in command
@@ -178,8 +204,12 @@ def selftest():
         receipt=capture_reference(
             profile_file=profile,expected_spec="enhancement",
             out_dir=output,simc_executable=binary,
-            runner=fake_simc,synthetic_test=True)
+            runner=fake_simc,synthetic_test=True,
+            target_count=2,seed=31459,fight_seconds=75)
         assert receipt["status"]=="SYNTHETIC_CAPTURE_TEST"
+        assert receipt["controlled_target_count"]==2
+        assert receipt["controlled_seed"]==31459
+        assert receipt["controlled_fight_seconds"]==75
         assert receipt["native_action_log_parsed"]=="NOT_RUN"
         assert receipt["apl_row_count"]==1
         assert receipt["actionable_rotation"] is False
@@ -221,6 +251,9 @@ def main() -> int:
     p.add_argument("--simc-bin",type=Path)
     p.add_argument("--out-dir",type=Path)
     p.add_argument("--timeout",type=int,default=180)
+    p.add_argument("--targets",type=int,help="explicit global desired_targets 1..8")
+    p.add_argument("--seed",type=int,help="explicit fixed positive seed")
+    p.add_argument("--fight-seconds",type=int,help="fixed duration, 20..3600 seconds")
     p.add_argument("--self-test",action="store_true")
     args=p.parse_args()
     if args.self_test:
@@ -231,7 +264,8 @@ def main() -> int:
     out=args.out_dir or (args.profile.parent/"zrot_simc_reference")
     receipt=capture_reference(
         profile_file=args.profile,expected_spec=args.spec,
-        simc_executable=args.simc_bin,out_dir=out,timeout_seconds=args.timeout)
+        simc_executable=args.simc_bin,out_dir=out,timeout_seconds=args.timeout,
+        target_count=args.targets,seed=args.seed,fight_seconds=args.fight_seconds)
     print("SIMC_NATIVE_REFERENCE_CAPTURED_UNPARSED")
     print("ARTIFACT_DIR="+str(out.resolve()))
     print("RECEIPT="+str((out/"simc_reference_receipt.json").resolve()))
