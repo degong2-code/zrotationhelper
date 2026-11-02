@@ -1,0 +1,99 @@
+{
+  "schema": "ZrotHistoricalProductSourceMigrationAssessmentV1",
+  "created_date": "2026-11-02",
+  "owner": "MAIN_INTEGRATION_REVIEW",
+  "scope": "HISTORICAL_SOURCE_RECOVERY_AND_DEPENDENCY_TRIAGE__NOT_PRODUCT_AUTHORITY",
+  "source": {
+    "handoff_sha256": "1299be440731d0fbf2b520d32b68f85c2c7dbdfc1ccd1632fe581ecf13574243",
+    "M4B_original_archive_sha256": "d42991109b6d6576c2ce0d61006c54d0aefb447e94c2c026cb69e75cc05849e8",
+    "private_recovery_zip_sha256": "1cfdff330d90fbf1f25081cc92955e1dddf287840bc015fcc4707bfb1f0098af",
+    "private_recovery_zip_n": 118,
+    "private_recovery_file_types": {
+      "py": 15,
+      "json": 100,
+      "md": 3
+    },
+    "full_private_source_inventory_map_sha256": "510bb8341d1018e05eda7183e3f87c24d6f1c638a9f06498840c58f87888a6f8",
+    "original_archive_crc": "PASS",
+    "per_file_source_copy_byte_parity": "118_OF_118_PASS",
+    "source_archival_purpose": "UNMODIFIED_HISTORICAL_FILES_FOR_PRIVATE_REVIEW",
+    "original_archive_public_released": false,
+    "locally_verified_on": "2026-11-02",
+    "archive_embedded_PACKAGE_MANIFEST_date": "2026-09-28",
+    "snapshot_currentness": "NOT_VERIFIED"
+  },
+  "historical_control_conflicts": {
+    "WORKFLOW_ID": [
+      "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+      "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1"
+    ],
+    "ACTIVE_WORKFLOW_SHA": [
+      "c9ba0657c0f5ed936acf41a839780d6b3c245e08757107a96fef6cc675b1dc2f",
+      "a3a30cc8f406216f9281109a3ffc357dba8306fafeb7b7a6f4fe090785e2d080"
+    ],
+    "DEFAULT_ACTION": [
+      "RUN_ACTIVE",
+      "STATUS"
+    ]
+  },
+  "selected_historical_source_sha256": {
+    "RUN_zRAID_MAIN.py": "52f3f1222c601c6fe63b6c826cd1f9db7072c9c324c0386f18a1446194361ec5",
+    "01_WORKFLOW/config/MAIN_CONTROL_PLANE.json": "2108740762ac2575d4f0c7a7ff86d086d674b7e531138f62b9dfd8d7aa6cd8f2",
+    "03_DATA/03_MANIFESTS/MAIN_ENTRYPOINT_AUTHORITY.json": "334b9334f36578dcf052bb03c86882c8805a07d5fdc89829b108ec7aa1c64ac2",
+    "03_DATA/03_MANIFESTS/FEX_BOUND_PROBE_CONTRACT.json": "af1439f13260b4bdbcbf6ecdb86a64a82b3d645f86f2c19c51f67a3289b13062",
+    "02_SOURCE/runtime/raid_dps/pipelines/discovery_mining.py": "8bdcdd101430e3f70bd4e248da99380eb29ea0416da218130698ed1ab47dba9a",
+    "02_SOURCE/runtime/raid_dps/pipelines/independent_validation.py": "96b250da2bb26200ecc0affe08a6a2e122ff3eef1a4a0328c51b8f087cf772bd",
+    "02_SOURCE/validation/generalization/FEX_FULL_ENGINE_SYNTHETIC_PROBE_v1.py": "c9ba0657c0f5ed936acf41a839780d6b3c245e08757107a96fef6cc675b1dc2f"
+  },
+  "research": {
+    "source_branch": "work/research-successor-baseline-20261102",
+    "pinned_baseline_sha": "ef51a58219cfc3e21683e81bfc6637f8ae54f3ee",
+    "locally_recovered_source_claim": "NO_GITHUB_FULL_ARCHIVE_UPLOAD",
+    "historical_frozen_wcl_blind_unchanged": true
+  },
+  "runtime_dependencies": {
+    "available_in_research_but_not_in_archival_m4b": [
+      "02_SOURCE/runtime/raid_dps/core/coverage.py",
+      "02_SOURCE/runtime/raid_dps/core/identity.py",
+      "02_SOURCE/runtime/raid_dps/core/prestate.py"
+    ],
+    "missing_from_both_m4b_and_research": [
+      "02_SOURCE/runtime/raid_dps/core/renderer.py",
+      "02_SOURCE/runtime/raid_dps/core/wcl_client.py",
+      "02_SOURCE/runtime/raid_dps/pipelines/orchestrator.py"
+    ],
+    "archived_original_present_but_missing_from_research": [
+      "RUN_zRAID_MAIN.py",
+      "02_SOURCE/runtime/raid_dps/pipelines/discovery_mining.py",
+      "02_SOURCE/runtime/raid_dps/pipelines/independent_validation.py",
+      "02_SOURCE/validation/generalization/FEX_FULL_ENGINE_SYNTHETIC_PROBE_v1.py"
+    ],
+    "import_resolution": "BASIC_AST_VISIBLE_IMPORTS_ONLY_NOT_DYNAMIC_COMPLETE",
+    "exact_source_merging_performed": false,
+    "full_product_dependency_closure": "NOT_COMPLETE"
+  },
+  "authority": {
+    "canonical_registry": "MISSING",
+    "current_pointer": "MISSING",
+    "current_runtime_work_state": "UNKNOWN",
+    "candidate_default_execution": "DISABLED",
+    "historical_product_entrypoint_executed": false,
+    "historical_product_runtime_executed": false,
+    "current_client_action_ids_certified": 0,
+    "new_gameplay_ready_rules_certified": 0,
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN",
+    "WCL_independent_discovery_semantics": "ISOLATED",
+    "FROZEN_modified": false,
+    "GitHub_main_modified": false,
+    "product_MAIN_promoted": false
+  },
+  "exact_next": [
+    "Obtain exact verified renderer/wcl_client/orchestrator original source or independently reviewed replacement without assuming old equivalence",
+    "Restore remaining M4B historical source in separately versioned private staging, never overwrite current product MAIN",
+    "Reconcile current MAIN authority including Registry/Pointer and FEX-vs-CROSS_SPEC conflict",
+    "Run source-complete focused product compatibility in offline sandbox",
+    "Only authorized MAIN then selects/promotes active product pointer"
+  ],
+  "verdict": "HISTORICAL_SOURCE_RECOVERY_PASS__PRODUCT_MAIN_MIGRATION_BLOCKED"
+}
