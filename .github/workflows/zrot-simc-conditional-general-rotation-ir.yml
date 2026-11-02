@@ -1,0 +1,116 @@
+name: zrot-simc-conditional-general-rotation-ir
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_ordered_if_else_general_rotation_ir_v1.py
+      - .github/workflows/zrot-simc-conditional-general-rotation-ir.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Final source compile and fail-closed IF-ELSE tri-state synthetic tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_ordered_if_else_general_rotation_ir_v1.py
+          python -B tools/research/simc_ordered_if_else_general_rotation_ir_v1.py >/tmp/apl-ir-selftest.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/apl-ir-selftest.json'))
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['checks']>=15
+          assert d['actual_WCL_or_SimC_loaded'] is False
+          assert d['auto_trainer_wrong_cast_flags']==0
+          print('SIMC_ORDERED_APL_IF_ELSE_TRI_STATE_STATIC_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_ordered_if_else_general_rotation_ir_v1.py
+
+  actual-simc-wcl-source-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    needs: [offline-contract]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-source-verified
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover independently verified actual WCL hero selector source receipt
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41483727635
+          name: postlock-apl-branch-build-guard-cd732e9b3d007d659bbf084cc8ad3d513d4c6a9a
+          path: /tmp/wcl-hero-source
+          github-token: ${{ github.token }}
+      - name: Compile exact pinned native APL and compare only proven WCL hero predicates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_ordered_if_else_general_rotation_ir_v1.py \
+            --profile simc-source-verified/profiles/MID2/MID2_Warrior_Fury.simc \
+            --hero-guard-receipt /tmp/wcl-hero-source/apl-branch-build-guard.json \
+            --out /tmp/general-rotation-ifelse-research-ir.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('/tmp/general-rotation-ifelse-research-ir.json').read_bytes())
+          assert d['schema']=='ZrotSimcSlayerConditionalPriorityResearchIRV1'
+          assert d['status']=='APL_CONDITIONS_EXTRACTED_WCL_TARGET_AND_READINESS_UNKNOWN'
+          assert d['source_ordered_action_counts']['default']==18
+          assert d['source_ordered_action_counts']['slayer']==22
+          assert d['source_ordered_action_counts']['slayer_aoe']==14
+          assert len(d['source_list_rows']['slayer'])==22
+          assert len(d['source_list_rows']['slayer_aoe'])==14
+          assert d['source_list_rows']['slayer'][0]['action']=='recklessness'
+          assert d['source_list_rows']['slayer_aoe'][0]['action']=='whirlwind'
+          assert d['source_list_rows']['slayer'][2]['if_source']=='buff.recklessness.up&rage>=100'
+          for cohort in ('discovery','holdout'):
+              t=d['hero_gates_at_wcl'][cohort]
+              assert t['slayer']['verdict']=='TALENT_GUARD_TRUE_TARGET_COUNT_UNKNOWN'
+              assert t['slayer_aoe']['verdict']=='TALENT_GUARD_TRUE_TARGET_COUNT_UNKNOWN'
+              assert t['thane']['verdict']=='TALENT_GUARD_FALSE_BRANCH_EXCLUDED'
+              assert t['thane_aoe']['verdict']=='TALENT_GUARD_FALSE_BRANCH_EXCLUDED'
+          assert d['active_enemies_at_WCL_cast']=='UNKNOWN'
+          assert d['WCL_Rage_scaled_units']=='UNVERIFIED'
+          assert d['gcd_cooldown_charges_and_cost_readiness']=='UNKNOWN'
+          assert d['native_SimC_APL_replay_at_WCL_timestamp']=='NOT_RUN'
+          assert d['recommendation_eligible'] is False
+          assert d['dummy_mistake_verdict']=='UNKNOWN'
+          print('PINNED_SIMC_36_ORDERED_SLAYER_ACTIONS_WITH_WCL_HERO_GATES=PASS')
+          print('GENERAL_ROTATION_SOURCE_LIST_COUNTS',json.dumps(d['source_ordered_action_counts'],sort_keys=True))
+          PY
+      - name: Retain portable source-derived IR and evidence proof (7 days)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simc-general-rotation-ordered-ifelse-ir-${{ github.sha }}
+          path: /tmp/general-rotation-ifelse-research-ir.json
+          retention-days: 7
+          if-no-files-found: error
