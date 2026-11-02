@@ -1,0 +1,73 @@
+name: zrot-product-scope-continuity
+
+on:
+  push:
+    branches:
+      - docs/product-scope-canonical-20261102
+      - main
+    paths:
+      - README.md
+      - AGENTS.md
+      - docs/PRODUCT_SCOPE_LOCK_V1.json
+      - docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md
+      - docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md
+      - docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md
+      - handoff/**
+      - tools/governance/**
+      - _UPLOAD_TO_CHATGPT/branches/BR-ENGINE-FIRST-FRESH-WCL-VSLICE/LATEST_HANDOFF.json
+      - .github/workflows/zrot-product-scope-continuity-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scope-regression:
+    name: Handoff-scope survival Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12","3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile scope gate
+        run: python -m py_compile tools/governance/validate_scope_continuity_v1.py
+      - name: Validate current scope and simulate 5 future handoffs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/scope
+          python -B tools/governance/validate_scope_continuity_v1.py --validate --self-test --handoff handoff/HANDOFF_TEMPLATE_V1.json > ci_artifacts/scope/scope_receipt.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path("ci_artifacts/scope/scope_receipt.json").read_text())
+          assert r["result"]=="PASS_SCOPE_CONTINUITY"
+          assert r["policy_id"]=="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
+          assert r["documentation_entrypoints"]["checked"]==6
+          assert r["negative_cases_passed"]==13
+          x=r["five_hop_simulation"]
+          assert x["result"]=="PASS"
+          assert len(x["simulated_successor_hops"])==5
+          assert x["actual_handoffs_created"]==0
+          assert all(z["scope"]=="PASS" and z["parent_link"]=="PASS" for z in x["simulated_successor_hops"])
+          assert r["old_raid_NSRT_encounter_output_required"] is False
+          assert r["real_WCL_SimC_WoW_client_calls"]=="NOT_RUN"
+          assert r["MAIN_pointer_modified"] is False and r["FROZEN_modified"] is False
+          print("SCOPE_LOCK_FIVE_HOP_AND_NEGATIVE_CASES_PASS")
+          PY
+      - name: Preserve only small sanitized policy receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-scope-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/scope/
+          retention-days: 7
+          if-no-files-found: warn
