@@ -6,6 +6,8 @@
 
 > **과거 시스템을 보존하려고 개발하지 않는다. 필요할 때 새로운 데이터를 수집·재생·독립 검증하고, 전문화·특성·대상 수가 달라져도 일반화되는 General Rotation 엔진을 개발한다. 과거 자료는 자산이지만 실행과 개발의 전제조건은 아니다.**
 
+**Handoff continuity:** Each new chat/owner reads [machine-readable product scope lock](PRODUCT_SCOPE_LOCK_V1.json), [five-hop handoff protocol](HANDOFF_CONTINUITY_PROTOCOL_V1.md), and [new-chat boot](../handoff/NEW_CHAT_BOOT_PROMPT.md). Do not let older Raid/NSRT plans override the current user-declared objective.
+
 **2026-11-02 공식 제품 범위 변경:** [General Rotation 오프닝·우선순위 + 허수아비 훈련 애드온](PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md)이 기존 Encounter Plan·레이드 실전·NSRT 목표를 대체한다. 본 Charter의 개발 철학은 유지되지만 구제품 범위와 충돌하는 문장은 새로운 제품 범위 문서가 우선한다.
 
 ## 1. 무엇이 완성 기준인가?
