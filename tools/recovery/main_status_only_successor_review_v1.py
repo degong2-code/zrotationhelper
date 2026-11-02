@@ -67,7 +67,37 @@ def git_blob_sha1(data: bytes) -> str:
     return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\x00" + data).hexdigest()
 
 
+def _strict_keys(obj: dict, allowed: set[str], label: str) -> None:
+    if not isinstance(obj, dict) or set(obj) != allowed:
+        raise ReviewContractError("UNKNOWN_AUTHORITY_FIELD_" + label)
+
+
 def validate(candidate: dict, evidence: dict) -> dict:
+    _strict_keys(candidate, {
+        "schema", "candidate_id", "owner", "lifecycle", "base",
+        "workflow_authority", "status_adapter_contract", "historical_conflicts",
+        "promotion_gates", "invariants", "verdict",
+    }, "ROOT")
+    _strict_keys(candidate["base"], {
+        "github_repository", "github_review_branch", "github_review_head_sha",
+        "github_product_main_head_sha", "product_main_status",
+        "evidence_path", "evidence_git_blob_sha1", "evidence_scope",
+    }, "BASE")
+    _strict_keys(candidate["workflow_authority"], {
+        "current_approved_runtime", "current_approved_work_state",
+        "selection_state", "selected_workflow_id", "candidates",
+        "false_authority_forbidden", "preferred_workflow_id",
+    }, "WORKFLOW")
+    _strict_keys(candidate["status_adapter_contract"], {
+        "only_command", "default_operation", "allowed_operations",
+        "forbidden_operations", "read_only_input_allowlist",
+        "execution_backend", "product_live_call_count",
+    }, "ADAPTER")
+    _strict_keys(candidate["historical_conflicts"], {
+        "workflow_id_conflict", "prompt_sha_id_binding",
+        "default_action_conflict", "stale_entrypoint_or_config_sha_occurrences",
+        "reconciled_six_pc_hashes", "corrected_sources_applied_to_product_main",
+    }, "CONFLICTS")
     if not isinstance(candidate, dict) or candidate.get("schema") != "ZrotMainAuthoritySuccessorStatusOnlyCandidateV1":
         raise ReviewContractError("UNKNOWN_CANDIDATE_SCHEMA")
     if candidate.get("lifecycle") != "BRANCH_CANDIDATE_NOT_PROMOTED":
@@ -100,6 +130,7 @@ def validate(candidate: dict, evidence: dict) -> dict:
         "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1": {"CURRENT_STATE.md", "MAIN_ENTRYPOINT_AUTHORITY.json"},
     }
     for row in rows:
+        _strict_keys(row, {"id", "historical_source_sha256", "historical_observed_refs", "status"}, "WORKFLOW_CANDIDATE")
         ident = row["id"]
         if (row.get("historical_source_sha256") != CANDIDATE_IDS[ident]
                 or row.get("status") != "HISTORICAL_CANDIDATE_NOT_APPROVED"
@@ -202,7 +233,10 @@ def self_test(candidate: dict, evidence: dict) -> dict:
     reject(lambda c, e: e["verified_user_pc_files"].pop("RUN_zRAID_MAIN.py"), "BASE_SIX_HASH")
     reject(lambda c, e: e["archived_source_sha256"].update({"02_SOURCE/validation/generalization/FEX_FULL_ENGINE_SYNTHETIC_PROBE_v1.py": "0" * 64}), "BASE_HISTORICAL_WORKFLOW")
     reject(lambda c, e: c["historical_conflicts"].update({"default_action_conflict": "RESOLVED"}), "HISTORICAL_CONFLICT")
-    reject(lambda c, e: c["lifecycle"] == "PROMOTED" or c.update({"lifecycle": "PROMOTED"}), "LIFECYCLE_PROMOTION")
+    reject(lambda c, e: c.update({"lifecycle": "PROMOTED"}), "LIFECYCLE_PROMOTION")
+    reject(lambda c, e: c.update({"run_command": "RUN_ACTIVE"}), "UNKNOWN_AUTHORITY_FIELD_ROOT")
+    reject(lambda c, e: c["workflow_authority"].update({"autostart": True}), "UNKNOWN_AUTHORITY_FIELD_WORKFLOW")
+    reject(lambda c, e: c["status_adapter_contract"].update({"legacy_entrypoint": "RUN_zRAID_MAIN.py"}), "UNKNOWN_AUTHORITY_FIELD_ADAPTER")
     return {"status": "PASS", "negative_regressions": successes,
             "live_runtime_execution": False, "source_code_execution": False}
 
