@@ -175,6 +175,7 @@ def selftest()->dict:
               "effective_apl_sha256":hashlib.sha256(apl).hexdigest(),
               "simc_executable_sha256":"b"*64,"simc_spec":"fury",
               "native_json2_sha256":hashlib.sha256(data["simc_native_sequence.json"]).hexdigest(),
+              "native_log_sha256":hashlib.sha256(data["simc_native_log.txt"]).hexdigest(),
               "outputs":[{"file":name,"sha256":hashlib.sha256(raw).hexdigest(),"bytes":len(raw)}
                          for name,raw in data.items()]}
             (folder/"simc_reference_receipt.json").write_text(json.dumps(receipt))
