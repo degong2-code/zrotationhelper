@@ -9,6 +9,7 @@ No gameplay or MAIN authority promotion under any circumstances.
 """
 from __future__ import annotations
 import argparse
+import io
 from copy import deepcopy
 import hashlib
 import json
@@ -96,22 +97,89 @@ def audit(doc:dict,root:Path=ROOT)->dict:
             "seq637":"UNKNOWN"}
 
 
-def audit_candidate_zip(path:Path)->dict:
-    """Exactly five modules, all SHA-matched; no execution/import."""
-    with zipfile.ZipFile(path) as z:
-        if z.testzip() is not None:raise SourceClosureFailure("CANDIDATE_ZIP_CRC_FAIL")
-        names={x.filename for x in z.infolist() if not x.is_dir()}
-        expected={"payload/"+p for p in EXPECTED}
-        if names!=expected:raise SourceClosureFailure("CANDIDATE_ZIP_FILESET_MISMATCH")
-        for name in names:
-            p=PurePosixPath(name)
-            if p.is_absolute() or ".." in p.parts:raise SourceClosureFailure("CANDIDATE_UNSAFE_PATH")
-            b=z.read(name)
-            size,sha,_=EXPECTED[name.removeprefix("payload/")]
-            if len(b)!=size or hashlib.sha256(b).hexdigest()!=sha:
+def audit_candidate_bytes(raw: bytes, expected: dict = EXPECTED) -> dict:
+    """Accept canonical POSIX or Windows PowerShell Compress-Archive paths.
+
+    Only exactly named, size/hash-pinned files may appear. Empty directory
+    entries emitted by Compress-Archive are ignored; no source is executed.
+    """
+    with zipfile.ZipFile(io.BytesIO(raw)) as z:
+        if z.testzip() is not None:
+            raise SourceClosureFailure("CANDIDATE_ZIP_CRC_FAIL")
+        normalized = {}
+        for info in z.infolist():
+            logical = info.filename.replace("\\", "/")
+            parts = PurePosixPath(logical).parts
+            if (not logical or logical.startswith("/")
+                    or ".." in parts or "." in parts or ":" in logical):
+                raise SourceClosureFailure("CANDIDATE_UNSAFE_PATH")
+            mode = info.external_attr >> 16
+            if info.create_system == 3 and (mode & 0o170000) == 0o120000:
+                raise SourceClosureFailure("CANDIDATE_SYMLINK_REJECTED")
+            if logical.endswith("/"):
+                if info.file_size != 0:
+                    raise SourceClosureFailure("CANDIDATE_NONEMPTY_DIRECTORY")
+                continue
+            if logical in normalized:
+                raise SourceClosureFailure("CANDIDATE_ZIP_FILESET_DUPLICATE")
+            normalized[logical] = info
+        required = {"payload/" + p for p in expected}
+        if set(normalized) != required:
+            raise SourceClosureFailure("CANDIDATE_ZIP_FILESET_MISMATCH")
+        for name, info in normalized.items():
+            payload = z.read(info)
+            n, digest, _ = expected[name.removeprefix("payload/")]
+            if len(payload) != n or hashlib.sha256(payload).hexdigest() != digest:
                 raise SourceClosureFailure("CANDIDATE_SOURCE_BYTES_MISMATCH")
-    return {"status":"EXACT_FIVE_HISTORICAL_SOURCE_BYTES_VERIFIED_ONLY",
-            "source_count":5,"product_runtime_executed":False,"product_main_promotion":False}
+    return {"status": "EXACT_FIVE_HISTORICAL_SOURCE_BYTES_VERIFIED_ONLY",
+            "source_count": len(expected), "product_runtime_executed": False,
+            "product_main_promotion": False}
+
+
+def audit_candidate_zip(path: Path) -> dict:
+    return audit_candidate_bytes(path.read_bytes())
+
+
+def zip_format_self_test() -> dict:
+    """No historical source bytes: synthetic ZIPs test path handling only."""
+    fake_path = "02_SOURCE/runtime/raid_dps/core/cohort.py"
+    good = b"safe-synthetic"
+    digest = hashlib.sha256(good).hexdigest()
+    expected = {fake_path: (len(good), digest, 1)}
+    good_win = "payload\\" + fake_path.replace("/", "\\")
+    good_posix = "payload/" + fake_path
+
+    def build(items):
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+            for name, body in items:
+                z.writestr(name, body)
+        return buf.getvalue()
+
+    positive = [
+        build([("payload\\02_SOURCE\\", b""), (good_win, good)]),
+        build([(good_posix, good)]),
+    ]
+    for raw in positive:
+        assert audit_candidate_bytes(raw, expected)["source_count"] == 1
+
+    cases = (
+        ([(good_win, b"bad-synthetic")], "CANDIDATE_SOURCE_BYTES_MISMATCH"),
+        ([(good_win, good), (good_posix, good)], "CANDIDATE_ZIP_FILESET_DUPLICATE"),
+        ([(good_win, good), ("payload\\..\\traverse.py", b"evil")], "CANDIDATE_UNSAFE_PATH"),
+        ([(good_win, good), ("payload\\extra.py", b"oops")], "CANDIDATE_ZIP_FILESET_MISMATCH"),
+    )
+    for items, expected_error in cases:
+        try:
+            audit_candidate_bytes(build(items), expected)
+        except SourceClosureFailure as exc:
+            assert expected_error in str(exc), (expected_error, str(exc))
+        else:
+            raise AssertionError("UNSAFE_CANDIDATE_ZIP_ACCEPTED")
+    return {"synthetic_windows_format_positive": 1,
+            "synthetic_posix_format_positive": 1,
+            "synthetic_format_negative_cases": len(cases),
+            "historical_raw_bytes_read_in_test": False}
 
 
 def self_test(doc:dict):
@@ -143,6 +211,8 @@ if __name__=="__main__":
     args=p.parse_args()
     doc=json.loads(args.document.read_text(encoding="utf-8"))
     result=audit(doc)
-    if args.self_test:result["negative_contract_tests"]=self_test(doc)
+    if args.self_test:
+        result["negative_contract_tests"]=self_test(doc)
+        result["zip_format_self_test"]=zip_format_self_test()
     if args.candidate_zip:result["optional_historical_bytes"]=audit_candidate_zip(args.candidate_zip)
     print(json.dumps(result,sort_keys=True,indent=2))
