@@ -1,0 +1,100 @@
+name: zrot-main-integration-recovery-review
+
+on:
+  push:
+    branches:
+      - work/main-integration-recovery-20261102
+    paths:
+      - .github/workflows/zrot-main-integration-recovery-review.yml
+      - docs/MAIN_INTEGRATION_RECOVERY_EVIDENCE_20261102.json
+      - tools/research/main_integration_recovery_gate_v1.py
+      - 02_SOURCE/runtime/raid_dps/specs/protocol.py
+      - 02_SOURCE/runtime/raid_dps/specs/enhancement_shaman/adapter.py
+      - 02_SOURCE/runtime/raid_dps/specs/fury_warrior/adapter.py
+      - 02_SOURCE/validation/generalization/CROSS_SPEC_SYNTHETIC_PROBE_v1.py
+
+permissions:
+  contents: read
+
+jobs:
+  focused-compatibility:
+    name: Recovery gate Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - name: Checkout isolated integration-review branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify GitHub main is still a README-only bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          read -r REMOTE_HEAD _ < <(git ls-remote --heads origin refs/heads/main)
+          test "$REMOTE_HEAD" = "4790f77f76a75f26ff0558d1d18c16cd9d630c4b"
+          git fetch --depth=1 origin main
+          test "$(git ls-tree -r --name-only FETCH_HEAD)" = "README.md"
+          echo "MAIN_GITHUB_BOOTSTRAP_ONLY=CONFIRMED"
+      - name: Audit historical source Git blobs and fail-closed promotion boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/main_recovery
+          python -B -m py_compile tools/research/main_integration_recovery_gate_v1.py
+          python -B tools/research/main_integration_recovery_gate_v1.py --self-test \
+            > ci_artifacts/main_recovery/recovery_gate_receipt.json
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json, os, platform
+          proof=json.loads(Path("ci_artifacts/main_recovery/recovery_gate_receipt.json").read_text())
+          assert proof["status"]=="PASS_HISTORICAL_SOURCE_COMPATIBILITY__PRODUCT_MAIN_BLOCKED"
+          assert proof["verified_historical_count"]==4
+          assert proof["focused_negative_self_test_cases"]==6
+          assert proof["focused_negative_self_test_status"]=="PASS"
+          assert proof["main_product_promotion"] is False
+          assert proof["canonical_registry"]=="MISSING"
+          assert proof["active_pointer"]=="MISSING"
+          assert proof["research_staging_compatible_for_review"] is True
+          assert proof["main_git_branch_product_authority"]=="NOT_ESTABLISHED"
+          assert proof["seq578"]=="FAILED_QUARANTINED_PRESERVED"
+          assert proof["seq637"]=="UNKNOWN"
+          summary={
+            "schema":"ZrotMainRecoveryGithubOfflineCIReceiptV1",
+            "result":"PASS_RESEARCH_REVIEW_GATE__NOT_MAIN_PROMOTION",
+            "github_sha":os.environ.get("GITHUB_SHA","UNKNOWN"),
+            "github_run_id":os.environ.get("GITHUB_RUN_ID","UNKNOWN"),
+            "python":platform.python_version(),
+            "research_compatibility_git_blobs":4,
+            "negative_fail_closed_cases":6,
+            "historical_source_proof":"PINNED_ZIP_OFFLINE_AUDIT",
+            "current_main_runtime":"UNKNOWN",
+            "main_product_promotion":False,
+            "production_runtime_execution":"NOT_RUN",
+            "live_wcl_simc_blizzard":"NOT_RUN",
+            "seq578":"FAILED_QUARANTINED_PRESERVED",
+            "seq637":"UNKNOWN",
+            "source_sha256":{
+              "gate":hashlib.sha256(Path("tools/research/main_integration_recovery_gate_v1.py").read_bytes()).hexdigest(),
+              "audit":hashlib.sha256(Path("docs/MAIN_INTEGRATION_RECOVERY_EVIDENCE_20261102.json").read_bytes()).hexdigest(),
+            }
+          }
+          Path("ci_artifacts/main_recovery/github_receipt.json").write_text(
+            json.dumps(summary,indent=2,sort_keys=True)+"\n")
+          print("MAIN_INTEGRATION_RECOVERY_AUDIT=PASS_RESEARCH_ONLY_PRODUCT_BLOCKED")
+          PY
+      - name: Upload bounded receipts only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-recovery-review-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/main_recovery/
+          if-no-files-found: warn
+          retention-days: 7
