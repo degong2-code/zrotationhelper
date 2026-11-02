@@ -10,6 +10,7 @@ on:
       - tools/recovery/main_status_only_successor_review_v1.py
       - docs/MAIN_124_FEX_STATIC_INTERFACE_COMPATIBILITY_20261102.json
       - tools/recovery/main_124_fex_source_interface_gate_v1.py
+      - tools/recovery/zrot_research_strict_pre_offline_behavior_v1.py
 
 permissions:
   contents: read
@@ -149,6 +150,31 @@ jobs:
           assert all(x["AST_signature_accepts_historical_call_form"] is True for x in obj["research_actual_source_pins_and_AST_signatures"])
           assert obj["product_runtime_execution"] is False and obj["product_MAIN_promotion"] is False
           print("HISTORICAL_FEX_AST_COMPAT=PASS_PARTIAL_BEHAVIORAL_CLAIM")
+          PY
+      - name: Execute research Strict PRE/coverage synthetic edge fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B -m py_compile tools/recovery/zrot_research_strict_pre_offline_behavior_v1.py
+          python -B tools/recovery/zrot_research_strict_pre_offline_behavior_v1.py --self-test > ci_artifacts/status_only/research_pre_behavior.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("ci_artifacts/status_only/research_pre_behavior.json")
+          d=json.loads(p.read_text())
+          assert d["result"]=="PASS"
+          assert d["research_module_original_sha_exact_n"]==3
+          assert d["behavioral_assertion_count"]>=30
+          assert d["strict_PRE_bisect_left_timestamp_less_than_t"]=="PASS"
+          assert d["same_timestamp_future_state_leakage"] is False
+          assert d["coverage_label_treated_as_evidence_strength"] is False
+          assert d["state_readiness_missing_assumed_available"] is False
+          assert d["original_private_124_source_executed"] is False
+          assert d["product_MAIN_entrypoint_executed"] is False
+          assert d["current_product_authority"]=="UNKNOWN"
+          assert d["seq578"]=="FAILED_QUARANTINED_PRESERVED"
+          assert d["seq637"]=="UNKNOWN"
+          print("RESEARCH_STRICT_PRE_OFFLINE_BEHAVIOR=PASS")
           PY
       - name: Save sanitized review receipts
         if: always()
