@@ -1,0 +1,64 @@
+name: zrot-WCL-blind-independent-candidate-lock
+
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py
+      - .github/workflows/zrot-wcl-independent-candidate-lock.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-blind-lock:
+    name: WCL numeric-only lock offline Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12","3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile independent WCL numeric discovery only
+        run: |
+          python -m py_compile tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py
+      - name: Fresh WCL collector STRICT PRE and independent candidate lock regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/wcl_blind
+          python -B tools/engine_first/fresh_wcl_engine_v1.py self-test > ci_artifacts/wcl_blind/fresh_wcl_selftest.json
+          python -B tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py --self-test \
+            > ci_artifacts/wcl_blind/blind_lock_selftest.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a=Path("ci_artifacts/wcl_blind")
+          e=json.loads((a/"fresh_wcl_selftest.json").read_text())
+          b=json.loads((a/"blind_lock_selftest.json").read_text())
+          assert e["result"]=="PASS" and e["real_api_requests"]==0
+          assert b["result"]=="PASS"
+          assert b["synthetic_assertions"]>=16
+          assert b["actual_WCL_API_calls"]==0
+          assert b["actual_WCL_ranker_cohort"]=="NOT_COLLECTED"
+          assert b["SimC_semantic_input"]=="NEVER_USED"
+          assert b["rotation_priority_causality"]=="NOT_PROVEN"
+          print("WCL_INDEPENDENT_NUMERIC_CANDIDATE_LOCK_OFFLINE=PASS")
+          PY
+      - name: Small synthetic receipts only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcl-blind-numeric-${{ github.sha }}-${{ matrix.python-version }}
+          path: ci_artifacts/wcl_blind/
+          retention-days: 7
+          if-no-files-found: warn
