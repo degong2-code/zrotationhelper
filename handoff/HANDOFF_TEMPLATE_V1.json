@@ -123,7 +123,8 @@
     "parent_handoff_sha256": null,
     "carried_forward_at": "2026-11-02",
     "scope_override": false,
-    "new_user_scope_override_evidence": null
+    "new_user_scope_override_evidence": null,
+    "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295"
   },
   "read_first": [
     "docs/PRODUCT_SCOPE_LOCK_V1.json",
