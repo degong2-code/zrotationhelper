@@ -17,7 +17,7 @@ import re
 
 POLICY="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
 PROFILE_BLOB_SHA1="3225992ed5b754ad5d61e8b785d9d859f1eed1be"
-TOKENS=re.compile(r"<=|>=|!=|==|[&|!()<>]=?|[A-Za-z_][A-Za-z0-9_.]*|\d+(?:\.\d+)?")
+TOKENS=re.compile(r"<=|>=|!=|==|=|[&|!()<>]|[A-Za-z_][A-Za-z0-9_.]*|\d+(?:\.\d+)?")
 ROW_RE=re.compile(r"^actions(?:\.([a-z_]+))?(\+?=)(?:/)?(.+)$")
 ALLOWED_OPS={"&","|","!","(",")","=","==","!=",">","<",">=","<="}
 
