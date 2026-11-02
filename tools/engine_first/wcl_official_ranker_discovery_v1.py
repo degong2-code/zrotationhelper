@@ -66,6 +66,8 @@ def ranked_rows(data, *, encounter, class_name, spec_name, difficulty, min_rank=
         if not isinstance(item, dict):
             continue
         rank = item.get("rank")
+        if type(rank) is float and rank.is_integer():
+            rank = int(rank)  # provider JSON may emit exact integral ranks as Float
         if type(rank) is not int or not min_rank <= rank <= max_rank:
             continue
         report = item.get("report")
@@ -82,9 +84,13 @@ def ranked_rows(data, *, encounter, class_name, spec_name, difficulty, min_rank=
             continue
         if not isinstance(code, str) or not CODE_RE.fullmatch(code):
             continue
+        if type(fight) is float and fight.is_integer():
+            fight = int(fight)
         if not _positive(fight):
             continue
-        if item.get("spec") is not None and str(item["spec"]).casefold() != spec_name.casefold():
+        # Ranking JSON may expose numeric spec ids, not human labels.
+        # Bind names only when actually strings; full spec gate runs later.
+        if isinstance(item.get("spec"), str) and item["spec"].casefold() != spec_name.casefold():
             continue
         if item.get("class") is not None and isinstance(item["class"], str) and item["class"].casefold() != class_name.casefold():
             continue
@@ -96,7 +102,16 @@ def ranked_rows(data, *, encounter, class_name, spec_name, difficulty, min_rank=
         })
     candidates.sort(key=lambda x: (x["rank"], x["code"], x["fight"]))
     if not candidates:
-        raise RankSourceError("NO_RANKING_WITH_REPORT_FIGHT_AND_NAME")
+        # No secret, report code, or player name in diagnostic: only keys
+        # and JSON types. This is a response-contract inspection, not a retry.
+        shapes = []
+        for row in rows[:2]:
+            if isinstance(row, dict):
+                shapes.append({k: type(v).__name__ for k, v in sorted(row.items())
+                               if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,40}", k)})
+        details = {"row_count": len(rows), "sample_shapes": shapes}
+        raise RankSourceError("NO_RANKING_WITH_REPORT_FIGHT_AND_NAME__SHAPE=" +
+                              json.dumps(details, separators=(",", ":"), sort_keys=True))
     return candidates
 
 
@@ -288,6 +303,14 @@ def selftest():
         except RankSourceError: pass
         else: raise AssertionError("INVALID_RANKED_ACTOR_ACCEPTED:" + mutation)
         tested += 1
+    # Numeric specialization IDs must not reject all otherwise valid rows.
+    variant = copy.deepcopy(ranking)
+    variant["worldData"]["encounter"]["characterRankings"]["rankings"][0]["spec"] = 72
+    variant["worldData"]["encounter"]["characterRankings"]["rankings"][0]["fightID"] = 9.0
+    numeric = ranked_rows(variant, encounter=enc, class_name="Warrior",
+                          spec_name="Fury", difficulty=4)
+    assert len(numeric) == 1 and numeric[0]["fight"] == 9
+    tested += 1
     return {"status": "PASS_OFFLINE_SYNTHETIC",
             "negative_cases": 8, "assertion_groups": tested,
             "live_wcl_api_calls": 0, "actual_ranker_collected": False,
