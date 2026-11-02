@@ -17,6 +17,7 @@ import re
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
+from wcl_ranked_actor_resolution_v1 import ranked_actor,ActorResolutionError
 
 TOKEN="https://www.warcraftlogs.com/oauth/token"
 API="https://www.warcraftlogs.com/api/v2/client"
@@ -24,6 +25,10 @@ SCHEMA="ZrotFreshWCLRankedFuryPreflightV1"
 ZONE_QUERY="query { worldData { zones { id name frozen encounters { id name } } } }"
 RANK_QUERY="""query($id:Int!){worldData{encounter(id:$id){
  id name characterRankings(className:"Warrior",specName:"Fury",difficulty:4,page:1)
+}}}"""
+ACTOR_QUERY="""query($code:String!,$fight:Int!){reportData{report(code:$code){
+ code revision fights(fightIDs:[$fight],translate:false){id startTime endTime difficulty inProgress}
+ masterData(translate:false){actors{id name type subType}}
 }}}"""
 
 class PreflightError(ValueError):
@@ -155,8 +160,46 @@ def live(zone_match="Voidspire"):
             result["status"]=z["status"];return result
         encounter=graphql(token,RANK_QUERY,{"id":z["encounter_id"]}).get("worldData",{}).get("encounter")
         require(isinstance(encounter,dict),"RANKED_ENCOUNTER_SCHEMA_MISSING")
-        result["rankings"]=parse_rankers(encounter.get("characterRankings"))
+        ranking_obj=encounter.get("characterRankings")
+        result["rankings"]=parse_rankers(ranking_obj)
         result["status"]=result["rankings"]["status"]
+        # Exact ranker -> report -> fight -> actor mapping must be verified
+        # BEFORE any raw fight event collection. Names remain only in memory.
+        if result["status"]=="RANKED_REPORT_AND_FIGHT_IDENTIFIED":
+            rows=ranking_obj.get("rankings",[])
+            for item in rows[:5]:
+                if not isinstance(item,dict) or not isinstance(item.get("report"),dict):
+                    continue
+                c=item["report"].get("code")
+                fid=item["report"].get("fightID")
+                if not isinstance(c,str) or not re.fullmatch(r"[A-Za-z0-9]{6,40}",c):
+                    continue
+                if type(fid) is not int or fid<=0:continue
+                rd=graphql(token,ACTOR_QUERY,{"code":c,"fight":fid}).get("reportData")
+                if not isinstance(rd,dict):continue
+                report=rd.get("report")
+                if not isinstance(report,dict):continue
+                if report.get("code")!=c or type(report.get("revision")) is not int:continue
+                fights=report.get("fights",[])
+                if not isinstance(fights,list) or len(fights)!=1:continue
+                fight=fights[0]
+                if (fight.get("id")!=fid or fight.get("difficulty")!=4
+                    or fight.get("inProgress") is True):continue
+                md=report.get("masterData")
+                if not isinstance(md,dict):continue
+                try:
+                    match=ranked_actor(ranking_row=item,
+                        master_actors=md.get("actors"),
+                        report_code=c,fight_id=fid)
+                except ActorResolutionError:
+                    continue
+                result["ranker_actor_match"]=match
+                result["ranked_report_revision"]=report["revision"]
+                result["WCL_ranker_exact_actor_verified"]=True
+                result["status"]="RANKED_REPORT_FIGHT_ACTOR_NUMERIC_ID_CONFIRMED"
+                break
+            if not result["WCL_ranker_exact_actor_verified"]:
+                result["status"]="BLOCKED_RANKER_ACTOR_IDENTITY_NOT_UNIQUE_OR_UNOBSERVED"
     except PreflightError as ex:
         result["status"]="BLOCKED_"+str(ex)
     return result
