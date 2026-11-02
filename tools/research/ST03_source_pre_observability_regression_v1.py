@@ -175,7 +175,7 @@ def selftest():
     z["ledger"]["ledger_sha256"] = st03.digest(z["ledger"]["events"])
     reject("missing_event_provenance_rejected", z, "ST03_TRANSITION_EVIDENCE_REQUIRED")
     z = fixture("fury"); z["ledger"]["events"][0]["value"] = float("nan")
-    reject("nonfinite_value_rejected", z, "ST03_LEDGER_SHA256_MISMATCH")
+    reject("nonfinite_value_rejected", z, "ST03_NONFINITE_OR_INVALID_LEDGER_JSON")
     z = fixture("fury"); z["ledger"]["events"][0]["event_id"] = z["ledger"]["events"][1]["event_id"]
     z["ledger"]["ledger_sha256"] = st03.digest(z["ledger"]["events"])
     reject("duplicate_event_id_rejected", z, "ST03_DUPLICATE_EVENT_ID")
