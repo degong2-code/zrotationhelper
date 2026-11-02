@@ -152,8 +152,12 @@ def selftest():
         expect(which + "_provider_observed_negative", z,
                "OBSERVED_NEGATIVE_RESEARCH_ONLY")
         z = fixture(which); change(z, sfeature, timestamp=950)
+        source_action = next(a for a in json.loads(z["st02_case"]["source_json"])["candidate_actions"]
+                             if a["action"] == z["st02_case"]["selector"]["action_token"])
+        related_gid = next(g["id"] for g in source_action["extra_source_obligations"]
+                           if sfeature in g["required_state"])
         expect(which + "_stale_gate_before_source_state", z, "UNKNOWN",
-               diagnostic=(gid, "UNKNOWN_STALE_GATE_BEFORE_SOURCE_STATE"))
+               diagnostic=(related_gid, "UNKNOWN_STALE_GATE_BEFORE_SOURCE_STATE"))
         z = fixture(which); z["ledger"]["feature_bindings"].pop(sfeature)
         # Input ledger event now unbound; should reject rather than accept.
         reject(which + "_unbound_feature_rejected", z, "ST03_UNBOUND_TRANSITION_FEATURE")
