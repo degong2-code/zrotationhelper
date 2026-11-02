@@ -1,0 +1,75 @@
+name: zrot-engine-first-fresh-data-ci
+
+on:
+  push:
+    branches:
+      - work/engine-first-fresh-data-vslice-20261102
+    paths:
+      - tools/engine_first/**
+      - docs/ENGINE_FIRST_FRESH_WCL_VERTICAL_SLICE_V1.md
+      - .github/workflows/zrot-engine-first-fresh-data-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-e2e:
+    name: Fresh snapshot and replay Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile both delivered Python files
+        run: |
+          python -m py_compile tools/engine_first/fresh_wcl_engine_v1.py tools/engine_first/test_fresh_wcl_engine_v1.py
+      - name: Run no-argument offline cold-start/resume/replay
+        run: |
+          mkdir -p ci_artifacts/fresh_engine
+          python tools/engine_first/fresh_wcl_engine_v1.py > ci_artifacts/fresh_engine/default_run.json
+          python tools/engine_first/fresh_wcl_engine_v1.py self-test > ci_artifacts/fresh_engine/explicit_selftest.json
+      - name: Independent mocked-transport and fail-closed regression tests
+        run: |
+          python -m unittest discover -s tools/engine_first -p 'test_fresh_wcl_engine_v1.py' -v
+      - name: Assert evidence scope without gameplay claims
+        run: |
+          python - <<'PY'
+          import json,platform
+          from pathlib import Path
+          a=Path("ci_artifacts/fresh_engine")
+          x=json.loads((a/"default_run.json").read_text())
+          y=json.loads((a/"explicit_selftest.json").read_text())
+          assert x==y
+          assert x["result"]=="PASS" and x["check_count"]==21
+          assert x["real_api_requests"]==0
+          assert x["product_MAIN_modified"] is False
+          assert x["FROZEN_modified"] is False
+          assert x["full_rotation_engine_complete"] is False
+          receipt={"schema":"ZrotFreshDataVerticalSliceCIReceiptV1","status":"PASS_OFFLINE_E2E_ONLY",
+                   "python":platform.python_version(),"synthetic_check_count":21,
+                   "independent_unittest_count":10,
+                   "actual_live_WCL_API":"NOT_RUN",
+                   "SimC_APL_lane":"NOT_IMPLEMENTED",
+                   "WCL_blind_candidate_lock":"NOT_IMPLEMENTED",
+                   "current_season_gameplay_accuracy":"NOT_PROVEN",
+                   "MAIN_promotion":False,"FROZEN_changed":False}
+          (a/"scope_receipt.json").write_text(json.dumps(receipt,sort_keys=True,indent=2)+"\n")
+          print("FRESH_DATA_SNAPSHOT_REPLAY=PASS_OFFLINE")
+          PY
+      - name: Retain receipts without credentials or event data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fresh-engine-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/fresh_engine/
+          if-no-files-found: warn
+          retention-days: 7
