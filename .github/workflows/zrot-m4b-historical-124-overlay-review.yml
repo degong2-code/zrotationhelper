@@ -1,0 +1,76 @@
+name: zrot-m4b-historical-124-overlay-review
+
+on:
+  push:
+    branches:
+      - work/m4b-124-stage-registry-reconciliation-20261102
+    paths:
+      - .github/workflows/zrot-m4b-historical-124-overlay-review.yml
+      - docs/M4B_124_PRIVATE_SOURCE_AND_RESEARCH_OVERLAY_REVIEW_20261102.json
+      - tools/recovery/m4b_124_research_overlay_comparison_v1.py
+
+permissions:
+  contents: read
+
+jobs:
+  source-overlay:
+    name: Historical source overlap ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify GitHub bootstrap main remains untouched
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin refs/heads/main
+          test "$(git rev-parse FETCH_HEAD)" = "4790f77f76a75f26ff0558d1d18c16cd9d630c4b"
+      - name: Perform pinned historical vs research SHA comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/m4b124
+          python -B -m py_compile tools/recovery/m4b_124_research_overlay_comparison_v1.py
+          python -B tools/recovery/m4b_124_research_overlay_comparison_v1.py --self-test > ci_artifacts/m4b124/overlay.json
+          python - <<'PY'
+          import json,hashlib,os,platform
+          from pathlib import Path
+          p=Path("ci_artifacts/m4b124/overlay.json")
+          d=json.loads(p.read_text())
+          assert d["result"]=="PASS_DIAGNOSTIC_NO_AUTOMATIC_PROMOTION"
+          assert d["research_source_modules_compared"]==3
+          assert d["historical_inventory_byte_match_count"]+d["historical_inventory_byte_mismatch_count"]==3
+          assert d["negative_contract_cases"]==5
+          assert d["main_product_promotion"] is False
+          assert d["full_runtime_equivalence"]=="NOT_VERIFIED"
+          assert d["seq578"]=="FAILED_QUARANTINED_PRESERVED" and d["seq637"]=="UNKNOWN"
+          out={"schema":"ZrotM4B124OverlayCIReceiptV1",
+               "status":"PASS_SOURCE_VARIANT_DIAGNOSTIC__NOT_PRODUCT_MAIN",
+               "head_sha":os.getenv("GITHUB_SHA"),"run_id":os.getenv("GITHUB_RUN_ID"),
+               "python":platform.python_version(),
+               "research_checked":d["research_source_modules_compared"],
+               "historical_inventory_match":d["historical_inventory_byte_match_count"],
+               "historical_inventory_mismatch":d["historical_inventory_byte_mismatch_count"],
+               "offline_private_source_124_reexecuted":False,
+               "main_product_promotion":False,"frozen_mutated":False,
+               "seq578":"FAILED_QUARANTINED_PRESERVED","seq637":"UNKNOWN"}
+          Path("ci_artifacts/m4b124/ci_receipt.json").write_text(json.dumps(out,sort_keys=True,indent=2)+"\n")
+          print("M4B_124_OVERLAY_DIAGNOSTIC=PASS_NO_MAIN_PROMOTION")
+          PY
+      - name: Upload sanitized proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m4b124-overlap-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/m4b124/
+          if-no-files-found: warn
+          retention-days: 7
