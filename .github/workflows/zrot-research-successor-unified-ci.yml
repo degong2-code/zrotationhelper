@@ -1,0 +1,162 @@
+name: zrot-research-successor-unified-ci
+
+on:
+  push:
+    branches:
+      - work/research-successor-baseline-20261102
+    paths:
+      - .github/workflows/zrot-research-successor-unified-ci.yml
+      - active/branches/BR-RESEARCH-SUCCESSOR-20261102/RESEARCH_SUCCESSOR_BASELINE_CANDIDATE_V1.json
+      - tools/research/research_successor_baseline_gate_v1.py
+      - tools/research/ST01_existing_simc_readiness_gate_regression_v1.py
+      - tools/research/ZROT_Source_Obligation_Gate_v1.py
+      - tools/research/simc_apl_readiness_provider.py
+      - tools/research/ST02_source_identity_reconciliation_v1.py
+      - tools/research/ST02_source_identity_regression_v1.py
+      - tools/research/ST03_source_pre_observability_v1.py
+      - tools/research/ST03_source_pre_observability_regression_v1.py
+      - tools/research/ST04_raw_pre_capture_adapter_v1.py
+      - tools/research/ST04_independent_raw_pre_audit_v1.py
+      - tools/research/ST04_raw_pre_independent_regression_v1.py
+      - tools/research/ST05_actual_archived_native_producer_audit_v1.py
+      - tools/research/ST06_pinned_native_source_gate_instrument_v1.py
+      - tools/research/ST06_native_source_gate_independent_audit_v1.py
+
+permissions:
+  contents: read
+
+jobs:
+  combined-research:
+    name: Same-HEAD research baseline Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify bootstrap main remained unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin refs/heads/main
+          test "$(git rev-parse FETCH_HEAD)" = "4790f77f76a75f26ff0558d1d18c16cd9d630c4b"
+          test "$(git ls-tree -r --name-only FETCH_HEAD)" = "README.md"
+          echo "GITHUB_MAIN_PRODUCTION_NOT_AUTHORIZED=PASS"
+      - name: Compile and execute combined ST01-ST04 research regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/research_successor
+          python -B -m py_compile \
+            tools/research/research_successor_baseline_gate_v1.py \
+            tools/research/main_integration_recovery_gate_v1.py \
+            tools/research/ST01_existing_simc_readiness_gate_regression_v1.py \
+            tools/research/ZROT_Source_Obligation_Gate_v1.py \
+            tools/research/simc_apl_readiness_provider.py \
+            tools/research/ST02_source_identity_reconciliation_v1.py \
+            tools/research/ST02_source_identity_regression_v1.py \
+            tools/research/ST03_source_pre_observability_v1.py \
+            tools/research/ST03_source_pre_observability_regression_v1.py \
+            tools/research/ST04_raw_pre_capture_adapter_v1.py \
+            tools/research/ST04_independent_raw_pre_audit_v1.py \
+            tools/research/ST04_raw_pre_independent_regression_v1.py \
+            tools/research/ST05_actual_archived_native_producer_audit_v1.py \
+            tools/research/ST06_pinned_native_source_gate_instrument_v1.py \
+            tools/research/ST06_native_source_gate_independent_audit_v1.py
+          python -B tools/research/research_successor_baseline_gate_v1.py --self-test \
+            > ci_artifacts/research_successor/pin_and_authority_gate.json
+          python -B tools/research/main_integration_recovery_gate_v1.py --self-test \
+            > ci_artifacts/research_successor/historical_recovery_gate.json
+          python -B tools/research/ZROT_Source_Obligation_Gate_v1.py --self-test \
+            > ci_artifacts/research_successor/source_gate.json
+          python -B tools/research/ST01_existing_simc_readiness_gate_regression_v1.py --self-test \
+            > ci_artifacts/research_successor/st01.json
+          python -B tools/research/ST02_source_identity_regression_v1.py \
+            > ci_artifacts/research_successor/st02.json
+          python -B tools/research/ST03_source_pre_observability_regression_v1.py \
+            > ci_artifacts/research_successor/st03.json
+          python -B tools/research/ST04_raw_pre_independent_regression_v1.py \
+            > ci_artifacts/research_successor/st04.json
+          python -B tools/research/ST06_pinned_native_source_gate_instrument_v1.py --self-test \
+            > ci_artifacts/research_successor/st06_source_patch_static.json
+          python -B tools/research/ST06_native_source_gate_independent_audit_v1.py --self-test \
+            > ci_artifacts/research_successor/st06_native_auditor_static.json
+          python - <<'PY'
+          import hashlib, json, os, platform
+          from pathlib import Path
+          base=Path("ci_artifacts/research_successor")
+          def doc(name):
+              return json.loads((base/name).read_text())
+          pins=doc("pin_and_authority_gate.json")
+          restore=doc("historical_recovery_gate.json")
+          gate=doc("source_gate.json")
+          st01=doc("st01.json")
+          st02=doc("st02.json")
+          st03=doc("st03.json")
+          st04=doc("st04.json")
+          st06=doc("st06_source_patch_static.json")
+          auditor=doc("st06_native_auditor_static.json")
+          assert pins["status"]=="PASS_RESEARCH_SOURCE_PINS__PRODUCT_MAIN_BLOCKED"
+          assert pins["pinned_source_file_count"]==21
+          assert pins["negative_regression_passed"]==8
+          assert pins["main_product_promotion"] is False
+          assert restore["status"]=="PASS_HISTORICAL_SOURCE_COMPATIBILITY__PRODUCT_MAIN_BLOCKED"
+          assert restore["focused_negative_self_test_cases"]==6
+          assert gate["result"]=="PASS" and gate["count"]==24
+          assert st01["result"]=="PASS" and st01["passed"]==24
+          assert st02["status"]=="PASS" and st02["count"]==30
+          assert st03["result"]=="PASS" and st03["count"]==39
+          assert st04["status"]=="PASS" and st04["passed"]==33
+          assert st06["status"]=="PASS" and st06["counts"]=={"fury":2,"havoc":1}
+          assert auditor["status"]=="PASS" and auditor["synthetic_negative_contract_n"]==3
+          assert st04["live_ready_certified"]==0
+          assert st03["gameplay_readiness_certified"]==0
+          assert st02["current_gameplay_ready_certified"]==0
+          assert st01["main_or_frozen_promotion"] is False
+          fresh_n=sum([gate["count"],st01["passed"],st02["count"],st03["count"],st04["passed"]])
+          summary={
+              "schema":"ZrotResearchSuccessorSameHeadGithubReceiptV1",
+              "result":"PASS_RESEARCH_SAME_HEAD_NO_PRODUCTION",
+              "github_sha":os.environ.get("GITHUB_SHA","UNKNOWN"),
+              "github_run_id":os.environ.get("GITHUB_RUN_ID","UNKNOWN"),
+              "python":platform.python_version(),
+              "pinned_source_blobs":pins["pinned_source_file_count"],
+              "ST01_ST04_offline_test_cases":fresh_n,
+              "baseline_negative_regression":pins["negative_regression_passed"],
+              "recovery_negative_regression":restore["focused_negative_self_test_cases"],
+              "ST06_static_source_hook_count":sum(st06["counts"].values()),
+              "ST06_static_auditor_negative_n":auditor["synthetic_negative_contract_n"],
+              "ST05_actual_native_rerun":"NOT_RUN_PRIOR_CI_PINNED",
+              "ST06_cpp_native_rerun":"NOT_RUN_PRIOR_CI_PINNED",
+              "old_m4a_m4b_raw_reevaluation":"NOT_RUN_PRIOR_HASHES_PINNED",
+              "current_product_main_runtime":"UNKNOWN",
+              "canonical_registry":"MISSING",
+              "active_pointer":"MISSING",
+              "user_gameplay_readiness_certified":0,
+              "main_product_promotion":False,
+              "frozen_mutation":False,
+              "seq578":"FAILED_QUARANTINED_PRESERVED",
+              "seq637":"UNKNOWN",
+              "manifest_sha256":hashlib.sha256(Path(
+                "active/branches/BR-RESEARCH-SUCCESSOR-20261102/RESEARCH_SUCCESSOR_BASELINE_CANDIDATE_V1.json"
+              ).read_bytes()).hexdigest()
+          }
+          (base/"github_same_head_receipt.json").write_text(
+              json.dumps(summary,sort_keys=True,indent=2)+"\n")
+          print("RESEARCH_SUCCESSOR_SAME_HEAD_CI=PASS_PRODUCT_MAIN_BLOCKED")
+          PY
+      - name: Upload bounded research receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-successor-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/research_successor/*.json
+          if-no-files-found: warn
+          retention-days: 7
