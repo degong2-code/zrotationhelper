@@ -102,7 +102,30 @@ def evaluate(profile_raw:bytes,tree:dict,branches:list,actual:dict):
             else:source_state="NEITHER_SELECTED"
         sim_active=_selector_status(tree,nid,sim["selected"])
         wcl_active=_selector_status(tree,nid,actual["selected"])
+        # A tree-root can appear selected in the export while its entire
+        # hero subtree is inactive. The chooser, not raw root presence,
+        # determines applicability. Still require root selection for TRUE.
+        def talent_guard(selected,selector):
+            if selected is False or selector["active"] is False:
+                return "FALSE"
+            if selected is True and selector["active"] is True:
+                return "TRUE"
+            return "UNKNOWN"
+        profile_guard=talent_guard(sim_selected,sim_active)
+        wcl_guard=talent_guard(wcl_selected,wcl_active)
+        if profile_guard=="FALSE" and wcl_guard=="FALSE":
+            conditional_state="BOTH_INACTIVE_HERO_BRANCH"
+        elif profile_guard=="TRUE" and wcl_guard=="TRUE":
+            conditional_state="HERO_GUARD_AGREES_TARGET_COUNT_UNKNOWN"
+        else:
+            conditional_state="UNKNOWN_OR_DIFFERENT_HERO_GUARD"
         out.append({**row,"resolved_node_id":nid,
+                    "simc_profile_hero_talent_guard":profile_guard,
+                    "wcl_pre_hero_talent_guard":wcl_guard,
+                    "conditional_branch_state":conditional_state,
+                    "target_count_operand":"active_enemies",
+                    "target_count_at_wcl_decision":"UNKNOWN",
+                    "branch_action_priority_verified":False,
                     "simc_profile_raw_node_selected":sim_selected,
                     "wcl_strict_pre_raw_node_selected":wcl_selected,
                     "raw_node_selection_comparison":source_state,
@@ -169,12 +192,14 @@ def selftest():
     sel_no=_selector_status(selector,5,[(99,1901,1)])
     assert sel_yes["active"] is True and sel_no["active"] is False
     assert sel_yes["status"]=="EXPLICIT_PARENT_HERO_SELECTOR_EVIDENCE"
+    # Same raw root selection can have opposite effective hero-trait state.
+    assert sel_no["active"] is False
     assert _selector_status(selector,5,[])["active"] is None
     assert _selector_status(tree,5,[])["active"] is None
     try:source_branches(b"actions+=/rampage,if=rage>=80\n")
     except APLBranchError:pass
     else:raise AssertionError("NON_BRANCH_APL_ACCEPTED")
-    return {"status":"PASS_OFFLINE_SYNTHETIC","checks":11,
+    return {"status":"PASS_OFFLINE_SYNTHETIC","checks":12,
             "actual_SimC_or_WCL_sources_read":False,
             "priority_validated":False}
 
