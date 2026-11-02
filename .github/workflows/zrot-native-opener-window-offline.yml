@@ -1,0 +1,46 @@
+name: zrot-native-opener-window-offline
+
+on:
+  push:
+    branches:
+      - work/gr-native-simc-smoke-20261102
+    paths:
+      - tools/research/simc_native_opener_window_v1.py
+      - .github/workflows/zrot-native-opener-window-offline.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  opener-window:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12","3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile exact new research bridge
+        run: |
+          python -m py_compile tools/research/simc_native_opener_window_v1.py
+      - name: Synthetic native reference JSON2 -> observed opener fixture
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_opener_window_v1.py --self-test > receipt.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path("receipt.json").read_text())
+          assert r["result"]=="PASS"
+          assert r["offline_case_count"]==16
+          assert r["actual_native_simc_run"]=="NOT_RUN_IN_SELFTEST"
+          assert r["WCL_replay"]=="NOT_RUN"
+          print("NATIVE_OPENER_WINDOW_BRIDGE_OFFLINE_PASS")
+          PY
