@@ -1,0 +1,82 @@
+name: zrot-st01-offline-gate-ci
+
+on:
+  push:
+    branches:
+      - work/st01-actual-provider-gate-20261102
+    paths:
+      - .github/workflows/zrot-st01-offline-gate-ci.yml
+      - tools/research/ST01_existing_simc_readiness_gate_regression_v1.py
+      - tools/research/ZROT_Source_Obligation_Gate_v1.py
+      - tools/research/simc_apl_readiness_provider.py
+
+permissions:
+  contents: read
+
+jobs:
+  st01:
+    name: ST01 Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify pinned inputs and run exact offline regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/st01
+          python -B -m py_compile tools/research/simc_apl_readiness_provider.py tools/research/ZROT_Source_Obligation_Gate_v1.py tools/research/ST01_existing_simc_readiness_gate_regression_v1.py
+          python -B tools/research/ZROT_Source_Obligation_Gate_v1.py --self-test > ci_artifacts/st01/gate_selftest.json
+          python -B tools/research/ST01_existing_simc_readiness_gate_regression_v1.py --self-test > ci_artifacts/st01/provider_gate_integration.json
+          python - <<'PY'
+          import hashlib, json, os, platform, sys
+          from pathlib import Path
+          root=Path('tools/research')
+          expected={
+              'simc_apl_readiness_provider.py':'04f3551802852608a1240bfe41c56d92f6b02136b7a159437ca4caada47fff6e',
+              'ZROT_Source_Obligation_Gate_v1.py':'8477da762da67c94569b37728ecc5122a68399476789ae93e25e40c66773c7e7',
+              'ST01_existing_simc_readiness_gate_regression_v1.py':'578d6b1c5e514c35103e6b18c4342e2cfd62712c399db42063a3701ef3f9c7cd',
+          }
+          for name, digest in expected.items():
+              assert hashlib.sha256((root/name).read_bytes()).hexdigest()==digest, name
+          gate=json.loads(Path('ci_artifacts/st01/gate_selftest.json').read_text())
+          integration=json.loads(Path('ci_artifacts/st01/provider_gate_integration.json').read_text())
+          assert gate['result']=='PASS' and gate['count']==24, gate
+          assert integration['result']=='PASS' and integration['passed']==24, integration
+          assert integration['user_recommendation_eligible'] is False
+          assert integration['main_or_frozen_promotion'] is False
+          assert integration['actual_live_api_wcl_simc_gameplay']=='NOT_RUN'
+          receipt={
+              'schema':'ZrotST01GithubIsolatedCIReceiptV1',
+              'status':'PASS','gate_selftest_n':gate['count'],
+              'actual_provider_integration_n':integration['passed'],
+              'source_sha256':expected,
+              'commit':os.environ.get('GITHUB_SHA','UNKNOWN'),
+              'run_id':os.environ.get('GITHUB_RUN_ID','UNKNOWN'),
+              'python_version':platform.python_version(),
+              'evidence':'OFFLINE_SYNTHETIC_REAL_PROVIDER_FUNCTION',
+              'wcl_live':'NOT_RUN','simc_live':'NOT_RUN','gameplay':'NOT_CERTIFIED',
+              'promotion':False,'seq637':'UNKNOWN',
+          }
+          Path('ci_artifacts/st01/ci_receipt.json').write_text(json.dumps(receipt,indent=2,sort_keys=True)+'\n')
+          print('ST01_GITHUB_OFFLINE_CI=PASS')
+          PY
+      - name: Upload scoped receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: st01-offline-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/st01/
+          if-no-files-found: warn
+          retention-days: 7
