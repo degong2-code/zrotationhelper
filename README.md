@@ -11,6 +11,7 @@
 2. [Full product scope declaration](docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md)
 3. [Agent instructions](AGENTS.md) and [Engine-First Charter](docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md)
 4. [Handoff continuity protocol](docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md) and [New chat boot prompt](handoff/NEW_CHAT_BOOT_PROMPT.md)
+   - [Parallel Workstream contract (2026-11-02 scope-aligned)](docs/PARALLEL_WORKSTREAM_AND_MERGE_CONTRACT.md) controls branch ownership, never expands the product scope.
 5. The task's **current actual branch** latest handoff, with full `scope_continuity.policy_snapshot`.
 
 The policy ID is `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`. Simulated five-hop inheritance is a test, not five real chat handoffs. For a policy check on a docs-only checkout use:
