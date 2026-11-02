@@ -51,7 +51,7 @@ jobs:
           assert r["result"]=="PASS_SCOPE_CONTINUITY"
           assert r["policy_id"]=="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
           assert r["documentation_entrypoints"]["checked"]==6
-          assert r["negative_cases_passed"]==13
+          assert r["negative_cases_passed"]==14
           x=r["five_hop_simulation"]
           assert x["result"]=="PASS"
           assert len(x["simulated_successor_hops"])==5
