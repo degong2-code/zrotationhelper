@@ -14,7 +14,7 @@
     "research_source_base_sha": "5411e34d0cae4d6e354433666c17240d37188148"
   },
   "static_dependency_evidence": {
-    "raid_dps_module_internal_python_count": 15,
+    "raid_dps_module_internal_python_count": 16,
     "direct_from_import_edges_total": 43,
     "direct_archived_symbol_imports": 29,
     "archived_direct_symbol_exports_found": 29,
