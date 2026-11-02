@@ -1,0 +1,110 @@
+name: zrot-st05-real-native-producer-audit
+
+on:
+  push:
+    branches:
+      - work/st05-pinned-native-producer-evidence-20261102
+    paths:
+      - .github/workflows/zrot-st05-real-native-producer-audit.yml
+      - tools/research/ST05_actual_archived_native_producer_audit_v1.py
+      - tools/research/simc_native_bare_resource_eval_audit.py
+      - tools/research/simc_native_epoch_sequence_audit.py
+      - docs/BR_SIMC_ARCHIVED_NATIVE_FULL_ROW_REPLAY_20261031.json
+      - docs/BR_SIMC_ARCHIVED_NATIVE_ACTION_ID_EVIDENCE_20261031.json
+      - docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  st05:
+    name: ST05 Actual Native Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Fetch original historical Native artifact without committing player or log bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/st05
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/12990129697/zip" \
+            -H "Accept: application/vnd.github+json" \
+            --method GET \
+            --output ci_artifacts/st05/original_native_archive.zip
+          test -s ci_artifacts/st05/original_native_archive.zip
+          echo "ORIGINAL_NATIVE_ARTIFACT_FETCHED=YES"
+      - name: Independently re-audit actual epoch/resource expression markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B -m py_compile \
+            tools/research/ST05_actual_archived_native_producer_audit_v1.py \
+            tools/research/simc_native_bare_resource_eval_audit.py \
+            tools/research/simc_native_epoch_sequence_audit.py
+          python -B tools/research/ST05_actual_archived_native_producer_audit_v1.py \
+            --archive ci_artifacts/st05/original_native_archive.zip --self-test \
+            > ci_artifacts/st05/real_native_audit.json
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib, json, os, platform
+          p=Path("ci_artifacts/st05/real_native_audit.json")
+          d=json.loads(p.read_text())
+          assert d["status"]=="PASS_SOURCE_BYTE_REPLAY_NOT_READINESS", d
+          assert d["native_resource_eval_total"]==266, d
+          assert d["actual_native_run_id"]==41084262760
+          assert d["source_tamper_regression"]=="PASS_REJECT_TAMPERED_BYTES"
+          assert d["readiness_certified"]==0
+          assert d["complete_resource_write_coverage"]=="NOT_VERIFIED"
+          assert d["source_specific_gate_producer_provenance"]=="UNKNOWN"
+          assert d["source_to_ST03_positive_gate_input"]=="FORBIDDEN_WITH_CURRENT_EVIDENCE"
+          assert d["main_frozen_promotion"] is False
+          for row in d["profiles"]:
+              assert row["ready_certified"]==0
+              assert row["source_epoch_independent_audit"]=="PASS_EPOCH_NATIVE_SOURCE_BYTES_INDEPENDENT_RECALC"
+              assert all(v=="UNKNOWN_NO_CERTIFIED_SPECIFIC_NATIVE_PRODUCER_BINDING"
+                         for v in row["source_gate_readiness_state"].values())
+          r={"schema":"ZrotST05ActualNativeGithubCIReceiptV1",
+             "status":"PASS",
+             "github_sha":os.getenv("GITHUB_SHA","UNKNOWN"),
+             "github_run_id":os.getenv("GITHUB_RUN_ID","UNKNOWN"),
+             "python_version":platform.python_version(),
+             "actual_native_archive_sha256":d["archive_sha256"],
+             "native_resource_evaluation_count":d["native_resource_eval_total"],
+             "native_epoch_independent_audit":"PASS_PINNED_BYTE_SCOPE",
+             "producer_mechanic_completeness":"UNKNOWN",
+             "live_simc_execution":"NOT_RUN_ARCHIVED_ACTUAL_ONLY",
+             "live_wcl":"NOT_RUN","blizzard_retail":"NOT_VERIFIED",
+             "gameplay_ready_certified":0,"product_promotion":False,
+             "seq578":"FAILED_QUARANTINED_PRESERVED","seq637":"UNKNOWN"}
+          Path("ci_artifacts/st05/github_receipt.json").write_text(
+              json.dumps(r,indent=2,sort_keys=True)+"\n")
+          print("ST05_ACTUAL_NATIVE_ARCHIVE_CI=PASS")
+          PY
+      - name: Remove original raw archive before artifact upload
+        if: always()
+        shell: bash
+        run: |
+          rm -f ci_artifacts/st05/original_native_archive.zip
+      - name: Upload evidence summary only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: st05-actual-native-audit-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/st05/*.json
+          if-no-files-found: warn
+          retention-days: 7
