@@ -6,6 +6,19 @@
 **Official policy:** `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`; lock SHA256 `157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295`  
 **Canonical current handoff:** `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json`. Read this for the complete policy snapshot and latest chain; this note is explanatory, not an alternative pointer.
 
+## Follow-up implementation result — 2026-11-02 (branch-local, no MAIN promotion)
+
+This section records new implementation after the generation-1 handoff. It does **not** create another handoff generation or replace historical evidence.
+
+- Final tested research-code commit: `349313851f32734b58792fb61c14569f4d432820`.
+- New engine component: `tools/engine_first/wcl_actor_scoped_cohort_v1.py`. It uses the official WCL report fight `friendlyPlayers`/`friendlySpecs` and `masterData.actors` contracts to reject mismatched report/fight/actor/spec/class. It filters the verified numeric Strict-PRE replay to one actor **before** the independent blind numeric candidate lock. Its output does not contain SimC spell labels.
+- Added CI: `.github/workflows/zrot-wcl-actor-scoped-identity.yml`.
+- Final source SHA256: `07433e51e8c4253f788aee2744f3ce580a51d6f2ec2e09caeff97279bbdf0566`.
+- Final CI proof: [Actions 41455193036](https://github.com/degong2-code/zrotationhelper/actions/runs/41455193036), Python 3.12 and 3.14 **PASS** on compile + offline synthetic source identity, other-actor exclusion, Strict PRE same-timestamp guard, blind count lock, tampered replay, negative identity checks and existing collector/lock regression.
+- **Real high-ranking WCL source and authorized live API execution remain NOT RUN.** Ranking provenance and talent build are UNKNOWN; this synthetic PASS is not evidence of gameplay priority, current season validity, independent holdout, or post-lock SimC replay.
+- The explicit `--live` CLI requires a genuine report code/fight/actor/spec/class and lawful WCL OAuth environment. It saves raw pages locally, supports bounded `--max-pages` and partial checkpoint/resume, and never auto-runs with no arguments. No GitHub secret, production pointer, global handoff, MAIN or FROZEN was modified.
+- Product Exact Next unchanged. Session Exact Next narrows to verified fresh high-ranker discovery and bounded authorized acquisition, then real actor-scoped blind lock and only post-lock SimC comparison. Avoid sourcing actor/rank assertions from undocumented or stale secondary listings.
+
 ## Product and why this branch exists
 
 **Long-term goal is a reusable engine capable of producing and validating General Rotation models for changing specs/builds/patches**, not an ad hoc Fury Warrior rotation, a stack of CI PASS counts or a historical system restoration.
