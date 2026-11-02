@@ -89,7 +89,7 @@ def audit(data:dict)->dict:
       "status":"PASS_SIX_PIN_ATTESTATION__PRODUCT_MAIN_AUTHORITY_STILL_UNKNOWN",
       "reported_pc_hashes_match_original_archive":6,
       "historical_cross_doc_disagreements_preserved":len(expected),
-      "explicit_stale_embedded_source_hashes":3,
+      "explicit_stale_embedded_source_hashes":4,
       "automatic_repair":False,"original_source_run":False,
       "current_main_promotion":False,"frozen_modified":False,
       "seq578":"FAILED_QUARANTINED_PRESERVED","seq637":"UNKNOWN",
