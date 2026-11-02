@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   static-gate:
-    name: M4B static metadata Python GHOPEN matrix.python-version }}
+    name: M4B static metadata Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     timeout-minutes: 7
     strategy:
@@ -28,7 +28,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: GHOPEN matrix.python-version }}
+          python-version: ${{ matrix.python-version }}
       - name: Verify no product runtime authority changed
         shell: bash
         run: |
@@ -78,7 +78,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: m4b-five-static-GHOPEN matrix.python-version }}-GHOPEN github.sha }}
+          name: m4b-five-static-${{ matrix.python-version }}-${{ github.sha }}
           path: ci_artifacts/m4b_five/
           if-no-files-found: warn
           retention-days: 7
