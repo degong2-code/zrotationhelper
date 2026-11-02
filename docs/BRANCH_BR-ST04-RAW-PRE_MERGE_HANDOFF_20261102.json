@@ -1,0 +1,73 @@
+{
+  "schema": "ZrotBranchST04MergeHandoffV1",
+  "branch_id": "BR-ST04-RAW-PRE-INDEPENDENT-AUDIT",
+  "branch_name": "work/st04-independent-raw-pre-audit-20261102",
+  "research_base_sha": "e4bf99ef2b65672321f2c8e30a05292bb5d75d9e",
+  "validated_code_sha": "075dc94d3bc1b080bb45c22c928bef1f04c1f64f",
+  "owner": "ISOLATED_SIMC_POST_HYPOTHESIS_RESEARCH",
+  "scope": "Immutable caller-provided raw feature transition NDJSON to ST03 STRICT PRE + independent byte/row/state/gate consistency audit; no gameplay authority",
+  "owned_artifacts": [
+    "tools/research/ST04_raw_pre_capture_adapter_v1.py",
+    "tools/research/ST04_independent_raw_pre_audit_v1.py",
+    "tools/research/ST04_raw_pre_independent_regression_v1.py",
+    ".github/workflows/zrot-st04-independent-raw-pre-ci.yml"
+  ],
+  "validation": {
+    "production": "NOT_RUN",
+    "live_simc": "NOT_RUN",
+    "live_wcl": "NOT_RUN",
+    "blizzard_current_game": "NOT_VERIFIED",
+    "synthetic_static": "PASS",
+    "code_compile": "PASS",
+    "github_offline": "PASS",
+    "st04_cases_per_python": 33,
+    "st03_unchanged_cases_per_python": 39,
+    "python": [
+      "3.12",
+      "3.14"
+    ],
+    "run_id": 41373179846,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41373179846",
+    "artifacts": [
+      13109433167,
+      13110271338
+    ],
+    "earlier_failed_run": {
+      "id": 41373129737,
+      "cause": "CI receipt Python dictionary comprehension syntax typo",
+      "classification": "CI_RECEIPT_PIPELINE_ERROR",
+      "retained": true
+    },
+    "source_pin_invariants": "ST02 original SimC source and candidate identity document Git blob SHA checked by CI",
+    "code_files_not_modified_after_success": true
+  },
+  "key_results": [
+    "ST04 raw-to-ST03 adapter preserves exact caller-supplied typed actor/target/action transition source",
+    "Independent reviewer uses only stdlib, not ST01/ST02/ST03/ST04 producer, to reparse NDJSON, recompute per-line hashes and ledger equality",
+    "Independent reviewer separately rebuilds Strict PRE latest state, gate prerequisite ordering, exclusion counters and shadow-only result status",
+    "Two pinned source candidates Fury Rampage and Havoc Felblade covered by synthetic fixtures; no exhaustive spec generalization",
+    "Forged result, evidence receipt, raw-line hash, state or gate diagnostic rejected",
+    "Unverified caller-supplied data passes consistency audit, NOT authenticity or mechanic correctness"
+  ],
+  "limitations": [
+    "Raw capture and reporter from same caller are not independent state-producer proof",
+    "Gate values are declared numeric evaluation inputs, not actual source mechanic execution",
+    "Time/subject semantics still require independent Native or trusted source checks",
+    "Existing two-case sample not source-complete or current game verified",
+    "Actual WCL blind lock remains independent and NOT_RUN",
+    "Main Runtime/CurrentState/canonical pointer unresolved (M4)"
+  ],
+  "evidence_lifecycle": "BRANCH_VALIDATED_SYNTHETIC_ONLY",
+  "cross_branch_dependencies": [
+    "cross_branch_dependency: producer owner needs to provide verified native/actual event provenance, strict source transition semantics and source-specific gate computation",
+    "cross_branch_dependency: MAIN needs approved canonical Runtime, CURRENT_STATE and active pointer/registry before promotion",
+    "cross_branch_dependency: WCL owner needs independent numeric/structural blind candidate lock before SimC source semantic joining"
+  ],
+  "proposed_product_exact_next": "Seq637 remains UNKNOWN; no product launch",
+  "proposed_session_exact_next": "ST05 examine actual producer evidence and source mechanic parity; real source provenance remains blocker, not synthetic count",
+  "frozen_mutated": false,
+  "shared_authoritative_state_mutated": false,
+  "seq578": "FAILED_QUARANTINED_PRESERVED",
+  "seq637": "UNKNOWN",
+  "status": "BRANCH_VALIDATED_NO_PROMOTION"
+}
