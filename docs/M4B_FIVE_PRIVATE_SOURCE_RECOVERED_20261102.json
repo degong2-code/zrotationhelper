@@ -1,0 +1,68 @@
+{
+  "schema": "ZrotM4BExactFivePrivateSourceAttestedV1",
+  "date": "2026-11-02",
+  "scope": "PRIVATE_ORIGINAL_BYTES_VALIDATED_OFFLINE__PUBLIC_RECEIPT_ONLY",
+  "user_uploaded_zip": {
+    "sha256": "e3ebc267383959bedb7385c44fc7e792698380e567fd0af841147e8fd617b1d5",
+    "archive_crc": "PASS",
+    "file_count": 5,
+    "receipt_status": "EXACT_FIVE_RECOVERED_HISTORICAL_ONLY",
+    "source_blob_sha_verified": 5,
+    "source_names": [
+      "02_SOURCE/runtime/raid_dps/core/cohort.py",
+      "02_SOURCE/runtime/raid_dps/core/evidence.py",
+      "02_SOURCE/runtime/raid_dps/core/renderer.py",
+      "02_SOURCE/runtime/raid_dps/core/wcl_client.py",
+      "02_SOURCE/runtime/raid_dps/pipelines/orchestrator.py"
+    ],
+    "bytes_uploaded_to_github": false,
+    "zip_platform": "Windows PowerShell Compress-Archive emits backslash entry paths"
+  },
+  "private_composite": {
+    "historical_M4B_118_sha256": "1cfdff330d90fbf1f25081cc92955e1dddf287840bc015fcc4707bfb1f0098af",
+    "combined_archive_sha256": "4b2a27cc99410df8c81ecd9ffc7953bb51d104b15ef234d61d62737547349a5b",
+    "combined_archive_bytes": 236789,
+    "original_files_preserved": 123,
+    "source_python_files_syntax_compiled": 20,
+    "syntax_test_python": "3.13.5_LOCAL_STATIC_ONLY",
+    "source_json_files": 100,
+    "source_md_files": 3,
+    "archive_crc": "PASS",
+    "all_source_bytes_exact": "123/123",
+    "user_data_or_old_private_log_metadata_may_exist": true,
+    "raw_archive_committed_to_public_github": false,
+    "source_execution": "NOT_RUN"
+  },
+  "direct_import_reconciliation": {
+    "newly_discovered_missing": "02_SOURCE/runtime/raid_dps/pipelines/stage_registry.py",
+    "historical_inventory_expected_bytes": 5833,
+    "historical_inventory_expected_sha256": "9b424b101e615c2f692a16e4aac9b2223a5f19048a3cad7bc5d9729d290bd16e",
+    "unrecovered_source_bytes_for_stage_registry": true,
+    "other_three_missing_in_private_archive_but_available_pinned_on_research_branch": [
+      "02_SOURCE/runtime/raid_dps/core/coverage.py",
+      "02_SOURCE/runtime/raid_dps/core/identity.py",
+      "02_SOURCE/runtime/raid_dps/core/prestate.py"
+    ],
+    "complete_runtime_source_closure": false,
+    "dynamic_transitive_imports_all_proven": false
+  },
+  "authority": {
+    "current_product_MAIN": "NOT_RESTORED",
+    "canonical_registry": "MISSING",
+    "current_pointer": "MISSING",
+    "historical_control_conflicts": [
+      "WORKFLOW_ID",
+      "ACTIVE_WORKFLOW_SHA",
+      "DEFAULT_ACTION"
+    ],
+    "main_product_promotion": false,
+    "github_main_mutated": false,
+    "frozen_modified": false,
+    "WCL_blind_candidate_semantics": "ISOLATED",
+    "actual_gameplay_ready_certified": 0,
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN"
+  },
+  "validation_limit": "GitHub CI checks this sanitized manifest and synthetic Windows ZIP parser only. User-provided private bytes were independently checked offline and are not accessible to GitHub runners.",
+  "next": "Recover exact stage_registry.py bytes; then rerun static/transitive source closure and focused research compatibility against approved actual product MAIN base. No auto-promotion."
+}
