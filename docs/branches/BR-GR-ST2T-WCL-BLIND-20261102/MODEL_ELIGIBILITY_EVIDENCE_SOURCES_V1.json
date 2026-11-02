@@ -1,0 +1,25 @@
+{
+  "schema": "ZrotPinnedDualCohortModelEligibilityInputV1",
+  "scope_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "sources": {
+    "wcl_simc_build_alignment_sha256": "9b2b1efc88111d02cbd1b614720f9c275a4054fbcf07861dce04bf488d54e3a3",
+    "wcl_strict_pre_observability_sha256": "20d64898c7b0fc6e980f82ab4c1ec34d7dd3951e2cfc8c9cfacbb6832b6afc63",
+    "frozen_discovery_vs_simc_postlock_sha256": "20bc99fd1b9fd73f55ce9f12d94389afaed97a30541dbf57526385015183f534",
+    "disjoint_report_holdout_metrics_sha256": "a81c3e0f4df760d6bf9c658232fbcece961221ad67720ae7aea4deadd5cb28cf",
+    "original_blind_lock_sha256": "c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e"
+  },
+  "required_for_priority": [
+    "full_build_equivalence_to_SimC",
+    "real_target_count_strict_pre",
+    "spell_manual_actionability",
+    "cooldown_and_charges",
+    "resource_cost_and_scale",
+    "other_available_actions",
+    "full_apl_selection_replay",
+    "independent_replicated_priority_holdout"
+  ],
+  "rule_output_when_missing": "UNKNOWN",
+  "original_rule_promotions_allowed": false,
+  "preserve_production_main": false,
+  "scientific_contract": "Observation-level independent holdout cannot validate action priority or classify dummy trainer mistakes."
+}
