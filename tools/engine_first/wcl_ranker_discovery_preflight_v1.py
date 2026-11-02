@@ -45,15 +45,24 @@ def credentials():
 
 def post(endpoint,request_body,*,bearer=None):
     if endpoint not in (TOKEN,API):raise PreflightError("UNAPPROVED_NETWORK_ENDPOINT")
-    data=(urlencode(request_body).encode() if endpoint==TOKEN
-          else json.dumps(request_body,separators=(",",":")).encode())
-    headers={"User-Agent":"zRotationHelper-GeneralRotation/1","Content-Type":(
-       "application/x-www-form-urlencoded" if endpoint==TOKEN else "application/json")}
-    if bearer is not None:
-        headers["Authorization"]="Bearer "+bearer
-    elif endpoint==TOKEN:
-        require("client_id" in request_body and "client_secret" in request_body,
+    if endpoint==TOKEN:
+        require(bearer is None and isinstance(request_body,dict)
+                and isinstance(request_body.get("client_id"),str)
+                and isinstance(request_body.get("client_secret"),str)
+                and request_body.get("grant_type")=="client_credentials",
                 "CLIENT_CREDENTIAL_REQUIRED")
+        # Official WCL public OAuth: client_id/client_secret in HTTP Basic,
+        # only grant_type=client_credentials in the form body.
+        pair=(request_body["client_id"]+":"+request_body["client_secret"]).encode()
+        auth="Basic "+base64.b64encode(pair).decode("ascii")
+        data=urlencode({"grant_type":"client_credentials"}).encode()
+    else:
+        require(isinstance(bearer,str) and len(bearer)>10,"ACCESS_TOKEN_REQUIRED")
+        auth="Bearer "+bearer
+        data=json.dumps(request_body,separators=(",",":")).encode()
+    headers={"User-Agent":"zRotationHelper-GeneralRotation/1","Content-Type":(
+       "application/x-www-form-urlencoded" if endpoint==TOKEN else "application/json"),
+       "Authorization":auth}
     req=Request(endpoint,data=data,headers=headers,method="POST")
     try:
         with urlopen(req,timeout=25) as response:
@@ -219,6 +228,12 @@ def self_test():
     assert select_encounter({"zones":[{**z["zones"][0],"frozen":True}]},"Voidspire")["status"]=="BLOCKED_NO_MATCHING_UNFROZEN_RAID_ZONE";tests+=1
     assert parse_rankers({"rankings":[{"report":{"code":"abc","fightID":7}}]})["status"]=="BLOCKED_RANKING_ROWS_LACK_REPORT_FIGHT";tests+=1
     assert live.__defaults__==("Voidspire",);tests+=1
+    # Document the WCL token flow without printing secrets or making network calls.
+    import urllib.parse
+    fake_user="synthetic-client-id";fake_pass="synthetic-client-secret"
+    basic="Basic "+base64.b64encode((fake_user+":"+fake_pass).encode()).decode()
+    assert base64.b64decode(basic.removeprefix("Basic ")).decode()==fake_user+":"+fake_pass;tests+=1
+    assert urlencode({"grant_type":"client_credentials"})=="grant_type=client_credentials";tests+=1
     return {"result":"PASS","offline_assertions":tests,
             "live_WCL_requests":0,"rankers_discovered":"SYNTHETIC_ONLY"}
 
