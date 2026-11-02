@@ -80,7 +80,56 @@ jobs:
             echo "LIVE_PILOT_RETURNED"
           fi
           cat /tmp/zrot-live.json
-      - name: Record bounded metadata only, do not upload raw log or OAuth data
+      - name: Revalidate replay provenance and blind lock before evidence retention
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, 'tools/engine_first')
+          from fresh_wcl_engine_v1 import canonical, sha, replay
+          p=Path('/tmp/zrot-live.json')
+          if not p.is_file():
+              raise SystemExit('LIVE_RECEIPT_MISSING')
+          result=json.loads(p.read_text())
+          if result.get('status') != 'LIVE_WCL_ACTOR_SCOPED_NUMERIC_DISCOVERY_ONLY':
+              print('NO_COMPLETED_LIVE_ARTIFACT_TO_REVALIDATE')
+              raise SystemExit(0)
+          root=Path('/tmp/zrot-fresh')
+          derived=root/'derived'
+          selection=json.loads((derived/'selection.json').read_text())
+          receipt=json.loads((derived/'receipt.json').read_text())
+          gate=json.loads((derived/'identity.json').read_text())
+          blind=json.loads((derived/'blind_replay.json').read_text())
+          lock=json.loads((derived/'blind_lock.json').read_text())
+          source=replay(root/'raw'/selection['report_code']/f"fight_{selection['fight_id']}")
+          assert source['identity']['evidence_window']=='FIGHT_START_BOUNDED'
+          assert source['identity']['requested_window_ms']==15000
+          assert source['identity']['full_fight_end']>=source['identity']['end']
+          assert source['replay_sha256']==blind['identity']['source_replay_sha256']
+          assert sha(canonical(blind))==receipt['blind_actor_view_sha256']
+          assert sha(canonical(lock))==receipt['blind_lock_sha256']
+          assert sha(canonical(lock))==result['blind_lock_sha256']
+          assert lock['candidate_n']==result['candidate_count']
+          assert lock['holdout_validated'] is False
+          assert lock['gameplay_rule_eligible'] is False
+          assert gate['talent_build']=='UNKNOWN'
+          assert receipt['readiness']=='UNKNOWN'
+          assert result['full_fight_completed'] is False
+          assert result['window_completed'] is True
+          print('LIVE_WCL_RAW_REPLAY_AND_BLIND_LOCK_REVALIDATED=PASS')
+          PY
+      - name: Retain bounded public WCL research evidence for replay audit (7 days)
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-wcl-bounded-raw-and-lock-${{ github.sha }}
+          path: /tmp/zrot-fresh/
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Retain bounded pilot status with no OAuth values
         if: always()
         uses: actions/upload-artifact@v4
         with:
