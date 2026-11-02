@@ -133,11 +133,24 @@ def ranked_rows(data, *, encounter, class_name, spec_name, difficulty, min_rank=
 
 def select_verified(query, rankings_data, *, encounter, class_name, spec_name,
                     difficulty, max_rank=50, max_age_days=45, max_candidates=3,
-                    now=None):
+                    now=None, min_page_position=1, max_page_position=100,
+                    excluded_report_codes=()):
     """Verify the ranking's report/fight/actor through official report metadata."""
     candidates = ranked_rows(rankings_data, encounter=encounter,
                              class_name=class_name, spec_name=spec_name,
                              difficulty=difficulty, max_rank=max_rank)
+    if (type(min_page_position) is not int or type(max_page_position) is not int
+            or not 1 <= min_page_position <= max_page_position <= 100
+            or type(max_candidates) is not int or not 1 <= max_candidates <= 30
+            or not isinstance(excluded_report_codes, (tuple, list))
+            or any(not isinstance(x, str) or not CODE_RE.fullmatch(x)
+                   for x in excluded_report_codes)):
+        raise RankSourceError("INVALID_PREDECLARED_RANKING_FILTER")
+    candidates = [c for c in candidates
+                  if min_page_position <= c["ranking_page_position"] <= max_page_position
+                  and c["code"] not in excluded_report_codes]
+    if not candidates:
+        raise RankSourceError("NO_ELIGIBLE_RANKING_ROWS_AFTER_PREDECLARED_FILTER")
     now = now or datetime.now(timezone.utc)
     errors = []
     for c in candidates[:max_candidates]:
@@ -300,6 +313,24 @@ def selftest():
     assert proof["exact_rank_verified"] is True
     assert proof["talent_build"] == "UNKNOWN" and proof["rank_in_current_top_table"]
     assert len(queries) == 1
+    # Frozen holdout filter must exclude discovery report before any metadata API.
+    before=len(queries)
+    try:
+        select_verified(query, ranking, encounter=enc, class_name="Warrior",
+                        spec_name="Fury", difficulty=4, now=mock_now,
+                        min_page_position=2, max_page_position=15)
+    except RankSourceError as exc:
+        assert "NO_ELIGIBLE_RANKING" in str(exc)
+    else: raise AssertionError("HOLDOUT_PAGE_POSITION_BYPASS")
+    assert len(queries)==before
+    try:
+        select_verified(query, ranking, encounter=enc, class_name="Warrior",
+                        spec_name="Fury", difficulty=4, now=mock_now,
+                        excluded_report_codes=(code,))
+    except RankSourceError as exc:
+        assert "NO_ELIGIBLE_RANKING" in str(exc)
+    else: raise AssertionError("DISCOVERY_REPORT_REUSED_AS_HOLDOUT")
+    assert len(queries)==before
     import copy
     tested = 4
     for mutation in ("zone-frozen", "wrong-encounter", "bad-rank", "no-report"):
