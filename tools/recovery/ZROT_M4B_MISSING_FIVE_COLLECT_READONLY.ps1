@@ -85,7 +85,15 @@ if ($SelfTest) {
         New-Item -ItemType Directory -Path $trialRoot -Force | Out-Null
         $result=Test-Candidate -Root $trialRoot -Entry $expected[0]
         if ($result.status -ne "MISSING") { throw "EXPECTED_MISSING_FILE_REJECTED_INCORRECTLY" }
-        $payload=[ordered]@{ status="PASS"; self_test="EXPECTED_FIVE_PINS_AND_MISSING_FILE_NEGATIVE"; count=5; product_execution="NOT_RUN"; promotion=$false }
+        $fixture=Get-RelativeFullPath -Root $trialRoot -Rel $expected[0].Relative
+        New-Item -ItemType Directory -Path (Split-Path $fixture -Parent) -Force | Out-Null
+        [IO.File]::WriteAllBytes($fixture, [Text.Encoding]::UTF8.GetBytes("NOT_HISTORICAL_SOURCE"))
+        $result=Test-Candidate -Root $trialRoot -Entry $expected[0]
+        if ($result.status -ne "SIZE_DIFFERENT") { throw "EXPECTED_WRONG_SIZE_REJECTION" }
+        [IO.File]::WriteAllBytes($fixture, (New-Object byte[] $expected[0].Length))
+        $result=Test-Candidate -Root $trialRoot -Entry $expected[0]
+        if ($result.status -ne "SHA_DIFFERENT") { throw "EXPECTED_WRONG_SHA_REJECTION" }
+        $payload=[ordered]@{ status="PASS"; self_test="FIVE_PINS_MISSING_SIZE_SHA_REJECTED"; count=5; synthetic_negative_cases=3; product_execution="NOT_RUN"; promotion=$false }
         $payload | ConvertTo-Json -Depth 5
     } finally { if (Test-Path $trialRoot) { Remove-Item -LiteralPath $trialRoot -Force -Recurse } }
     exit 0
