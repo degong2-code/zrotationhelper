@@ -70,7 +70,26 @@
     ],
     "import_resolution": "BASIC_AST_VISIBLE_IMPORTS_ONLY_NOT_DYNAMIC_COMPLETE",
     "exact_source_merging_performed": false,
-    "full_product_dependency_closure": "NOT_COMPLETE"
+    "full_product_dependency_closure": "NOT_COMPLETE",
+    "missing_module_inventory_candidates": {
+      "02_SOURCE/runtime/raid_dps/core/renderer.py": {
+        "bytes": 13229,
+        "sha256": "7c0bf5e1b09d10aec09c89438b18cd302906acf73ef4f24fd6349526e004ca52",
+        "file_bytes_present": false
+      },
+      "02_SOURCE/runtime/raid_dps/core/wcl_client.py": {
+        "bytes": 13129,
+        "sha256": "452fb44c4c577b5bbb08ceb431013e165de57e62ef72f59500777d703e42ce24",
+        "file_bytes_present": false
+      },
+      "02_SOURCE/runtime/raid_dps/pipelines/orchestrator.py": {
+        "bytes": 19606,
+        "sha256": "fe398aa9238908c21af433ac5652f1730f66cd5dd0209722ebf6371b68d68d0d",
+        "file_bytes_present": false
+      }
+    },
+    "missing_inventory_provenance": "HISTORICAL_SOURCE_INVENTORY_JSON_FILE_METADATA_NOT_SOURCE_BYTES",
+    "missing_inventory_not_current_runtime_authority": true
   },
   "authority": {
     "canonical_registry": "MISSING",
