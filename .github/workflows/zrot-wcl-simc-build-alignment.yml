@@ -1,0 +1,147 @@
+name: zrot-wcl-simc-build-alignment
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/wcl_simc_build_alignment_v1.py
+      - .github/workflows/zrot-wcl-simc-build-alignment.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-talent-parser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile final script and test Blizzard 6-bit stream fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/wcl_simc_build_alignment_v1.py
+          python -B tools/research/wcl_simc_build_alignment_v1.py > /tmp/talent-synthetic.json
+          python - <<'PY'
+          import json
+          v=json.load(open('/tmp/talent-synthetic.json'))
+          assert v['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert v['checks']>=7
+          assert v['external_WCL_or_SimC_source_loaded'] is False
+          assert v['full_build_equivalence_proven'] is False
+          print('SIMC_WCL_BLIZZARD_TALENT_BITSTREAM_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/wcl_simc_build_alignment_v1.py
+
+  real-build-alignment:
+    name: Two WCL reports versus pinned official SimC export
+    runs-on: ubuntu-latest
+    needs: [offline-talent-parser]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: /tmp/simc-fixed-source
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Retrieve original WCL discovery evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41463589665
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          path: /tmp/wcl-discovery
+          github-token: ${{ github.token }}
+      - name: Retrieve disjoint official WCL holdout evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41473060401
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          path: /tmp/wcl-holdout
+          github-token: ${{ github.token }}
+      - name: Download bounded public class tree DB2 snapshot, record exact SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,urllib.request
+          from pathlib import Path
+          url='https://www.raidbots.com/static/data/live/talents.json'
+          req=urllib.request.Request(url,headers={'User-Agent':'zRotationHelperBuildResearch/1'})
+          with urllib.request.urlopen(req,timeout=25) as resp:
+              data=resp.read(8_000_001)
+          assert 100000<len(data)<8_000_000,'TALENT_DATA_SIZE_BOUND'
+          d=json.loads(data)
+          assert isinstance(d,list)
+          assert len([x for x in d if isinstance(x,dict) and x.get('specId')==72])==1
+          Path('/tmp/talent-tree-pinned-input.json').write_bytes(data)
+          print('EXTERNAL_TALENT_TREE_SHA256',hashlib.sha256(data).hexdigest())
+          print('EXTERNAL_TALENT_TREE_BYTES',len(data))
+          PY
+      - name: Repackage immutable WCL evidence and verify external source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from zipfile import ZipFile, ZIP_DEFLATED
+          from pathlib import Path
+          for kind in ('discovery','holdout'):
+              root=Path('/tmp/wcl-'+kind)
+              files=sorted(p for p in root.rglob('*') if p.is_file())
+              assert 1<=len(files)<=40
+              with ZipFile('/tmp/wcl-'+kind+'.zip','w',ZIP_DEFLATED) as z:
+                  for p in files:z.write(p,arcname=str(p.relative_to(root)))
+          PY
+          python -B tools/research/wcl_simc_build_alignment_v1.py \
+            --discovery-zip /tmp/wcl-discovery.zip \
+            --holdout-zip /tmp/wcl-holdout.zip \
+            --profile /tmp/simc-fixed-source/profiles/MID2/MID2_Warrior_Fury.simc \
+            --tree-data /tmp/talent-tree-pinned-input.json \
+            --out /tmp/wcl-simc-build-alignment.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/wcl-simc-build-alignment.json')
+          d=json.loads(p.read_bytes())
+          assert d['status']=='POSTLOCK_STRUCTURAL_TALENT_COMPARISON_ONLY'
+          assert d['talent_export_spec_id']==72
+          assert d['talent_export_version']==2
+          assert d['profile_git_blob_sha1']=='3225992ed5b754ad5d61e8b785d9d859f1eed1be'
+          assert d['same_WCL_build_between_cohorts'] is False
+          assert d['full_build_equivalence_to_current_SimC']=='UNKNOWN'
+          assert d['priority_or_optimality_inferred'] is False
+          assert d['dummy_trainer_error_rule_ready'] is False
+          print('LIVE_WCL_VS_PINNED_SIMC_TALENT_COMPARISON_PASS')
+          print('BUILD_COMPARISON_SUMMARY',json.dumps({
+              key:{k:d[key][k] for k in ('status','WCL_selected_node_count',
+                'SimC_decoded_selected_node_count','shared_identical_selected_nodes',
+                'simc_only_nodes_count','wcl_only_nodes_count',
+                'choice_or_rank_mismatched_node_count')}
+              for key in ('discovery','holdout')},sort_keys=True))
+          PY
+      - name: Retain compact derived comparison only (no profile, raw logs or DB2 dump)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcl-simc-talent-alignment-${{ github.sha }}
+          path: /tmp/wcl-simc-build-alignment.json
+          retention-days: 7
+          if-no-files-found: error
