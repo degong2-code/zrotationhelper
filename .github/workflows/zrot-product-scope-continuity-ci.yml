@@ -12,6 +12,7 @@ on:
       - docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md
       - docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md
       - docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md
+      - docs/PARALLEL_WORKSTREAM_AND_MERGE_CONTRACT.md
       - handoff/**
       - tools/governance/**
       - _UPLOAD_TO_CHATGPT/branches/BR-ENGINE-FIRST-FRESH-WCL-VSLICE/LATEST_HANDOFF.json
@@ -51,7 +52,7 @@ jobs:
           r=json.loads(Path("ci_artifacts/scope/scope_receipt.json").read_text())
           assert r["result"]=="PASS_SCOPE_CONTINUITY"
           assert r["policy_id"]=="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
-          assert r["documentation_entrypoints"]["checked"]==6
+          assert r["documentation_entrypoints"]["checked"]==7
           assert r["negative_cases_passed"]==14
           x=r["five_hop_simulation"]
           assert x["result"]=="PASS"
