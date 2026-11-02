@@ -84,7 +84,8 @@ def patch_fury(source: str) -> str:
         "    const int zrot_main_present = p()->main_hand_weapon.type != WEAPON_NONE;\n"
         "    const int zrot_off_present = p()->off_hand_weapon.type != WEAPON_NONE;\n"
         + _emit("p()", "MAIN_AND_OFF_HAND_WEAPON",
-                "zrot_main_present", "zrot_off_present", "-1.0", "-1.0") +
+                "static_cast<double>( zrot_main_present )",
+                "static_cast<double>( zrot_off_present )", "-1.0", "-1.0") +
         "    if ( p()->main_hand_weapon.type == WEAPON_NONE || p()->off_hand_weapon.type == WEAPON_NONE )"
     )
     body = _replace_once(body, ready, ready_new, "FURY_WEAPONS")
