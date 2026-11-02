@@ -1,0 +1,79 @@
+{
+  "schema": "ZrotM4BExactFivePrivateOriginalSourceBranchHandoffV1",
+  "owner": "BR-PRODUCT-MAIN-M4B-SOURCE-RECOVERY",
+  "branch": "work/m4b-exact-five-attested-20261102",
+  "date": "2026-11-02",
+  "validated_code_sha": "126d2de5d3a4838553d16da6b92acd4479341399",
+  "result": "USER_UPLOADED_FIVE_SOURCE_BYTES_VERIFIED_AND_PRIVATE_COMPOSITE_BUILT__PRODUCT_MAIN_STILL_BLOCKED",
+  "original_user_zip": {
+    "sha256": "e3ebc267383959bedb7385c44fc7e792698380e567fd0af841147e8fd617b1d5",
+    "source_sha_exact_count": 5,
+    "archive_crc": "PASS",
+    "original_paths": "WINDOWS_ARCHIVE_BACKSLASH_NORMALIZED"
+  },
+  "historic_118_zip": {
+    "sha256": "1cfdff330d90fbf1f25081cc92955e1dddf287840bc015fcc4707bfb1f0098af",
+    "source_sha_exact_count": 118
+  },
+  "private_combined_artifact": {
+    "sha256": "4b2a27cc99410df8c81ecd9ffc7953bb51d104b15ef234d61d62737547349a5b",
+    "bytes": 236789,
+    "original_files_n": 123,
+    "original_byte_identity": "123/123_PASS",
+    "python_sources_syntax_compiled": 20,
+    "python_interpreter": "3.13.5_LOCAL",
+    "run_product_entrypoint": false,
+    "raw_bytes_public_github": false
+  },
+  "dependency": {
+    "newly_found_missing_after_five": "02_SOURCE/runtime/raid_dps/pipelines/stage_registry.py",
+    "expected_sha256": "9b424b101e615c2f692a16e4aac9b2223a5f19048a3cad7bc5d9729d290bd16e",
+    "expected_bytes": 5833,
+    "discoverer": "ACTUAL_RECOVERED_ORCHESTRATOR_AST_DIRECT_IMPORT",
+    "stage_registry_raw_bytes": "UNKNOWN_NOT_RECOVERED",
+    "research_available_but_not_historical_M4B": [
+      "02_SOURCE/runtime/raid_dps/core/coverage.py",
+      "02_SOURCE/runtime/raid_dps/core/identity.py",
+      "02_SOURCE/runtime/raid_dps/core/prestate.py"
+    ],
+    "complete_transitive_or_dynamic_dependency_graph": false,
+    "product_runtime_equivalence": "NOT_PROVEN"
+  },
+  "github_ci": {
+    "id": 41388411593,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41388411593",
+    "python312": "SUCCESS",
+    "python314": "SUCCESS",
+    "offline_original_source": "NOT_COPIED_TO_RUNNER",
+    "synthetic_windows_zip_path_positive": "PASS",
+    "synthetic_posix_zip_path_positive": "PASS",
+    "synthetic_bad_zip_rejections": 4,
+    "previous_m4b_metadata_negative_tests": 8,
+    "pass_limit": "GITHUB_PUBLIC_MANIFEST_AND_PARSER_ONLY"
+  },
+  "MAIN_authority": {
+    "canonical_registry": "MISSING",
+    "current_pointer": "MISSING",
+    "control_pins_conflicts": [
+      "WORKFLOW_ID",
+      "ACTIVE_WORKFLOW_SHA",
+      "DEFAULT_ACTION"
+    ],
+    "default_product_execution": "DISABLED",
+    "gameplay_ready_certified": 0,
+    "FROZEN_changed": false,
+    "github_main_changed": false,
+    "main_promoted": false,
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN"
+  },
+  "cross_branch_dependency": [
+    "cross_branch_dependency: historical product source owner needs to provide exact stage_registry.py bytes pinned by archived SHA256, then rerun source closure",
+    "cross_branch_dependency: MAIN needs currently approved Runtime, Registry, Pointer, execution authority reconciliation; historical snapshot cannot establish current status",
+    "cross_branch_dependency: integration owner needs focused transitive/dynamic import and staged compatibility review, not only syntax compilation",
+    "cross_branch_dependency: WCL independent blind discovery remains isolated from SimC source semantics"
+  ],
+  "branch_exact_next": "Verify exact local historical stage_registry.py 5833-byte SHA256; private nonexecuting 124-file candidate, further import closure, then safe compatibility validation",
+  "product_exact_next": "Approved current MAIN runtime authority reconstruction or explicit new successor decision before live product promotion",
+  "scope": "BRANCH_LOCAL_ONLY_NO_SHARED_AUTHORITY_WRITE"
+}
