@@ -199,7 +199,8 @@ def select_verified(query, rankings_data, *, encounter, class_name, spec_name,
 
 
 def run_live(*, encounter, class_name, spec_name, difficulty, max_pages,
-             max_rank, max_age_days, out_dir, min_observations=2):
+             max_rank, max_age_days, out_dir, min_observations=2,
+             opener_window_ms=15000):
     """One bounded live run. Never overwrites a lock or silently grows cohort."""
     client, secret = credentials(None)
     token = oauth_token(client, secret)
@@ -217,10 +218,12 @@ def run_live(*, encounter, class_name, spec_name, difficulty, max_pages,
             "blind_lock.json", "receipt.json")):
         raise RankSourceError("EXISTING_SCIENTIFIC_ARTIFACT_NO_OVERWRITE")
     info = collect(query, candidate["code"], candidate["fight"],
-                   out_dir / "raw", max_pages=max_pages)
-    if info["status"] != "COMPLETE":
+                   out_dir / "raw", max_pages=max_pages,
+                   window_ms=opener_window_ms)
+    if info["status"] != "COMPLETE_WINDOW":
         return {"status": "PARTIAL_API_COLLECTION_CHECKPOINT_ONLY",
                 "pages": info["pages"],
+                "requested_window_ms": opener_window_ms,
                 "identity_gate": "PASS",
                 "rank_provenance": "REPORT_MATCH_VERIFIED",
                 "WCL_live": "EXECUTED",
@@ -239,6 +242,12 @@ def run_live(*, encounter, class_name, spec_name, difficulty, max_pages,
     receipt["ranking_selection_sha256"] = sha(canonical(selection))
     receipt["rank_provenance"] = "OFFICIAL_ENCOUNTER_TABLE_AND_REPORT_ACTOR_MATCH"
     receipt["talent_build"] = "UNKNOWN"
+    receipt["window_provenance"] = {
+        "scope": "FIGHT_START_BOUNDED",
+        "requested_window_ms": opener_window_ms,
+        "completed_window": True,
+        "complete_fight": False,
+    }
     out = out_dir / "derived"
     for filename, data in (("selection.json", selection),
                            ("identity.json", identity),
@@ -251,6 +260,9 @@ def run_live(*, encounter, class_name, spec_name, difficulty, max_pages,
             "explicit_official_rank": selection["explicit_official_rank"],
             "fight_age_days": selection["source_age_days"],
             "pages": info["pages"], "events": info["events"],
+            "opener_window_ms": opener_window_ms,
+            "window_completed": True,
+            "full_fight_completed": False,
             "candidate_count": lock["candidate_n"],
             "blind_lock_sha256": sha(canonical(lock)),
             "readiness": "UNKNOWN",
@@ -340,6 +352,43 @@ def selftest():
     assert no_rank_rows[0]["ranking_page_position"] == 1
     assert no_rank_rows[0]["rank_authority"] == "PAGE1_ORDER_ONLY_OFFICIAL_RANK_UNKNOWN"
     tested += 1
+    # Exercise bounded-window collection and actor/lock E2E with no network.
+    from fresh_wcl_engine_v1 import collect, replay
+    from wcl_actor_scoped_cohort_v1 import prepare
+    with tempfile.TemporaryDirectory() as d:
+        calls = []
+        def mock(q, variables):
+            if "FreshReport" in q:
+                return {"reportData": {"report": {
+                    "code": code, "revision": 2,
+                    "fights": [{"id": fight, "startTime": 1000, "endTime": 75000,
+                                "difficulty": 4, "encounterID": enc,
+                                "inProgress": False}]}}}
+            calls.append((variables["start"], variables["end"]))
+            return {"reportData": {"report": {"events": {
+                "data": [{"timestamp": 1100, "type": "cast",
+                          "sourceID": 7, "abilityGameID": 101},
+                         {"timestamp": 1200, "type": "cast",
+                          "sourceID": 7, "abilityGameID": 101},
+                         {"timestamp": 1300, "type": "cast",
+                          "sourceID": 8, "abilityGameID": 999}],
+                "nextPageTimestamp": None}}}}
+        result = collect(mock, code, fight, Path(d), max_pages=2,
+                         window_ms=15000)
+        assert result["status"] == "COMPLETE_WINDOW"
+        assert calls == [(1000, 16000)]
+        raw = replay(Path(d) / code / f"fight_{fight}")
+        assert raw["identity"]["end"] == 16000
+        assert raw["identity"]["full_fight_end"] == 75000
+        actor_meta = meta
+        gate2, view, lock, receipt = prepare(actor_meta, raw, code=code,
+             fight=fight, actor=7, spec="Fury", player_class="Warrior",
+             min_observations=2)
+        assert view["decision_count"] == 2 and lock["candidate_n"] == 1
+        assert lock["candidates"][0]["action_spell_id"] == 101
+        assert receipt["high_ranker_provenance"] == "NOT_VERIFIED"
+        assert receipt["readiness"] == "UNKNOWN"
+        tested += 7
     return {"status": "PASS_OFFLINE_SYNTHETIC",
             "negative_cases": 8, "assertion_groups": tested,
             "live_wcl_api_calls": 0, "actual_ranker_collected": False,
@@ -357,6 +406,7 @@ def main():
     ap.add_argument("--spec-name", default="Fury")
     ap.add_argument("--difficulty", type=int, default=4)
     ap.add_argument("--max-pages", type=int, default=2)
+    ap.add_argument("--opener-window-ms", type=int, default=15000)
     ap.add_argument("--max-rank", type=int, default=50)
     ap.add_argument("--max-age-days", type=int, default=45)
     ap.add_argument("--out-dir", type=Path)
@@ -367,6 +417,7 @@ def main():
     if (not _positive(args.encounter_id) or not _positive(args.difficulty)
             or not 1 <= args.max_pages <= 5 or not 1 <= args.max_rank <= 100
             or not 1 <= args.max_age_days <= 60
+            or not 1000 <= args.opener_window_ms <= 60000
             or not args.out_dir or not args.class_name or not args.spec_name):
         ap.error("live requires bounded encounter, difficulty, ranking and output arguments")
     try:
@@ -374,7 +425,8 @@ def main():
             encounter=args.encounter_id, class_name=args.class_name,
             spec_name=args.spec_name, difficulty=args.difficulty,
             max_pages=args.max_pages, max_rank=args.max_rank,
-            max_age_days=args.max_age_days, out_dir=args.out_dir)
+            max_age_days=args.max_age_days, out_dir=args.out_dir,
+            opener_window_ms=args.opener_window_ms)
     except Exception as exc:
         # Never print transport responses, credentials, names or report bodies.
         print(json.dumps({"status": "BLOCKED_OR_FAILED", "category":
