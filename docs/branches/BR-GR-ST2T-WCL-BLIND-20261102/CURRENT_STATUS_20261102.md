@@ -78,3 +78,18 @@ Historical FROZEN remains untouched; `Seq578=FAILED_QUARANTINED`, `Seq637=UNKNOW
 ## New-chat operating gate
 
 The successor chat must **read sources and report the restored scope, current evidence, owner, blockers, exact next and any discrepancy; then STOP**. No coding, GitHub mutations, WCL/SimC live calls, workflow dispatch or approval/promotion **until the user says '진행' or explicitly authorizes an action**. Reporting is allowed to use read-only checks. Consult the branch-specific start prompt.
+
+
+## Successor update — official ranker discovery / 2026-11-02
+
+Branch-local development only; historical generation-1 handoff remains unchanged.
+
+- Implemented `tools/engine_first/wcl_official_ranker_discovery_v1.py` (GitHub commit `e89d0c23171ae09c8b60ab182cc6b3aa6042884d`). Source SHA256 `15eec9f1e5ed6a4fa446c45925bf1617641cee381344b442e606dbc169c980b0` as printed by final CI both Python 3.12/3.14 jobs.
+- Uses official `worldData.encounter.characterRankings` candidate ranks, then cross-checks official report metadata, report/fight/actor/spec/class, encounter/difficulty and report+fight age before bounded event collection. This is reusable across specializations via CLI arguments; it does not hardcode a Fury-only scientific decision in the engine.
+- Added `.github/workflows/zrot-official-ranker-actor-scope-smoke.yml`, branch push smoke with 3.12/3.14 offline synthetic coverage and a single bounded live pilot requiring repository secrets `WCL_CLIENT_ID`, `WCL_CLIENT_SECRET`. Live query is limited to one page of rankings, maximum 3 candidate metadata checks and maximum 5 event pages, with no raw logs or secrets uploaded to CI artifacts.
+- Actions run [41460152986](https://github.com/degong2-code/zrotationhelper/actions/runs/41460152986): offline 3.12 **PASS**, offline 3.14 **PASS**; live pilot job **SUCCESS/SKIP**, with explicit `SKIPPED_MISSING_REPO_SCOPED_OAUTH_SECRETS`. Therefore actual WCL API calls: **ZERO**, actual ranker observed: **NONE**, live raw snapshot and Blind Lock: **NOT RUN**.
+- Recorded blocker type: **MISSING_EXTERNAL_CREDENTIAL_CONFIGURATION**; not a gameplay hypothesis failure, WCL GraphQL failure or demonstrated engine defect. No credential content was printed, stored or requested in chat.
+- The pilot encounter 3420 (heroic, Fury) is a provisional discovery input from public season context, not independently established as the authoritative current-season reference. Real official zone/encounter/fight verification must pass on a credentialed run before any claim.
+- Important bounds: rankings JSON is changeable and parser must fail closed on unexpected fields; rank does not imply action readiness/optimality. Talent build remains **UNKNOWN** until playerDetails/COMBATANT_INFO are verified. A single observed fight and cast-frequency lock cannot establish pairwise priority or independent holdout. Partial runs on ephemeral GitHub runners preserve status metadata only, not persistent raw checkpoint; use a controlled durable evidence store for production research.
+- Next step: authorize repository-scoped WCL OAuth secrets securely (user action in GitHub Settings, not in chat), run the same bounded credentialed pilot, review exact result and API point use, then expand replay/readiness only when actual data validates the contract. Do not repeatedly rerun the skip or promote MAIN.
+
