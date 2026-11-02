@@ -1,0 +1,83 @@
+{
+  "schema": "ZrotEngineFirstFreshDataVerticalSliceBranchHandoffV1",
+  "date": "2026-11-02",
+  "owner": "BR-ENGINE-FIRST-FRESH-WCL-VSLICE",
+  "branch": "work/engine-first-fresh-data-vslice-20261102",
+  "base_from": "work/main-status-only-successor-20261102",
+  "base_sha": "360b58888ab208bcdaef6c56636e6ee74271efe4",
+  "goal": "Replace legacy-restoration as prerequisite with an executable cold-start WCL snapshot and strict-PRE replay development engine",
+  "charter": "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md",
+  "branch_code": [
+    "tools/engine_first/fresh_wcl_engine_v1.py",
+    "tools/engine_first/test_fresh_wcl_engine_v1.py"
+  ],
+  "docs": "docs/ENGINE_FIRST_FRESH_WCL_VERTICAL_SLICE_V1.md",
+  "ci_workflow": ".github/workflows/zrot-engine-first-fresh-data-ci.yml",
+  "source_pins": {
+    "tools/engine_first/fresh_wcl_engine_v1.py": {
+      "sha256": "f0aaaca3f620ee9a1d69b73318aaaea128e86de255f767a160951db6231b8df1",
+      "git_blob": "f5134eb774fe3dbc97d4afdc7508eb9e147ae24d"
+    },
+    "tools/engine_first/test_fresh_wcl_engine_v1.py": {
+      "sha256": "2e562c2a380a3840d717e4cae663cb931c50a0ff9aa9c5355ca5c9ee6fdd7498",
+      "git_blob": "878e26ff8b6067c6d0d36ee60eebd2e27231c80d"
+    }
+  },
+  "verified_ci": {
+    "run_id": 41402977687,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41402977687",
+    "head_sha": "b86df2b04fa5afa45c9146981bbf0b2417398f9d",
+    "python312": "SUCCESS",
+    "python314": "SUCCESS",
+    "offline_full_end_to_end": 21,
+    "independent_unittest": 10,
+    "actual_fresh_WCL_API": "NOT_RUN",
+    "actual_API_WCL_SimC_production": "NOT_RUN"
+  },
+  "engine_capabilities": {
+    "safe_default_without_script_parameters": "OFFLINE_SELF_TEST",
+    "explicit_public_report_oauth_client_credentials": true,
+    "report_revision_checked_per_call": true,
+    "numeric_actor_ability_identity": true,
+    "atomic_raw_event_page_snapshot": true,
+    "SHA256_each_committed_page": true,
+    "checkpoint_resume": true,
+    "crash_orphan_page_adoption_if_strictly_valid": true,
+    "cursor_monotonic_gate": true,
+    "replay_deterministic_sha": true,
+    "strict_PRE_aura_state_lag": "TIMESTAMP_STRICTLY_LESS_THAN_ACTION",
+    "zero_stack_false_missing_stack_UNKNOWN": true,
+    "readiness_UNKNOWN_when_unobserved": true,
+    "no_SimC_label_in_blind_replay": true,
+    "rotation_candidate_lock": "NOT_IMPLEMENTED",
+    "general_rotation_IR": "NOT_IMPLEMENTED",
+    "encounter_execution": "NOT_IMPLEMENTED"
+  },
+  "evidence_scope": {
+    "historical_124_source": "NOT_REQUIRED_FOR_NEW_ENGINE",
+    "old_MAIN_dispatcher": "NOT_IMPORTED_OR_EXECUTED",
+    "historic_FROZEN": "UNMODIFIED",
+    "current_PRODUCT_MAIN_authority": "UNKNOWN",
+    "source_branch_only": "YES_NO_PROJECT_AUTHORITY_PROMOTION",
+    "new_public_WCL_data_collected": "NO_CREDENTIALS_OR_REPORT_CODE_AVAILABLE_IN_CI",
+    "all_live_compatibility_claims": "UNKNOWN",
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN"
+  },
+  "observed_outcome": "FRESH_ENGINE_V1_OFFLINE_END_TO_END_PASS__LIVE_API_UNVERIFIED",
+  "next_owner_exact_next": "Authorized small live public report smoke with user's local .env + real report/fight IDs. Verify API response contract, point budget, revision-safe checkpoint/replay, then build true resource/readiness observability and independent numeric candidate lock. In parallel bootstrap SimC APL/profile with no semantic contamination before WCL lock.",
+  "cross_branch_dependency": [
+    "cross_branch_dependency: MAIN should review Engine-First Charter before any production or active pointer promotion; branch code stands independently of old MAIN",
+    "cross_branch_dependency: WCL credentials owner must provide legitimate .env at local runtime for live collection; never put credentials in GitHub or handoff",
+    "cross_branch_dependency: WCL and SimC research owners must preserve two-lane blind WCL lock and independent SimC hypothesis bootstrap"
+  ],
+  "shared_authoritative_state_mutated": false,
+  "project_wide_FROZEN_changed": false,
+  "promotion_state": "BRANCH_VALIDATED__MAIN_REVIEW_REQUIRED",
+  "read_first": [
+    "AGENTS.md",
+    "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md",
+    "docs/ENGINE_FIRST_FRESH_WCL_VERTICAL_SLICE_V1.md",
+    "_UPLOAD_TO_CHATGPT/branches/BR-ENGINE-FIRST-FRESH-WCL-VSLICE/LATEST_HANDOFF.json"
+  ]
+}
