@@ -1,0 +1,9 @@
+# Synthetic fixture only; NOT a real specialization rotation.
+spec=enhancement
+actions.precombat=flask
+actions=call_action_list,name=single,if=active_enemies=1
+actions+=/call_action_list,name=multi,if=active_enemies>=2
+actions+=/fallback
+actions.single=alpha,if=resource>=70
+actions.single+=/beta
+actions.multi=gamma
