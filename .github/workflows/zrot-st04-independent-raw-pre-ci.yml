@@ -66,7 +66,7 @@ jobs:
               "tools/research/ST02_source_identity_reconciliation_v1.py",
               "tools/research/ZROT_Source_Obligation_Gate_v1.py",
               "docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json",
-              "docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json"))
+              "docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json")}
           receipt={
               "schema":"ZrotST04GithubOfflineCIReceiptV1","result":"PASS",
               "new_regression_n":fresh["passed"],
