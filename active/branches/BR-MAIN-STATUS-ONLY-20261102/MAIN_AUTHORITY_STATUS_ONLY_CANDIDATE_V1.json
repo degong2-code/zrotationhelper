@@ -1,0 +1,100 @@
+{
+  "schema": "ZrotMainAuthoritySuccessorStatusOnlyCandidateV1",
+  "candidate_id": "MAIN-STATUS-ONLY-20261102-V1",
+  "owner": "BR-MAIN-STATUS-ONLY-REVIEW",
+  "lifecycle": "BRANCH_CANDIDATE_NOT_PROMOTED",
+  "base": {
+    "github_repository": "degong2-code/zrotationhelper",
+    "github_review_branch": "work/main-six-pin-consistency-20261102",
+    "github_review_head_sha": "5411e34d0cae4d6e354433666c17240d37188148",
+    "github_product_main_head_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
+    "product_main_status": "README_ONLY_NOT_VERIFIED_PRODUCT_RUNTIME",
+    "evidence_path": "docs/MAIN_SIX_LIVE_HASHES_SNAPSHOT_CONSISTENCY_20261102.json",
+    "evidence_git_blob_sha1": "675b081a5ff82b58a2b5497ca3aa0a9dc6a38b0e",
+    "evidence_scope": "USER_REPORTED_6_LOCAL_SHA_MATCH_ARCHIVED_PRIVATE_M4B"
+  },
+  "workflow_authority": {
+    "current_approved_runtime": "UNKNOWN",
+    "current_approved_work_state": "UNKNOWN",
+    "selection_state": "UNRESOLVED_NEEDS_MAIN_APPROVED_EVIDENCE",
+    "selected_workflow_id": null,
+    "candidates": [
+      {
+        "id": "FEX_FULL_ENGINE_SYNTHETIC_PROBE_V1",
+        "historical_source_sha256": "c9ba0657c0f5ed936acf41a839780d6b3c245e08757107a96fef6cc675b1dc2f",
+        "historical_observed_refs": [
+          "MAIN_CONTROL_PLANE.json",
+          "LATEST_HANDOFF.json"
+        ],
+        "status": "HISTORICAL_CANDIDATE_NOT_APPROVED"
+      },
+      {
+        "id": "FIRST_CROSS_SPEC_SYNTHETIC_PROBE_V1",
+        "historical_source_sha256": "a3a30cc8f406216f9281109a3ffc357dba8306fafeb7b7a6f4fe090785e2d080",
+        "historical_observed_refs": [
+          "CURRENT_STATE.md",
+          "MAIN_ENTRYPOINT_AUTHORITY.json"
+        ],
+        "status": "HISTORICAL_CANDIDATE_NOT_APPROVED"
+      }
+    ],
+    "false_authority_forbidden": true,
+    "preferred_workflow_id": null
+  },
+  "status_adapter_contract": {
+    "only_command": "STATUS_ONLY",
+    "default_operation": "READ_CANDIDATE_STATUS",
+    "allowed_operations": [
+      "READ_CANDIDATE_STATUS",
+      "VALIDATE_CANDIDATE_CONTRACT"
+    ],
+    "forbidden_operations": [
+      "RUN_ACTIVE",
+      "LEGACY_RUN_zRAID_MAIN",
+      "DISPATCH_INBOX",
+      "RUN_SIMC",
+      "CALL_WCL",
+      "WRITE_MAIN_STATE",
+      "WRITE_POINTER",
+      "PROMOTE_FROZEN"
+    ],
+    "read_only_input_allowlist": [
+      "active/branches/BR-MAIN-STATUS-ONLY-20261102/MAIN_AUTHORITY_STATUS_ONLY_CANDIDATE_V1.json",
+      "docs/MAIN_SIX_LIVE_HASHES_SNAPSHOT_CONSISTENCY_20261102.json"
+    ],
+    "execution_backend": "NONE_NO_DISPATCHER_NO_SUBPROCESS_NO_IMPORT_LEGACY_MODULES",
+    "product_live_call_count": 0
+  },
+  "historical_conflicts": {
+    "workflow_id_conflict": "FIRST_CROSS_SPEC_VS_FEX",
+    "prompt_sha_id_binding": "PROMPT_NAMES_FEX_BUT_SHA_MATCHES_FIRST",
+    "default_action_conflict": "RUN_ACTIVE_VS_STATUS",
+    "stale_entrypoint_or_config_sha_occurrences": 4,
+    "reconciled_six_pc_hashes": 6,
+    "corrected_sources_applied_to_product_main": false
+  },
+  "promotion_gates": {
+    "latest_runtime_authority_verified": false,
+    "latest_work_state_verified": false,
+    "selected_workflow_evidence_verified": false,
+    "old_historical_conflicts_disposition_approved": false,
+    "dispatcher_pre_status_side_effect_controlled": false,
+    "full_product_source_runtime_compatibility_verified": false,
+    "independent_focused_behavior_validation": false,
+    "total_authorized_for_live_activation": false
+  },
+  "invariants": {
+    "GitHub_main_changed": false,
+    "MAIN_CURRENT_STATE_changed": false,
+    "canonical_registry_created": false,
+    "current_pointer_created": false,
+    "product_default_action_changed": false,
+    "archived_control_plane_changed": false,
+    "FROZEN_changed": false,
+    "Seq578": "FAILED_QUARANTINED_PRESERVED",
+    "Seq637": "UNKNOWN",
+    "gameplay_ready_action_count": 0,
+    "WCL_blind_semantic_join": "FORBIDDEN_PRE_LOCK"
+  },
+  "verdict": "REVIEW_ONLY_STATUS_SAFE__ACTIVE_AUTHORITY_NOT_SELECTED"
+}
