@@ -1,0 +1,64 @@
+{
+  "schema": "ZrotMainIntegrationRecoveryMergeHandoffV1",
+  "date": "2026-11-02",
+  "owner": "MAIN_INTEGRATION_REVIEW",
+  "purpose": "Restore and reconcile historical product MAIN state before promoting verified ST01-ST06 research modules; do not overwrite current product authority",
+  "scope": "MAIN recovery candidate and focused compatibility validation only",
+  "base_source_branch": "work/st06-native-obligation-hook-20261102",
+  "base_sha": "0817d2de80ee5a23b011e1591be1543a52855226",
+  "validated_review_code_commit": "810e3728c49848cdb624ab449037ebde6e5acfe9",
+  "validation": {
+    "historical_archives": "M4A 54/54 M4B 118/118 CRC_AND_SHA_PASS",
+    "github_comparison": "FOUR_PINNED_M4B_SOURCE_GIT_BLOBS_MATCH_ST06",
+    "github_ci": "PASS_PYTHON_3_12_AND_3_14",
+    "run_id": 41377618743,
+    "run_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41377618743",
+    "artifacts": [
+      13111702267,
+      13111872457
+    ],
+    "focused_fail_closed_negative_cases_each_python": 6,
+    "original_failed_run_id": 41377557463,
+    "original_failed_run_cause": "RECOVERY_DOC_FIELD_NAME_MISMATCH_IN_GATE_TEST_SCHEMA",
+    "original_failed_run_retained": true,
+    "actual_product_live_execution": "NOT_RUN",
+    "current_runtime_authority": "UNKNOWN",
+    "WCL_SimC_Blizzard_live": "NOT_RUN"
+  },
+  "blockers": [
+    "CANONICAL_REGISTRY.json unavailable in both local M4 snapshots",
+    "CURRENT_POINTER.json unavailable in both local M4 snapshots",
+    "Approved newest CURRENT_STATE/Runtime/Work State/active manifest not independently restored",
+    "Historical Control Plane vs Entrypoint Authority disagree on FEX vs FIRST_CROSS_SPEC active workflow",
+    "Historical Prompt Manifest SHA pin disagrees with FEX Control Plane SHA pin",
+    "Historical default_action RUN_ACTIVE vs STATUS conflict",
+    "GitHub main README-only bootstrap is not historical user-PC product MAIN",
+    "Research branch has no product entrypoint or full old FEX/discovery pipelines; four matching files alone do not establish whole product equivalence"
+  ],
+  "approved_user_policy": "USER_AUTHORIZED_INTEGRATION_NO_ADDITIONAL_APPROVAL_REQUIRED_IF_EVIDENCE_GATES_PASS",
+  "decisions": {
+    "product_MAIN_authoritative_recovery": "BLOCKED",
+    "ST01_ST06_branch_local_research_compatibility": "FOCUSED_FOUR_SOURCE_PINS_PASS",
+    "ST01_ST06_product_MAIN_promotion": "BLOCKED",
+    "latest_Retail_readiness_achievement": "ZERO_GAMEPLAY_READY_CERTIFIED",
+    "WCL_blind_semantic_contamination": "NOT_PERMITTED"
+  },
+  "cross_branch_dependency": [
+    "cross_branch_dependency: MAIN/current-product owner needs to supply exact current Runtime/CURRENT_STATE, canonical Registry, current active Pointer and frozen contracts with source hashes; resolve three historical workflow/sha/default-action contradictions",
+    "cross_branch_dependency: integration owner needs to run dependency-complete focused compatibility regression against that exact approved product base before any promotion",
+    "cross_branch_dependency: WCL owner needs to keep numeric blind candidate lock isolated prior to SimC hypothesis reconciliation"
+  ],
+  "deliverable_paths": [
+    "docs/MAIN_INTEGRATION_RECOVERY_EVIDENCE_20261102.json",
+    "tools/research/main_integration_recovery_gate_v1.py",
+    ".github/workflows/zrot-main-integration-recovery-review.yml"
+  ],
+  "shared_runtime_or_registry_mutation": false,
+  "github_main_mutation": false,
+  "FROZEN": "UNCHANGED",
+  "Seq578": "FAILED_QUARANTINED_PRESERVED",
+  "Seq637": "UNKNOWN",
+  "product_exact_next": "CURRENT_LIVE_MAIN_AUTHORITY_RESTORE_THEN_FOCUSED_ST01_ST06_COMPAT_AND_MAIN_PROMOTION",
+  "session_exact_next": "BLOCKED_ON_REAL_MAIN_CANONICAL_CURRENT_RUNTIME_REGISTRY_POINTER; DO_NOT_SYNTHESIZE_OR_PROMOTE",
+  "status": "BRANCH_REVIEW_VALIDATED__MAIN_PRODUCT_PROMOTION_BLOCKED"
+}
