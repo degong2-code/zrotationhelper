@@ -1,0 +1,87 @@
+name: zrot-official-simc-real-profile-source-smoke
+
+on:
+  push:
+    branches:
+      - work/gr-simc-opener-priority-vslice-20261102
+    paths:
+      - tools/research/simc_general_opener_priority_bridge_v1.py
+      - .github/workflows/zrot-official-simc-real-profile-source-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-public-profile-ingest:
+    name: Pinned official SimC MID2 profiles Python 3.12
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch exact pinned official PUBLIC SimC profiles and parse General Rotation structural hypotheses
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/simc_real_source
+          python - <<'PY'
+          import hashlib,json,sys,urllib.request
+          from pathlib import Path
+          sys.path.insert(0,"tools/research")
+          from simc_general_opener_priority_bridge_v1 import inspect_source_only
+          revision="b522cded8c26b97dac03fdf56e57a03ec7e8faa6"
+          profiles=[
+             ("fury","profiles/MID2/MID2_Warrior_Fury.simc","3225992ed5b754ad5d61e8b785d9d859f1eed1be"),
+             ("enhancement","profiles/MID2/MID2_Shaman_Enhancement.simc","2f2c951ae07489d124db36c464ab66d1efd262ce"),
+             ("unholy","profiles/MID2/MID2_Death_Knight_Unholy.simc","3a94484f15b5fb8b454c05dbdfd78b799979560e"),
+          ]
+          output=[]
+          for spec,path,expected_blob in profiles:
+              url=f"https://raw.githubusercontent.com/simulationcraft/simc/{revision}/{path}"
+              req=urllib.request.Request(url,headers={"User-Agent":"zRotationHelper-General-Rotation-Research/1"})
+              with urllib.request.urlopen(req,timeout=20) as f:
+                  raw=f.read(200000)
+              assert len(raw)<200000
+              blob=hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\0"+raw).hexdigest()
+              assert blob==expected_blob,(spec,blob)
+              model=inspect_source_only(raw,spec=spec)
+              assert model["source_apl_sha256"]==hashlib.sha256(raw).hexdigest()
+              assert model["precombat_is_combat_opener"] is False
+              assert model["combat_opener_sequence_inferred"] is False
+              assert model["decision_readiness_observed"] is False
+              assert model["general_rotation_proven"] is False
+              assert model["row_count"]>20
+              assert model["decision_graph_node_count"]>=model["row_count"]
+              output.append({"spec":spec,"official_repo":"simulationcraft/simc",
+                "revision":revision,"profile_path":path,"profile_git_blob_sha1":blob,
+                "source_apl_sha256":model["source_apl_sha256"],
+                "structural_rows":model["row_count"],
+                "precombat_directives":len(model["precombat_directives"]),
+                "source_lists":len(model["source_list_names"]),
+                "target_count_guard_candidates":len(model["target_count_guard_candidates"]),
+                "complete_opener_proven":False,"WCL_replay":"NOT_RUN",
+                "actual_SimC_executable_run":"NOT_RUN"})
+          receipt={
+           "schema":"ZrotFreshOfficialSimcProfileStructuralCoverageV1",
+           "result":"PASS_REAL_PUBLIC_SIMC_SOURCE_ACQUISITION_AND_STRUCTURAL_PARSE",
+           "retrieved_profile_count":len(output),"profiles":output,
+           "actual_SimC_native_execution":"NOT_RUN",
+           "actual_WCL_high_ranker_reconciliation":"NOT_RUN",
+           "General_Rotation_validated":False,
+           "current_gameplay_opener_complete":False}
+          Path("ci_artifacts/simc_real_source/receipt.json").write_text(json.dumps(receipt,indent=2)+"\n")
+          print(json.dumps(receipt,indent=2))
+          PY
+      - name: Upload metadata only, not actual SimC profile bytes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-simc-source-${{ github.sha }}
+          path: ci_artifacts/simc_real_source/
+          retention-days: 7
+          if-no-files-found: warn
