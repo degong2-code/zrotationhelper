@@ -44,8 +44,7 @@ jobs:
           mkdir -p ci_artifacts/st05
           gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/12990129697/zip" \
             -H "Accept: application/vnd.github+json" \
-            --method GET \
-            --output ci_artifacts/st05/original_native_archive.zip
+            --method GET > ci_artifacts/st05/original_native_archive.zip
           test -s ci_artifacts/st05/original_native_archive.zip
           echo "ORIGINAL_NATIVE_ARTIFACT_FETCHED=YES"
       - name: Independently re-audit actual epoch/resource expression markers
