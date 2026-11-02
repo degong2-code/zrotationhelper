@@ -4,6 +4,7 @@ on:
     branches: [work/gr-simc-st-2t-wcl-blind-20261102]
     paths:
       - tools/engine_first/wcl_official_ranker_discovery_v1.py
+      - tools/engine_first/wcl_actor_scoped_cohort_v1.py
       - .github/workflows/zrot-official-ranker-actor-scope-smoke.yml
   workflow_dispatch:
 
