@@ -1,0 +1,87 @@
+{
+  "schema": "ZrotPrivateEngine42AndPrestateZeroStackCandidateEvidenceV1",
+  "date": "2026-11-02",
+  "owner": "BRANCH_ISOLATED_MAIN_ENGINE_BEHAVIOR_REVIEW",
+  "private_historical_runtime": {
+    "source_zip_sha256": "46e3a2dd1b51465429932a03efb7345cae781c756137dea9a39c9c4bed152bf6",
+    "behavior_script_sha256": "3a00d4ab9d906e3eca2d868cc194134af6ff495b4fb7155f099170a40489083c",
+    "behavior_receipt_sha256": "2023a6ba0a3e8eb87e77a134579e42c34d5bbe4797e7e00f71fde7fe89df17e7",
+    "source_module_pin_verified": 6,
+    "real_source_modules_imported": 4,
+    "synthetic_behavioral_assertions": 42,
+    "behavioral_result": "PASS",
+    "scope": [
+      "O0_O2 checkpoint run/retry and unimplemented O3 rejection",
+      "fingerprint and package-lock tamper rejection",
+      "distinct-player cohort/holdout overlap diagnostics",
+      "evidence lifecycle and no causal or mandatory inference from WCL repetition"
+    ],
+    "actual_private_source_in_public_GitHub": false,
+    "product_main_or_inbox_executed": false,
+    "live_WCL_SimC_Blizzard_called": false,
+    "strict_PRE_included_in_private_42": false,
+    "historic_FEX_full_behavior_validated": false
+  },
+  "strict_pre": {
+    "public_module_sha256": "889fdd114f5a07d31612c0fc2a548ac0dfab1dc1d5738e8741f573194efd7d50",
+    "public_identity_sha256": "d2328bef5f7db3fa973cbb99b2125f13d796a5249be3c007219c38509965f8b6",
+    "public_coverage_sha256": "30daad468f43ab012f4d85cb457ba838899bef5ddaf32acb4d14645043ba8147",
+    "prior_failing_original_ci_id": 41398991492,
+    "original_result": "FAIL_CONFIRMED_LEGACY_ZERO_STACK_DEFECT",
+    "input": {
+      "type": "removebuffstack",
+      "abilityGameID": 101,
+      "stack": 0,
+      "timestamp": 110
+    },
+    "historical_state_at_t_111": [
+      true,
+      1
+    ],
+    "corrected_expected_state_at_t_111": [
+      false,
+      0
+    ],
+    "strict_PRE_state_at_t_110": [
+      true,
+      3
+    ],
+    "mechanism": "zero-valued observed stack is discarded by python truthiness in or-fallback",
+    "user_facing_effect": "POTENTIAL_FALSE_ACTIVE_BUFF_AND_WRONG_ROTATION_BRANCH",
+    "candidate_patch_path": "active/branches/BR-PRESTATE-ZERO-STACK-20261102/PRESTATE_REMOVE_STACK_ZERO_FIX_V1.patch",
+    "candidate_applied_to_public_original": false,
+    "candidate_applied_to_PRODUCT_MAIN": false,
+    "candidate_applied_to_FROZEN": false,
+    "candidate_test_isolation": "IN_MEMORY_ONLY",
+    "candidate_behavior_assertions": 37,
+    "candidate_synthetic_result": "PASS",
+    "candidate_late_event_leakage": "NOT_OBSERVED_IN_SYNTHETIC_FIXTURE",
+    "original_missing_stack_semantics": "RETURNS_ACTIVE_STACK_1__OBSERVABILITY_UNCERTAINTY_NOT_CLOSED",
+    "important_unresolved_limit": "AuraIdIndex.state_pre returns inactive for never-observed buff ID; consumer must not infer confirmed unavailable without independent observation coverage.",
+    "ci_run_id": 41399406241,
+    "ci_conclusion": "SUCCESS_BOTH_PYTHON",
+    "ci_python_versions": [
+      "3.12",
+      "3.14"
+    ],
+    "ci_artifact_python312_id": 13120696837,
+    "ci_artifact_python314_id": 13121270861,
+    "private_original_source_replayed_in_GitHub": false
+  },
+  "authority": {
+    "active_workflow_id": null,
+    "current_approved_RUNTIME": "UNKNOWN",
+    "current_approved_WorkState": "UNKNOWN",
+    "shared_MAIN_source_modified": false,
+    "shared_GENERAL_ROTATION_modified": false,
+    "canonical_registry_or_pointer_modified": false,
+    "product_current_season_behavior_certified": false,
+    "Seq578": "FAILED_QUARANTINED_PRESERVED",
+    "Seq637": "UNKNOWN"
+  },
+  "hypothesis_vs_pipeline": {
+    "original_CI_failure_type": "BEHAVIORAL_HYPOTHESIS_VIOLATION_TRUE_BUG",
+    "correction_CI_status": "FIXED_IN_BRANCH_LOCAL_CANDIDATE_ONLY",
+    "next_acceptance": "MAIN owner review exact minimal patch against source; independent holdout/synthetic check of stack=0, stack alias, no-stack uncertainty; focused O4 integration behavior with PRE state coverage and no future leakage."
+  }
+}
