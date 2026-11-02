@@ -53,7 +53,7 @@ jobs:
             -DBUILD_GUI=OFF -DBUILD_TESTING=OFF -DSC_NO_NETWORKING=ON
           cmake --build /tmp/zrot-simc-build --target simc --parallel 3
           test -x /tmp/zrot-simc-build/simc
-          /tmp/zrot-simc-build/simc version
+          /tmp/zrot-simc-build/simc display_build=2
       - name: Execute real native SimC one-actor ST with bounded log and deterministic seed
         shell: bash
         run: |
@@ -70,6 +70,38 @@ jobs:
           echo "=== native log sample first 90 lines, max 15000 bytes ==="
           head -n 90 ci_artifacts/native_simc/fury_st.log | head -c 15000 || true
           echo
+      - name: Parse real performed actions with strict scope and no gameplay promotion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B -m py_compile tools/research/native_simc_opener_ingest_v1.py
+          python -B tools/research/native_simc_opener_ingest_v1.py --self-test > ci_artifacts/native_simc/parser_selftest.json
+          python -B tools/research/native_simc_opener_ingest_v1.py \
+            --log-file ci_artifacts/native_simc/fury_st.log \
+            --actor MID2_Warrior_Fury \
+            --source-commit "$SIMC_COMMIT" \
+            --profile-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
+            --seed 31459 \
+            --out ci_artifacts/native_simc/native_actions.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a=Path("ci_artifacts/native_simc")
+          t=json.loads((a/"parser_selftest.json").read_text())
+          n=json.loads((a/"native_actions.json").read_text())
+          assert t["result"]=="PASS" and t["case_count"]>=20
+          assert n["observed_log_actor_found"] is True
+          assert n["observed_performs_event_count"]>=3
+          assert len(n["opening_window_actions"])>=1
+          assert n["combat_opener_automatically_proven"] is False
+          assert n["cooldown_readiness_reconstructed"] is False
+          assert n["player_facing_general_rotation_rule_ready"] is False
+          print("NATIVE_SIMC_LOG_OBSERVED_ACTIONS="+str(n["observed_performs_event_count"]))
+          print("NATIVE_SIMC_FIRST_15_SECONDS="+str([
+            (x["simulation_time_s"],x["action_as_logged"])
+            for x in n["opening_window_actions"][:16]
+          ]))
+          PY
       - name: Prove genuine execution and record bounded evidence only
         shell: bash
         run: |
@@ -91,8 +123,10 @@ jobs:
            "native_log_sha256":hashlib.sha256(raw).hexdigest(),
            "native_log_lines":len(lines),
            "native_log_size_bytes":len(raw),
+           "native_observed_action_count":json.loads(Path("ci_artifacts/native_simc/native_actions.json").read_text())["observed_performs_event_count"],
+           "native_first_15_sec_observed_actions":[{"t":x["simulation_time_s"],"name":x["action_as_logged"]} for x in json.loads(Path("ci_artifacts/native_simc/native_actions.json").read_text())["opening_window_actions"][:20]],
            "native_log_preview_first_30_lines":lines[:30],
-           "native_action_sequence_parsed":"NOT_YET",
+           "native_action_sequence_parsed":"STRUCTURAL_PERFORMED_EVENTS_ONLY",
            "strict_pre_readiness_verified":False,
            "WCL_ranker_reconciliation":"NOT_RUN",
            "opener_complete":False,
@@ -108,6 +142,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: native-simc-evidence-${{ github.sha }}
-          path: ci_artifacts/native_simc/native_receipt.json
+          path: |
+            ci_artifacts/native_simc/native_receipt.json
+            ci_artifacts/native_simc/native_actions.json
+            ci_artifacts/native_simc/parser_selftest.json
           retention-days: 7
           if-no-files-found: warn
