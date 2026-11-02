@@ -113,7 +113,7 @@
     "Run source complete focused compatibility with research sources and multi-spec fixtures in sandbox; preserve gameplay UNKNOWN if not verified",
     "Only MAIN accepts or rejects production promotion; branch handoff itself cannot promote"
   ],
-  "next": "MAIN should accept/reject minimal PRE-state explicit-zero fix after independent focused O4 state/coverage integration; current Runtime/Work State active authority remains UNKNOWN. Avoid repeating 124 source hashes and old 42 original checks unless code changes.",
+  "next": "ENGINE_FIRST_EXACT_NEXT: implement safe minimal development entrypoint and fresh WCL collection/snapshot/checkpoint/replay vertical slice (without legacy Inbox dispatcher). Use new valid accessible data as E2E test. Keep approved Runtime/Work State and product MAIN promotion UNKNOWN pending MAIN review; do not wait for full historical restoration.",
   "status": "MERGE_READY_FOR_MAIN_REVIEW_OF_BOUNDED_ZERO_STACK_PATCH__PRODUCT_MAIN_NOT_PROMOTED",
   "focused_source_interface_evidence": {
     "independent_private_local_receipt_sha256": "7a3dfc30bad818199f15288f2f380867a7a8997105c20bc9c7e39024fb5f97a7",
@@ -181,5 +181,45 @@
     "result": "BRANCH_LOCAL_CANDIDATE_VALIDATED__ORIGINAL_STILL_HAS_DEFECT",
     "user_facing_risk": "POTENTIAL_WRONG_BUFF_ACTIVE_DECISION",
     "missing_stack_count_remains_unknown_for_readiness": "NOT_CLOSED"
-  }
+  },
+  "user_approved_engine_first_policy": {
+    "approved_date": "2026-11-02",
+    "authority_scope": "USER_APPROVED_DEVELOPMENT_DIRECTION__BRANCH_RECORDED__MAIN_PROMOTION_NOT_DONE",
+    "headline": "Build a reproducible generic rotation research engine, not a historical source restoration program.",
+    "charter": "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md",
+    "agent_instructions": "AGENTS.md",
+    "read_first": [
+      "AGENTS.md",
+      "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md"
+    ],
+    "priority": [
+      "MINIMAL_SAFE_FRESH_DATA_ENGINE",
+      "LIVE_WCL_RECOLLECT_AS_E2E_TEST",
+      "SNAPSHOT_CHECKPOINT_REPLAY_STRICT_PRE_UNKNOWN",
+      "SIMC_APL_BOOTSTRAP_PARALLEL_TO_BLIND_WCL_CANDIDATE_LOCK",
+      "COMPARED_AND_VERIFIED_GENERAL_ROTATION_IR",
+      "MULTISPEC_ENCOUNTER_GENERALITY"
+    ],
+    "old_data_policy": "USE_WHEN_HELPFUL_NOT_GATE_TO_DEVELOPMENT",
+    "external_constraint_exception": "Historical logs removed or API/patch changes do not by themselves prove the engine is broken; separate retrieval limitations from pipeline failures.",
+    "immutable_constraints": [
+      "FROZEN_ORIGINAL_EVIDENCE",
+      "MAIN_ONLY_AUTHORITY_PROMOTION",
+      "WCL_BLIND_INDEPENDENCE_BEFORE_LOCK",
+      "SEQ578_FAILED_QUARANTINED",
+      "SEQ637_UNKNOWN"
+    ],
+    "never_claim": "CI pass or restored source alone means gameplay rotation accuracy, generality or live data collection is proven."
+  },
+  "read_first": [
+    "AGENTS.md",
+    "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md",
+    "_UPLOAD_TO_CHATGPT/branches/BR-MAIN-STATUS-ONLY-20261102/LATEST_HANDOFF.json"
+  ],
+  "previous_exact_next_before_user_direction_shift": "MAIN should accept/reject minimal PRE-state explicit-zero fix after independent focused O4 state/coverage integration; current Runtime/Work State active authority remains UNKNOWN. Avoid repeating 124 source hashes and old 42 original checks unless code changes.",
+  "product_exact_next": "Build a fresh-data-capable dual-lane generic research engine. First vertical slice: safe execution, official WCL new report, deterministic snapshot replay, Strict PRE observability/UNKNOWN, then blind candidate lock and independent SimC APL hypothesis lane. Generalize after one specialization fixture.",
+  "branch_exact_next": "Produce isolated safe fresh-data collector/replay candidate with .env local-secret autodiscovery, resumable cache and synthetic before live smoke; no automatic production pointer change.",
+  "changed_approach_reason": "USER_2026_11_02_EXPLICIT_FEEDBACK: historical restoration is a means not an end; engine must prove ability to reacquire and reanalyze fresh data. Avoid overvaluing old assets or blocking development on legacy authority.",
+  "shared_authoritative_state_mutated": false,
+  "project_wide_promotion_status": "NOT_PROMOTED_MAIN_ONLY"
 }
