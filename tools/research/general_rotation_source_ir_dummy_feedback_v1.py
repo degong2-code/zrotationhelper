@@ -107,8 +107,8 @@ def evaluate(ir,resource):
                 raise EvaluatorError("INVALID_ACTION_TIMESTAMP")
             pre=row.get("resource_pre",{})
             for power,details in pre.items():
-                if details.get("source_timestamp",ts)>=ts or
-                   details.get("owner_proof") not in ("ACTOR_OWNED_SOURCE","ACTOR_OWNED_TARGET"):
+                if (details.get("source_timestamp",ts)>=ts or
+                    details.get("owner_proof") not in ("ACTOR_OWNED_SOURCE","ACTOR_OWNED_TARGET")):
                     raise EvaluatorError("INVALID_RESOURCE_PRE_PROOF")
             # No exact active enemy count exists in this WCL source.
             route=branch_guard(gate,raw,None,ts)
