@@ -1,0 +1,161 @@
+name: zrot-disjoint-report-holdout-research
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/engine_first/wcl_disjoint_holdout_v1.py
+      - tools/engine_first/wcl_official_ranker_discovery_v1.py
+      - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HOLDOUT_PREDECLARED_SOURCE_AND_METRICS_V1.json
+      - .github/workflows/zrot-disjoint-report-holdout-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-contract:
+    name: Holdout strict-PRE source / frozen metrics Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile live path and run isolated synthetic holdout gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/engine_first/wcl_disjoint_holdout_v1.py tools/engine_first/wcl_official_ranker_discovery_v1.py tools/research/wcl_simc_postlock_real_audit_v1.py
+          python -B tools/engine_first/wcl_disjoint_holdout_v1.py --self-test > /tmp/holdout-regression.json
+          python -B tools/engine_first/wcl_official_ranker_discovery_v1.py --self-test > /tmp/ranker-regression.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a=json.loads(Path('/tmp/holdout-regression.json').read_text())
+          b=json.loads(Path('/tmp/ranker-regression.json').read_text())
+          assert a['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert a['assertion_groups']>=11
+          assert a['actual_WCL_API_calls']==0
+          assert a['SimC_hypothesis_loaded'] is False
+          assert a['gameplay_rule_promoted'] is False
+          assert b['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert b['live_wcl_api_calls']==0
+          print('PREDECLARED_HOLDOUT_METRICS_AND_RANKER_FILTER_OFFLINE_PASS')
+          PY
+          sha256sum tools/engine_first/wcl_disjoint_holdout_v1.py
+
+  official-wcl-holdout:
+    name: Disjoint report holdout against existing frozen numeric lock
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [offline-contract]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Retrieve original immutable discovery lock evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41463589665
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          path: /tmp/zrot-discovery-frozen
+          github-token: ${{ github.token }}
+      - name: Confirm frozen evidence and scope BEFORE OAuth/network
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/engine_first')
+          from wcl_disjoint_holdout_v1 import validate_contract,validate_frozen_lock
+          c=validate_contract(json.loads(Path('docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HOLDOUT_PREDECLARED_SOURCE_AND_METRICS_V1.json').read_text()))
+          lock=Path('/tmp/zrot-discovery-frozen/derived/blind_lock.json').read_bytes()
+          original=validate_frozen_lock(lock,c)
+          assert original['candidate_n']==4
+          assert {x['action_spell_id'] for x in original['candidates']}=={1,184367,335096,335097}
+          print('ORIGINAL_DISCOVERY_LOCK_SHA_VERIFIED_PRE_NETWORK')
+          PY
+      - name: Collect independent report and compare locked candidates only
+        shell: bash
+        env:
+          WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
+          WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "$WCL_CLIENT_ID" ] || [ -z "$WCL_CLIENT_SECRET" ]; then
+            echo '{"status":"SKIPPED_MISSING_CONFIGURED_OAUTH","real_wcl_holdout":"NOT_RUN"}' > /tmp/zrot-holdout-status.json
+            exit 0
+          fi
+          python -B tools/engine_first/wcl_disjoint_holdout_v1.py --live \
+            --contract docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HOLDOUT_PREDECLARED_SOURCE_AND_METRICS_V1.json \
+            --discovery-lock /tmp/zrot-discovery-frozen/derived/blind_lock.json \
+            --out-dir /tmp/zrot-holdout-evidence > /tmp/zrot-holdout-status.json
+          cat /tmp/zrot-holdout-status.json
+      - name: Verify held-out numeric evidence did not change discovery lock or rule authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f /tmp/zrot-holdout-evidence/derived/holdout_observed_metrics.json ]; then
+            echo 'HOLDOUT_NOT_COMPLETED_NO_ARTIFACT_TO_PROMOTE'
+            exit 0
+          fi
+          python - <<'PY'
+          from pathlib import Path
+          import json,sys
+          sys.path.insert(0,'tools/engine_first')
+          from fresh_wcl_engine_v1 import sha,canonical,replay
+          from wcl_disjoint_holdout_v1 import validate_contract,validate_frozen_lock,assess_holdout
+          from wcl_simc_postlock_real_audit_v1 import independently_replay_pre
+          c=validate_contract(json.loads(Path('docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HOLDOUT_PREDECLARED_SOURCE_AND_METRICS_V1.json').read_text()))
+          lock=validate_frozen_lock(Path('/tmp/zrot-discovery-frozen/derived/blind_lock.json').read_bytes(),c)
+          root=Path('/tmp/zrot-holdout-evidence')
+          x=json.loads((root/'derived/holdout_observed_metrics.json').read_text())
+          s=json.loads((root/'derived/source_selection.json').read_text())
+          gate=json.loads((root/'derived/identity_gate.json').read_text())
+          view=json.loads((root/'derived/blind_holdout_replay.json').read_text())
+          folder=root/'raw'/s['report_code']/f"fight_{s['fight_id']}"
+          raw=replay(folder)
+          events=[]
+          for p in sorted(folder.glob('page_*.json')):
+              events+=json.loads(p.read_text())['events']
+          independent=independently_replay_pre(events,gate['actor_id'])
+          check=assess_holdout(c,lock,s,view,independent)
+          for key,value in check.items():
+              assert x[key]==value,(key,value,x.get(key))
+          assert raw['replay_sha256']==view['identity']['source_replay_sha256']
+          assert x['unchanged_discovery_lock_sha256']==c['frozen_discovery']['blind_lock_sha256']
+          assert x['different_report_from_discovery'] is True
+          assert x['new_discovery_candidates_added']==0
+          assert x['causal_priority_or_optimality_proven'] is False
+          assert x['general_rotation_rule_promoted'] is False
+          assert x['independent_player_identity']=='UNKNOWN'
+          print('REAL_HOLDOUT_RAW_SHA_STRICT_PRE_FROZEN_METRICS_REVALIDATED=PASS')
+          PY
+      - name: Retain bounded holdout evidence for reproducible comparison (7 days)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcl-disjoint-report-holdout-${{ github.sha }}
+          path: /tmp/zrot-holdout-evidence/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Retain non-secret holdout status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcl-disjoint-report-holdout-status-${{ github.sha }}
+          path: /tmp/zrot-holdout-status.json
+          if-no-files-found: warn
+          retention-days: 7
