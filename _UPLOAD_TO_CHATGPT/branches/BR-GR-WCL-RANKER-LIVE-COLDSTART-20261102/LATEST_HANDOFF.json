@@ -117,13 +117,14 @@
     "new_user_scope_override_evidence": null
   },
   "product_exact_next": "Complete verified General Rotation opener and target-count IF/ELSE priority from SimC baseline + independently selected WCL ranker evidence; then add target dummy rotation error feedback.",
-  "chat_exact_next": "Connect WCL_CLIENT_ID and WCL_CLIENT_SECRET as encrypted GitHub Actions repository secrets for degong2-code/zrotationhelper, rerun the ranked WCL pilot, validate real ranking report/fight/actor identity and fresh event snapshot; progress to Strict PRE and numeric blind lock, then post-lock SimC replay. Do not claim live WCL success before nonzero real API evidence.",
+  "chat_exact_next": "Set encrypted GitHub Actions repository secrets WCL_CLIENT_ID and WCL_CLIENT_SECRET on degong2-code/zrotationhelper; rerun Actions run #41429991816 (or trigger same workflow via safe branch push); verify actual nonzero WCL API ranked fight/actor and fresh events; only then candidate lock and SimC post-lock compare.",
   "implemented": [
     "tools/engine_first/wcl_ranker_discovery_preflight_v1.py",
     "tools/engine_first/wcl_ranked_actor_resolution_v1.py",
     "tools/engine_first/wcl_ranker_fresh_e2e_pilot_v1.py",
     ".github/workflows/zrot-live-wcl-ranker-preflight.yml",
-    ".github/workflows/zrot-live-ranked-wcl-fresh-pilot.yml"
+    ".github/workflows/zrot-live-ranked-wcl-fresh-pilot.yml",
+    "docs/WCL_RANKED_LIVE_PILOT_AUTH_AND_SCOPE_20261102.md"
   ],
   "validation": {
     "preflight_run_id": 41429553206,
@@ -138,7 +139,13 @@
     "actual_holdout": "NOT_RUN",
     "SimC_and_WCL_postlock_comparison": "NOT_RUN",
     "total_product_General_Rotation_completed": false,
-    "user_target_dummy_feedback_test": "NOT_RUN"
+    "user_target_dummy_feedback_test": "NOT_RUN",
+    "after_official_OAuth_basic_auth_contract_update_run_id": 41430464537,
+    "after_official_OAuth_basic_auth_contract_update": "PASS_OFFLINE_BUT_LIVE_BLOCKED_CREDENTIALS",
+    "actual_WCL_API_call_count": 0,
+    "actual_WCL_ranker_rows": 0,
+    "actual_WCL_actor_id_verified": false,
+    "actual_WCL_numeric_blind_lock_created": false
   },
   "guards": {
     "no_simc_semantic_inputs_in_WCL_blind": true,
@@ -172,5 +179,7 @@
   "Seq578": "FAILED_QUARANTINED",
   "Seq637": "UNKNOWN",
   "actual_new_chat_handoff": false,
-  "main_canonical_promotion": false
+  "main_canonical_promotion": false,
+  "config_instructions": "docs/WCL_RANKED_LIVE_PILOT_AUTH_AND_SCOPE_20261102.md",
+  "note": "Live GitHub runs have succeeded as jobs while reporting BLOCKED_* in receipts; never treat green Actions status as actual WCL-production PASS."
 }
