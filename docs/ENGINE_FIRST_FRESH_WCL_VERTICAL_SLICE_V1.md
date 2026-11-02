@@ -1,3 +1,5 @@
+> **Current product scope (user 2026-11-02):** [Machine-readable General Rotation + target-dummy trainer lock](PRODUCT_SCOPE_LOCK_V1.json) takes precedence over any earlier Encounter/raid/NSRT roadmap. SimC APL first, WCL high-ranker independent blind verification and correction, validated opener and IF/ELSE priority, then evidence-bounded dummy practice feedback. This document supplies **technical component evidence only**, not a separate product goal.
+
 # Engine-First Fresh WCL Vertical Slice V1
 
 ## Goal
