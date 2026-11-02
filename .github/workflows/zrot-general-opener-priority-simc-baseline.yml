@@ -7,6 +7,7 @@ on:
     paths:
       - tools/research/simc_general_opener_priority_bridge_v1.py
       - tools/research/fixtures/general_rotation_opener_*
+      - _UPLOAD_TO_CHATGPT/branches/BR-GENERAL-SIMC-OPENER-PRIORITY/LATEST_HANDOFF.json
       - .github/workflows/zrot-general-opener-priority-simc-baseline.yml
   workflow_dispatch:
 
@@ -75,6 +76,24 @@ jobs:
           python -B tools/research/simc_apl_source_engine.py --self-test
           python -B tools/research/simc_apl_conditional_ir.py --self-test
           python -B tools/research/simc_apl_decision_graph.py --self-test
+      - name: Verify fixed General Rotation scope carried into this research branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/governance/validate_scope_continuity_v1.py --validate --self-test \
+            --handoff _UPLOAD_TO_CHATGPT/branches/BR-GENERAL-SIMC-OPENER-PRIORITY/LATEST_HANDOFF.json \
+            > ci_artifacts/general_opener/scope_continuity.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path("ci_artifacts/general_opener/scope_continuity.json").read_text())
+          assert x["result"]=="PASS_SCOPE_CONTINUITY"
+          assert x["negative_cases_passed"]==14
+          assert len(x["five_hop_simulation"]["simulated_successor_hops"])==5
+          assert x["product_scope"]=="GENERAL_ROTATION_OPENER_PRIORITY_AND_TARGET_DUMMY_FEEDBACK"
+          assert x["old_raid_NSRT_encounter_output_required"] is False
+          print("GENERAL_ROTATION_PRODUCT_SCOPE_CARRIED=PASS")
+          PY
       - name: Preserve small synthetic receipts only
         if: always()
         uses: actions/upload-artifact@v4
