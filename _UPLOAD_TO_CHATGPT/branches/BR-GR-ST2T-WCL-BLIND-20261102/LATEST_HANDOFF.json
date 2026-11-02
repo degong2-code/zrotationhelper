@@ -1,0 +1,170 @@
+{
+  "schema": "ZrotStTwoTargetSimcAndIndependentWclResearchHandoffV1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "date": "2026-11-02",
+  "branch_code_head_at_handoff_creation": "a8326e7373dcb83d1a7a5a470dc46e33201eea50",
+  "upstream_branch": "work/gr-native-simc-smoke-20261102",
+  "upstream_handoff_blob_sha1": "caa30c2da7123ad62dce408ead291e74594f22ee",
+  "actual_new_chat_handoff": false,
+  "scope_continuity": {
+    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+    "policy_git_blob_sha1": "14b9f5174a9d1652a56dcca03af1f2302b78c22d",
+    "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+    "policy_snapshot": {
+      "schema": "ZrotProductScopeLockV1",
+      "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+      "effective_date": "2026-11-02",
+      "authority": "USER_EXPLICIT_FINAL_PRODUCT_GOAL_CHANGE",
+      "source_of_intent": "User explicitly withdrew raid execution/NSRT final outputs and selected General Rotation opener/priority plus lightweight target-dummy practice feedback.",
+      "read_first": [
+        "docs/PRODUCT_SCOPE_LOCK_V1.json",
+        "docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md",
+        "AGENTS.md",
+        "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md"
+      ],
+      "final_product_goal": {
+        "research_product": "GENERAL_ROTATION_OPENER_AND_CONDITIONAL_PRIORITY",
+        "opener": "EXPLICIT_REQUIRED",
+        "combat_contexts": [
+          "SINGLE_TARGET",
+          "TWO_TARGET",
+          "CLEAVE",
+          "AOE",
+          "TARGET_COUNT_BREAKPOINTS"
+        ],
+        "state_factors": [
+          "RESOURCE",
+          "PROC",
+          "BUFF_DEBUFF",
+          "COOLDOWN_CHARGE",
+          "TALENT_BUILD",
+          "ACTION_REPLACEMENT",
+          "EXECUTE_FIGHT_REMAINS",
+          "SEQUENCE_STATE"
+        ],
+        "output": "EVIDENCE_BOUNDED_IF_ELSE_PRIORITY_WITH_REASON_AND_UNKNOWN",
+        "training_product": "LIGHTWEIGHT_TARGET_DUMMY_ROTATION_MISTAKE_FEEDBACK",
+        "training_mode_preference": "OBSERVABILITY_FIRST_LIVE_IF_FEASIBLE_ELSE_POST_SESSION_COMBAT_LOG_ANALYSIS",
+        "training_result": "ACTUAL_ACTION_VS_VERIFIED_RULE_PLUS_TIME_CONDITION_REASON_AND_CORRECTIVE_ACTION"
+      },
+      "research_execution_order": [
+        "SIMC_APL_PROFILE_BASELINE_AND_OPENER_HYPOTHESIS",
+        "WCL_HIGH_RANKER_STRICT_PRE_INDEPENDENT_BLIND_CANDIDATE_DISCOVERY_AND_LOCK",
+        "POST_LOCK_SIMC_HYPOTHESIS_REPLAY_AGAINST_WCL_RANKER_STATES",
+        "BLIZZARD_MECHANIC_RECONCILIATION_AND_IMPORTANT_AMBIGUITY_VALIDATION",
+        "VALIDATED_GENERAL_ROTATION_OPENER_AND_PRIORITY_IR",
+        "TARGET_DUMMY_OWN_ACTION_FEEDBACK"
+      ],
+      "research_guards": {
+        "SimC_first_hypothesis_bootstrap": true,
+        "WCL_blind_lock_before_SimC_semantic_answer_injection": true,
+        "SimC_counterfactual_optional_for_important_ambiguity": true,
+        "Strict_PRE_timestamp_rule": "event_timestamp < decision_timestamp",
+        "unobserved_readiness": "UNKNOWN",
+        "avoid_false_causal_priority_claims": true,
+        "cross_spec_generic_semantics_not_hardcoded": true
+      },
+      "permitted_support": {
+        "new_fresh_WCL_log_collection_is_engine_E2E_test": true,
+        "past_data_not_prerequisite": true,
+        "raid_reports_as_general_rotation_empirical_fixtures": true,
+        "blizzard_patch_mechanic_truth": true,
+        "lightweight_addon_and_optional_offline_companion": true
+      },
+      "out_of_scope": [
+        "ENCOUNTER_SPECIFIC_ROTATION_PLAN",
+        "RAID_EXECUTION_ASSISTANT",
+        "NSRT_EXPORT",
+        "RAID_TIMELINE_OR_BOSS_GUIDE_EXPORT",
+        "PRODUCTION_READY_GAMEPLAY_CLAIM_WITHOUT_VALIDATION"
+      ],
+      "interface_limits": {
+        "actual_live_dummy_feedback_feasibility": "UNVERIFIED_DEPENDS_ON_SUPPORTED_RETAIL_ADDON_API",
+        "offline_combatlog_feedback_allowed": true,
+        "addons_no_arbitrary_external_file_io": true,
+        "no_unobserved_state_as_known": true,
+        "no_restricted_or_secret_combat_value_bypass": true
+      },
+      "development_priority": [
+        "EXECUTABLE_FRESH_DATA_ENGINE",
+        "SIMC_CONDITIONAL_OPENER_BOOTSTRAP",
+        "WCL_HIGH_RANKER_VALIDATION",
+        "GENERAL_IF_ELSE_IR",
+        "TARGET_DUMMY_FEEDBACK"
+      ],
+      "fixed_legacy_evidence_policy": "PRESERVE_HISTORICAL_FROZEN_AND_PRIOR_HANDOFF_BYTES; NEW_SCOPE_OVERRIDES_OLD_ROADMAP_GOALS_NOT_OLD_RAW_EVIDENCE",
+      "promotion_policy": "BRANCH_CAN_RECORD_USER_POLICY_AND_PROPOSE_MERGE; MAIN_ALONE_PROMOTES_SHARED_POINTERS",
+      "handoff_rules": {
+        "required_on_every_handoff": true,
+        "carry_full_policy_object": true,
+        "carry_policy_sha256": true,
+        "carry_explicit_next_product_goal": true,
+        "carry_explicit_out_of_scope": true,
+        "carry_next_generation_integer": true,
+        "at_least_five_hop_simulation_required": true,
+        "no_silent_scope_override": true,
+        "explicit_user_new_policy_required_to_supersede": true
+      },
+      "invariants": [
+        "SEQ578_FAILED_QUARANTINED",
+        "SEQ637_UNKNOWN",
+        "FROZEN_EVIDENCE_NOT_REWRITTEN"
+      ]
+    },
+    "generation": 0,
+    "parent_handoff_sha256": null,
+    "carried_forward_at": "2026-11-02",
+    "scope_override": false,
+    "new_user_scope_override_evidence": null
+  },
+  "product_exact_next": "Complete empirically verified SimC-first General Rotation opener and ST/2-target/AoE IF/ELSE priority; then precise target-dummy practice feedback.",
+  "chat_exact_next": "Confirm pinned official native Fury 1-target and 2-target real sample capture/JSON2 difference, then acquire WCL high-ranker logs on a separate blind cohort to validate and correct target-count conditional priorities.",
+  "new_source_files": [
+    "tools/research/simc_native_reference_capture.py (bounded new --targets/--seed/--fight-seconds overrides)",
+    "tools/research/simc_native_target_count_compare_v1.py",
+    "tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py",
+    ".github/workflows/zrot-general-rotation-st-vs-2t-native-simc.yml",
+    ".github/workflows/zrot-wcl-independent-candidate-lock.yml"
+  ],
+  "validation": {
+    "simc_target_offline_run_id": 41422148326,
+    "simc_target_offline": "PASS_PYTHON_3_12_AND_3_14",
+    "simc_native_target_capture": "IN_PROGRESS_NOT_YET_PASS",
+    "WCL_blind_numeric_lock_offline_run_id": 41422536988,
+    "WCL_blind_numeric_lock_offline": "PASS_PYTHON_3_12_AND_3_14",
+    "WCL_blind_live_ranker_acquisition": "NOT_RUN",
+    "WCL_blind_candidate_lock_live": "NOT_RUN",
+    "WCL_holdout": "NOT_RUN",
+    "post_lock_SimC_WCL_reconciliation": "NOT_RUN",
+    "Blizzard_current_spell_truth": "NOT_RUN",
+    "General_Rotation_validated": false,
+    "dummy_trainer_feedback_validated": false
+  },
+  "evidence_claim_boundaries": {
+    "same_simc_profile_binary_seed_fight_time_before_comparison": true,
+    "precombat_vs_combat_separate": true,
+    "raw_JSON2_snapshot_not_Strict_PRE": true,
+    "candidate_lock_numeric_only_no_SimC_semantics": true,
+    "frequent_cast_not_priority": true,
+    "unknown_readiness": "UNKNOWN",
+    "independent_WCL_source_not_proven_without_actual_data": true,
+    "synthetic_offline_pass_not_production": true
+  },
+  "read_first": [
+    "docs/PRODUCT_SCOPE_LOCK_V1.json",
+    "docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md",
+    "AGENTS.md",
+    "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md",
+    "docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md",
+    "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json"
+  ],
+  "shared_authoritative_state_mutated": false,
+  "project_wide_FROZEN_changed": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "MAIN_promoted": false,
+  "blockers": [
+    "Real WCL high-ranker samples with correctly attested actor/spec/build/readiness remain unavailable in this branch."
+  ]
+}
