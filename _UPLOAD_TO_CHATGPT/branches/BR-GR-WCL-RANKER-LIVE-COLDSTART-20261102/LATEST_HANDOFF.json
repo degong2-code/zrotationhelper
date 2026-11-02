@@ -117,7 +117,7 @@
     "new_user_scope_override_evidence": null
   },
   "product_exact_next": "Complete verified General Rotation opener and target-count IF/ELSE priority from SimC baseline + independently selected WCL ranker evidence; then add target dummy rotation error feedback.",
-  "chat_exact_next": "Set encrypted GitHub Actions repository secrets WCL_CLIENT_ID and WCL_CLIENT_SECRET on degong2-code/zrotationhelper; rerun Actions run #41429991816 (or trigger same workflow via safe branch push); verify actual nonzero WCL API ranked fight/actor and fresh events; only then candidate lock and SimC post-lock compare.",
+  "chat_exact_next": "Add WCL_CLIENT_ID and WCL_CLIENT_SECRET as encrypted Actions repository secrets in degong2-code/zrotationhelper; re-run corrected GitHub Actions run #41430775363, not superseded #41429991816; inspect actual status and nonzero API event/actor proof before any WCL candidate promotion.",
   "implemented": [
     "tools/engine_first/wcl_ranker_discovery_preflight_v1.py",
     "tools/engine_first/wcl_ranked_actor_resolution_v1.py",
@@ -130,7 +130,7 @@
     "preflight_run_id": 41429553206,
     "preflight_code_and_offline_identity": "PASS",
     "preflight_real_auth_status": "BLOCKED_MISSING_WCL_CLIENT_CREDENTIALS_IN_ACTIONS",
-    "end_to_end_run_id": 41429991816,
+    "end_to_end_run_id": 41430775363,
     "end_to_end_offline_synthetic_full_path": "PASS",
     "live_wcl_api_requests": 0,
     "live_wcl_event_rows": 0,
@@ -145,7 +145,9 @@
     "actual_WCL_API_call_count": 0,
     "actual_WCL_ranker_rows": 0,
     "actual_WCL_actor_id_verified": false,
-    "actual_WCL_numeric_blind_lock_created": false
+    "actual_WCL_numeric_blind_lock_created": false,
+    "corrected_http_basic_auth_live_pilot_run_id": 41430775363,
+    "corrected_http_basic_auth_live_pilot_status": "OFFLINE_E2E_PASS_REAL_WCL_BLOCKED_NO_SECRETS"
   },
   "guards": {
     "no_simc_semantic_inputs_in_WCL_blind": true,
@@ -181,5 +183,6 @@
   "actual_new_chat_handoff": false,
   "main_canonical_promotion": false,
   "config_instructions": "docs/WCL_RANKED_LIVE_PILOT_AUTH_AND_SCOPE_20261102.md",
-  "note": "Live GitHub runs have succeeded as jobs while reporting BLOCKED_* in receipts; never treat green Actions status as actual WCL-production PASS."
+  "note": "Live GitHub runs have succeeded as jobs while reporting BLOCKED_* in receipts; never treat green Actions status as actual WCL-production PASS.",
+  "exact_user_setup_docs": "docs/WCL_RANKED_LIVE_PILOT_AUTH_AND_SCOPE_20261102.md"
 }
