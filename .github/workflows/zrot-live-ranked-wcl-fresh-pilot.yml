@@ -1,4 +1,6 @@
 name: zrot-live-ranked-wcl-fresh-pilot
+# Source contract: official WCL public OAuth client_credentials with HTTP Basic authorization.
+# Use the CURRENT branch run after secrets are set; reruns of older commits retain old code.
 
 on:
   push:
