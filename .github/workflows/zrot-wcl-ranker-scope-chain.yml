@@ -1,0 +1,41 @@
+name: zrot-wcl-ranker-scope-chain
+
+on:
+  push:
+    branches:
+      - work/gr-wcl-ranker-live-coldstart-20261102
+    paths:
+      - _UPLOAD_TO_CHATGPT/branches/BR-GR-WCL-RANKER-LIVE-COLDSTART-20261102/LATEST_HANDOFF.json
+      - .github/workflows/zrot-wcl-ranker-scope-chain.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scope-five-handoff-inheritance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify user-approved General Rotation final goal survives 5 successor hops
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/governance/validate_scope_continuity_v1.py
+          python -B tools/governance/validate_scope_continuity_v1.py \
+            --validate --self-test \
+            --handoff _UPLOAD_TO_CHATGPT/branches/BR-GR-WCL-RANKER-LIVE-COLDSTART-20261102/LATEST_HANDOFF.json \
+            > scope_receipt.json
+          python - <<'PY'
+          import json
+          x=json.load(open("scope_receipt.json"))
+          assert x["result"]=="PASS_SCOPE_CONTINUITY"
+          assert x["negative_cases_passed"]==14
+          assert len(x["five_hop_simulation"]["simulated_successor_hops"])==5
+          assert x["old_raid_NSRT_encounter_output_required"] is False
+          assert x["product_scope"]=="GENERAL_ROTATION_OPENER_PRIORITY_AND_TARGET_DUMMY_FEEDBACK"
+          print("WCL_HIGH_RANKER_CONTINUITY=PASS")
+          PY
