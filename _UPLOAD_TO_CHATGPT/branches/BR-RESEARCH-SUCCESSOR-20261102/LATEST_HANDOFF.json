@@ -1,0 +1,63 @@
+{
+  "schema": "ZrotResearchSuccessorBranchLatestHandoffV1",
+  "identity": "BR-RESEARCH-SUCCESSOR-20261102",
+  "owner": "BRANCH_LOCAL_RESEARCH_MERGE_READY_NOT_PRODUCT_MAIN",
+  "source_base": {
+    "branch": "work/main-integration-recovery-20261102",
+    "sha": "9cc87e3f8ac6a717e32563ff3269ad4fc83fffc2"
+  },
+  "validated_same_head": {
+    "sha": "3d9e9a7a934a63733db3969672fd4733008e2d20",
+    "run_id": 41379633750,
+    "run_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41379633750",
+    "python312": "PASS",
+    "python314": "PASS",
+    "source_files_pinned": 21,
+    "ST01_ST04_offline_cases_each_python": 150,
+    "baseline_reject_cases_each_python": 8,
+    "prior_recovery_reject_cases_each_python": 6,
+    "ST06_synthetic_source_hooks": 3,
+    "ST06_synthetic_negative_auditor_cases": 3,
+    "artifact_3_12": 13112546508,
+    "artifact_3_14": 13112284770,
+    "artifact_crc_3_12": "PASS",
+    "receipt_sha256_for_baseline_manifest": "65b7356cd96d7b1077a0969ff7cb853699cf60b38d482634dda84f464cc88f63"
+  },
+  "new_files": [
+    "active/branches/BR-RESEARCH-SUCCESSOR-20261102/RESEARCH_SUCCESSOR_BASELINE_CANDIDATE_V1.json",
+    "tools/research/research_successor_baseline_gate_v1.py",
+    ".github/workflows/zrot-research-successor-unified-ci.yml"
+  ],
+  "claim_scope": {
+    "same_head_ST01_ST04_regression": "PASS_SYNTHETIC_OFFLINE",
+    "prior_ST05_actual_native_archive": "REFERENCE_PREVIOUS_CI_41373890693_NO_RERUN",
+    "prior_ST06_actual_cpp_native": "REFERENCE_PREVIOUS_CI_41375416081_NO_REBUILD",
+    "current_product_MAIN": "NOT_RESTORED",
+    "historical_snapshots": "M4A_54_OF_54_AND_M4B_118_OF_118_HISTORICAL_INTEGRITY_ONLY",
+    "source_id_identity": "UNKNOWN_CURRENT_GAME",
+    "wcl_blind_lock": "NOT_RUN",
+    "actual_gameplay_ready_certified": 0,
+    "product_main_promotion": false,
+    "frozen_promotion": false,
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN"
+  },
+  "remaining_blockers": [
+    "Current approved MAIN Runtime/Work State inaccessible; history shows conflicting active execution pins",
+    "Canonical Registry and Active Pointer missing in historical M4 snapshots",
+    "GitHub main remains README-only, not verified runtime",
+    "Research checkout lacks historical full pipelines/FEX and RUN_zRAID_MAIN.py"
+  ],
+  "cross_branch_dependency": [
+    "cross_branch_dependency: MAIN needs current approved Runtime, canonical registry, active pointer, and resolved control plane or an explicit separately approved migration plan to establish new product authority",
+    "cross_branch_dependency: Integration reviewer needs compare actual full product source hashes and run focused producer-independent regression before shared state promotion",
+    "cross_branch_dependency: WCL owner continues blind numeric/structural lock without SimC semantic prejoin"
+  ],
+  "candidate_next": "MAINTAIN_RESEARCH_VERSIONED_BASELINE_READY_FOR_REVIEW; DO_NOT_ENABLE_PRODUCT_EXECUTION",
+  "product_next": "RECOVER_OR_REAUTHORIZE_CURRENT_MAIN_CONTROL_PLANE_FROM_VERIFIED_SOURCE",
+  "user_approval": "EXISTING_APPROVAL_FOR_SAFE_INTEGRATION_ACKNOWLEDGED",
+  "main_authoritative_files_changed": false,
+  "github_main_changed": false,
+  "active_manifest_pointer_changed": false,
+  "branch_local_handoff_only": true
+}
