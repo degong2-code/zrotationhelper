@@ -1,6 +1,9 @@
 # zRotationHelper — Official product-scope change: General Rotation + Dummy Trainer
 
-**User-declared effective date: 2026-11-02**  
+**User-declared effective date: 2026-11-02**
+**Fixed policy ID:** `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`
+**Machine-readable lock:** [PRODUCT_SCOPE_LOCK_V1.json](PRODUCT_SCOPE_LOCK_V1.json)
+**Handoff rule:** [HANDOFF_CONTINUITY_PROTOCOL_V1.md](HANDOFF_CONTINUITY_PROTOCOL_V1.md). All future handoffs carry the full policy snapshot, not only a link.  
 **Change type:** Explicit product objective and roadmap override (user-approved).  
 **Repository state:** Recorded as branch-local scope proposal. Shared MAIN pointer, archived/FROZEN evidence, existing run states and frozen contracts are NOT mutated; MAIN is the integration/promotion owner.
 
