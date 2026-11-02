@@ -1,0 +1,125 @@
+name: zrot-dual-wcl-postlock-state-observability
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/wcl_dual_cohort_state_observability_v1.py
+      - .github/workflows/zrot-dual-wcl-state-observability.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-observability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and verify strict timestamp observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/wcl_dual_cohort_state_observability_v1.py
+          python -B tools/research/wcl_dual_cohort_state_observability_v1.py >/tmp/zrot-state-selftest.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/zrot-state-selftest.json'))
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert x['checks']>=8 and x['actual_WCL_data_read'] is False
+          assert x['SimC_semantic_dependency'] is False and x['real_priority_inference'] is False
+          print('NUMERIC_STRICT_PRE_STATE_OBSERVABILITY_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/wcl_dual_cohort_state_observability_v1.py
+
+  independent-raw-source-audit:
+    name: Discovery and holdout actual WCL raw state audit
+    needs: [offline-observability]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch previous frozen-discovery WCL raw evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41463589665
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          path: /tmp/wcl-discovery-state
+          github-token: ${{ github.token }}
+      - name: Fetch separate actual holdout report WCL raw evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41473060401
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          path: /tmp/wcl-holdout-state
+          github-token: ${{ github.token }}
+      - name: Package artifact inputs without modifying event or checkpoint bytes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          for cohort in ('discovery','holdout'):
+              path=Path('/tmp/wcl-'+cohort+'-state')
+              files=sorted(f for f in path.rglob('*') if f.is_file())
+              assert 1<=len(files)<=40
+              with ZipFile('/tmp/wcl-'+cohort+'-input.zip','w',ZIP_DEFLATED) as z:
+                  for f in files:z.write(f,arcname=str(f.relative_to(path)))
+          PY
+      - name: Independent actual talent-tree, strict PRE resource and target observability audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/wcl_dual_cohort_state_observability_v1.py \
+            --discovery-zip /tmp/wcl-discovery-input.zip \
+            --holdout-zip /tmp/wcl-holdout-input.zip \
+            --source-contract docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HOLDOUT_PREDECLARED_SOURCE_AND_METRICS_V1.json \
+            --discovery-fixture docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/POSTLOCK_FURY_WCL_SIMC_FIXTURE_V1.json \
+            --out /tmp/wcl-dual-cohort-state-observability.json
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          r=json.loads(Path('/tmp/wcl-dual-cohort-state-observability.json').read_text())
+          d=r['discovery'];h=r['holdout']
+          assert r['status']=='OBSERVED_RAW_STATE_ONLY_NO_PRIORITY_CLAIM'
+          assert d['WCL_raw_event_count']==17083 and h['WCL_raw_event_count']==9101
+          assert d['cast_count']==54 and h['cast_count']==51
+          assert d['observed_combatantinfo_build']['spec_id']==72
+          assert h['observed_combatantinfo_build']['spec_id']==72
+          assert d['observed_combatantinfo_build']['talent_tree_numeric_entries']>0
+          assert h['observed_combatantinfo_build']['talent_tree_numeric_entries']>0
+          assert d['cast_with_pre_combatantinfo_count']>0
+          assert h['cast_with_pre_combatantinfo_count']>0
+          assert d['cast_with_any_prior_resource_snapshot_count']>0
+          assert h['cast_with_any_prior_resource_snapshot_count']>0
+          assert d['same_timestamp_state_used'] is False
+          assert h['same_timestamp_state_used'] is False
+          assert r['does_WCL_build_match_SimC']=='UNKNOWN'
+          assert r['WCL_vs_SimC_priority_proven'] is False
+          assert r['general_rotation_rules_ready'] is False
+          print('DUAL_COHORT_REAL_WCL_BUILD_AND_RESOURCE_PRE_AUDIT_PASS')
+          print('WCL_TALENT_TREE_FINGERPRINTS_EQUAL',r['two_wcl_talent_tree_fingerprints_equal'])
+          print('RESOURCE_PRE_COVERAGE',d['cast_with_any_prior_resource_snapshot_count'],h['cast_with_any_prior_resource_snapshot_count'])
+          PY
+      - name: Preserve only compact numeric observability receipt
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcl-dual-cohort-observability-${{ github.sha }}
+          path: /tmp/wcl-dual-cohort-state-observability.json
+          retention-days: 7
+          if-no-files-found: error
