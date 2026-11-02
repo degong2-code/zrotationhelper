@@ -1,0 +1,20 @@
+{
+  "schema": "ZrotPinnedPostlockWclSimcComparisonFixtureV1",
+  "scope_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "expected_spec": "fury",
+  "report_code": "a9LTzA7wCMnV2Qyh",
+  "fight_id": 194,
+  "actor_id": 1707,
+  "window_ms": 15000,
+  "expected_raw_event_count": 17083,
+  "diagnostic_spell_id": 1,
+  "wcl_blind_lock_sha256": "c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e",
+  "simc_public_receipt_sha256": "a878a2b5720e842faa14ac1375e526c153d7d1852033a3757b6097d88d393f37",
+  "simc_fixed_seed": 31459,
+  "simc_sample_actions": 24,
+  "simc_common_prefix_actions": 9,
+  "discovery_cohort": "ONE_FIGHT_UNSUITABLE_FOR_GENERAL_PRIORITY",
+  "independent_holdout": "NOT_RUN",
+  "WCL_target_count_at_cast": "UNKNOWN",
+  "WCL_build_equivalence_to_SimC": "UNKNOWN"
+}
