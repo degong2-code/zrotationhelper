@@ -1,0 +1,89 @@
+name: zrot-official-ranker-actor-scope-smoke
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/engine_first/wcl_official_ranker_discovery_v1.py
+      - .github/workflows/zrot-official-ranker-actor-scope-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-source-and-schema-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile research sources and execute bounded synthetic gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/engine_first/fresh_wcl_engine_v1.py tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py tools/engine_first/wcl_actor_scoped_cohort_v1.py tools/engine_first/wcl_official_ranker_discovery_v1.py
+          python -B tools/engine_first/wcl_official_ranker_discovery_v1.py --self-test > /tmp/zrot-rank-test.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/zrot-rank-test.json'))
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['negative_cases'] >= 8
+          assert d['live_wcl_api_calls']==0
+          assert d['actual_ranker_collected'] is False
+          assert d['actual_priority_proven'] is False
+          print('RANKER_IDENTITY_AND_FRESHNESS_SYNTHETIC=PASS')
+          PY
+          sha256sum tools/engine_first/wcl_official_ranker_discovery_v1.py
+
+  authorized-minimal-live-pilot:
+    if: ${{ github.repository == 'degong2-code/zrotationhelper' && github.ref == 'refs/heads/work/gr-simc-st-2t-wcl-blind-20261102' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    needs: [offline-source-and-schema-gate]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bounded WCL pilot only when both approved OAuth secrets exist
+        shell: bash
+        env:
+          WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
+          WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "$WCL_CLIENT_ID" ] || [ -z "$WCL_CLIENT_SECRET" ]; then
+            echo '{"status":"SKIPPED_MISSING_REPO_SCOPED_OAUTH_SECRETS","WCL_live":"NOT_RUN","gameplay_priority":"NOT_VALIDATED"}' | tee /tmp/zrot-live.json
+            exit 0
+          fi
+          # Encounter 3420 / heroic Fury are a source-discovery pilot, NOT a
+          # trusted current-season gameplay assertion. Official zone/report
+          # identity and age MUST pass before any event collection.
+          set +e
+          python -B tools/engine_first/wcl_official_ranker_discovery_v1.py --live --encounter-id 3420 --class-name Warrior --spec-name Fury --difficulty 4 --max-rank 50 --max-age-days 45 --max-pages 5 --out-dir /tmp/zrot-fresh > /tmp/zrot-live.json
+          rc=$?
+          set -e
+          if [ "$rc" -ne 0 ]; then
+            echo "LIVE_PILOT_BLOCKED_OR_FAILED_WITHOUT_SECRET_LEAKAGE"
+          else
+            echo "LIVE_PILOT_RETURNED"
+          fi
+          cat /tmp/zrot-live.json
+      - name: Record bounded metadata only, do not upload raw log or OAuth data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-wcl-pilot-metadata-${{ github.sha }}
+          path: /tmp/zrot-live.json
+          retention-days: 7
+          if-no-files-found: warn
