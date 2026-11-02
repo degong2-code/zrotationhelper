@@ -11,6 +11,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+import types
 
 ROOT = Path(__file__).resolve().parents[2]
 RUNTIME = ROOT / "02_SOURCE/runtime"
@@ -21,7 +22,65 @@ PINS = {
 }
 
 
-def run_fixture() -> dict:
+def _candidate_prestate(original):
+    """Patch only the discovered zero-stack fallback in an isolated module."""
+    name = "raid_dps.core.prestate_zero_stack_candidate"
+    original_text = (RUNTIME / "raid_dps/core/prestate.py").read_text(encoding="utf-8")
+    old = """        stack = (
+            as_int(
+                event.get("stack")
+            )
+            or as_int(
+                event.get("stacks")
+            )
+        )
+
+        # WCL payloads can omit the post-event stack count."""
+    new = """        stack = as_int(event.get("stack"))
+        if stack is None:
+            stack = as_int(event.get("stacks"))
+
+        # WCL payloads can omit the post-event stack count."""
+    if original_text.count(old) != 1:
+        raise AssertionError("CANDIDATE_PATCH_CONTEXT_CHANGED")
+    patched = original_text.replace(old, new, 1)
+    candidate = types.ModuleType(name)
+    candidate.__file__ = "<temporary in-memory candidate only>"
+    candidate.__package__ = "raid_dps.core"
+    exec(compile(patched, name, "exec"), candidate.__dict__)
+    if candidate.aura_transition({
+        "type": "removebuffstack", "abilityGameID": 101, "stack": 0
+    }) != (False, 0):
+        raise AssertionError("CANDIDATE_ZERO_STACK_NOT_FIXED")
+    return candidate
+
+
+def reproduce_defect(original) -> dict:
+    events=[
+        {"timestamp":100,"type":"applybuff","abilityGameID":101,"stack":3},
+        {"timestamp":110,"type":"removebuffstack","abilityGameID":101,"stack":0},
+    ]
+    index=original.AuraIdIndex(events)
+    old_state=index.state_pre(101,111)
+    if old_state!=(True,1):
+        raise AssertionError("ORIGINAL_DEFECT_NOT_REPRODUCED")
+    if index.state_pre(101,110)!=(True,3):
+        raise AssertionError("ORIGINAL_STRICT_PRE_ALREADY_DIFFERENT")
+    return {
+      "schema":"ZrotPrestateZeroStackOriginalDefectReproductionV1",
+      "result":"KNOWN_LEGACY_DEFECT_REPRODUCED",
+      "original_module_sha256":PINS["raid_dps/core/prestate.py"],
+      "event":{"type":"removebuffstack","stack":0,"timestamp":110},
+      "original_next_timestamp_state":list(old_state),
+      "expected_next_timestamp_state":[False,0],
+      "same_timestamp_prior_state":[True,3],
+      "original_code_modified":False,
+      "FROZEN_modified":False,
+      "MAIN_promoted":False,
+    }
+
+
+def run_fixture(*, candidate_patch:bool=False, original_defect_repro:bool=False) -> dict:
     for relative, expected_sha in PINS.items():
         data = (RUNTIME / relative).read_bytes()
         if hashlib.sha256(data).hexdigest() != expected_sha:
@@ -33,6 +92,12 @@ def run_fixture() -> dict:
         from raid_dps.core import prestate as pre
     finally:
         sys.path.remove(str(RUNTIME))
+
+    if original_defect_repro:
+        return reproduce_defect(pre)
+    if not candidate_patch:
+        raise AssertionError("ORIGINAL_PRESTATE_HAS_KNOWN_ZERO_STACK_DEFECT_USE_--original-defect-repro_OR_--candidate-patch")
+    pre = _candidate_prestate(pre)
 
     passed = []
     def check(label: str, ok: bool) -> None:
@@ -94,6 +159,10 @@ def run_fixture() -> dict:
 
     return {
         "schema": "ZrotResearchStrictPreAndCoverageSyntheticReceiptV1",
+        "mode":"BRANCH_ONLY_IN_MEMORY_ZERO_STACK_CANDIDATE",
+        "original_bug_reproduced_separately":True,
+        "original_research_source_modified":False,
+        "candidate_only_in_memory":True,
         "result": "PASS",
         "research_module_original_sha_exact_n": len(PINS),
         "behavioral_assertion_count": len(passed),
@@ -115,5 +184,9 @@ def run_fixture() -> dict:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--self-test", action="store_true", help="execute offline synthetic fixture")
+    parser.add_argument("--original-defect-repro", action="store_true")
+    parser.add_argument("--candidate-patch", action="store_true")
     args = parser.parse_args()
-    print(json.dumps(run_fixture(), sort_keys=True, indent=2))
+    if args.original_defect_repro and args.candidate_patch:
+        parser.error("choose exactly one mode")
+    print(json.dumps(run_fixture(candidate_patch=args.candidate_patch, original_defect_repro=args.original_defect_repro), sort_keys=True, indent=2))
