@@ -1,0 +1,93 @@
+{
+  "schema": "ZrotMain124FexStaticInterfaceCompatibilityCandidateV1",
+  "date": "2026-11-02",
+  "scope": "BRANCH_LOCAL_STATIC_COMPATIBILITY__NO_PRODUCT_EXECUTION",
+  "source_provenance": {
+    "private_historical_124_zip_sha256": "46e3a2dd1b51465429932a03efb7345cae781c756137dea9a39c9c4bed152bf6",
+    "private_local_independent_receipt_sha256": "7a3dfc30bad818199f15288f2f380867a7a8997105c20bc9c7e39024fb5f97a7",
+    "private_original_file_count": 124,
+    "python_ast_source_files": 21,
+    "json_parse_sources": 100,
+    "private_archive_raw_bytes_in_github": false,
+    "private_source_audited_local_no_gameplay_execution": true,
+    "research_source_baseline_ref": "work/main-six-pin-consistency-20261102",
+    "research_source_base_sha": "5411e34d0cae4d6e354433666c17240d37188148"
+  },
+  "static_dependency_evidence": {
+    "raid_dps_module_internal_python_count": 15,
+    "direct_from_import_edges_total": 43,
+    "direct_archived_symbol_imports": 29,
+    "archived_direct_symbol_exports_found": 29,
+    "archived_direct_symbol_export_mismatches": 0,
+    "direct_archived_submodule_import_edges": 11,
+    "direct_research_external_module_import_edges": 3,
+    "external_three_historical_SHA_comparison": "3_OF_3_PASS_PREVIOUS_CI_41390523985",
+    "all_43_edges_behaviorally_executed": false,
+    "dynamic_import_closure_verified": false
+  },
+  "fex_evidence": {
+    "bound_source_module_count": 10,
+    "bound_sha256_matches": 10,
+    "bound_sha256_mismatches": 0,
+    "archived_fex_report_status": "PASS",
+    "archived_fex_synthetic_case_n": 2,
+    "archived_fex_synthetic_case_pass": 2,
+    "declared_required_capability_areas": 11,
+    "declared_covered_capability_areas": 11,
+    "all_11_capability_areas_behaviorally_validated": false,
+    "actual_behavioral_claim": "PARTIAL__RUNTIME_SURFACE_AND_ADAPTER_CONTRACT_EXECUTED",
+    "general_rotation_current_gameplay_certified": 0,
+    "full_spec_rotation_optimality_certified": false
+  },
+  "public_research_bridge": [
+    {
+      "path": "02_SOURCE/runtime/raid_dps/core/coverage.py",
+      "historical_sha256": "30daad468f43ab012f4d85cb457ba838899bef5ddaf32acb4d14645043ba8147",
+      "github_git_blob_sha1": "b10d3ac8338a1734c8ff853b551445749959541f",
+      "historical_caller": "02_SOURCE/runtime/raid_dps/pipelines/prestate_coverage.py",
+      "kind": "function",
+      "symbol": "coverage_record",
+      "call_form": "NO_POSITIONAL_FIVE_KEYWORDS",
+      "kwonly": [
+        "field",
+        "covered",
+        "total",
+        "semantic_mask",
+        "semantic_route"
+      ]
+    },
+    {
+      "path": "02_SOURCE/runtime/raid_dps/core/identity.py",
+      "historical_sha256": "d2328bef5f7db3fa973cbb99b2125f13d796a5249be3c007219c38509965f8b6",
+      "github_git_blob_sha1": "191688a2bf2ce4cebe545f93b2ef56f2a0671a99",
+      "historical_caller": "02_SOURCE/runtime/raid_dps/pipelines/prestate_coverage.py",
+      "kind": "function",
+      "symbol": "event_ability_id",
+      "call_form": "ONE_POSITIONAL",
+      "positional": [
+        "event"
+      ]
+    },
+    {
+      "path": "02_SOURCE/runtime/raid_dps/core/prestate.py",
+      "historical_sha256": "889fdd114f5a07d31612c0fc2a548ac0dfab1dc1d573194efd7d50",
+      "github_git_blob_sha1": "93e3ceacabf348d5fd9cdcc6aa612e940eccc54c",
+      "historical_caller": "02_SOURCE/runtime/raid_dps/pipelines/prestate_coverage.py",
+      "kind": "class_init",
+      "symbol": "AuraIdIndex",
+      "call_form": "ONE_POSITIONAL",
+      "positional": [
+        "self",
+        "events"
+      ]
+    }
+  ],
+  "research_metadata_promotion_prohibited": true,
+  "current_MAIN_authority": "UNKNOWN",
+  "current_ACTIVE_workflow": null,
+  "legacy_inbox_dispatcher_executed": false,
+  "FROZEN_changed": false,
+  "Seq578": "FAILED_QUARANTINED_PRESERVED",
+  "Seq637": "UNKNOWN",
+  "next_acceptance": "Safe integration fixture for 124 private source plus pinned three research modules, then independent behavior validation and MAIN authority resolution; do not treat FEX source contract as gameplay proof."
+}
