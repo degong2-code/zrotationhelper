@@ -198,6 +198,52 @@ def build_baseline(actions_bytes: bytes, *, spec: str, fixture: dict) -> dict:
     }
 
 
+def inspect_source_only(actions_bytes: bytes, *, spec: str) -> dict:
+    """Real-profile source inspection, with no simulated readiness or opener casts."""
+    if not isinstance(actions_bytes, bytes) or not actions_bytes:
+        raise BaselineError("NONEMPTY_APL_BYTES_REQUIRED")
+    model=ingest_actions(actions_bytes, expected_spec=spec)
+    ir=compile_structural_ir(model)
+    graph=compile_decision_graph(ir)
+    precombat=ir["lists"].get("precombat", [])
+    return {
+        "schema":"ZrotSimcSourceOnlyGeneralRotationOpenerInventoryV1",
+        "scope_id":"ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+        "spec":spec,
+        "source_apl_sha256":model["apl_sha256"],
+        "row_count":ir["total_rows"],
+        "precombat_directives":[
+            {"command":r["command"],"source_line":r["source_line"],
+             "guard":r["guard"],"operation":r["operation"]}
+            for r in precombat
+        ],
+        "source_list_names":sorted(ir["lists"]),
+        "source_list_rows":{
+            name:[{"rank":r["priority_in_list"],"command":r["command"],
+                   "guard":r["guard"],"source_line":r["source_line"],
+                   "obligations":r["unverified_semantic_obligations"]}
+                  for r in rows]
+            for name,rows in ir["lists"].items()
+        },
+        "target_count_guard_candidates":[
+            {"list":name,"source_line":r["source_line"],"guard":r["guard"]}
+            for name,rows in ir["lists"].items()
+            for r in rows if isinstance(r["guard"],str)
+            and "active_enemies" in r["guard"]
+        ],
+        "required_state_operands":ir["required_state_operands"],
+        "unresolved_semantic_gap_counts":ir["semantic_gap_count_by_row"],
+        "decision_graph_node_count":len(graph["nodes"]),
+        "source_is_actual_executed_simc_APL":False,
+        "precombat_is_combat_opener":False,
+        "combat_opener_sequence_inferred":False,
+        "decision_readiness_observed":False,
+        "WCL_ranking_validated":False,
+        "general_rotation_proven":False,
+        "intended_next":"REPLAY_AT_EXPLICIT_STRICT_PRE_STATE_THEN_INDEPENDENT_WCL_RANKER_COMPARISON",
+    }
+
+
 def self_test() -> dict:
     sample = (
         b"spec=fury\n"
@@ -251,6 +297,11 @@ def self_test() -> dict:
                  ]),
         ],
     }
+    only=inspect_source_only(sample,spec="fury")
+    assert only["precombat_is_combat_opener"] is False
+    assert len(only["precombat_directives"])==2
+    assert len(only["target_count_guard_candidates"])>=2
+    assert only["combat_opener_sequence_inferred"] is False
     r = build_baseline(sample, spec="fury", fixture=fixture)
     checks = []
     def check(name, value):
@@ -310,18 +361,24 @@ def main() -> int:
     ap.add_argument("--actions-file",type=Path)
     ap.add_argument("--spec")
     ap.add_argument("--fixture",type=Path)
+    ap.add_argument("--source-only",action="store_true",help="inspect a pinned real APL without fabricating combat decisions")
     ap.add_argument("--out",type=Path)
     args=ap.parse_args()
     if args.self_test or (args.actions_file is None and args.fixture is None and args.spec is None):
         print(json.dumps(self_test(),indent=2,ensure_ascii=False))
         return 0
-    if args.actions_file is None or args.fixture is None or not args.spec:
-        ap.error("--actions-file, --spec and --fixture must be supplied together")
-    result=build_baseline(
-        args.actions_file.read_bytes(),
-        spec=args.spec,
-        fixture=json.loads(args.fixture.read_text(encoding="utf-8")),
-    )
+    if args.source_only:
+        if args.actions_file is None or not args.spec or args.fixture is not None:
+            ap.error("--source-only requires --actions-file and --spec, without --fixture")
+        result=inspect_source_only(args.actions_file.read_bytes(),spec=args.spec)
+    else:
+        if args.actions_file is None or args.fixture is None or not args.spec:
+            ap.error("--actions-file, --spec and --fixture must be supplied together")
+        result=build_baseline(
+            args.actions_file.read_bytes(),
+            spec=args.spec,
+            fixture=json.loads(args.fixture.read_text(encoding="utf-8")),
+        )
     raw=json.dumps(result,indent=2,ensure_ascii=False)+"\n"
     if args.out:
         args.out.parent.mkdir(parents=True,exist_ok=True)
