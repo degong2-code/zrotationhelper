@@ -25,6 +25,7 @@ For training, prefer truthful live feedback only if permitted WoW API observabil
 `scope_continuity`:
 - `policy_id`: unchanged `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`
 - `policy_git_blob_sha1`: exact Git blob of read-first policy; does not substitute for checking contents.
+- `policy_sha256`: exact SHA256 of the complete lock file; current approved value `157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295`. Fail if absent or mismatched.
 - `policy_snapshot`: complete exact policy JSON copy, including goals, research order, out-of-scope, dummy feedback and engine-first rule.
 - `generation`: integer 0+; increment by exactly 1 on each **actual** handoff.
 - `parent_handoff_sha256`: actual prior handoff file byte digest, or `null` at first seeded generation.
