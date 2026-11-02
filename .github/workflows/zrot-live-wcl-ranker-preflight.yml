@@ -6,6 +6,7 @@ on:
       - work/gr-wcl-ranker-live-coldstart-20261102
     paths:
       - tools/engine_first/wcl_ranker_discovery_preflight_v1.py
+      - tools/engine_first/wcl_ranked_actor_resolution_v1.py
       - .github/workflows/zrot-live-wcl-ranker-preflight.yml
   workflow_dispatch:
 
@@ -27,10 +28,15 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile tools/engine_first/wcl_ranker_discovery_preflight_v1.py
+          python -m py_compile tools/engine_first/wcl_ranked_actor_resolution_v1.py
+          python -B tools/engine_first/wcl_ranked_actor_resolution_v1.py --self-test > actor_identity_offline.json
           python -B tools/engine_first/wcl_ranker_discovery_preflight_v1.py --self-test > offline.json
           python - <<'PY'
           import json
           x=json.load(open("offline.json"))
+          a=json.load(open("actor_identity_offline.json"))
+          assert a["result"]=="PASS" and a["checks"]>=12
+          assert a["player_names_emitted"] is False
           assert x["result"]=="PASS"
           assert x["offline_assertions"]>=8
           assert x["live_WCL_requests"]==0
