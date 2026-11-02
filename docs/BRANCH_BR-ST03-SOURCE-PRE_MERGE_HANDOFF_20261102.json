@@ -1,0 +1,88 @@
+{
+  "schema": "ZrotBranchST03MergeHandoffV1",
+  "branch_id": "BR-ST03-SOURCE-PRE",
+  "branch_name": "work/st03-strict-pre-observability-20261102",
+  "base_authority": {
+    "research_branch_base": "8dd70677a190942ff65526298cdd6d968a0400cc",
+    "main_runtime_authority": "NOT_RESTORED_M4_BLOCKED",
+    "main_branch_not_product_authority": true
+  },
+  "branch_scope": "source-specific STRICT PRE observability for ST02 pinned candidate gates via existing readiness/state provider",
+  "ownership": [
+    "tools/research/ST03_source_pre_observability_v1.py",
+    "tools/research/ST03_source_pre_observability_regression_v1.py",
+    ".github/workflows/zrot-st03-pre-observability-ci.yml"
+  ],
+  "base_inputs": [
+    "tools/research/ST01_existing_simc_readiness_gate_regression_v1.py",
+    "tools/research/ST02_source_identity_reconciliation_v1.py",
+    "02_SOURCE/runtime/raid_dps/core/behavioral_evaluator.py",
+    "docs/BR_SIMC_MINIMUM_READINESS_SOURCE_GAP_20261031.json",
+    "docs/BR_SIMC_EXTERNAL_GAME_SPELL_ID_CANDIDATE_20261031.json"
+  ],
+  "source_doc_git_blobs": {
+    "source": "e437da47d632737c9eacc3901c945590aff0308b",
+    "identity": "2e933135877704b257237ef465025e532a14b9c0"
+  },
+  "validation": {
+    "scope": "OFFLINE_SYNTHETIC_PINNED_SOURCE_ONLY",
+    "ci_run_id": 41372465581,
+    "ci_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41372465581",
+    "tested_commit": "c5b3e2df3bf95696f414d0e2944ba6c4c80957b6",
+    "python_3_12": "PASS_39_OF_39",
+    "python_3_14": "PASS_39_OF_39",
+    "build_compile": "PASS",
+    "artifact_ids": [
+      13110285437,
+      13109448192
+    ],
+    "first_ci_failure_retained": {
+      "run_id": 41372400351,
+      "cause": "test asserted stale gate for unrelated source-state feature",
+      "classification": "TEST_FIXTURE_EXPECTATION_ERROR",
+      "fixed_in_commit": "c5b3e2df3bf95696f414d0e2944ba6c4c80957b6"
+    },
+    "live_wcl": "NOT_RUN",
+    "live_simc": "NOT_RUN",
+    "blizzard_current_game": "NOT_VERIFIED",
+    "production": "NOT_RUN"
+  },
+  "key_results": [
+    "Actual StrictPreStateProvider reused after marking conflicting same-time/latest UNKNOWN and missing/unobservable source fields",
+    "ST02 source obligation prerequisites and independently declared gate observations must both be Strict PRE and in event order",
+    "Target state is scoped to the exact decision target; without target identity -> UNKNOWN",
+    "Ledger SHA256 and producer/evidence fields retained but do not certify source or mechanic authenticity",
+    "Unverified gate semantics never produce gameplay READY and never leak into blind WCL"
+  ],
+  "evidence_level": "BRANCH_VALIDATED_SYNTHETIC_ONLY",
+  "unresolved_blockers": [
+    "M4 authoritative MAIN Runtime/current pointer/registry not restored",
+    "No independently validated actual source-state producer or actor/target live transition evidence",
+    "Actual source-specific ability mechanic, dynamic resource cost, current client mapping not certified",
+    "Two pinned candidate actions only; source obligation enumeration not exhaustive",
+    "WCL blind candidate lock and holdout not supplied"
+  ],
+  "cross_branch_dependencies": [
+    "cross_branch_dependency: MAIN needs to restore canonical Runtime/CURRENT_STATE/Registry and approve SpecAdapter/source-obligation semantic interface before product promotion",
+    "cross_branch_dependency: WCL owner needs to independently lock numeric/structural candidates and Strict PRE observability before any SimC semantic joining",
+    "cross_branch_dependency: producer owner needs to provide externally verifiable source-specific transition observations and mechanic-derived gate assertions with raw source provenance"
+  ],
+  "merge_risks": [
+    "Caller-attested gate assertion does not prove native mechanic truth",
+    "A single producer may create both transition and validation evidence",
+    "Target and identity mappings are candidate-only"
+  ],
+  "focused_revalidation_required": [
+    "real raw transition evidence audited independently against frozen state contract",
+    "source-specific dynamic calculation and target identity in a pinned current build",
+    "verify unknown exclusion from mismatch denominator",
+    "MAIN compatibility only after M4"
+  ],
+  "shared_authoritative_state_mutated": false,
+  "frozen_modified": false,
+  "seq578": "FAILED_QUARANTINED_PRESERVED",
+  "seq637": "UNKNOWN",
+  "product_exact_next": "MAINTAIN_UNKNOWN_PENDING_AUTHORITY_RESTORE_THEN_SEQ637_REVALIDATION",
+  "session_exact_next": "PROPOSE_ST04_INDEPENDENT_RAW_PRODUCER_OR_NATIVE_MECHANIC_STATE_PROOF_BEFORE_STRONGER_CLAIMS",
+  "promotion_status": "NOT_PROMOTED"
+}
