@@ -1,0 +1,86 @@
+{
+  "schema": "ZrotBranchST05ActualNativeProducerHandoffV1",
+  "branch_id": "BR-ST05-NATIVE-PRODUCER",
+  "branch_name": "work/st05-pinned-native-producer-evidence-20261102",
+  "owner": "ISOLATED_SIMC_POST_HYPOTHESIS_RESEARCH",
+  "product_goal": "generic reusable source-obligation readiness research, not ability-specific gameplay rules",
+  "branch_parent_sha": "145834edb8eb4fe03b8fc57f56b22a579df93030",
+  "exact_ci_validated_commit_sha": "2bcf021396fe01cf1153da27b0218ddcaa1fd801",
+  "ci_run": {
+    "id": 41373890693,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41373890693",
+    "python_3_12": "SUCCESS",
+    "python_3_14": "SUCCESS",
+    "artifact_ids": [
+      13110765249,
+      13109987964
+    ]
+  },
+  "original_native_source": {
+    "run_id": 41084262760,
+    "artifact_id": 12990129697,
+    "archive_sha256": "da88d27ea027b2eacaa6675c9ee22afdffa8a307852ab21b661dabdbb2faab3e",
+    "scope": "ACTUAL_ARCHIVED_PINNED_SIMC_NATIVE_PUBLIC_PROFILES_NOT_NEW_NATIVE_RUN",
+    "source_upstream_sha": "710c2408bfd3ae4df71b8cd55cdf01f63fd6c926",
+    "original_archive_expiry_utc": "2026-11-06T15:54:14Z",
+    "raw_marker_archives_committed_to_git": false
+  },
+  "native_eval_status": {
+    "fury": {
+      "total": 137,
+      "MATCH_PARTIAL_PRODUCER": 133,
+      "SAME_TIME_NOT_STRICT_PRE": 4,
+      "UNKNOWN_NOT_IN_EXACT_SELECTION": 0
+    },
+    "havoc": {
+      "total": 129,
+      "MATCH_PARTIAL_PRODUCER": 13,
+      "SAME_TIME_NOT_STRICT_PRE": 1,
+      "UNKNOWN_NOT_IN_EXACT_SELECTION": 115
+    },
+    "total": 266,
+    "matched_partial": 146,
+    "same_time_not_pre": 5,
+    "outside_exact_selection": 115,
+    "source_eval_audit": "existing simc_native_bare_resource_eval_audit.py applied to exact decoded native markers",
+    "independent_source_epoch_bytes": "PASS_PINNED_SOURCE",
+    "underlying_producer_completeness": "UNKNOWN"
+  },
+  "source_specific_readiness": {
+    "source_pinned_cases": [
+      "fury/rampage",
+      "havoc/felblade"
+    ],
+    "obligations": {
+      "MAIN_AND_OFF_HAND_WEAPON": "UNKNOWN",
+      "DYNAMIC_RESOURCE_COST": "UNKNOWN",
+      "SHARED_MOVEMENT_COOLDOWN": "UNKNOWN",
+      "DIRECTIONAL_MOVEMENT": "UNKNOWN"
+    },
+    "reason": "No independently validated native source-specific readiness gate producer binding in archived source; resource eval is not readiness. No current-game action-id certification.",
+    "actual_gameplay_ready_certified": 0
+  },
+  "unverified": [
+    "Native archive is historical pinned SimC, not current Retail live mechanics",
+    "Resource producer may omit direct writes or other transitions",
+    "No full effective APL export bytes in retained native ZIP",
+    "Native selection context not established for 115 Havoc evaluations",
+    "Same timestamp observations must remain excluded",
+    "No WCL independent blind discovery performed by this branch",
+    "No causal, mandatory or optimal user-facing priority established"
+  ],
+  "ci_source_artifacts_only_json": true,
+  "evidence_level": "ACTUAL_ARCHIVED_NATIVE_RAW_SOURCE_RECOMPUTED_PARTIAL_NOT_GAMEPLAY",
+  "cross_branch_dependencies": [
+    "cross_branch_dependency: SimC source producer owner needs to instrument/replay action-specific readiness obligations with source hook provenance and complete resource writes at same actor/spawn/selection epoch",
+    "cross_branch_dependency: WCL owner must lock blind numeric/structural PRE candidates before SimC semantic comparison",
+    "cross_branch_dependency: MAIN must restore canonical CURRENT_STATE/Runtime/active pointer and approve semantic compatibility before promotion"
+  ],
+  "session_exact_next": "ST06 focused actual Native producer proof: source-specific gate expression/readiness provenance or independently justified UNKNOWN; no broad synthetic expansion",
+  "product_exact_next": "Seq637 one-click result remains UNKNOWN, pending authoritative MAIN restore/approval",
+  "frozen_modified": false,
+  "shared_main_promoted": false,
+  "seq578": "FAILED_QUARANTINED_PRESERVED",
+  "seq637": "UNKNOWN",
+  "promotion": "NONE"
+}
