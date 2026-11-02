@@ -122,11 +122,11 @@ def lock_candidates(proofs:list[dict],*,min_observations:int=2,source_kind:str="
        "threshold_retuned_after_discovery":False,
        "semantic_names_attached":False,
        "gameplay_rule_claim":False,
-       "wcl_blind_candidate_producer":"NUMERIC_COUNTS_NO_SIMC_INPUT",
+       "wcl_blind_candidate_producer":"NUMERIC_CAST_COUNTS_BLIND_INPUT",
        "independent_fresh_WCL_data_verified":False if source_kind=="SYNTHETIC_FIXTURE" else "RAW_SOURCE_AUDIT_REQUIRED",
        "priority_optimality_or_causality_proven":False,
        "holdout_validated":False,
-       "user_general_rotation_rule_eligible":False,
+       "gameplay_rule_eligible":False,
     }
     return lock
 
