@@ -44,7 +44,7 @@ def _verify(proof:dict):
     if proof.get("cooldown_or_resource_readiness")!="UNKNOWN":
         raise BlindInputError("INFERRED_READINESS_NOT_ALLOWED")
     identity=proof.get("identity",{})
-    if not isinstance(identity,dict) or not isinstance(identity.get("code"),str) or type(identity.get("fight")) is not int:
+    if not isinstance(identity,dict) or not isinstance(identity.get("report_code"),str) or type(identity.get("fight_id")) is not int:
         raise BlindInputError("REPORT_FIGHT_IDENTITY_MISSING")
     if not isinstance(proof.get("decisions"),list):
         raise BlindInputError("DECISION_ROWS_MISSING")
@@ -64,7 +64,7 @@ def _verify(proof:dict):
             raise BlindInputError("STRICT_PRE_AURA_REQUIRED")
         if any(not str(k).isdigit() for k in d["aura_pre"]):
             raise BlindInputError("SEMANTIC_AURA_NAME_NOT_ALLOWED")
-    return (identity["code"],identity["fight"])
+    return (identity["report_code"],identity["fight_id"])
 
 
 def lock_candidates(proofs:list[dict],*,min_observations:int=2,source_kind:str="ATTESTED_RAW_WCL_REPLAY")->dict:
