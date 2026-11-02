@@ -1,0 +1,162 @@
+name: zrot-st06-native-source-obligation-fixtures
+
+on:
+  push:
+    branches:
+      - work/st06-native-obligation-hook-20261102
+    paths:
+      - .github/workflows/zrot-st06-native-source-obligation-fixtures.yml
+      - tools/research/ST06_pinned_native_source_gate_instrument_v1.py
+      - tools/research/ST06_native_source_gate_independent_audit_v1.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    name: ST06 Python ${{ matrix.python-version }} source-contract selftests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Source pin patch and independent parser self-tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B -m py_compile tools/research/ST06_pinned_native_source_gate_instrument_v1.py tools/research/ST06_native_source_gate_independent_audit_v1.py
+          python -B tools/research/ST06_pinned_native_source_gate_instrument_v1.py --self-test
+          python -B tools/research/ST06_native_source_gate_independent_audit_v1.py --self-test
+
+  real-native:
+    name: ST06 pinned actual SimC C++ build and Native evaluation
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      PINNED_SIMC_UPSTREAM: 710c2408bfd3ae4df71b8cd55cdf01f63fd6c926
+    steps:
+      - name: Checkout research-only repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch exact public upstream source, no current-game assumptions
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init "$RUNNER_TEMP/simc-pinned"
+          git -C "$RUNNER_TEMP/simc-pinned" remote add origin https://github.com/simulationcraft/simc.git
+          git -C "$RUNNER_TEMP/simc-pinned" fetch --depth 1 origin "$PINNED_SIMC_UPSTREAM"
+          git -C "$RUNNER_TEMP/simc-pinned" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/simc-pinned" rev-parse HEAD)" = "$PINNED_SIMC_UPSTREAM"
+      - name: Apply preexisting proven Native observability instrumentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/simc-pinned"
+          python tools/research/simc_apl_pointer_instrument.py --upstream-root "$ROOT" > "$RUNNER_TEMP/base-pointer-receipt.json"
+          python tools/research/simc_apl_selection_callsite_instrument.py --upstream-root "$ROOT" > "$RUNNER_TEMP/base-callsite-receipt.json"
+          python tools/research/simc_apl_foreground_selection_instrument.py --upstream-root "$ROOT" > "$RUNNER_TEMP/base-select-receipt.json"
+          python tools/research/simc_native_resource_change_instrument.py --upstream-root "$ROOT" > "$RUNNER_TEMP/base-resource-receipt.json"
+          python tools/research/simc_native_resource_lifecycle_instrument.py --upstream-root "$ROOT" > "$RUNNER_TEMP/base-lifecycle-receipt.json"
+          python tools/research/simc_native_select_entry_resource_instrument.py --upstream-root "$ROOT" > "$RUNNER_TEMP/base-diagnostic-receipt.json"
+          python tools/research/simc_native_epoch_sequence_instrument.py --upstream-root "$ROOT" > "$RUNNER_TEMP/base-epoch-receipt.json"
+          python tools/research/simc_native_reset_boundary_instrument.py --upstream-root "$ROOT" > "$RUNNER_TEMP/base-reset-receipt.json"
+          python tools/research/simc_native_bare_resource_eval_instrument.py --upstream-root "$ROOT" > "$RUNNER_TEMP/base-apl-resource-receipt.json"
+          python tools/research/simc_native_apl_eval_scope_instrument.py --upstream-root "$ROOT" > "$RUNNER_TEMP/base-scope-receipt.json"
+          python tools/research/simc_native_if_guard_instrument.py --upstream-root "$ROOT" > "$RUNNER_TEMP/base-guard-receipt.json"
+      - name: Apply ST06 source-specific fixture probes (read-only evaluation)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/ST06_pinned_native_source_gate_instrument_v1.py \
+            --upstream-root "$RUNNER_TEMP/simc-pinned" \
+            > "$RUNNER_TEMP/st06-hook-source-receipt.json"
+          test -s "$RUNNER_TEMP/st06-hook-source-receipt.json"
+      - name: Build pinned instrumented C++ SimC
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S "$RUNNER_TEMP/simc-pinned" -B "$RUNNER_TEMP/simc-pinned-build" -G Ninja \
+            -DBUILD_GUI=OFF -DBUILD_TESTING=OFF -DSC_NO_NETWORKING=ON \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build "$RUNNER_TEMP/simc-pinned-build" --target simc -j 2
+          test -s "$RUNNER_TEMP/simc-pinned-build/simc"
+      - name: Run actual pinned public Fury and Havoc profiles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/st06-markers" "$RUNNER_TEMP/st06-summary"
+          python -B tools/research/simc_apl_pointer_native_probe.py \
+            --upstream-root "$RUNNER_TEMP/simc-pinned" \
+            --binary "$RUNNER_TEMP/simc-pinned-build/simc" \
+            --summary "$RUNNER_TEMP/st06-summary/native-pointer.json" \
+            --specs fury,havoc \
+            --marker-output-dir "$RUNNER_TEMP/st06-markers" \
+            > "$RUNNER_TEMP/st06-summary/native-run-stdout.txt"
+          test -s "$RUNNER_TEMP/st06-markers/fury.zrot_native_markers.txt.gz"
+          test -s "$RUNNER_TEMP/st06-markers/havoc.zrot_native_markers.txt.gz"
+      - name: Independent new Native source gate audit (not gameplay READY)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/ST06_native_source_gate_independent_audit_v1.py \
+            --marker-gzip "$RUNNER_TEMP/st06-markers/fury.zrot_native_markers.txt.gz" \
+            --spec fury > "$RUNNER_TEMP/st06-summary/fury-source-gates.json"
+          python -B tools/research/ST06_native_source_gate_independent_audit_v1.py \
+            --marker-gzip "$RUNNER_TEMP/st06-markers/havoc.zrot_native_markers.txt.gz" \
+            --spec havoc > "$RUNNER_TEMP/st06-summary/havoc-source-gates.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=Path(os.environ["RUNNER_TEMP"])/"st06-summary"
+          fury=json.loads((d/"fury-source-gates.json").read_text())
+          havoc=json.loads((d/"havoc-source-gates.json").read_text())
+          assert fury["native_eval_count"]>0 and havoc["native_eval_count"]>0
+          assert fury["native_epoch_independent_recalculation"]=="PASS"
+          assert havoc["native_epoch_independent_recalculation"]=="PASS"
+          assert not fury["strict_pre_gate_eligible"] and not havoc["strict_pre_gate_eligible"]
+          assert fury["source_gate_gameplay_ready_certified"]==0
+          assert havoc["source_gate_gameplay_ready_certified"]==0
+          receipt={"schema":"ZrotST06ActualNativeSourceObligationCIReceiptV1",
+            "result":"PASS_ACTUAL_PINNED_SIMC_SOURCE_EVAL_ONLY",
+            "commit":os.environ.get("GITHUB_SHA","UNKNOWN"),
+            "run_id":os.environ.get("GITHUB_RUN_ID","UNKNOWN"),
+            "profiles":["fury","havoc"],"native_evaluations":{
+              "fury":fury["native_eval_count"],"havoc":havoc["native_eval_count"]},
+            "native_independent_epoch_audit":"PASS",
+            "source_specific_gate_producer":"PARTIAL_EVALUATION_ONLY",
+            "full_source_gate_coverage":"NOT_VERIFIED",
+            "native_evaluation_is_strict_pre":False,
+            "source_to_ST03_ready":"BLOCKED",
+            "blizzard_current_game":"NOT_VERIFIED",
+            "wcl_blind":"NOT_RUN",
+            "gameplay_ready_certified":0,
+            "main_frozen_promotion":False,"seq578":"FAILED_QUARANTINED",
+            "seq637":"UNKNOWN"}
+          (d/"ci-receipt.json").write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n")
+          print("ST06_ACTUAL_PINNED_NATIVE_SOURCE_EVALUATION=PASS")
+          PY
+      - name: Upload only source receipts and summary; no raw logs or profile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: st06-native-source-gate-summary-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/st06-summary/*.json
+            ${{ runner.temp }}/st06-hook-source-receipt.json
+          if-no-files-found: warn
+          retention-days: 7
