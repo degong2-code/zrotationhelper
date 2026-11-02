@@ -1,0 +1,87 @@
+name: zrot-m4b-private-five-source-attestation
+
+on:
+  push:
+    branches:
+      - work/m4b-exact-five-attested-20261102
+    paths:
+      - .github/workflows/zrot-m4b-private-five-source-attestation.yml
+      - docs/M4B_FIVE_PRIVATE_SOURCE_RECOVERED_20261102.json
+      - tools/recovery/m4b_five_missing_source_gate_v1.py
+
+permissions:
+  contents: read
+
+jobs:
+  safe-attestation:
+    name: Private source metadata and Windows ZIP parser - Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Read-only main GitHub bootstrap head check
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin refs/heads/main
+          test "$(git rev-parse FETCH_HEAD)" = "4790f77f76a75f26ff0558d1d18c16cd9d630c4b"
+      - name: Verify fail-closed ZIP parser and private receipt scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci_artifacts/five_recovered
+          python -B -m py_compile tools/recovery/m4b_five_missing_source_gate_v1.py
+          python -B tools/recovery/m4b_five_missing_source_gate_v1.py --self-test > ci_artifacts/five_recovered/gate.json
+          python - <<'PY'
+          import json, platform, os
+          from pathlib import Path
+          gate=json.loads(Path("ci_artifacts/five_recovered/gate.json").read_text())
+          doc=json.loads(Path("docs/M4B_FIVE_PRIVATE_SOURCE_RECOVERED_20261102.json").read_text())
+          assert gate["status"]=="PASS_METADATA_AND_REPOSITORY_ABSENCE__MAIN_BLOCKED"
+          assert gate["negative_contract_tests"]==8
+          assert gate["zip_format_self_test"]=={
+              "synthetic_windows_format_positive":1,"synthetic_posix_format_positive":1,
+              "synthetic_format_negative_cases":4,"historical_raw_bytes_read_in_test":False,
+          }
+          assert doc["scope"]=="PRIVATE_ORIGINAL_BYTES_VALIDATED_OFFLINE__PUBLIC_RECEIPT_ONLY"
+          assert doc["user_uploaded_zip"]["source_blob_sha_verified"]==5
+          assert doc["private_composite"]["original_files_preserved"]==123
+          assert doc["private_composite"]["all_source_bytes_exact"]=="123/123"
+          assert doc["private_composite"]["source_python_files_syntax_compiled"]==20
+          assert doc["direct_import_reconciliation"]["complete_runtime_source_closure"] is False
+          assert doc["direct_import_reconciliation"]["unrecovered_source_bytes_for_stage_registry"] is True
+          assert doc["authority"]["main_product_promotion"] is False
+          assert doc["user_uploaded_zip"]["bytes_uploaded_to_github"] is False
+          assert doc["private_composite"]["raw_archive_committed_to_public_github"] is False
+          receipt={
+              "schema":"ZrotM4BPrivateFiveSourceAttestationCIReceiptV1",
+              "status":"PASS_STATIC_ATTESTATION__NOT_PRIVATE_RAW_REPLAY",
+              "head_sha":os.environ["GITHUB_SHA"],"run_id":os.environ["GITHUB_RUN_ID"],
+              "python_version":platform.python_version(),
+              "source_five_private_sha_claim":"PINNED_EXTERNAL_OFFLINE_INDEPENDENT_AUDIT",
+              "source_123_private_byte_identity":"PINNED_EXTERNAL_OFFLINE_INDEPENDENT_AUDIT",
+              "windows_zip_normalization_synthetic":"PASS",
+              "zip_invalid_path_tamper_negative_cases":4,
+              "actual_private_zip_bytes_in_runner":False,
+              "remaining_missing_stage_registry":True,
+              "main_product_promotion":False,"seq578":"FAILED_QUARANTINED_PRESERVED","seq637":"UNKNOWN"
+          }
+          Path("ci_artifacts/five_recovered/receipt.json").write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n")
+          print("M4B_EXACT_FIVE_ATTESTATION=PASS_NO_PRODUCT_PROMOTION")
+          PY
+      - name: Upload sanitized receipts only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m4b-private-five-${{ matrix.python-version }}-${{ github.sha }}
+          path: ci_artifacts/five_recovered/
+          if-no-files-found: warn
+          retention-days: 7
