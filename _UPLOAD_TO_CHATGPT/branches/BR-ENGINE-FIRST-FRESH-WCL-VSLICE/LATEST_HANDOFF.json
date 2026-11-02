@@ -81,6 +81,7 @@
     "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md",
     "docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md",
     "handoff/NEW_CHAT_BOOT_PROMPT.md",
+    "docs/PROJECT_SETTINGS_SCOPE_OVERRIDE_PASTE.md",
     "_UPLOAD_TO_CHATGPT/branches/BR-ENGINE-FIRST-FRESH-WCL-VSLICE/LATEST_HANDOFF.json"
   ],
   "user_approved_product_scope_override": {
@@ -229,5 +230,27 @@
   },
   "scope_handoff_protocol": "docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md",
   "scope_boot_prompt": "handoff/NEW_CHAT_BOOT_PROMPT.md",
-  "chat_exact_next": "Validate the reusable five-handoff continuity gate; then resume the General Rotation APL baseline and independent WCL high-ranker verification, not encounter/NSRT."
+  "chat_exact_next": "Validate the reusable five-handoff continuity gate; then resume the General Rotation APL baseline and independent WCL high-ranker verification, not encounter/NSRT.",
+  "scope_continuity_verification": {
+    "policy": "docs/PRODUCT_SCOPE_LOCK_V1.json",
+    "protocol": "docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md",
+    "boot": "handoff/NEW_CHAT_BOOT_PROMPT.md",
+    "template": "handoff/HANDOFF_TEMPLATE_V1.json",
+    "checker": "tools/governance/validate_scope_continuity_v1.py",
+    "local_project_settings_override_draft": "docs/PROJECT_SETTINGS_SCOPE_OVERRIDE_PASTE.md",
+    "feature_branch_ci_run_id": 41406303353,
+    "feature_branch_ci_result": "SUCCESS_PYTHON_3_12_AND_3_14",
+    "governance_test_result": "FIVE_SIMULATED_HANDOFFS_AND_THIRTEEN_NEGATIVE_DRIFT_CASES_PASS",
+    "docs_only_main_review_pr_number": 2,
+    "docs_only_main_review_pr_url": "https://github.com/degong2-code/zrotationhelper/pull/2",
+    "docs_only_main_review_branch": "docs/product-scope-canonical-20261102",
+    "docs_only_main_review_ci_run_id": 41406785342,
+    "docs_only_main_review_ci_result": "SUCCESS_PYTHON_3_12_AND_3_14",
+    "project_settings_custom_instructions_applied": false,
+    "project_source_contracts_updated": false,
+    "global_MAIN_pointer_promoted": false,
+    "main_branch_docs_merged": false,
+    "source_of_truth_note": "User 2026-11-02 explicit decision supersedes historical encounter/NSRT product goals; full scope snapshot must carry every future handoff.",
+    "actual_real_handoff_generation": 0
+  }
 }
