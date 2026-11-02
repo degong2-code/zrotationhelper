@@ -19,6 +19,7 @@ TEMPLATE=ROOT/"handoff/HANDOFF_TEMPLATE_V1.json"
 ACTIVE=ROOT/"_UPLOAD_TO_CHATGPT/branches/BR-ENGINE-FIRST-FRESH-WCL-VSLICE/LATEST_HANDOFF.json"
 EXPECTED_POLICY_ID="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
 EXPECTED_BLOB_SHA1="14b9f5174a9d1652a56dcca03af1f2302b78c22d"
+EXPECTED_POLICY_SHA256="157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295"
 EXPECTED_RESEARCH_ORDER=[
  "SIMC_APL_PROFILE_BASELINE_AND_OPENER_HYPOTHESIS",
  "WCL_HIGH_RANKER_STRICT_PRE_INDEPENDENT_BLIND_CANDIDATE_DISCOVERY_AND_LOCK",
@@ -90,6 +91,8 @@ def pinned_lock()->tuple[dict,str,str]:
     b=LOCK_PATH.read_bytes()
     if git_blob_sha1(b)!=EXPECTED_BLOB_SHA1:
         raise ScopeDrift("POLICY_CONTENT_BYTES_CHANGED_WITHOUT_EXPLICIT_USER_VERSION_BUMP")
+    if digest(b)!=EXPECTED_POLICY_SHA256:
+        raise ScopeDrift("POLICY_SHA256_CHANGED_WITHOUT_EXPLICIT_USER_VERSION_BUMP")
     p=json.loads(b)
     assert_lock(p)
     return p,git_blob_sha1(b),digest(b)
@@ -114,6 +117,7 @@ def validate_handoff(h:dict,p:dict,blob:str,*,template:bool=False)->int:
     if not isinstance(sc,dict):raise ScopeDrift("NO_SCOPE_CONTINUITY")
     if sc.get("policy_id")!=EXPECTED_POLICY_ID:raise ScopeDrift("HANDOFF_POLICY_ID")
     if sc.get("policy_git_blob_sha1")!=blob:raise ScopeDrift("HANDOFF_POLICY_BLOB")
+    if sc.get("policy_sha256")!=EXPECTED_POLICY_SHA256:raise ScopeDrift("HANDOFF_POLICY_SHA256")
     if sc.get("policy_snapshot")!=p:raise ScopeDrift("HANDOFF_POLICY_SNAPSHOT_DRIFT")
     if sc.get("scope_override") is not False or sc.get("new_user_scope_override_evidence") is not None:
         raise ScopeDrift("SILENT_USER_SCOPE_OVERRIDE")
@@ -180,6 +184,7 @@ def negative_tests(p:dict,blob:str,current:dict)->int:
     mutant(lambda x:x["scope_continuity"]["policy_snapshot"]["final_product_goal"].update({"opener":"OPTIONAL"}))
     mutant(lambda x:x["scope_continuity"].update({"policy_id":"LEGACY_RAID_FIRST"}))
     mutant(lambda x:x["scope_continuity"].update({"policy_git_blob_sha1":"0"*40}))
+    mutant(lambda x:x["scope_continuity"].update({"policy_sha256":"0"*64}))
     mutant(lambda x:x["scope_continuity"].update({"scope_override":True}))
     mutant(lambda x:x["scope_continuity"].update({"generation":-1}))
     mutant(lambda x:x.update({"product_exact_next":"Make NSRT raid execution guide"}))
