@@ -27,7 +27,7 @@ META_QUERY = """query ZrotActorGate($code:String!, $fight:Int!){
       friendlyPlayers friendlySpecs
     }
     masterData(translate:false) {
-      actors { id type subType }
+      actors { id name type subType }
     }
   } }
 }"""
