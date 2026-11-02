@@ -119,8 +119,12 @@ def _validate_ledger(ledger: Mapping[str, Any], action: str, ts: int,
     if not isinstance(events, list) or len(events) > 50000:
         raise ST03ContractError("INVALID_LEDGER_ROWS")
     expected_digest = ledger.get("ledger_sha256")
+    try:
+        computed_digest = digest(events)
+    except (TypeError, ValueError) as exc:
+        raise ST03ContractError("ST03_NONFINITE_OR_INVALID_LEDGER_JSON") from exc
     if (not isinstance(expected_digest, str) or len(expected_digest) != 64
-            or set(expected_digest) - HEX64 or expected_digest != digest(events)):
+            or set(expected_digest) - HEX64 or expected_digest != computed_digest):
         raise ST03ContractError("ST03_LEDGER_SHA256_MISMATCH")
     ids: set[str] = set()
     same = future = invalid = 0
