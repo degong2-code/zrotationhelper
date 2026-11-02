@@ -105,6 +105,19 @@ def run_fixture(*, candidate_patch:bool=False, original_defect_repro:bool=False)
             raise AssertionError("OFFLINE_RESEARCH_FIXTURE_FAILURE:" + label)
         passed.append(label)
 
+    check("candidate_zero_primary_stack_precedence", pre.aura_transition({
+        "type":"removebuffstack","stack":0,"stacks":7
+    })==(False,0))
+    check("candidate_zero_fallback_stacks", pre.aura_transition({
+        "type":"removebuffstack","stacks":0
+    })==(False,0))
+    check("candidate_positive_stack_preserved", pre.aura_transition({
+        "type":"removebuffstack","stack":3
+    })==(True,3))
+    check("candidate_missing_stack_historical_limitation", pre.aura_transition({
+        "type":"removebuffstack"
+    })==(True,1))
+
     # Runtime identity must NOT resolve a localized name-only event.
     check("id_abilityGameID", ident.event_ability_id({"abilityGameID": 901}) == 901)
     check("id_abilityID_fallback", ident.event_ability_id({"abilityID": "902"}) == 902)
