@@ -4,6 +4,7 @@ on:
     branches: [work/gr-simc-st-2t-wcl-blind-20261102]
     paths:
       - tools/research/simc_ordered_if_else_general_rotation_ir_v1.py
+      - tools/research/general_rotation_source_ir_dummy_feedback_v1.py
       - .github/workflows/zrot-simc-conditional-general-rotation-ir.yml
   workflow_dispatch:
 
@@ -42,6 +43,16 @@ jobs:
           print('SIMC_ORDERED_APL_IF_ELSE_TRI_STATE_STATIC_SYNTHETIC_PASS')
           PY
           sha256sum tools/research/simc_ordered_if_else_general_rotation_ir_v1.py
+          python -m py_compile tools/research/general_rotation_source_ir_dummy_feedback_v1.py
+          python -B tools/research/general_rotation_source_ir_dummy_feedback_v1.py >/tmp/dummy-feedback-selftest.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/dummy-feedback-selftest.json'))
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['checks']>=5 and d['false_error_flags']==0
+          print('SIMC_APL_DUMMY_FEEDBACK_SOURCE_GATE_OFFLINE=PASS')
+          PY
+          sha256sum tools/research/general_rotation_source_ir_dummy_feedback_v1.py
 
   actual-simc-wcl-source-bridge:
     runs-on: ubuntu-latest
@@ -112,5 +123,69 @@ jobs:
         with:
           name: simc-general-rotation-ordered-ifelse-ir-${{ github.sha }}
           path: /tmp/general-rotation-ifelse-research-ir.json
+          retention-days: 7
+          if-no-files-found: error
+
+  actual-wcl-opener-feedback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    needs: [offline-contract]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41541463955
+          name: simc-general-rotation-ordered-ifelse-ir-713905baad4d96bd2fbc033a4ee1c3fb793c5a4a
+          path: /tmp/simc-general-rotation-source
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41538718550
+          name: wcl-actor-owned-strict-pre-5d2bfbf93422008e5dcbe6be288e3a9380204248
+          path: /tmp/wcl-actor-owned-resources
+          github-token: ${{ github.token }}
+      - name: Compare actual casts with source APL guards without readiness or false player errors
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_source_ir_dummy_feedback_v1.py \
+            --source-ir /tmp/simc-general-rotation-source/general-rotation-ifelse-research-ir.json \
+            --actor-owned-resource /tmp/wcl-actor-owned-resources/actor-resource-provenance.json \
+            --out /tmp/general-rotation-practice-feedback.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/general-rotation-practice-feedback.json'))
+          assert d['schema']=='ZrotSimcHypothesisToDummyFeedbackEvidenceGateV1'
+          assert d['status']=='REAL_WCL_ACTIONS_EVALUATED_UNKNOWN_NO_FALSE_MISTAKES'
+          assert d['total_player_actions_evaluated']==105
+          assert d['discovery']['actor_casts_evaluated']==54
+          assert d['holdout']['actor_casts_evaluated']==51
+          assert d['discovery']['confirmed_player_owned_resource_pre']==53
+          assert d['holdout']['confirmed_player_owned_resource_pre']==50
+          assert d['discovery']['target_count_unknown_casts']==54
+          assert d['holdout']['target_count_unknown_casts']==51
+          assert d['wrong_rotation_actions_confirmed']==0
+          assert d['readiness_claims_made']==0
+          for role in ('discovery','holdout'):
+              for event in d[role]['practice_feedback']:
+                  assert event['mistake_verdict']=='UNKNOWN'
+                  assert event['error_flag'] is False
+                  assert event['expected_spell']=='UNKNOWN'
+                  assert event['recommended_correction']=='UNKNOWN'
+                  assert event['why_not_scored']=='WCL_ACTIVE_ENEMIES_STRICT_PRE_NOT_OBSERVED'
+                  assert event['candidate_apl_lists']==['slayer','slayer_aoe']
+          print('ACTUAL_105_CASTS_STRICT_PRE_SOURCE_APL_NO_FALSE_DUMMY_MISTAKES=PASS')
+          PY
+      - name: Retain offline actual-cast evaluator proof without expanding original raw storage
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-general-rotation-dummy-feedback-${{ github.sha }}
+          path: /tmp/general-rotation-practice-feedback.json
           retention-days: 7
           if-no-files-found: error
