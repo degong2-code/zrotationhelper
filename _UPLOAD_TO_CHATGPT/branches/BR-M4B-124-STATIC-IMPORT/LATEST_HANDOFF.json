@@ -1,0 +1,64 @@
+{
+  "schema": "ZrotM4B124PlusHistoricalResearchOverlayBranchHandoffV1",
+  "branch_id": "BR-M4B-124-STATIC-IMPORT-RECONCILIATION",
+  "branch": "work/m4b-124-stage-registry-reconciliation-20261102",
+  "owner": "BRANCH_ISOLATED_PRODUCT_MAIN_RECOVERY",
+  "date": "2026-11-02",
+  "validation": {
+    "original_uploaded_stage_registry_zip_sha256": "10375e43ac660e9cfa7e3d1b996aaedc08bac2dbd1eb6b431df030120cac379d",
+    "source_file_stage_registry_sha256": "9b424b101e615c2f692a16e4aac9b2223a5f19048a3cad7bc5d9729d290bd16e",
+    "previous_123_private_composite_zip_sha256": "4b2a27cc99410df8c81ecd9ffc7953bb51d104b15ef234d61d62737547349a5b",
+    "resulting_private_124_composite_sha256": "46e3a2dd1b51465429932a03efb7345cae781c756137dea9a39c9c4bed152bf6",
+    "private_124_source_byte_identity": "124/124_PASS",
+    "private_124_python_syntax": "21/21_PASS",
+    "private_124_json_parsed": "100/100_PASS",
+    "stage_registry_order_dependencies": "O0_O8_STATIC_TOPOLOGY_PASS",
+    "github_ci_run_id": 41390523985,
+    "github_ci_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/41390523985",
+    "validated_code_sha": "4f0451959cde7d290fbae96040e54775cd025174",
+    "ci_python312": "PASS",
+    "ci_python314": "PASS",
+    "github_ci_research_overlay_historical_sha_match": "3/3_PASS",
+    "github_ci_private_124_raw_replayed": false,
+    "historical_raid_dps_static_direct_import_targets": 24,
+    "resolved_in_private_124": 21,
+    "resolved_by_repo_research_three_exact_historical_sha": 3,
+    "unresolved_static_raid_dps_direct_imports_after_reconciliation": 0,
+    "full_runtime_module_and_dynamic_dependency_closure": "NOT_VERIFIED",
+    "historical_current_source_status": "HISTORICAL_NOT_CURRENT_AUTHORITY",
+    "actual_product_live_execution": "NOT_RUN",
+    "user_ready_rules_certified": 0
+  },
+  "research_overlay_exact_sha256": {
+    "02_SOURCE/runtime/raid_dps/core/coverage.py": "30daad468f43ab012f4d85cb457ba838899bef5ddaf32acb4d14645043ba8147",
+    "02_SOURCE/runtime/raid_dps/core/identity.py": "d2328bef5f7db3fa973cbb99b2125f13d796a5249be3c007219c38509965f8b6",
+    "02_SOURCE/runtime/raid_dps/core/prestate.py": "889fdd114f5a07d31612c0fc2a548ac0dfab1dc1d5738e8741f573194efd7d50"
+  },
+  "public_repo_uploaded_original_124_source_bytes": false,
+  "private_source_delivery": "Only through user-uploaded source and private conversation artifacts, not GitHub",
+  "files_added": [
+    "docs/M4B_124_PRIVATE_SOURCE_AND_RESEARCH_OVERLAY_REVIEW_20261102.json",
+    "tools/recovery/m4b_124_research_overlay_comparison_v1.py",
+    ".github/workflows/zrot-m4b-historical-124-overlay-review.yml"
+  ],
+  "product_authority": {
+    "latest_MAIN_RUNTIME": "UNKNOWN",
+    "canonical_registry": "MISSING",
+    "current_pointer": "MISSING",
+    "historical_workflow_id_sha_default_conflicts": 3,
+    "github_bootstrap_main_sha": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
+    "main_promoted": false,
+    "frozen_mutated": false,
+    "active_manifest_changed": false,
+    "seq578": "FAILED_QUARANTINED_PRESERVED",
+    "seq637": "UNKNOWN"
+  },
+  "next_product": "MAIN owner must restore/approve actual current runtime, canonical registry and pointer, reconcile workflow conflicts before promotion",
+  "next_session": "Review static direct-import reconciliation as bounded evidence; avoid rerunning 124 hash work. Need independent focused integration with approved runtime and no live API calls initially",
+  "cross_branch_dependency": [
+    "cross_branch_dependency: MAIN needs approved CURRENT_STATE/Runtime, canonical registry and current pointer; historical bootstrap SHA is not authorized product MAIN",
+    "cross_branch_dependency: Integration owner needs full transitive/dynamic import and behavior regression on safe staging, using research modules only after compatibility policy",
+    "cross_branch_dependency: WCL owner must preserve independent numeric/structural blind candidate lock prior to SimC semantic join"
+  ],
+  "status": "BRANCH_LOCAL_HISTORICAL_STATIC_RECONCILIATION_VALIDATED__PRODUCT_MAIN_NOT_PROMOTED"
+}
