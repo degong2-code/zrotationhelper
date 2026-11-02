@@ -1,0 +1,41 @@
+{
+  "schema": "ZrotPredeclaredDisjointWclHoldoutV1",
+  "scope_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "frozen_discovery": {
+    "report_code": "a9LTzA7wCMnV2Qyh",
+    "fight_id": 194,
+    "actor_id": 1707,
+    "blind_lock_sha256": "c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e",
+    "raw_artifact_run_id": 41463589665,
+    "raw_artifact_name": "official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1",
+    "frozen_min_observations": 2
+  },
+  "holdout_source": {
+    "encounter_id": 3420,
+    "difficulty": 4,
+    "class_name": "Warrior",
+    "spec_name": "Fury",
+    "rankings_page": 1,
+    "min_page_position": 2,
+    "max_page_position": 15,
+    "max_metadata_candidates": 10,
+    "max_age_days": 45,
+    "opener_window_ms": 15000,
+    "max_event_pages": 5,
+    "forbid_same_report_code_as_discovery": true,
+    "forbid_same_report_fight_as_discovery": true,
+    "exact_official_rank_required": false,
+    "verify_actor_fight_spec_class": true
+  },
+  "locked_metrics": {
+    "candidate_set_source": "IMMUTABLE_DISCOVERY_LOCK_ONLY",
+    "retained_candidate_metric": "HOLDOUT_CAST_EVENT_COUNT_AND_OBSERVED_AT_LEAST_ONCE",
+    "observed_threshold": 1,
+    "no_new_candidate_discovery_in_holdout": true,
+    "no_threshold_retuning": true,
+    "same_timestamp_state": "EXCLUDE",
+    "build_readiness_unknown_allowed": true,
+    "no_causal_priority_or_gameplay_promotion": true
+  },
+  "provenance_notes": "Selected before reading any fresh holdout log. Distinct report/fight only; independent player, build and readiness are unverified."
+}
