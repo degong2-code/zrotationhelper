@@ -6,6 +6,8 @@ on:
       - tools/research/simc_native_select_trace_instrument_v1.py
       - tools/research/simc_native_select_trace_audit_v1.py
       - tools/research/simc_native_foreground_structural_replay_v1.py
+      - tools/research/simc_native_if_expression_instrument_v1.py
+      - tools/research/simc_native_if_condition_coverage_v1.py
       - .github/workflows/zrot-simc-native-selection-source-oracle-v1.yml
   workflow_dispatch:
 
@@ -34,15 +36,21 @@ jobs:
           python -m py_compile tools/research/simc_native_select_trace_instrument_v1.py
           python -m py_compile tools/research/simc_native_select_trace_audit_v1.py
           python -m py_compile tools/research/simc_native_foreground_structural_replay_v1.py
+          python -m py_compile tools/research/simc_native_if_expression_instrument_v1.py
+          python -m py_compile tools/research/simc_native_if_condition_coverage_v1.py
           python -B tools/research/simc_native_select_trace_instrument_v1.py >/tmp/native-producer-selftest.json
           python -B tools/research/simc_native_select_trace_audit_v1.py >/tmp/native-audit-selftest.json
           python -B tools/research/simc_native_foreground_structural_replay_v1.py >/tmp/native-structural-selftest.json
+          python -B tools/research/simc_native_if_expression_instrument_v1.py >/tmp/native-if-patch-selftest.json
+          python -B tools/research/simc_native_if_condition_coverage_v1.py >/tmp/native-if-coverage-selftest.json
           python - <<'PY'
           import json
           from pathlib import Path
           for file,count in [('native-producer-selftest.json',8),
                              ('native-audit-selftest.json',7),
-                             ('native-structural-selftest.json',10)]:
+                             ('native-structural-selftest.json',10),
+                             ('native-if-patch-selftest.json',7),
+                             ('native-if-coverage-selftest.json',8)]:
               d=json.loads((Path('/tmp')/file).read_bytes())
               assert d['status']=='PASS_OFFLINE_SYNTHETIC'
               assert d['checks']>=count
@@ -52,6 +60,8 @@ jobs:
           sha256sum tools/research/simc_native_select_trace_instrument_v1.py
           sha256sum tools/research/simc_native_select_trace_audit_v1.py
           sha256sum tools/research/simc_native_foreground_structural_replay_v1.py
+          sha256sum tools/research/simc_native_if_expression_instrument_v1.py
+          sha256sum tools/research/simc_native_if_condition_coverage_v1.py
 
   real-native-foreground-source-oracle:
     needs: [offline-python-provenance]
@@ -85,6 +95,7 @@ jobs:
               raw=Path(path).read_bytes()
               return hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
           assert gblob('simc-upstream/engine/player/player.cpp')=='88e03a01ca87ff66fd3902c9d6e047fe1a03ecb8'
+          assert gblob('simc-upstream/engine/action/action.cpp')=='399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4'
           assert gblob('simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc')=='3225992ed5b754ad5d61e8b785d9d859f1eed1be'
           print('SIMC_NATIVE_SOURCE_AND_PROFILE_PIN_PASS')
           PY
@@ -126,6 +137,17 @@ jobs:
           python -B tools/research/simc_native_select_trace_instrument_v1.py \
             --simc-root simc-upstream \
             --receipt /tmp/native-selected-source-patch.json
+          python -B tools/research/simc_native_if_expression_instrument_v1.py \
+            --simc-root simc-upstream \
+            --receipt /tmp/native-if-expression-patch.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/native-if-expression-patch.json'))
+          assert p['schema']=='ZrotNativeIfEvaluationPassivePatchReceiptV1'
+          assert p['single_if_expression_eval_per_callsite'] is True
+          assert p['native_action_behaviour_validated_with_original']=='NOT_YET_RUN'
+          print('NATIVE_IF_SOURCE_SINGLE_EVAL_PATCH_READY')
+          PY
           python - <<'PY'
           import json
           x=json.load(open('/tmp/native-selected-source-patch.json'))
@@ -254,6 +276,37 @@ jobs:
           },sort_keys=True))
           PY
           sha256sum /tmp/native-source-order-structural-replay.json
+      - name: Audit actual native if_expr outcomes without inferring unvisited conditions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_condition_coverage_v1.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --out /tmp/native-source-if-condition-coverage.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('/tmp/native-source-if-condition-coverage.json').read_bytes())
+          assert x['schema']=='ZrotNativeIfConditionFuryTwoTargetV1'
+          assert x['status']=='REAL_NATIVE_IF_OUTCOME_COVERAGE_NO_INDEPENDENT_OPERAND_PARITY'
+          assert x['source_scans']==214
+          assert x['independent_if_semantic_parity']=='NOT_PROVEN'
+          assert x['generic_gameplay_priority_model']=='NOT_COMPLETE'
+          for name,scans,attempts in [('st',118,1542),('two_target',96,1030)]:
+              c=x[name]
+              assert c['native_root_foreground_scans']==scans
+              assert c['counts']['total_native_action_ready_attempts']==attempts
+              assert c['native_if_outcome_distinct_from_full_ready'] is True
+              assert c['source_expression_ast_independent_state_values']=='UNKNOWN'
+              assert c['WCL_eligible'] is False
+              assert c['player_rotation_error_verdict']=='UNKNOWN'
+          print('REAL_NATIVE_214_SCANS_IF_EXPR_EVALUATION_COVERAGE_PASS')
+          print('NATIVE_IF_COVERAGE_COUNTS',json.dumps({
+              k:x[k]['counts'] for k in ('st','two_target')},sort_keys=True))
+          PY
+          sha256sum /tmp/native-source-if-condition-coverage.json
       - name: Preserve small native selection proof, never raw logs or character metadata
         if: success()
         uses: actions/upload-artifact@v4
@@ -264,5 +317,7 @@ jobs:
             /tmp/native-sequence-nonperturbation.json
             /tmp/native-selected-source-patch.json
             /tmp/native-source-order-structural-replay.json
+            /tmp/native-if-expression-patch.json
+            /tmp/native-source-if-condition-coverage.json
           retention-days: 7
           if-no-files-found: error
