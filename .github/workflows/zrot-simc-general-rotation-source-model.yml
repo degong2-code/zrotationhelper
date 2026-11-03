@@ -1,0 +1,115 @@
+name: zrot-simc-general-rotation-source-model
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_general_rotation_source_model_v1.py
+      - .github/workflows/zrot-simc-general-rotation-source-model.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile final source and test target-count guard conservatism
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_general_rotation_source_model_v1.py
+          python -B tools/research/simc_general_rotation_source_model_v1.py >/tmp/source-model-test.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/source-model-test.json'))
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['checks']>=6
+          assert d['WCL_API_calls']==0
+          assert d['gameplay_priority_proven'] is False
+          print('SIMC_SOURCE_MODEL_GRAPH_TARGET_COUNT_CONTRACT_PASS')
+          PY
+          sha256sum tools/research/simc_general_rotation_source_model_v1.py
+
+  real-pinned-simc-source-only-model:
+    runs-on: ubuntu-latest
+    needs: [offline]
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore pinned full-source APL model (NOT WCL)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41562454066
+          name: simc-source-faithful-apl-v2-fdefae186a803f0945d1a6fa46eb3c06cf66314f
+          path: /tmp/pinned-simc-apl
+          github-token: ${{ github.token }}
+      - name: Restore independently executed native SimC effective-APL equality proof
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41563013349
+          name: native-effective-source-apl-proof-358c5ce181abaaf8593b4d2780465d7f40ba87d3
+          path: /tmp/pinned-native-effective
+          github-token: ${{ github.token }}
+      - name: Compile branch routing plus all source priorities into bounded model
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_general_rotation_source_model_v1.py \
+            --source-ir /tmp/pinned-simc-apl/fury-apl-semantic-ir-v2.json \
+            --native-structural-receipt /tmp/pinned-native-effective/native-effective-source-apl-parity.json \
+            --out /tmp/simc-general-rotation-source-model.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('/tmp/simc-general-rotation-source-model.json').read_bytes())
+          assert d['schema']=='ZrotGeneralRotationSimcSourceHypothesisModelV1'
+          assert d['status']=='NATIVE_EFFECTIVE_APL_EXACT_SOURCE_STRUCTURE_BEHAVIOR_NOT_YET_PROVEN'
+          assert d['native_source_semantic_row_match']=='121/121'
+          assert d['raw_action_rows_retained']==121
+          assert len(d['all_source_action_lists'])==8
+          assert d['precombat']['source_directive_count']==16
+          assert d['precombat']['variable_definition_count']==14
+          assert d['precombat']['non_variable_directive_count']==2
+          assert len(d['default_action_flow'])==6
+          assert len(d['hero_and_target_count_route_hypotheses'])==4
+          assert d['source_routing_target_count_equals_one']==['slayer','thane']
+          assert d['source_routing_target_count_greater_than_one']==['slayer_aoe','thane_aoe']
+          assert d['two_target_vs_AoE_separate_source_list']=='NOT_PRESENT_FOR_THIS_PINNED_FURY_PROFILE'
+          assert d['all_source_action_lists']['slayer']['row_count']==22
+          assert d['all_source_action_lists']['slayer_aoe']['row_count']==14
+          assert any(c['comparator']=='>' and c['count']==6 for c in
+                     d['source_count_comparisons_in_conditions'])
+          assert d['source_action_priority_vs_actual_foreground_native_decision']=='NOT_REPLAYED'
+          assert d['wcl_comparison_eligible'] is False
+          assert d['target_dummy_feedback_eligible'] is False
+          assert d['MAIN_promotion'] is False
+          print('REAL_121_NATIVE_MATCHED_ROWS_TO_SIMC_GENERAL_ROTATION_CONDITIONAL_HYPOTHESIS_PASS')
+          print('TARGET_ROUTE_HYPOTHESES',json.dumps(d['hero_and_target_count_route_hypotheses'],sort_keys=True))
+          PY
+          sha256sum /tmp/simc-general-rotation-source-model.json
+      - name: Preserve small SimC-only conditional General Rotation reference model
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simc-source-general-rotation-hypothesis-${{ github.sha }}
+          path: /tmp/simc-general-rotation-source-model.json
+          retention-days: 7
+          if-no-files-found: error
