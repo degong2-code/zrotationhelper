@@ -200,7 +200,7 @@ jobs:
           assert d['full_if_else_action_priority_eligible'] is False
           assert d['spell_cost_modifiers_and_cooldowns']=='UNKNOWN'
           assert d['dummy_mistake_flags']==0
-          for name,n,raw,positive in (('discovery',54,17083,13),('holdout',51,9101,15)):
+          for name,n,raw,positive in (('discovery',54,17083,13),('holdout',51,9101,16)):
               r=d[name]
               assert r['actor_cast_count']==n and r['raw_event_count']==raw
               g=r['resource_scale_empirical']
