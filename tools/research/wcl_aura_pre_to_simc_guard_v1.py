@@ -124,7 +124,8 @@ def validate_fixture(path,adapter_bytes,ir_bytes):
     obj=json.loads(path.read_bytes())
     if (obj.get("schema")!=SCHEMA or obj.get("scope_policy_id")!=POLICY
         or obj.get("source_simc_ir_receipt_sha256")!=sha(ir_bytes)
-        or obj.get("source_adapter_git_blob_sha1")!=hashlib.sha1(\n            b"blob "+str(len(adapter_bytes)).encode()+b"\\0"+adapter_bytes).hexdigest()
+        or obj.get("source_adapter_git_blob_sha1")!=hashlib.sha1(
+            b"blob "+str(len(adapter_bytes)).encode()+b"\0"+adapter_bytes).hexdigest()
         or not isinstance(obj.get("apl_row"),dict)
         or obj["apl_row"].get("list")!="slayer"
         or obj["apl_row"].get("index")!=2):
