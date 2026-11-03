@@ -487,15 +487,31 @@ def bounded_decision(ir, facts, readiness, *, timestamp=None,
                 return {"verdict": "UNKNOWN", "reason": "CONDITION_UNOBSERVED",
                         "blocking_source_line": row["source_line"]}
             behavior = row["behavior"]
-            if behavior in ("CALL", "RUN"):
+            if behavior == "RUN":
+                # Native run_action_list_t is ACTION_OTHER, not ACTION_CALL:
+                # it is QUEUED and execute() changes active_action_list
+                # asynchronously. The next execute_action() evaluates that
+                # destination and restores the caller after selection.
+                # Recurse here and choosing its first row *now* was wrong.
+                dest = _source_attributes(row)["name"]
+                return {
+                    "verdict": "HYPOTHETICAL_RUN_LIST_CONTROL_ACTION",
+                    "source_list": name,
+                    "source_index": row["index"],
+                    "destination": dest,
+                    "state_change_event": "AFTER_QUEUED_RUN_ACTION_EXECUTES",
+                    "next_scan_active_list_if_executed": dest,
+                    "native_action_selected_now": "run_action_list",
+                    "foreground_spell_selected_now": None,
+                    "native_runtime_parity_proven": False,
+                    "dummy_error_verdict": "UNKNOWN"
+                }
+            if behavior == "CALL":
+                # Native call_action_list_t is ACTION_CALL; select_action()
+                # recursively evaluates the target in the same scan and
+                # falls back to caller if the target returns no action.
                 dest = _source_attributes(row)["name"]
                 result = examine(dest, stack + [name])
-                if behavior == "RUN":
-                    # No action in run destination is NOT equivalent to
-                    # fallthrough to the next caller row.
-                    return result if result else {
-                       "verdict": "DEFER_NATIVE_RUN_LIST_RESTART",
-                       "destination": dest, "gameplay_rule_proven": False}
                 if result is not None:
                     return result
                 continue
@@ -530,6 +546,57 @@ def bounded_decision(ir, facts, readiness, *, timestamp=None,
             "consulted_source_rows": consulted,
             "readiness_derived_from_SimC_profile": False,
             "model_gameplay_authority": "RESEARCH_ONLY"}
+
+
+def bounded_control_step(ir, facts, readiness, control, *,
+                         timestamp=None, strict_pre=False):
+    """Synthetic/native-replay scaffolding for one select_action scan.
+
+    State describes the SimC active APL and pending restore list. A queued
+    run control action takes effect only on its execute() event, represented
+    by a separate accepted transition here; this is NOT a game action cast.
+    Native scheduling and chooser equivalence still require validation.
+    """
+    if not isinstance(control, dict):
+        raise AplError("CONTROL_STATE_REQUIRED")
+    active = control.get("active_list", "default")
+    restore = control.get("restore_list")
+    if active not in ir["action_lists"]:
+        raise AplError("CONTROL_ACTIVE_LIST_NOT_IN_SOURCE")
+    if restore is not None and restore not in ir["action_lists"]:
+        raise AplError("CONTROL_RESTORE_LIST_NOT_IN_SOURCE")
+    prior = {"active_list": active, "restore_list": restore}
+    outcome = bounded_decision(
+        ir, facts, readiness, timestamp=timestamp, start_list=active,
+        strict_pre=strict_pre)
+    result = outcome["result"]
+    updated = dict(prior)
+    kind = result["verdict"]
+    if kind == "HYPOTHETICAL_RUN_LIST_CONTROL_ACTION":
+        if restore is not None:
+            # It could be nested source state. A real player_t only captures
+            # restore_action_list if nullptr, so keep original restore.
+            updated["restore_list"] = restore
+        else:
+            updated["restore_list"] = active
+        updated["active_list"] = result["destination"]
+        phase = "QUEUED_RUN_EXECUTED_MODEL_TRANSITION"
+    elif restore is not None:
+        # Native player_t::execute_action restores after select_action
+        # even if select_action returns nullptr. Never skip this restore.
+        updated = {"active_list": restore, "restore_list": None}
+        phase = "MODEL_RESTORE_AFTER_NEXT_SELECT"
+    else:
+        phase = "NO_LIST_TRANSITION"
+    return {
+        "result": result,
+        "state_before": prior,
+        "state_after_model": updated,
+        "phase": phase,
+        "full_native_event_order_parity": "NOT_PROVEN",
+        "WCL_recommendation_authorized": False,
+        "actual_native_select_trace_required": True
+    }
 
 
 def selftest():
@@ -584,9 +651,40 @@ def selftest():
                          {"sub:0": "UNKNOWN", "default:1": "READY"})
     assert c["result"]["verdict"] == "UNKNOWN"
     run_profile = simple.replace(b"call_action_list", b"run_action_list")
-    d = bounded_decision(parse_profile(run_profile, require_source=False),
-                         {"rage": 50}, {"sub:1": "NOT_READY", "default:1": "READY"})
-    assert d["result"]["verdict"] == "DEFER_NATIVE_RUN_LIST_RESTART"
+    native_run_ir = parse_profile(run_profile, require_source=False)
+    d = bounded_decision(native_run_ir,
+                         {"rage": 50}, {"sub:1": "NOT_READY",
+                                       "default:0": "READY", "default:1": "READY"})
+    assert d["result"]["verdict"] == "HYPOTHETICAL_RUN_LIST_CONTROL_ACTION"
+    assert d["result"]["foreground_spell_selected_now"] is None
+    assert d["result"]["destination"] == "sub"
+    # The first scan selects a quiet run control action. NOT alpha, beta
+    # or the caller's filler. In the following scan, if the destination has
+    # no eligible action, caller filler is still NOT selected that scan.
+    first=bounded_control_step(native_run_ir, {"rage":50},
+        {"default:0":"READY", "default:1":"READY", "sub:1":"NOT_READY"}, {})
+    assert first["phase"]=="QUEUED_RUN_EXECUTED_MODEL_TRANSITION"
+    assert first["state_after_model"]=={
+        "active_list":"sub","restore_list":"default"}
+    second=bounded_control_step(native_run_ir, {"rage":50},
+        {"default:1":"READY", "sub:1":"NOT_READY"},
+        first["state_after_model"])
+    assert second["result"]["verdict"]=="UNKNOWN"
+    assert second["phase"]=="MODEL_RESTORE_AFTER_NEXT_SELECT"
+    assert second["state_after_model"]=={
+        "active_list":"default","restore_list":None}
+    third=bounded_control_step(native_run_ir, {"rage":50},
+        {"default:0":"NOT_READY","default:1":"READY"}, second["state_after_model"])
+    assert third["result"]["action"]=="filler"
+    # A runnable destination action is selected only on the NEXT scan.
+    first=bounded_control_step(native_run_ir, {"rage":150},
+        {"default:0":"READY","sub:0":"READY"}, {})
+    second=bounded_control_step(native_run_ir, {"rage":150},
+        {"sub:0":"READY"}, first["state_after_model"])
+    assert first["result"]["foreground_spell_selected_now"] is None
+    assert second["result"]["action"]=="alpha"
+    assert second["state_after_model"]=={
+        "active_list":"default","restore_list":None}
     var = (
         b"actions=variable,name=x,op=setif,value=5,value_else=2,condition=rage>=100\n"
         b"actions+=/filler,if=variable.x=5\n"
@@ -605,7 +703,7 @@ def selftest():
                       expected_git_blob="a"*40)
     except AplError:pass
     else:raise AssertionError("SOURCE_PIN_BYPASSED")
-    return {"status": "PASS_OFFLINE_SYNTHETIC", "checks": 38,
+    return {"status": "PASS_OFFLINE_SYNTHETIC", "checks": 48,
             "source_SimC_profile_loaded": False,
             "WCL_observations_used": False,
             "native_SimC_parity_proven": False,
