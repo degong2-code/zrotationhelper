@@ -52,6 +52,7 @@ local function CallSpellAPI(api, id)
     if type(api) ~= "function" then return "UNKNOWN_API_UNAVAILABLE", nil end
     local ok, value = pcall(api, id)
     if not ok then return "UNKNOWN_API_RESTRICTED", nil end
+    if not SecretFree(value) then return "UNKNOWN_RETURN_SECRET", nil end
     if value == nil then return "UNKNOWN_NO_INFORMATION", nil end
     -- The object itself is never saved or iterated. Each allowed field
     -- is read under a pcall and checked for secrecy before inspection.
