@@ -279,9 +279,13 @@ def _interpret_class(command, attributes):
     return "ACTION"
 
 
-def parse_profile(raw, *, require_source=True):
-    if require_source and git_blob(raw) != PROFILE_GIT_BLOB:
-        raise AplError("PINNED_PROFILE_SOURCE_BLOB_MISMATCH")
+def parse_profile(raw, *, require_source=True, expected_git_blob=PROFILE_GIT_BLOB):
+    if require_source:
+        if (not isinstance(expected_git_blob,str) or
+            not re.fullmatch(r"[a-f0-9]{40}",expected_git_blob)):
+            raise AplError("EXACT_SOURCE_GIT_BLOB_REQUIRED")
+        if git_blob(raw) != expected_git_blob:
+            raise AplError("PINNED_PROFILE_SOURCE_BLOB_MISMATCH")
     decoded = raw.decode("utf-8")
     lists = {}
     parsed = 0
@@ -594,7 +598,14 @@ def selftest():
                          {}, {"default:1": "READY"})
     assert f["result"]["verdict"] == "UNKNOWN"
     assert Expression("1-2+3").parse()[0] == "binary"
-    return {"status": "PASS_OFFLINE_SYNTHETIC", "checks": 36,
+    sample2=b"actions=spell,if=rage>30\n"
+    assert parse_profile(sample2,require_source=True,
+                         expected_git_blob=git_blob(sample2))["source_action_line_count"]==1
+    try:parse_profile(sample2,require_source=True,
+                      expected_git_blob="a"*40)
+    except AplError:pass
+    else:raise AssertionError("SOURCE_PIN_BYPASSED")
+    return {"status": "PASS_OFFLINE_SYNTHETIC", "checks": 38,
             "source_SimC_profile_loaded": False,
             "WCL_observations_used": False,
             "native_SimC_parity_proven": False,
@@ -604,9 +615,12 @@ def selftest():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", type=Path)
+    parser.add_argument("--expected-git-blob",default=PROFILE_GIT_BLOB,
+                        help="Pinned official source Git blob SHA1; override for other specs/builds")
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
-    value = (parse_profile(args.profile.read_bytes())
+    value = (parse_profile(args.profile.read_bytes(),
+                           expected_git_blob=args.expected_git_blob)
              if args.profile else selftest())
     blob = canonical(value)
     if args.out:
