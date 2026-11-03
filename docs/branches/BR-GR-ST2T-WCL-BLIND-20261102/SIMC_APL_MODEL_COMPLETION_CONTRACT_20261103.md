@@ -51,3 +51,15 @@ G1 syntax/source fidelity is **not** a completion declaration for the product. S
 4. Resume WCL blind post-lock comparison and dummy feedback **after** the SimC engine is fit to serve as the reference model.
 
 No user-side WoW addon installation or manual local task is required for this stage.
+
+
+## 2026-11-03 native selected-row oracle successor status
+
+The user-directed SimC-first research engine priority continues; WCL and dummy addon work are held.
+
+- **G2 source language semantics successor:** Native `simulationcraft/simc@b522cded8c26b97dac03fdf56e57a03ec7e8faa6` `run_action_list` behavior differs from generic recursive `call_action_list`. Corrected `simc_apl_semantic_ir_v2.py` to model RUN as **quiet queued control action**, activation on its `execute()`, followed by destination scan and restoration. Separate CALL uses synchronous `select_action` recursion with fallback. An external readiness verdict is required before either control action is executed. [Final source CI #41565030261](https://github.com/degong2-code/zrotationhelper/actions/runs/41565030261) PASS Python 3.12/3.14 with source profiles; **G2 complete Native parity remains NOT ESTABLISHED**.
+- **G4 partial live native oracle input:** Instrumented actual `player_t::select_action` using pinned source blob and a single `a->action_ready()` evaluation, source pointer identity against exact owning APL row, plus direct CALL recursion and return markers. [Native SimC CI #41565722906](https://github.com/degong2-code/zrotationhelper/actions/runs/41565722906) PASS full official/pristine versus modified reporter differential (identical ST/2T precombat and combat JSON2 sequences). ST 118 foreground roots, 100 returned selected rows, 1542 readiness attempts. Two targets 96 roots, 90 returned selected rows, 1030 readiness attempts. All 190 selected rows have pointer identity, zero UNKNOWN. Actual source row directly observed: ST `default` RUN Slayer → `slayer` Recklessness, 2T `default` RUN Slayer AoE → `slayer_aoe` Recklessness. This is NOT an independent interpreter selection-parity PASS; Native oracle state and alternative readiness reasons are still unresolved.
+- **G5 model amendment:** [source conditional model CI #41565944271](https://github.com/degong2-code/zrotationhelper/actions/runs/41565944271) PASS, superseding earlier incorrect textual RUN behavior; source-hypothesis model output SHA256 `a523ae7f579f4dde56d0e5282fa69541f0c0f1073f07d63fef88bf12290a296c`. No production General Rotation priority promotion.
+- **Session Exact Next:** build a small per-foreground-scan Native source row/attempt trace contract and a distinct interpreter replay that consumes the **same strict PRE state** without leaking action-ready outcome as a player-readiness fact. Require action-selection parity and explanations across ST and 2T before generalizing to AoE and Enhancement. Do not spend WCL API points or expand the target-dummy addon until SimC model completeness is proven.
+
+No MAIN/FROZEN/global state promoted; no player action required.
