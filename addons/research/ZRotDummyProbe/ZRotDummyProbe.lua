@@ -15,6 +15,7 @@ local MAX_SESSIONS = 5
 local MAX_TRACKED = 16
 local DEFAULT_IDS = {184367, 23881, 335096, 85288, 335097, 1719, 61304}
 local session
+local recorderDisabled = false
 
 local function Message(msg)
     if DEFAULT_CHAT_FRAME then
@@ -141,6 +142,7 @@ local function Snapshot(eventName)
 end
 
 local function Start()
+    if recorderDisabled then Message("Recorder disabled for unsafe saved-data schema."); return end
     if session then Message("Already recording."); return end
     if not ZRotDummyProbeDB or #ZRotDummyProbeDB.sessions >= MAX_SESSIONS then
         Message("Session capacity reached; existing saved data was not removed.")
@@ -201,7 +203,7 @@ local function Stats()
 end
 
 local function OnSlash(text)
-    if not ZRotDummyProbeDB then Message("Not initialized."); return end
+    if recorderDisabled or not ZRotDummyProbeDB then Message("Not initialized or disabled."); return end
     local command, rest = string.match(text or "", "^%s*(%S*)%s*(.-)%s*$")
     command = string.lower(command)
     if command == "start" then Start()
@@ -229,13 +231,13 @@ frame:SetScript("OnEvent", function(_, event, ...)
         if type(ZRotDummyProbeDB.sessions) ~= "table" or
            type(ZRotDummyProbeDB.tracked) ~= "table" then
             -- Refuse to overwrite old or unexpected saved data.
-            ZRotDummyProbeDB = nil
-            Message("Saved data has unknown schema; recorder disabled.")
+            recorderDisabled = true
+            Message("Saved data has unknown schema; existing records preserved; recorder disabled.")
             return
         end
         if ZRotDummyProbeDB.schema ~= SCHEMA then
-            ZRotDummyProbeDB = nil
-            Message("Saved data schema differs; recorder disabled.")
+            recorderDisabled = true
+            Message("Saved data schema differs; existing records preserved; recorder disabled.")
         end
         return
     end
@@ -258,6 +260,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
             -- Do not take post-cast cooldown to claim strict PRE readiness.
             Append({kind="PLAYER_CAST_SUCCEEDED",timestamp=when,
                     spell_id=spellID,expected_spell="UNKNOWN",
+                    manual_keypress="UNKNOWN",
                     source_readiness_pre="UNKNOWN",
                     verdict="UNKNOWN"})
         else
