@@ -64,7 +64,7 @@ jobs:
           import json
           r=json.load(open('/tmp/aura-pre-selftest.json'))
           assert r['status']=='PASS_OFFLINE_SYNTHETIC'
-          assert r['checks']>=9 and r['live_API_calls']==0
+          assert r['checks']>=13 and r['live_API_calls']==0
           assert r['priority_rules_validated']==0
           assert r['wrong_cast_flags']==0
           print('STRICT_PRE_AURA_TRANSITION_INDEPENDENT_SYNTHETIC_PASS')
@@ -263,9 +263,12 @@ jobs:
           assert obj['source_buff_duration_truth']=='UNVERIFIED'
           assert obj['resource_scaling_patch_truth']=='UNVERIFIED'
           assert obj['trainer_error_flags']==0
-          for role,expected in [('discovery',54),('holdout',51)]:
+          for role,expected,affected in [('discovery',54,40),('holdout',51,34)]:
               v=obj[role]
               assert v['actor_casts']==expected
+              assert v['aura_reconstruction']['same_tick_remove_apply_groups']==8
+              assert v['aura_reconstruction']['same_tick_reapply_affected_casts']==affected
+              assert v['aura_reconstruction'].get('independent_replay_true_mismatches',0)==0
               assert sum(v['source_apl_guard_counts'].values())==expected
               assert v['source_apl_guard_extracted_and_executed'] is True
               for cast in v['cast_records']:
