@@ -1,0 +1,18 @@
+{
+  "schema": "ZrotAuraProvenanceSimcPredicateFixtureV1",
+  "scope_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_simc_ir_receipt_sha256": "206e3a39d83d9abbe7e770ad6c7c963facc18c6485337b9734f6a9a3cdecc1d5",
+  "source_adapter_git_blob_sha1": "6c75321d8a86ec8be3f6a63e890e6a69b65fda39",
+  "apl_row": {
+    "list": "slayer",
+    "index": 2,
+    "action": "rampage",
+    "expression": "buff.recklessness.up&rage>=100"
+  },
+  "aura_state_contract": "latest valid actor-target aura transition timestamp strictly earlier than actor cast",
+  "same_timestamp_change_policy": "exclude from PRE; conflicting transition groups make future state UNKNOWN",
+  "original_replay_conflict_policy": "downgrade to UNKNOWN, do not overwrite source",
+  "resource_units": "WCL actor-owned type-1 raw/10, empirical observational candidate",
+  "priority_authority": "NO_PRIORITY_RECOMMENDATION_OR_TRAINER_MISTAKE",
+  "stable_discovery_lock": "c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e"
+}
