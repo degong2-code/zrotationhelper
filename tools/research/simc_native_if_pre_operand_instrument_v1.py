@@ -44,8 +44,13 @@ def instrument(raw,*,strict=True):
     if v1.count(OLD)!=1 or v1.count(OLD_LOG)!=1:
         raise OperandPatchError("IF_SOURCE_PRE_OPERAND_SITE_OR_RESULT_MARKER_CHANGED")
     revised=v1.replace(OLD,NEW).replace(OLD_LOG,NEW_LOG)
-    if revised.count("if_expr->success()")!=1:
-        raise OperandPatchError("NATIVE_IF_EVAL_CALLED_MULTIPLE_TIMES")
+    # Enforce evaluation count within the EXACT function being patched.
+    # Other native actions may legitimately call if_expr->success() elsewhere
+    # in the 175 KB official action.cpp source; those remain untouched.
+    from simc_native_if_expression_instrument_v1 import BEFORE,AFTER
+    region=revised.split(BEFORE,1)[1].split(AFTER,1)[0]
+    if region.count("if_expr->success()")!=1:
+        raise OperandPatchError("NATIVE_ACTION_READY_IF_REEVALUATED")
     if revised.count(MARK)!=1 or revised.count("ZROT_NATIVE_IF_V1|")!=1:
         raise OperandPatchError("MISSING_SOURCE_FACT_ORIGINAL_RESULT_MARKERS")
     if revised.index("zrot_pre_primary_resource =")>revised.index("zrot_original_if_result ="):
@@ -85,6 +90,10 @@ def selftest():
              +V1_OLD+"\n  return true;\n}\n"+AFTER+"  return true;\n}\n").encode()
     changed=instrument(example,strict=False).decode()
     assert changed.count("if_expr->success()")==1
+    # Unrelated source functions can have their own single native IF call.
+    # Those must not change the function-scoped instrumentation contract.
+    extended=example+b"\nvoid unrelated() { if_expr->success(); }\n"
+    assert instrument(extended,strict=False).decode().count("if_expr->success()")==2
     assert changed.count(MARK)==1
     assert "zrot_pre_primary_resource" in changed
     assert "zrot_pre_active_enemies" in changed
@@ -93,7 +102,7 @@ def selftest():
     try:instrument(changed.encode(),strict=False)
     except PatchError:pass
     else:raise AssertionError("ACCEPTED_DOUBLE_INSTRUMENT")
-    return {"status":"PASS_OFFLINE_SYNTHETIC","checks":7,
+    return {"status":"PASS_OFFLINE_SYNTHETIC","checks":8,
             "native_runtime":"NOT_RUN","if_evaluation_count_unchanged":True,
             "WCL_API_calls":0}
 
