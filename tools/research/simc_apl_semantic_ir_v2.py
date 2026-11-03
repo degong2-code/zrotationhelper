@@ -487,6 +487,20 @@ def bounded_decision(ir, facts, readiness, *, timestamp=None,
                 return {"verdict": "UNKNOWN", "reason": "CONDITION_UNOBSERVED",
                         "blocking_source_line": row["source_line"]}
             behavior = row["behavior"]
+            k = name + ":" + str(row["index"])
+            # CALL and RUN are native actions and must also pass action_ready()
+            # before recursion or queued list transition. Do NOT silently
+            # accept them based only on a true APL "if" condition.
+            if behavior != "VARIABLE":
+                state = readiness.get(k, "UNKNOWN")
+                if state not in ("READY", "NOT_READY", "UNKNOWN"):
+                    raise AplError("INVALID_ACTION_READINESS")
+                if state == "NOT_READY":
+                    continue
+                if state == "UNKNOWN":
+                    return {"verdict": "UNKNOWN",
+                            "reason": "ACTION_READINESS_UNOBSERVED",
+                            "blocking_source_line": row["source_line"]}
             if behavior == "RUN":
                 # Native run_action_list_t is ACTION_OTHER, not ACTION_CALL:
                 # it is QUEUED and execute() changes active_action_list
@@ -524,15 +538,6 @@ def bounded_decision(ir, facts, readiness, *, timestamp=None,
                             "variable": v["name"]}
                 copied["variable." + v["name"]] = v["value"]
                 continue
-            k = name + ":" + str(row["index"])
-            state = readiness.get(k, "UNKNOWN")
-            if state not in ("READY", "NOT_READY", "UNKNOWN"):
-                raise AplError("INVALID_READINESS_VERDICT")
-            if state == "NOT_READY":
-                continue
-            if state == "UNKNOWN":
-                return {"verdict": "UNKNOWN", "reason": "ACTION_READINESS_UNOBSERVED",
-                        "blocking_source_line": row["source_line"]}
             return {"verdict": "HYPOTHETICAL_SOURCE_ROW",
                     "action": row["action"], "list": name,
                     "index": row["index"], "source_line": row["source_line"],
@@ -642,13 +647,13 @@ def selftest():
     ir = parse_profile(simple, require_source=False)
     assert ir["source_action_line_count"] == 4
     a = bounded_decision(ir, {"rage": 50},
-                         {"sub:1": "NOT_READY", "default:1": "READY"})
+                         {"default:0": "READY", "sub:1": "NOT_READY", "default:1": "READY"})
     assert a["result"]["action"] == "filler"
     b = bounded_decision(ir, {"rage": 150},
-                         {"sub:0": "READY", "default:1": "READY"})
+                         {"default:0": "READY", "sub:0": "READY", "default:1": "READY"})
     assert b["result"]["action"] == "alpha"
     c = bounded_decision(ir, {"rage": 150},
-                         {"sub:0": "UNKNOWN", "default:1": "READY"})
+                         {"default:0": "READY", "sub:0": "UNKNOWN", "default:1": "READY"})
     assert c["result"]["verdict"] == "UNKNOWN"
     run_profile = simple.replace(b"call_action_list", b"run_action_list")
     native_run_ir = parse_profile(run_profile, require_source=False)
@@ -703,7 +708,7 @@ def selftest():
                       expected_git_blob="a"*40)
     except AplError:pass
     else:raise AssertionError("SOURCE_PIN_BYPASSED")
-    return {"status": "PASS_OFFLINE_SYNTHETIC", "checks": 48,
+    return {"status": "PASS_OFFLINE_SYNTHETIC", "checks": 49,
             "source_SimC_profile_loaded": False,
             "WCL_observations_used": False,
             "native_SimC_parity_proven": False,
