@@ -120,11 +120,11 @@ def replay_aura(events,actor,spell_ids,casts):
     return replay,dict(sorted(counts.items()))
 
 
-def validate_fixture(path,adapter,ir_bytes):
+def validate_fixture(path,adapter_bytes,ir_bytes):
     obj=json.loads(path.read_bytes())
     if (obj.get("schema")!=SCHEMA or obj.get("scope_policy_id")!=POLICY
         or obj.get("source_simc_ir_receipt_sha256")!=sha(ir_bytes)
-        or obj.get("source_adapter_sha256")!=sha(canonical(adapter))
+        or obj.get("source_adapter_git_blob_sha1")!=hashlib.sha1(\n            b"blob "+str(len(adapter_bytes)).encode()+b"\\0"+adapter_bytes).hexdigest()
         or not isinstance(obj.get("apl_row"),dict)
         or obj["apl_row"].get("list")!="slayer"
         or obj["apl_row"].get("index")!=2):
@@ -204,7 +204,7 @@ def execute(fixture_path,adapter_path,source_ir_path,discovery,holdout):
     adapter_raw=adapter_path.read_bytes()
     adapter=validate_adapter(json.loads(adapter_raw))
     ir_bytes=source_ir_path.read_bytes()
-    fixture=validate_fixture(fixture_path,adapter,ir_bytes)
+    fixture=validate_fixture(fixture_path,adapter_raw,ir_bytes)
     ir=json.loads(ir_bytes)
     selected_row=check_condition(ir,fixture)
     result={}
