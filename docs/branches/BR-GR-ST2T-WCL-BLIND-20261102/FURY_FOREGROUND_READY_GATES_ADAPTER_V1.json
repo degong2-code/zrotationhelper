@@ -1,0 +1,61 @@
+{
+  "schema": "ZrotSourceForegroundReadyGateAdapterV1",
+  "scope_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source": {
+    "repository": "simulationcraft/simc",
+    "revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "path": "engine/class_modules/sc_warrior.cpp",
+    "git_blob_sha1": "38ee3dd0d5943eb9227ec55aefb21e7d47244f96"
+  },
+  "spec_id": 72,
+  "source_gate": "talent.reckless_abandon_and_buff.recklessness.up",
+  "cooldown_families": [
+    {
+      "family": "BLOODTHIRST_FAMILY",
+      "shared_cooldown_key": "bloodthirst",
+      "base": {
+        "action": "bloodthirst",
+        "source_struct": "bloodthirst_t",
+        "block_when": "GATE_TRUE",
+        "foreground_exception": true
+      },
+      "replacement": {
+        "action": "bloodbath",
+        "source_struct": "bloodbath_t",
+        "block_when": "GATE_FALSE",
+        "foreground_exception": false
+      }
+    },
+    {
+      "family": "RAGING_BLOW_FAMILY",
+      "shared_cooldown_key": "raging_blow",
+      "base": {
+        "action": "raging_blow",
+        "source_struct": "raging_blow_t",
+        "block_when": "GATE_TRUE",
+        "foreground_exception": false
+      },
+      "replacement": {
+        "action": "crushing_blow",
+        "source_struct": "crushing_blow_t",
+        "block_when": "GATE_FALSE",
+        "foreground_exception": false
+      }
+    }
+  ],
+  "readiness_contract": "source-only negative foreground readiness; no game event availability inferred",
+  "source_model_patch_equivalence_to_WCL": "UNKNOWN",
+  "full_ready_requires": [
+    "source_model_mechanic_equivalence",
+    "gcd",
+    "charges",
+    "cooldown",
+    "resource",
+    "weapon",
+    "other_action_restrictions"
+  ],
+  "allow_full_READY": false,
+  "allow_automatic_player_error": false,
+  "allow_use_cast_gap_as_cooldown": false,
+  "frozen_discovery_lock_sha256": "c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e"
+}
