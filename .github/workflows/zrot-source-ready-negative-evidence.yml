@@ -4,6 +4,7 @@ on:
     branches: [work/gr-simc-st-2t-wcl-blind-20261102]
     paths:
       - tools/research/source_ready_negative_evidence_v1.py
+      - tools/research/simc_conditional_source_ready_row_filter_v1.py
       - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_FOREGROUND_READY_GATES_ADAPTER_V1.json
       - .github/workflows/zrot-source-ready-negative-evidence.yml
   workflow_dispatch:
@@ -43,6 +44,17 @@ jobs:
           print('SOURCE_ONLY_NEGATIVE_READY_GUARDS_OFFLINE_PASS')
           PY
           sha256sum tools/research/source_ready_negative_evidence_v1.py
+          python -m py_compile tools/research/simc_conditional_source_ready_row_filter_v1.py
+          python -B tools/research/simc_conditional_source_ready_row_filter_v1.py >/tmp/source-row-filter-selftest.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/source-row-filter-selftest.json'))
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['checks']>=4
+          assert d['wrong_cast_flags']==0
+          print('SOURCE_READY_GUARDS_TO_APL_PRIORITY_ROWS_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_conditional_source_ready_row_filter_v1.py
 
   actual-source-and-real-wcl-evidence:
     runs-on: ubuntu-latest
@@ -110,6 +122,52 @@ jobs:
           print('REAL_105_WCL_PRE_CONTEXTS_TWO_SIMC_ACTION_FAMILIES_188_SOURCE_FOREGROUND_NEGATIVES_PASS')
           print('SOURCE_ONLY_NONREADY_COUNT',d['source_model_false_ready_action_contexts'])
           PY
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41541463955
+          name: simc-general-rotation-ordered-ifelse-ir-713905baad4d96bd2fbc033a4ee1c3fb793c5a4a
+          path: /tmp/source-simc-ir
+          github-token: ${{ github.token }}
+      - name: Map proven source-only NOT_READY actions to 105 ST and AoE priority row sets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_conditional_source_ready_row_filter_v1.py \
+            --simc-ir /tmp/source-simc-ir/general-rotation-ifelse-research-ir.json \
+            --source-negative /tmp/ready-negative-actual-evidence.json \
+            --out /tmp/conditional-simc-source-ready-filter.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/conditional-simc-source-ready-filter.json'))
+          assert d['schema']=='ZrotGeneralRotationConditionalSourceReadyRowFilterV1'
+          assert d['status']=='SOURCE_BLOCKED_ROWS_MAPPED_TO_BOTH_APL_BRANCHES_BUT_TARGET_COUNT_UNKNOWN'
+          assert d['total_actual_actor_casts']==105
+          assert d['source_model_blocked_rows_per_branch']=={'slayer':188,'slayer_aoe':188}
+          assert d['conditional_branches_mutually_exclusive'] is True
+          assert d['total_distinct_actual_gameplay_exclusions_claimed'] is None
+          assert d['active_enemies_strict_pre']=='UNKNOWN'
+          assert d['exact_alternative_cd_charges']=='UNKNOWN'
+          assert d['spell_priority_or_dummy_mistakes_proven'] is False
+          for name,contexts in (('discovery',54),('holdout',51)):
+              result=d[name]
+              assert result['actual_cast_count']==contexts
+              assert len(result['action_decisions'])==contexts
+              assert result['predicted_spell_readiness_positive_claims']==0
+              assert result['confirmed_player_error_count']==0
+              for row in result['action_decisions']:
+                  assert row['selected_actual_apl_branch']=='UNKNOWN'
+                  assert row['expected_spell']=='UNKNOWN'
+                  assert row['dummy_wrong_action']=='UNKNOWN'
+          print('REAL_105_CASTS_ST_AOE_SOURCE_ROW_EXCLUSIONS_ZERO_PRIORITY_PROMOTION_PASS')
+          print('SOURCE_ROW_COUNTS',json.dumps(d['source_model_blocked_rows_per_branch'],sort_keys=True))
+          PY
+      - name: Retain source-conditional General Rotation IR filter receipt
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conditional-apl-source-nonready-${{ github.sha }}
+          path: /tmp/conditional-simc-source-ready-filter.json
+          retention-days: 7
       - name: Retain compact source-backed exclusions receipt
         if: success()
         uses: actions/upload-artifact@v4
