@@ -8,6 +8,7 @@ on:
       - tools/research/wcl_actor_rage_predicate_evidence_v1.py
       - tools/research/wcl_aura_pre_to_simc_guard_v1.py
       - tools/research/wcl_source_action_family_readiness_v1.py
+      - tools/research/wcl_trait_spell_replacement_gate_v1.py
       - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_ACTION_FAMILY_MECHANICS_ADAPTER_V1.json
       - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/AURA_PRE_SIMC_GUARD_FURY_FIXTURE_V1.json
       - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_WCL_RAGE_PREDICATE_ADAPTER_EXPLORATORY_V1.json
@@ -83,6 +84,17 @@ jobs:
           print('SIMC_SOURCE_ACTION_FAMILY_OFFLINE_CONTRACT_PASS')
           PY
           sha256sum tools/research/wcl_source_action_family_readiness_v1.py
+          python -m py_compile tools/research/wcl_trait_spell_replacement_gate_v1.py
+          python -B tools/research/wcl_trait_spell_replacement_gate_v1.py >/tmp/trait-gate-selftest.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/trait-gate-selftest.json'))
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=9
+          assert r['priority_claims_validated']==0
+          print('STRICT_PRE_TALENT_REPLACEMENT_GATE_OFFLINE_PASS')
+          PY
+          sha256sum tools/research/wcl_trait_spell_replacement_gate_v1.py
 
   two-real-cohort-evidence:
     name: Independent WCL raw source/target actor resource gate
@@ -410,5 +422,100 @@ jobs:
         with:
           name: postlock-wcl-simc-action-families-${{ github.sha }}
           path: /tmp/wcl-action-family-replay.json
+          retention-days: 7
+          if-no-files-found: error
+
+  actual-talent-replacement-gates:
+    runs-on: ubuntu-latest
+    needs: [offline-contract]
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41463589665
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          path: /tmp/trait-discovery
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41473060401
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          path: /tmp/trait-holdout
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41555742452
+          name: postlock-wcl-simc-action-families-860e798f873b1a5c94de7d62369460a9dc61efdf
+          path: /tmp/pinned-action-family
+          github-token: ${{ github.token }}
+      - name: Retrieve exact previously pinned 72-spec public trait metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          import hashlib,json,urllib.request
+          req=urllib.request.Request('https://www.raidbots.com/static/data/live/talents.json',
+              headers={'User-Agent':'zRotationHelperPostLockTraitEvidence/1'})
+          with urllib.request.urlopen(req,timeout=30) as resp:blob=resp.read(8_000_001)
+          assert 100000<len(blob)<8000000
+          digest=hashlib.sha256(blob).hexdigest()
+          assert digest=='53bb1b612f140b666d66b75314db501bb1fa31923b66ad3f3cb02edbc5f3a07c',digest
+          json.loads(blob)
+          Path('/tmp/source-traits.json').write_bytes(blob)
+          for name in ('discovery','holdout'):
+              root=Path('/tmp/trait-'+name)
+              files=sorted(p for p in root.rglob('*') if p.is_file())
+              assert 1<=len(files)<=40
+              with ZipFile('/tmp/trait-'+name+'.zip','w',ZIP_DEFLATED) as z:
+                  for p in files:z.write(p,arcname=str(p.relative_to(root)))
+          print('PINNED_WCL_AND_BLIZZARD_TRAIT_TREE_SNAPSHOT_REUSED')
+          PY
+      - name: Evaluate verified talent and aura replacement switch, never action readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/wcl_trait_spell_replacement_gate_v1.py \
+            --tree-data /tmp/source-traits.json \
+            --source-family-receipt /tmp/pinned-action-family/wcl-action-family-replay.json \
+            --discovery-zip /tmp/trait-discovery.zip \
+            --holdout-zip /tmp/trait-holdout.zip \
+            --out /tmp/trait-family-gate-proof.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('/tmp/trait-family-gate-proof.json').read_bytes())
+          assert d['schema']=='ZrotWclSpecTraitEffectiveActionGateV1'
+          assert d['total_casts']==105
+          assert d['actual_competing_spell_cooldown_readiness']=='UNKNOWN'
+          assert d['dummy_wrong_action_flags']==0
+          for name,total in [('discovery',54),('holdout',51)]:
+              r=d[name]
+              assert r['casts_evaluated']==total
+              assert sum(r['cast_replacement_gate_counts'].values())==total
+              assert r['trait_numeric_precombat_evidence']['source']=='STRICT_PRE_COMBATANTINFO'
+              assert r['any_gameplay_recommendation'] is False
+              assert all(row['which_action_should_be_pressed']=='UNKNOWN' for row in r['recorded_cast_details'])
+              assert all(row['base_bloodthirst_actual_cd_ready']=='UNKNOWN' for row in r['recorded_cast_details'])
+          print('REAL_105_WCL_CASTS_TALENT_AURA_REPLACEMENT_GATE_VALIDATION_PASS')
+          print('EFFECTIVE_REPLACEMENT_GATE_COUNTS',json.dumps({
+              n:{'talent':d[n]['trait_numeric_precombat_evidence'],
+                 'counts':d[n]['cast_replacement_gate_counts'],
+                 'replacement_cast_gate_contradictions':d[n]['recorded_replacement_cast_with_false_gate']}
+              for n in ('discovery','holdout')},sort_keys=True))
+          PY
+      - name: Preserve derived non-promoted trait-conditioned replacement evidence
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postlock-trait-conditioned-replacement-${{ github.sha }}
+          path: /tmp/trait-family-gate-proof.json
           retention-days: 7
           if-no-files-found: error
