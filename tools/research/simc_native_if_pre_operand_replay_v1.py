@@ -181,7 +181,7 @@ def verify_folder(folder,targets,source_ir):
                 if src[field]!=native[field]:
                     raise OperandReplayError("OFFICIAL_PROFILE_NATIVE_EFFECTIVE_DIFFERENCE")
     log=(folder/"simc_native_log.txt").read_bytes()
-    summary=analyze_trace(log.decode("utf-8"))
+    summary=analyze_trace(log.decode("utf-8"),effective)
     if summary["counts"]["all_native_action_ready_attempts"]!=audit["source_action_ready_attempts"]["total"]:
         raise OperandReplayError("ACTUAL_READY_COUNT_DRIFT")
     summary["controlled_targets"]=targets
