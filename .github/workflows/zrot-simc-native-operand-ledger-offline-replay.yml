@@ -1,0 +1,110 @@
+name: zrot-simc-native-operand-ledger-offline-replay
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_native_if_ledger_offline_replay_v1.py
+      - tools/research/simc_apl_semantic_ir_v2.py
+      - .github/workflows/zrot-simc-native-operand-ledger-offline-replay.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Validate final source and adversarial ledger checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_native_if_ledger_offline_replay_v1.py
+          python -B tools/research/simc_native_if_ledger_offline_replay_v1.py >/tmp/simc-ledger-selftest.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/simc-ledger-selftest.json'))
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=3 and r['WCL_API_calls']==0
+          assert r['native_simc_run'] is False
+          assert r['independent_second_implementation_oracle'] is False
+          print('NATIVE_OPERAND_REPLAY_CHEAP_OFFLINE_FIXTURE_PASS')
+          PY
+          sha256sum tools/research/simc_native_if_ledger_offline_replay_v1.py
+
+  actual-pinned-ledger-no-native-simc:
+    runs-on: ubuntu-latest
+    needs: [offline-contract]
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc-source
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41584822737
+          name: native-fury-st-2t-source-select-4c2d0bdf29d5d3e7eeead3cd73a1b9356054c7e5
+          path: /tmp/pinned-native-if-pre
+          github-token: ${{ github.token }}
+      - name: Recompute all 477 native PRE operand cases using Python only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_ledger_offline_replay_v1.py \
+            --official-profile original-simc-source/profiles/MID2/MID2_Warrior_Fury.simc \
+            --native-pre-fact-receipt /tmp/pinned-native-if-pre/native-independent-pre-operand-ast-subset.json \
+            --out /tmp/replayed-native-simc-operand-facts.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('/tmp/replayed-native-simc-operand-facts.json').read_bytes())
+          assert x['schema']=='ZrotIndependentSimcOperandLedgerOfflineRecheckV1'
+          assert x['status']=='REPRODUCED_NATIVE_BOUNDED_PRE_FACT_AST_FROM_IMMUTABLE_RECEIPT'
+          assert x['total_native_IF_pre_facts_replayed']==477
+          assert x['fully_known_numeric_AST_matches']==3
+          assert x['decisive_partial_three_valued_AST_matches']==63
+          assert x['known_native_IF_checks_correctly_recomputed']==66
+          assert x['IF_checks_with_unverified_other_operands']==411
+          assert x['native_simc_executed_in_recheck'] is False
+          assert x['independent_second_language_or_implementation_oracle'] is False
+          assert x['General_Rotation_priority_model_complete'] is False
+          assert x['WCL_comparison_eligible'] is False
+          for name,total,proven in [('st',255,20),('two_target',222,46)]:
+              r=x[name]
+              assert r['facts_reverified']==total
+              assert r['independent_replayed_boolean_count']==proven
+              assert r['native_binary_was_executed_in_this_validation'] is False
+          print('REAL_477_NATIVE_PRE_OPERAND_FACTS_OFFLINE_REPLAY_66_INDEPENDENT_AST_MATCHES_PASS')
+          PY
+          sha256sum /tmp/replayed-native-simc-operand-facts.json
+      - name: Retain lightweight proof only
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simc-477-preoperand-ledger-offline-${{ github.sha }}
+          path: /tmp/replayed-native-simc-operand-facts.json
+          retention-days: 7
+          if-no-files-found: error
