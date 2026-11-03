@@ -131,7 +131,11 @@ def model(source,native):
                   if "if" in row["expression_fields"] else set())
                   if x!="active_enemies"),
               "no_action_semantics":"CALLER_FALLTHROUGH" if row["behavior"]=="CALL"
-                                    else "RUN_DESTINATION_YIELD_NO_CALLER_FALLTHROUGH"})
+                                    else "QUEUED_ACTION_CHANGES_ACTIVE_LIST_ON_EXECUTE",
+              "next_scan_semantics":"SAME_SCAN_RECURSION_AND_FALLBACK"
+                   if row["behavior"]=="CALL" else
+                   "NEXT_SELECT_ON_DESTINATION_THEN_RESTORE_PREVIOUS_ACTIVE_LIST",
+              "native_foreground_choice_parity":"NOT_PROVEN"})
     priority={}
     for list_name,rows in lists.items():
         priority[list_name]=[{
@@ -187,7 +191,13 @@ def model(source,native):
        "source_count_comparisons_in_conditions":breakers,
        "source_symbolic_dependencies":source["source_symbol_dependencies"],
        "raw_action_rows_retained":121,
-       "run_list_control_flow_native_parity":"NOT_YET_PROVEN_PER_DECISION",
+       "run_list_control_flow_native_parity":"SOURCE_CODE_BRANCH_CONFIRMED_NATIVE_TRACE_PENDING",
+       "native_control_source_references":{
+           "player_cpp_git_blob_sha1":"88e03a01ca87ff66fd3902c9d6e047fe1a03ecb8",
+           "action_cpp_git_blob_sha1":"399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4",
+           "source_semantics":"RUN_IS_QUEUED_ACTION_CALL_IS_SELECT_TIME_RECURSION",
+           "source_tracing_execution_equivalence":"NOT_YET_PROVEN"
+       },
        "precombat_variable_runtime_parity":"NOT_YET_PROVEN",
        "ability_ready_state_semantics":"NOT_PROVEN",
        "source_action_priority_vs_actual_foreground_native_decision":"NOT_REPLAYED",
