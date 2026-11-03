@@ -5,6 +5,7 @@ on:
     paths:
       - tools/research/simc_native_select_trace_instrument_v1.py
       - tools/research/simc_native_select_trace_audit_v1.py
+      - tools/research/simc_native_foreground_structural_replay_v1.py
       - .github/workflows/zrot-simc-native-selection-source-oracle-v1.yml
   workflow_dispatch:
 
@@ -32,13 +33,16 @@ jobs:
           set -euo pipefail
           python -m py_compile tools/research/simc_native_select_trace_instrument_v1.py
           python -m py_compile tools/research/simc_native_select_trace_audit_v1.py
+          python -m py_compile tools/research/simc_native_foreground_structural_replay_v1.py
           python -B tools/research/simc_native_select_trace_instrument_v1.py >/tmp/native-producer-selftest.json
           python -B tools/research/simc_native_select_trace_audit_v1.py >/tmp/native-audit-selftest.json
+          python -B tools/research/simc_native_foreground_structural_replay_v1.py >/tmp/native-structural-selftest.json
           python - <<'PY'
           import json
           from pathlib import Path
           for file,count in [('native-producer-selftest.json',8),
-                             ('native-audit-selftest.json',7)]:
+                             ('native-audit-selftest.json',7),
+                             ('native-structural-selftest.json',10)]:
               d=json.loads((Path('/tmp')/file).read_bytes())
               assert d['status']=='PASS_OFFLINE_SYNTHETIC'
               assert d['checks']>=count
@@ -47,6 +51,7 @@ jobs:
           PY
           sha256sum tools/research/simc_native_select_trace_instrument_v1.py
           sha256sum tools/research/simc_native_select_trace_audit_v1.py
+          sha256sum tools/research/simc_native_foreground_structural_replay_v1.py
 
   real-native-foreground-source-oracle:
     needs: [offline-python-provenance]
@@ -212,6 +217,43 @@ jobs:
               for k in ('st','two_target')},sort_keys=True))
           PY
           sha256sum /tmp/native-foreground-selected-apl-rows.json
+      - name: Independently replay every Native foreground select_action tree from source order and oracle readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_foreground_structural_replay_v1.py \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --native-selection-receipt /tmp/native-foreground-selected-apl-rows.json \
+            --pinned-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --out /tmp/native-source-order-structural-replay.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/native-source-order-structural-replay.json').read_bytes())
+          assert r['schema']=='ZrotNativeSimcConditionalScanStructureReplayV1'
+          assert r['status']=='SOURCE_SELECTION_STRUCTURE_CONDITIONAL_NATIVE_READY_INPUT_PASS'
+          assert r['source_structure_replay_accepted_roots']==214
+          assert r['total_foreground_root_scans']==214
+          assert r['real_native_foreground_selected_rows']==190
+          assert r['native_true_false_ready_inputs_used'] is True
+          assert r['independent_simc_if_expression_parity']=='NOT_TESTED'
+          assert r['independent_spell_ready_and_resource_parity']=='NOT_TESTED'
+          assert r['full_General_Rotation_model_complete'] is False
+          assert r['WCL_comparison_eligible'] is False
+          for label,roots,actions in [('st',118,100),('two_target',96,90)]:
+              o=r[label]
+              assert o['foreground_root_scans']==roots
+              assert o['foreground_replay_counts']['root_returned_action']==actions
+              assert o['foreground_replay_counts']['root_no_action']==roots-actions
+              assert o['parent_Calls_and_RUNs_source_control_parity_given_native_ready_bits']=='PASS_CONDITIONAL_SOURCE_ORDER_REPLAY'
+              assert len(o['root_examples'])==12
+          print('REAL_NATIVE_214_ROOTS_190_SELECTED_ROWS_SOURCE_SCAN_CONTROL_REPLAY_PASS')
+          print('REPLAY_COUNTS',json.dumps({
+              name:r[name]['foreground_replay_counts'] for name in ('st','two_target')
+          },sort_keys=True))
+          PY
+          sha256sum /tmp/native-source-order-structural-replay.json
       - name: Preserve small native selection proof, never raw logs or character metadata
         if: success()
         uses: actions/upload-artifact@v4
@@ -221,5 +263,6 @@ jobs:
             /tmp/native-foreground-selected-apl-rows.json
             /tmp/native-sequence-nonperturbation.json
             /tmp/native-selected-source-patch.json
+            /tmp/native-source-order-structural-replay.json
           retention-days: 7
           if-no-files-found: error
