@@ -59,6 +59,7 @@ jobs:
           path: simc-pinned
           sparse-checkout: |
             profiles/MID2/MID2_Warrior_Fury.simc
+            profiles/MID2/MID2_Shaman_Enhancement.simc
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
@@ -116,12 +117,35 @@ jobs:
           cmp /tmp/fury-apl-semantic-ir-v2.json /tmp/identical-second-IR.json
           echo 'DETERMINISTIC_REPRODUCED_FINAL_IR_BYTES=PASS'
           sha256sum /tmp/fury-apl-semantic-ir-v2.json
+          python -B tools/research/simc_apl_semantic_ir_v2.py \
+            --profile simc-pinned/profiles/MID2/MID2_Shaman_Enhancement.simc \
+            --expected-git-blob 2f2c951ae07489d124db36c464ab66d1efd262ce \
+            --out /tmp/enhancement-apl-semantic-ir-v2.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('/tmp/enhancement-apl-semantic-ir-v2.json').read_bytes())
+          assert d['source_git_blob_sha1']=='2f2c951ae07489d124db36c464ab66d1efd262ce'
+          assert d['source_action_line_count']==114
+          assert d['action_list_counts']=={
+            'precombat':9,'default':9,'aoe':34,'cooldowns':11,
+            'single_sb':29,'single_totemic':22}
+          assert d['expression_attribute_counts']['if']==80
+          assert d['expression_attribute_counts']['value']==6
+          assert d['expression_syntax_coverage']=='COMPLETE_FOR_THIS_PINNED_PROFILE'
+          assert d['semantic_runtime_equivalence_to_native_SimC']=='NOT_YET_TESTED'
+          assert d['model_ready_for_WCL_priority_comparison'] is False
+          print('SECOND_SPECIALIZATION_ENHANCEMENT_APL_114_ROWS_SOURCE_SYNTAX_PASS')
+          PY
+          sha256sum /tmp/enhancement-apl-semantic-ir-v2.json
           sha256sum tools/research/simc_apl_semantic_ir_v2.py
       - name: Archive source-faithful candidate model only
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: simc-source-faithful-apl-v2-${{ github.sha }}
-          path: /tmp/fury-apl-semantic-ir-v2.json
+          path: |
+            /tmp/fury-apl-semantic-ir-v2.json
+            /tmp/enhancement-apl-semantic-ir-v2.json
           retention-days: 7
           if-no-files-found: error
