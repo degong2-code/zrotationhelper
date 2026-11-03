@@ -1,0 +1,120 @@
+name: zrot-source-ready-negative-evidence
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/source_ready_negative_evidence_v1.py
+      - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_FOREGROUND_READY_GATES_ADAPTER_V1.json
+      - .github/workflows/zrot-source-ready-negative-evidence.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Final file compile and source-negative-readiness self-test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/source_ready_negative_evidence_v1.py
+          python -B tools/research/source_ready_negative_evidence_v1.py >/tmp/ready-guard-selftest.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/ready-guard-selftest.json'))
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['checks']>=11
+          assert d['false_player_priority_errors']==0
+          assert d['actual_WCL_or_SimC_loaded'] is False
+          print('SOURCE_ONLY_NEGATIVE_READY_GUARDS_OFFLINE_PASS')
+          PY
+          sha256sum tools/research/source_ready_negative_evidence_v1.py
+
+  actual-source-and-real-wcl-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    needs: [offline-contract]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: fixed-simc-source
+          sparse-checkout: |
+            engine/class_modules/sc_warrior.cpp
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41556142959
+          name: postlock-trait-conditioned-replacement-1cdd6eef3a22048894028fb85b69f70224eca906
+          path: /tmp/verified-wcl-pre-gate
+          github-token: ${{ github.token }}
+      - name: Verify exact SimC C++ foreground ready() guards against 105 actual WCL contexts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/source_ready_negative_evidence_v1.py \
+            --adapter docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_FOREGROUND_READY_GATES_ADAPTER_V1.json \
+            --simc-cpp fixed-simc-source/engine/class_modules/sc_warrior.cpp \
+            --replacement-receipt /tmp/verified-wcl-pre-gate/trait-family-gate-proof.json \
+            --out /tmp/ready-negative-actual-evidence.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('/tmp/ready-negative-actual-evidence.json').read_bytes())
+          assert d['schema']=='ZrotSourceReadyNegativeProofAndWclStrictPreV1'
+          assert d['status']=='SOURCE_FOREGROUND_BLOCKERS_OBSERVED_NOT_COMPLETE_GAME_READINESS'
+          assert d['total_actor_casts']==105
+          assert d['source_model_false_ready_action_contexts']==188
+          assert d['game_cd_charge_state_verified'] is False
+          assert d['simc_patch_and_player_full_build_equivalence']=='UNKNOWN'
+          assert d['actual_target_count']=='UNKNOWN'
+          assert d['true_spell_ready_claims']==0
+          assert d['confirmed_dummy_mistakes']==0
+          assert len(d['source_ready_override_evidence'])==4
+          for role,n,selected,unknown in (('discovery',54,52,2),('holdout',51,42,9)):
+              v=d[role]
+              assert v['observed_casts']==n
+              assert len(v['actions'])==n
+              assert v['source_model_foreground_exclusions']==selected*2
+              for action in ('bloodthirst','raging_blow'):
+                  stats=v['source_model_action_guard_status_counts'][action]
+                  assert stats['SOURCE_MODEL_BLOCKED_FOREGROUND']==selected
+                  assert stats['UNKNOWN_GATE']==unknown
+              for action in ('bloodbath','crushing_blow'):
+                  stats=v['source_model_action_guard_status_counts'][action]
+                  assert stats['SOURCE_MODEL_GATE_PASSED_OTHER_READY_FACTORS_UNKNOWN']==selected
+                  assert stats['UNKNOWN_GATE']==unknown
+              assert all(row['actual_game_ready_action']=='UNKNOWN' for row in v['actions'])
+              assert all(row['trainer_wrong_cast']=='UNKNOWN' for row in v['actions'])
+          print('REAL_105_WCL_PRE_CONTEXTS_TWO_SIMC_ACTION_FAMILIES_188_SOURCE_FOREGROUND_NEGATIVES_PASS')
+          print('SOURCE_ONLY_NONREADY_COUNT',d['source_model_false_ready_action_contexts'])
+          PY
+      - name: Retain compact source-backed exclusions receipt
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-ready-negative-evidence-${{ github.sha }}
+          path: /tmp/ready-negative-actual-evidence.json
+          retention-days: 7
+          if-no-files-found: error
