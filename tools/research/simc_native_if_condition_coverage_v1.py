@@ -221,7 +221,7 @@ def selftest():
     assert unknown["counts"]["unobserved_if_at_attempt"]==1
     assert unknown["absence_of_if_event_means_condition_false"] is False
     return {"status":"PASS_OFFLINE_SYNTHETIC","checks":8,
-       "real_native_executed":False,"independent_operand_parity_proven":False}
+       "real_native_executed":False,"independent_operand_parity_proven":False,"WCL_API_calls":0}
 
 
 def main():
