@@ -1,0 +1,152 @@
+name: zrot-simc-v2-native-effective-apl
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_native_effective_apl_crosscheck_v1.py
+      - .github/workflows/zrot-simc-v2-native-effective-apl.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Exact file compile + independent source/effective fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_native_effective_apl_crosscheck_v1.py
+          python -B tools/research/simc_native_effective_apl_crosscheck_v1.py >/tmp/native-crosscheck-test.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/native-crosscheck-test.json'))
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['checks']==5
+          assert d['actual_native_simc_executed'] is False
+          assert d['native_choice_parity_verified'] is False
+          print('NATIVE_SOURCE_VS_EFFECTIVE_APL_MODEL_FIXTURE_PASS')
+          PY
+          sha256sum tools/research/simc_native_effective_apl_crosscheck_v1.py
+
+  real-native-source-model:
+    needs: [offline]
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      SIMC_COMMIT: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact official public profile and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = "$SIMC_COMMIT"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          raw=Path('simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc').read_bytes()
+          blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          assert blob=='3225992ed5b754ad5d61e8b785d9d859f1eed1be'
+          print('NATIVE_SOURCE_PROFILE_IDENTITY_PASS')
+          PY
+      - name: Restore build cache
+        shell: bash
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ccache
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: simc-ubuntu-gcc-b522cded8c26b97dac03fdf56e57a03ec7e8faa6-v1
+      - name: Compile official native executable with existing source-cache identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-simc-build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_GUI=OFF -DBUILD_TESTING=OFF -DSC_NO_NETWORKING=ON \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-simc-build --target simc --parallel 3
+          test -x /tmp/zrot-simc-build/simc
+          /tmp/zrot-simc-build/simc display_build=2
+          ccache --show-stats
+      - name: Capture actual native effective APL + fixed one-target public reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --spec fury \
+            --simc-bin /tmp/zrot-simc-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/native-profile-effective-reference --timeout 180
+          test -s /tmp/native-profile-effective-reference/simc_effective_actions.simc
+          test -s /tmp/native-profile-effective-reference/simc_reference_receipt.json
+      - name: Compare original source against native-executed effective action lists
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_effective_apl_crosscheck_v1.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --native-effective /tmp/native-profile-effective-reference/simc_effective_actions.simc \
+            --native-receipt /tmp/native-profile-effective-reference/simc_reference_receipt.json \
+            --out /tmp/native-effective-source-apl-parity.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('/tmp/native-effective-source-apl-parity.json').read_bytes())
+          assert d['schema']=='ZrotNativeEffectiveAplCrosscheckV1'
+          assert d['status']=='NATIVE_SOURCE_ACTIONS_VERIFIED_NOT_NATIVE_DECISION_PARITY'
+          assert d['real_native_capture'] is True
+          assert d['source_profile_git_blob_sha1']=='3225992ed5b754ad5d61e8b785d9d859f1eed1be'
+          assert d['native_effective_ast_compilation']=='PASS'
+          assert d['source_to_native_action_selection_parity']=='NOT_RUN'
+          assert d['source_model_general_rotation_complete'] is False
+          assert d['WCL_ready_to_replay'] is False
+          assert d['dummy_trainer_rule_authorized'] is False
+          print('REAL_PINNED_SIMC_NATIVE_EFFECTIVE_APL_COMPILATION_AND_IDENTITY_PASS')
+          print('SOURCE_NATIVE_EFFECTIVE_SUMMARY',json.dumps({
+              'source_rows':d['source_to_native_effective']['source_rows'],
+              'effective_rows':d['source_to_native_effective']['effective_rows'],
+              'matching':d['source_to_native_effective']['semantic_rows_matching'],
+              'same':d['source_to_native_effective']['source_to_effective_structure_identical'],
+              'diff_count':len(d['source_to_native_effective']['differences']),
+              'first_diffs':d['source_to_native_effective']['differences'][:5]
+          },sort_keys=True))
+          PY
+          sha256sum /tmp/native-effective-source-apl-parity.json
+      - name: Preserve public effective APL proof only, not logs
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-effective-source-apl-proof-${{ github.sha }}
+          path: |
+            /tmp/native-effective-source-apl-parity.json
+            /tmp/native-profile-effective-reference/simc_effective_actions.simc
+            /tmp/native-profile-effective-reference/simc_reference_receipt.json
+          retention-days: 7
+          if-no-files-found: error
