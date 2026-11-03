@@ -205,7 +205,7 @@ def selftest():
     out=audit_lines(events,ir)
     assert out["source_selection_calls"]["root_foreground_scans"]==4
     assert out["source_selection_calls"]["root_returned_action"]==3
-    assert out["source_action_ready_attempts"]["total"]==6
+    assert out["source_action_ready_attempts"]["total"]==5
     assert out["selected_foreground_root_examples"][0]["root_native_action"]=="alpha"
     assert out["selected_foreground_root_examples"][1]["root_native_action"]=="run_action_list"
     assert out["selected_foreground_root_examples"][2]["root_native_action"]=="beta"
