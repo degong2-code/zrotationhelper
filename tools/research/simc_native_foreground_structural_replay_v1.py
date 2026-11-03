@@ -192,13 +192,25 @@ def replay_group(group,source_lists):
     return winner,dict(measures),path
 
 
-def verify_capture(folder,expected,oracle):
+def verify_capture(folder,expected,oracle,pinned_profile):
     folder=folder.resolve(strict=True)
     base=audit_dir(folder,expected)
     log=(folder/"simc_native_log.txt").read_bytes()
     effective=(folder/"simc_effective_actions.simc").read_bytes()
-    source=parse_profile(effective,require_source=True,
-                         expected_git_blob=UPSTREAM_PROFILE_BLOB)
+    # Native save_actions can differ in headers/metadata without changing
+    # action rows; require exact original source pin AND complete row equality.
+    official=parse_profile(pinned_profile,require_source=True,
+                           expected_git_blob=UPSTREAM_PROFILE_BLOB)
+    source=parse_profile(effective,require_source=False)
+    if set(official["action_lists"])!=set(source["action_lists"]):
+        raise StructuralError("NATIVE_EFFECTIVE_APL_LIST_SET_CHANGED")
+    for name in official["action_lists"]:
+        left,right=official["action_lists"][name],source["action_lists"][name]
+        if len(left)!=len(right):raise StructuralError("NATIVE_APL_ROW_COUNT_CHANGED")
+        for a,b in zip(left,right):
+            for key in ("action","attributes","expression_fields"):
+                if a[key]!=b[key]:
+                    raise StructuralError("NATIVE_EFFECTIVE_SOURCE_ROW_DIFFERS")
     if (base["source_native_log_sha256"]!=sha(log)
         or base["native_effective_apl_sha256"]!=sha(effective)
         or base["source_selection_calls"]!=oracle["source_selection_calls"]
@@ -246,7 +258,7 @@ def verify_capture(folder,expected,oracle):
         raise StructuralError("NATIVE_ORACLE_ROOT_RESULT_RECONCILIATION_FAILED")
     return {
         "controlled_target_count":expected,
-        "source_profile_git_blob_sha1":source["source_git_blob_sha1"],
+        "source_profile_git_blob_sha1":official["source_git_blob_sha1"],
         "native_binary_sha256":oracle["native_binary_sha256"],
         "native_effective_apl_sha256":base["native_effective_apl_sha256"],
         "original_log_sha256":base["source_native_log_sha256"],
@@ -259,7 +271,7 @@ def verify_capture(folder,expected,oracle):
         "native_marker_count":marker_count}
 
 
-def run(st_dir,two_dir,oracle_file):
+def run(st_dir,two_dir,oracle_file,profile_file):
     source_bytes=oracle_file.read_bytes()
     native=json.loads(source_bytes)
     if (native.get("schema")!=AUDIT_SCHEMA or native.get("scope_policy_id")!=POLICY
@@ -268,8 +280,9 @@ def run(st_dir,two_dir,oracle_file):
         or native.get("actual_native_choice_v2_model_parity")!="NOT_YET_PROVEN"
         or native.get("WCL_replay_allowed") is not False):
         raise StructuralError("NATIVE_SELECTED_SOURCE_ORACLE_NOT_VERIFIED")
-    st=verify_capture(st_dir,1,native["st"])
-    two=verify_capture(two_dir,2,native["two_target"])
+    original=profile_file.read_bytes()
+    st=verify_capture(st_dir,1,native["st"],original)
+    two=verify_capture(two_dir,2,native["two_target"],original)
     if (st["native_binary_sha256"]!=two["native_binary_sha256"] or
         st["native_effective_apl_sha256"]!=two["native_effective_apl_sha256"]):
         raise StructuralError("NATIVE_ST_2T_BUILD_OR_APL_DRIFT")
@@ -343,9 +356,11 @@ def main():
     p.add_argument("--native-st-dir",type=Path)
     p.add_argument("--native-2t-dir",type=Path)
     p.add_argument("--native-selection-receipt",type=Path)
+    p.add_argument("--pinned-profile",type=Path)
     p.add_argument("--out",type=Path)
     args=p.parse_args()
-    files=(args.native_st_dir,args.native_2t_dir,args.native_selection_receipt)
+    files=(args.native_st_dir,args.native_2t_dir,args.native_selection_receipt,
+           args.pinned_profile)
     if all(v is None for v in files):data=selftest()
     elif all(v is not None for v in files):
         data=run(*files)
