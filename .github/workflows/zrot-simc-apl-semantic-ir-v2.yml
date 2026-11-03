@@ -1,0 +1,127 @@
+name: zrot-simc-apl-semantic-ir-v2
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_apl_semantic_ir_v2.py
+      - .github/workflows/zrot-simc-apl-semantic-ir-v2.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-parser-and-evaluator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Final source compile and bounded semantic synthetic tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_apl_semantic_ir_v2.py
+          python -B tools/research/simc_apl_semantic_ir_v2.py >/tmp/apl-v2-selftest.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/apl-v2-selftest.json'))
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert x['checks']>=36
+          assert x['source_SimC_profile_loaded'] is False
+          assert x['WCL_observations_used'] is False
+          assert x['native_SimC_parity_proven'] is False
+          assert x['trainer_mistake_verdict']=='UNKNOWN'
+          print('SIMC_APL_V2_SOURCE_SEMANTIC_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_apl_semantic_ir_v2.py
+
+  real-pinned-simc-profile-full-syntax:
+    runs-on: ubuntu-latest
+    needs: [offline-parser-and-evaluator]
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-pinned
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile every source action line and expression without loss
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_apl_semantic_ir_v2.py \
+            --profile simc-pinned/profiles/MID2/MID2_Warrior_Fury.simc \
+            --out /tmp/fury-apl-semantic-ir-v2.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import hashlib
+          p=Path('simc-pinned/profiles/MID2/MID2_Warrior_Fury.simc').read_bytes()
+          d=json.loads(Path('/tmp/fury-apl-semantic-ir-v2.json').read_bytes())
+          assert hashlib.sha1(b'blob '+str(len(p)).encode()+b'\0'+p).hexdigest()=='3225992ed5b754ad5d61e8b785d9d859f1eed1be'
+          assert d['schema']=='ZrotSourceFaithfulSimcAplSemanticIRV2'
+          assert d['source_action_line_count']==121
+          assert d['action_list_counts']=={
+             'precombat':16,'default':18,'slayer':22,'slayer_aoe':14,
+             'thane':20,'thane_aoe':22,'trinkets':5,'variables':4}
+          assert d['control_counts']['CALL']==2
+          assert d['control_counts']['RUN']==4
+          assert d['control_counts']['VARIABLE']==18
+          assert d['expression_attribute_counts']['if']==51
+          assert d['expression_attribute_counts']['value']==18
+          assert d['expression_attribute_counts']['value_else']==8
+          assert d['expression_attribute_counts']['condition']==8
+          assert len(d['graph_edges']['default'])==6
+          assert len(d['duplicate_variable_definition_sites']['trinket_1_manual'])==2
+          all_rows=[r for rows in d['action_lists'].values() for r in rows]
+          assert len(all_rows)==121
+          assert all(r['source_text'].startswith('actions') for r in all_rows)
+          assert len(set(r['source_line'] for r in all_rows))==121
+          assert all(hashlib.sha256(r['source_text'].encode()).hexdigest()==r['source_sha256'] for r in all_rows)
+          assert all(r['gameplay_ready']=='UNKNOWN' for r in all_rows)
+          assert d['expression_syntax_coverage']=='COMPLETE_FOR_THIS_PINNED_PROFILE'
+          assert d['semantic_runtime_equivalence_to_native_SimC']=='NOT_YET_TESTED'
+          assert d['model_ready_for_WCL_priority_comparison'] is False
+          assert d['WCL_evidence_consulted_in_candidate_compilation'] is False
+          tr=d['action_lists']['precombat']
+          assert tr[10]['expression_fields']['condition']['source'].find('%%')>=0
+          assert tr[12]['expression_fields']['condition']['source'].find('%')>=0
+          assert d['action_lists']['slayer'][2]['expression_fields']['if']['source']=='buff.recklessness.up&rage>=100'
+          assert d['action_lists']['slayer_aoe'][0]['action']=='whirlwind'
+          print('REAL_PINNED_SIMC_121_ACTIONS_8_LISTS_85_EXPRESSION_FIELDS_SOURCE_COMPLETE_PASS')
+          print('APL_LIST_COUNTS',json.dumps(d['action_list_counts'],sort_keys=True))
+          print('GRAPH_EDGES',json.dumps(d['graph_edges'],sort_keys=True))
+          PY
+          python -B tools/research/simc_apl_semantic_ir_v2.py \
+            --profile simc-pinned/profiles/MID2/MID2_Warrior_Fury.simc \
+            --out /tmp/identical-second-IR.json
+          cmp /tmp/fury-apl-semantic-ir-v2.json /tmp/identical-second-IR.json
+          echo 'DETERMINISTIC_REPRODUCED_FINAL_IR_BYTES=PASS'
+          sha256sum /tmp/fury-apl-semantic-ir-v2.json
+          sha256sum tools/research/simc_apl_semantic_ir_v2.py
+      - name: Archive source-faithful candidate model only
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simc-source-faithful-apl-v2-${{ github.sha }}
+          path: /tmp/fury-apl-semantic-ir-v2.json
+          retention-days: 7
+          if-no-files-found: error
