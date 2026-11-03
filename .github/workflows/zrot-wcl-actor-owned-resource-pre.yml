@@ -7,6 +7,8 @@ on:
       - tools/research/wcl_actor_resource_owner_strict_pre_v1.py
       - tools/research/wcl_actor_rage_predicate_evidence_v1.py
       - tools/research/wcl_aura_pre_to_simc_guard_v1.py
+      - tools/research/wcl_source_action_family_readiness_v1.py
+      - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_ACTION_FAMILY_MECHANICS_ADAPTER_V1.json
       - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/AURA_PRE_SIMC_GUARD_FURY_FIXTURE_V1.json
       - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_WCL_RAGE_PREDICATE_ADAPTER_EXPLORATORY_V1.json
       - .github/workflows/zrot-wcl-actor-owned-resource-pre.yml
@@ -70,6 +72,17 @@ jobs:
           print('STRICT_PRE_AURA_TRANSITION_INDEPENDENT_SYNTHETIC_PASS')
           PY
           sha256sum tools/research/wcl_aura_pre_to_simc_guard_v1.py
+          python -m py_compile tools/research/wcl_source_action_family_readiness_v1.py
+          python -B tools/research/wcl_source_action_family_readiness_v1.py >/tmp/action-family-selftest.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/action-family-selftest.json'))
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['checks']>=8
+          assert d['priority_claims_proven']==0
+          print('SIMC_SOURCE_ACTION_FAMILY_OFFLINE_CONTRACT_PASS')
+          PY
+          sha256sum tools/research/wcl_source_action_family_readiness_v1.py
 
   two-real-cohort-evidence:
     name: Independent WCL raw source/target actor resource gate
@@ -305,3 +318,97 @@ jobs:
           path: /tmp/wcl-rage-predicate-evidence.json
           if-no-files-found: error
           retention-days: 7
+
+  actual-action-family:
+    runs-on: ubuntu-latest
+    needs: [offline-contract]
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-source-pinned
+          sparse-checkout: |
+            engine/class_modules/sc_warrior.cpp
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41463589665
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          path: /tmp/family-discovery
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41473060401
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          path: /tmp/family-holdout
+          github-token: ${{ github.token }}
+      - name: Reconstruct original immutable raw evidence ZIP inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          for kind in ('discovery','holdout'):
+              folder=Path('/tmp/family-'+kind)
+              members=sorted(p for p in folder.rglob('*') if p.is_file())
+              assert 1<=len(members)<=40
+              with ZipFile('/tmp/family-'+kind+'.zip','w',ZIP_DEFLATED) as z:
+                  for p in members:
+                      z.write(p,arcname=str(p.relative_to(folder)))
+          PY
+      - name: Verify pinned SimC source IDs and replay WCL action families only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/wcl_source_action_family_readiness_v1.py \
+            --adapter docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_ACTION_FAMILY_MECHANICS_ADAPTER_V1.json \
+            --simc-source simc-source-pinned/engine/class_modules/sc_warrior.cpp \
+            --discovery-zip /tmp/family-discovery.zip \
+            --holdout-zip /tmp/family-holdout.zip \
+            --out /tmp/wcl-action-family-replay.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/wcl-action-family-replay.json'))
+          assert d['schema']=='ZrotSourceBackedActionFamilyWclCastEvidenceV1'
+          assert d['combined_actor_casts']==105
+          assert d['source_simc_mechanics_git_blob_sha1']=='38ee3dd0d5943eb9227ec55aefb21e7d47244f96'
+          assert d['original_numeric_lock_sha256']=='c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e'
+          assert d['priority_claims_proven']==0
+          assert d['dummy_errors_confirmed']==0
+          assert d['cooldown_or_charge_state_at_uncast_alternatives']=='UNKNOWN'
+          for name,counts,casts in (
+            ('discovery',{'1':30,'184367':9,'335096':2,'335097':6},54),
+            ('holdout',{'1':24,'184367':8,'335096':2,'335097':5},51)):
+              v=d[name]
+              assert v['actor_cast_count']==casts
+              assert v['numeric_blind_candidate_casts']==counts
+              assert v['recognized_candidate_cast_total']==sum(counts.values())
+              assert v['mechanic_cooldowns_or_charges_proven'] is False
+              assert v['manual_keypress_proven'] is False
+              assert v['competing_action_readiness_proven'] is False
+              assert v['wrong_priority_flags']==0
+              assert all(x['action_ready_strict_pre']=='UNKNOWN' for x in v['cast_records'])
+              assert all(x['rotation_priority_proven'] is False for x in v['cast_records'])
+          print('REAL_WCL_105_CASTS_SIMC_SOURCE_FAMILY_REPLAY_PASS')
+          print('ACTION_FAMILY_COUNTS',json.dumps({
+            n:d[n]['action_family_cast_totals'] for n in ('discovery','holdout')},sort_keys=True))
+          print('REPEAT_CAST_GAPS_NOT_COOLDOWN',json.dumps({
+            n:d[n]['observed_intercast_gaps_ms_only'] for n in ('discovery','holdout')},sort_keys=True))
+          PY
+      - name: Preserve concise numeric family and no-false-readiness receipt
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postlock-wcl-simc-action-families-${{ github.sha }}
+          path: /tmp/wcl-action-family-replay.json
+          retention-days: 7
+          if-no-files-found: error
