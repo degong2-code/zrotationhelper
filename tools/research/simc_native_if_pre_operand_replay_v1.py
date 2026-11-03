@@ -69,20 +69,27 @@ def evaluate_sample(fact,row):
         return "UNKNOWN_IF_NOT_SAMPLED",None
     expr=row["expression_fields"]["if"]
     symbols=set(expr["symbols"])
-    if not symbols.issubset(KNOWN):
-        return "UNKNOWN_UNSAMPLED_SYMBOLS",None
+    missing=symbols-KNOWN
     facts={"rage":fact["primary_resource_value"],
            "active_enemies":fact["active_enemies"]}
+    # Three-valued soundness: if an unknown AND operand is irrelevant
+    # because the known side is false, or an unknown OR operand is
+    # irrelevant because the known side is true, the result is provable.
+    # UNKNOWN is still required when unknown operands can change truth.
     independently=evaluate_ast(expr["ast"],facts)
     check=truth(independently)
-    if check is None:return "UNKNOWN_NUMERIC_RESULT",None
+    if check is None:
+        return ("UNKNOWN_UNSAMPLED_SYMBOLS" if missing
+                else "UNKNOWN_NUMERIC_RESULT"),None
     actual=1 if check else 0
     if actual!=fact["native_if_bool"]:
         raise OperandReplayError(
             "INDEPENDENT_AST_VS_NATIVE_IF_TRUTH_CONFLICT:"
             +row["list"]+":"+str(row["index"]))
-    return "MATCH_AST_FROM_PRE_OPERANDS",{
+    return ("MATCH_AST_DETERMINATE_WITH_MISSING_SYMBOLS" if missing
+            else "MATCH_AST_FROM_PRE_OPERANDS"),{
          "independent_result_bool":actual,
+         "unobserved_but_logically_irrelevant_symbols":sorted(missing),
          "native_if_bool_for_comparison_only":fact["native_if_bool"],
          "source_condition":expr["source"],
          "source_expression_symbols":sorted(symbols),
@@ -96,6 +103,7 @@ def analyze_trace(text,ir,*,capture_examples=12):
     outstanding=defaultdict(deque)
     counts=Counter()
     matched_examples=[]
+    compact_fact_ledger=[]
     resource_kinds=set()
     rows_with_match=Counter()
     for line in text.splitlines():
@@ -136,6 +144,20 @@ def analyze_trace(text,ir,*,capture_examples=12):
             counts["facts_attached_to_actual_ready_attempts"]+=1
             state,detail=evaluate_sample(fact,row)
             counts[state]+=1
+            compact_fact_ledger.append({
+               "at_ms":fact["time_ms"],"source_list":name,
+               "source_index":index,"source_line_sha256":row["source_sha256"],
+               "native_action":row["action"],"native_name":attempt["native_name"],
+               "native_if_result_verification_only":fact["native_if_bool"],
+               "native_ready_verification_only":attempt["ready"],
+               "pre_primary_resource_id":fact["primary_resource_id"],
+               "pre_primary_resource_value":fact["primary_resource_value"],
+               "pre_active_enemies":fact["active_enemies"],
+               "source_if":row["expression_fields"].get("if",{}).get("source"),
+               "source_if_symbols":row["expression_fields"].get("if",{}).get("symbols"),
+               "derived_AST_status":state,
+               "independently_derived_bool":detail["independent_result_bool"] if detail else None
+            })
             if detail:
                 rows_with_match[name+":"+str(index)]+=1
                 if len(matched_examples)<capture_examples:
@@ -160,6 +182,7 @@ def analyze_trace(text,ir,*,capture_examples=12):
         "unique_primary_resource_ids":sorted(resource_kinds),
         "source_rows_with_independent_AST_matches":dict(sorted(rows_with_match.items())),
         "independent_matched_examples":matched_examples,
+        "all_native_if_pre_fact_ledger":compact_fact_ledger,
         "all_other_unobserved_operands":"UNKNOWN",
         "native_IF_truth_as_python_operand":False,
         "native_spell_ready_used_as_AST_operand":False,
@@ -200,12 +223,18 @@ def run(profile,st_dir,two_dir):
         st["unique_primary_resource_ids"]!=two["unique_primary_resource_ids"]):
         raise OperandReplayError("ST_2T_NATIVE_IDENTITY_OR_RESOURCE_KIND_MISMATCH")
     count=sum(x["counts"].get("MATCH_AST_FROM_PRE_OPERANDS",0) for x in (st,two))
+    partial=sum(x["counts"].get("MATCH_AST_DETERMINATE_WITH_MISSING_SYMBOLS",0)
+                for x in (st,two))
     return {"schema":SCHEMA,"scope_policy_id":POLICY,
             "status":"INDEPENDENT_NUMERIC_AST_SUBSET_ONLY_NATIVE_OPERAND_PARITY",
             "source_pinned_profile_blob_sha1":PINNED_FURY_BLOB,
             "source_profile_sha256":sha(original),
             "restricted_accepted_symbol_set":sorted(KNOWN),
             "source_only_pre_operand_numeric_ast_matches":count,
+            "source_partial_operand_three_valued_ast_matches":partial,
+            "total_independent_conclusive_AST_matches":count+partial,
+            "compact_actual_native_pre_IF_fact_rows":sum(
+                len(x["all_native_if_pre_fact_ledger"]) for x in (st,two)),
             "native_pre_operand_readout_used":True,
             "native_if_truth_used_as_AST_input":False,
             "remaining_native_if_expression_semantics":"UNKNOWN",
@@ -232,6 +261,21 @@ def selftest():
     assert evaluate_sample({**base,"ordinal":2,"native_name":"bar",
                             "native_if_bool":1,"active_enemies":2},row[1])[0]==state
     assert evaluate_sample({**base,"ordinal":3,"native_name":"baz"},row[2])[0]=="UNKNOWN_UNSAMPLED_SYMBOLS"
+    # Known false conjunct must yield an independent false result even when
+    # the other symbol was not sampled. Known true OR must similarly win.
+    orrow=parse_profile(b"actions=foo,if=talent.unknown|active_enemies=2\n",
+                       require_source=False)["action_lists"]["default"][0]
+    androw=parse_profile(b"actions=foo,if=talent.unknown&active_enemies=1\n",
+                        require_source=False)["action_lists"]["default"][0]
+    decisively_false={**base,"active_enemies":2,"native_if_bool":0}
+    decisive_status,decisive=evaluate_sample(decisively_false,androw)
+    assert decisive_status=="MATCH_AST_DETERMINATE_WITH_MISSING_SYMBOLS"
+    assert decisive["independent_result_bool"]==0
+    decisively_true={**base,"active_enemies":2,"native_if_bool":1}
+    true_status,true_payload=evaluate_sample(decisively_true,orrow)
+    assert true_status=="MATCH_AST_DETERMINATE_WITH_MISSING_SYMBOLS"
+    assert true_payload["independent_result_bool"]==1
+    assert true_payload["unobserved_but_logically_irrelevant_symbols"]==["talent.unknown"]
     try:evaluate_sample({**base,"native_if_bool":0},row[0])
     except OperandReplayError:pass
     else:raise AssertionError("MISMATCH_NATIVE_IF_ACCEPTED")
@@ -250,9 +294,11 @@ def selftest():
     analysis=analyze_trace(trace,model)
     assert analysis["counts"]["MATCH_AST_FROM_PRE_OPERANDS"]==1
     assert analysis["counts"]["UNKNOWN_UNSAMPLED_SYMBOLS"]==1
+    assert len(analysis["all_native_if_pre_fact_ledger"])==2
+    assert analysis["all_native_if_pre_fact_ledger"][0]["independently_derived_bool"]==1
     assert analysis["counts"]["native_attempt_without_if_evaluation"]==1
     assert analysis["native_IF_truth_as_python_operand"] is False
-    return {"status":"PASS_OFFLINE_SYNTHETIC","checks":10,
+    return {"status":"PASS_OFFLINE_SYNTHETIC","checks":15,
             "actual_native_executed":False,"WCL_API_calls":0,
             "independent_numeric_subset_test":True}
 
