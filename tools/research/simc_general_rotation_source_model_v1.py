@@ -54,6 +54,29 @@ def target_guard_pairs(ast):
             return [{"symbol":"active_enemies","comparator":op,"count":r[1]}]
     return []
 
+def target_count_mentions(ast):
+    """Report *all* numeric target comparisons even inside disjunctions.
+
+    An occurrence is NOT automatically a mandatory branch constraint.
+    Branch route constraints use the separate, conservative AND-only parser.
+    """
+    if not isinstance(ast,list):return []
+    direct=[]
+    if len(ast)==4 and ast[0]=="binary":
+        op,left,right=ast[1],ast[2],ast[3]
+        if (op in ("=","<","<=",">",">=")
+            and left==["symbol","active_enemies"]
+            and isinstance(right,list) and right[0]=="number"
+            and len(right)==2):
+            direct.append({"symbol":"active_enemies","comparator":op,
+                           "count":right[1]})
+    if ast[0]=="binary":
+        return direct+target_count_mentions(ast[2])+target_count_mentions(ast[3])
+    if ast[0] in ("unary","function"):
+        return direct+target_count_mentions(ast[2])
+    return direct
+
+
 def symbols_of(ast):
     if not isinstance(ast,list):return set()
     if ast[0]=="symbol":return {ast[1]}
@@ -67,7 +90,7 @@ def expression_breakpoints(lists):
     for name,rows in lists.items():
         for row in rows:
             for field,data in row["expression_fields"].items():
-                clauses=target_guard_pairs(data["ast"])
+                clauses=target_count_mentions(data["ast"])
                 for clause in clauses:
                     pairs.append({"list":name,"index":row["index"],
                                   "source_line":row["source_line"],
@@ -182,13 +205,16 @@ def selftest():
     assert target_guard_pairs(["binary","|",
         ["binary","=",["symbol","active_enemies"],["number",1.0]],
         ["symbol","x"]])==[]
+    assert target_count_mentions(["binary","|",
+        ["binary","=",["symbol","active_enemies"],["number",1.0]],
+        ["symbol","x"]])==[{"symbol":"active_enemies","comparator":"=","count":1.0}]
     assert target_guard_pairs(["binary","+",["symbol","active_enemies"],["number",1]])==[]
     assert symbols_of(["binary","&",["symbol","rage"],
         ["binary","=",["symbol","active_enemies"],["number",1]]])=={
         "rage","active_enemies"}
     assert target_guard_pairs(["binary","=",
         ["symbol","active_enemies"],["number",1]])[0]["count"]==1
-    return {"status":"PASS_OFFLINE_SYNTHETIC","checks":5,
+    return {"status":"PASS_OFFLINE_SYNTHETIC","checks":6,
             "native_source_loaded":False,"WCL_API_calls":0,
             "gameplay_priority_proven":False}
 
