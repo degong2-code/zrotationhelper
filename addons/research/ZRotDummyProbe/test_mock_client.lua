@@ -83,6 +83,7 @@ assert(sample.records[2].kind == "PLAYER_CAST_SUCCEEDED")
 assert(sample.records[2].spell_id == 335097)
 assert(sample.records[2].timestamp == 11)
 assert(sample.records[2].source_readiness_pre == "UNKNOWN")
+assert(sample.records[2].manual_keypress == "UNKNOWN")
 assert(sample.records[2].verdict == "UNKNOWN")
 assert(sample.records[2].spells == nil)
 
@@ -128,5 +129,14 @@ assert(#sample.records == 5)
 assert(ZRotDummyProbeDB.sessions[1] == sample)
 SlashCmdList.ZROTDUMMYPROBE("track 123456")
 assert(#ZRotDummyProbeDB.tracked == 8)
+-- Unknown persisted schema must never be silently overwritten.
+local foreign = {schema="UnknownLegacySchema",sessions={{payload="original"}},tracked={}}
+ZRotDummyProbeDB = foreign
+frame.onEvent(frame,"ADDON_LOADED","ZRotDummyProbe")
+assert(ZRotDummyProbeDB == foreign)
+assert(ZRotDummyProbeDB.sessions[1].payload == "original")
+SlashCmdList.ZROTDUMMYPROBE("start")
+assert(#ZRotDummyProbeDB.sessions == 1)
+
 print("MOCK_WOW_12X_ADDON_SECRET_SAFE_RECORDER_PASS")
 print("RECORDED_ROWS="..#sample.records)
