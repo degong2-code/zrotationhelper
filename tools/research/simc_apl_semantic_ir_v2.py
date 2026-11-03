@@ -549,10 +549,6 @@ def selftest():
     assert evaluate_ast(Expression("unknown&0").parse(), {}) == 0
     assert evaluate_ast(Expression("unknown|1").parse(), {}) == 1
     assert evaluate_ast(Expression("unknown|0").parse(), {}) is None
-    assert evaluate_ast(Expression("rage>=100").parse(), {
-        "rage": {"value": 120, "timestamp": 99,
-                 "provenance": "STRICT_PRE_OBSERVATION"}},
-        timestamp=100) is None if False else True
     # Strict PRE is explicitly enforced, regardless of expression truth.
     assert evaluate_ast(Expression("rage>=100").parse(), {
         "rage": {"value": 120, "timestamp": 100,
