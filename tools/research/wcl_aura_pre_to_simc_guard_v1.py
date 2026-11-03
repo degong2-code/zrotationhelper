@@ -73,16 +73,29 @@ def replay_aura(events,actor,spell_ids,casts):
                 old=expected.get("aura_pre",{}).get(str(sid))
                 previous=old.get("active") if isinstance(old,dict) else None
                 computed=prior["active"] if prior is not None else None
-                matched=(previous==computed) if previous is not None or computed is not None else True
-                # Divergence must DOWNGRADE to unknown, not fix up original view.
-                authoritative=computed if matched else None
-                provenance=("NO_PRIOR_TRANSITION" if prior is None
-                    else "PRE_REPLAY_MISMATCH_QUARANTINED" if not matched
-                    else "AMBIGUOUS_TRANSITION" if computed is None
-                    else "MATCHING_TARGET_AURA_TRANSITION")
+                # A same-tick remove->apply has no trustworthy relative
+                # timestamp. The old replay's array-order TRUE is merely
+                # plausible, NOT a contradictory independent measurement.
+                if prior is None:
+                    provenance="NO_PRIOR_TRANSITION"
+                    matched=(previous is None)
+                    authoritative=None
+                elif computed is None:
+                    if prior.get("pair_kind")=="REMOVE_THEN_APPLY":
+                        provenance="SAME_TICK_REAPPLICATION_ORDER_UNVERIFIED"
+                        counts["same_tick_reapply_affected_casts"]+=1
+                    else:
+                        provenance="AMBIGUOUS_TRANSITION"
+                    matched=None
+                    authoritative=None
+                else:
+                    matched=(previous==computed)
+                    authoritative=computed if matched else None
+                    provenance=("MATCHING_TARGET_AURA_TRANSITION" if matched
+                                else "PRE_REPLAY_MISMATCH_QUARANTINED")
                 if prior is not None and prior["timestamp"]>=ts:
                     raise AuraPreError("SAME_TIMESTAMP_AURA_LEAK")
-                if not matched:counts["mismatched_spell_casts"]+=1
+                if matched is False:counts["independent_replay_true_mismatches"]+=1
                 if authoritative is None:counts["unknown_spell_casts"]+=1
                 this[str(sid)]={
                   "active":authoritative,
@@ -93,6 +106,10 @@ def replay_aura(events,actor,spell_ids,casts):
                   "source_timestamp":prior["timestamp"] if prior else None,
                   "last_transition_type":prior["event_type"] if prior else None,
                   "events_at_last_transition":prior["batch_count"] if prior else 0,
+                  "last_same_tick_types":prior["event_types"] if prior else [],
+                  "post_tick_array_order_candidate_active":(
+                      prior.get("array_order_candidate_active") if prior else None),
+                  "same_tick_order_proven":False if prior and prior.get("pair_kind") else None,
                   "spell_duration_or_expiry_verified":False
                 }
             replay.append({"timestamp":ts,"ability_id":expected["ability_id"],
@@ -104,17 +121,25 @@ def replay_aura(events,actor,spell_ids,casts):
                 continue
             sid=event.get("abilityGameID")
             if type(sid) is not int or sid not in ids:continue
-            pending[sid].append((_transition(event),event.get("type")))
+            pending[sid].append((_transition(event),event.get("type"),event.get("sourceID")))
             counts["tracked_aura_transition_events"]+=1
         for sid,rows in pending.items():
-            vals={v for v,_ in rows}
+            vals={v for v,_,_ in rows}
+            kinds=[kind for _,kind,_ in rows]
+            pair_kind=("REMOVE_THEN_APPLY"
+                if kinds==["removebuff","applybuff"] and
+                   rows[0][2]==rows[1][2] else None)
             if len(vals)!=1 or None in vals:
                 active=None
                 counts["ambiguous_aura_timestamp_groups"]+=1
+                if pair_kind:
+                    counts["same_tick_remove_apply_groups"]+=1
             else:
                 active=next(iter(vals))
             state[sid]={"active":active,"timestamp":ts,"event_type":rows[-1][1],
-                        "batch_count":len(rows)}
+                        "batch_count":len(rows),"event_types":kinds,
+                        "pair_kind":pair_kind,
+                        "array_order_candidate_active":rows[-1][0]}
     if len(replay)!=len(casts):
         raise AuraPreError("MISSING_SOURCE_CAST")
     return replay,dict(sorted(counts.items()))
@@ -241,26 +266,30 @@ def selftest():
       {"timestamp":110,"type":"cast","sourceID":7,"abilityGameID":200},
       {"timestamp":110,"type":"removebuff","targetID":7,"abilityGameID":spell},
       {"timestamp":115,"type":"cast","sourceID":7,"abilityGameID":201},
-      {"timestamp":120,"type":"applybuff","targetID":7,"abilityGameID":spell},
       {"timestamp":120,"type":"removebuff","targetID":7,"abilityGameID":spell},
+      {"timestamp":120,"type":"applybuff","targetID":7,"abilityGameID":spell},
       {"timestamp":125,"type":"cast","sourceID":7,"abilityGameID":202},
     ]
     views=[
       {"timestamp":110,"ability_id":200,"aura_pre":{"1719":{"active":True}}},
       {"timestamp":115,"ability_id":201,"aura_pre":{"1719":{"active":False}}},
-      {"timestamp":125,"ability_id":202,"aura_pre":{"1719":{"active":False}}}]
+      {"timestamp":125,"ability_id":202,"aura_pre":{"1719":{"active":True}}}]
     rows,diag=replay_aura(events,7,[spell],views)
     assert rows[0]["spells"]["1719"]["active"] is True
     assert rows[1]["spells"]["1719"]["active"] is False
     assert rows[2]["spells"]["1719"]["active"] is None
     assert rows[0]["spells"]["1719"]["source_timestamp"]==100
     assert diag["ambiguous_aura_timestamp_groups"]==1
-    assert diag["mismatched_spell_casts"]==1
+    assert diag["independent_replay_true_mismatches"]==0
+    assert diag["same_tick_reapply_affected_casts"]==1
+    assert diag["same_tick_remove_apply_groups"]==1
+    assert rows[2]["spells"]["1719"]["proof_status"]=="SAME_TICK_REAPPLICATION_ORDER_UNVERIFIED"
+    assert rows[2]["spells"]["1719"]["post_tick_array_order_candidate_active"] is True
     assert rows[1]["spells"]["1719"]["source_timestamp"]==110
     assert rows[0]["spells"]["1719"]["spell_duration_or_expiry_verified"] is False
     assert rows[0]["spells"]["1719"]["proof_status"]=="MATCHING_TARGET_AURA_TRANSITION"
     return {"status":"PASS_OFFLINE_SYNTHETIC",
-       "checks":9,"live_API_calls":0,"priority_rules_validated":0,
+       "checks":13,"live_API_calls":0,"priority_rules_validated":0,
        "wrong_cast_flags":0}
 
 def main():
