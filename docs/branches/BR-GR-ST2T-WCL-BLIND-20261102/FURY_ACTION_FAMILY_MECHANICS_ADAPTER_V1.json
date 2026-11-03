@@ -1,0 +1,111 @@
+{
+  "schema": "ZrotSpecActionFamilyMechanicsAdapterV1",
+  "scope_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "specialization": {
+    "class": "Warrior",
+    "spec": "Fury",
+    "spec_id": 72
+  },
+  "source_simc": {
+    "repo": "simulationcraft/simc",
+    "revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "path": "engine/class_modules/sc_warrior.cpp",
+    "git_blob_sha1": "38ee3dd0d5943eb9227ec55aefb21e7d47244f96"
+  },
+  "candidates": [
+    {
+      "spell_id": 1,
+      "canonical_action": "auto_attack",
+      "family": "AUTO_ATTACK_UNSCORABLE",
+      "manuality": "UNVERIFIED_AUTO_HYPOTHESIS",
+      "shared_cooldown_group": null,
+      "readiness": "UNKNOWN",
+      "evidence": "WCL_CAST_AND_DAMAGE_AND_SIMC_AUTO_ATTACK_OBSERVATION"
+    },
+    {
+      "spell_id": 184367,
+      "canonical_action": "rampage",
+      "family": "RAMPAGE",
+      "manuality": "DIRECT_SPELL_CANDIDATE",
+      "shared_cooldown_group": "rampage",
+      "readiness": "UNKNOWN",
+      "evidence": "PUBLIC_WOWHEAD_PLUS_SIMC_APL"
+    },
+    {
+      "spell_id": 335096,
+      "canonical_action": "bloodbath",
+      "family": "BLOODTHIRST_FAMILY",
+      "replaces": "bloodthirst",
+      "manuality": "DIRECT_SPELL_CANDIDATE",
+      "shared_cooldown_group": "bloodthirst",
+      "activated_when": [
+        "talent.reckless_abandon",
+        "buff.recklessness.up"
+      ],
+      "readiness": "UNKNOWN",
+      "evidence": "PINNED_SIMC_COOLDOWN_POINTER_BLOODTHIRST"
+    },
+    {
+      "spell_id": 335097,
+      "canonical_action": "crushing_blow",
+      "family": "RAGING_BLOW_FAMILY",
+      "replaces": "raging_blow",
+      "manuality": "DIRECT_SPELL_CANDIDATE",
+      "shared_cooldown_group": "raging_blow",
+      "activated_when": [
+        "talent.reckless_abandon",
+        "buff.recklessness.up"
+      ],
+      "readiness": "UNKNOWN",
+      "evidence": "PINNED_SIMC_COOLDOWN_POINTER_RAGING_BLOW"
+    }
+  ],
+  "unobserved_parent_actions": [
+    {
+      "canonical_action": "bloodthirst",
+      "family": "BLOODTHIRST_FAMILY",
+      "numeric_spell_id": 23881
+    },
+    {
+      "canonical_action": "raging_blow",
+      "family": "RAGING_BLOW_FAMILY",
+      "numeric_spell_id": 85288
+    }
+  ],
+  "modifier_mechanisms": [
+    {
+      "family": "RAGING_BLOW_FAMILY",
+      "effect": "CD_RESET_PROC",
+      "source_symbol": "cooldown->reset( true )",
+      "observability": "UNKNOWN"
+    },
+    {
+      "family": "RAGING_BLOW_FAMILY",
+      "effect": "HASTED_COOLDOWN",
+      "source_symbol": "cooldown->hasted = true",
+      "observability": "UNKNOWN"
+    },
+    {
+      "family": "BLOODTHIRST_FAMILY",
+      "effect": "OTHER_PROC_CD_RESET",
+      "source_symbol": "cooldown.bloodbath->reset( true )",
+      "observability": "UNKNOWN"
+    },
+    {
+      "family": "RAMPAGE",
+      "effect": "TALENT_MODIFIED_RAGE_COST",
+      "source_symbol": "rampaging_berserker_2->effectN( 1 ).base_value() / 10",
+      "observability": "UNKNOWN"
+    },
+    {
+      "family": "RECKLESSNESS",
+      "effect": "ANGER_MANAGEMENT_CDR_AND_BUFF_EXTENSION",
+      "observability": "UNKNOWN"
+    }
+  ],
+  "allow_repeat_cast_elapsed_only": true,
+  "allow_infer_exact_cd_from_gap": false,
+  "allow_infer_availability_of_alternative": false,
+  "allow_infer_priority_or_player_error": false,
+  "protected_blind_lock_sha256": "c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e"
+}
