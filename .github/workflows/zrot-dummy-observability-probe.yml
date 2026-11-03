@@ -1,0 +1,158 @@
+name: zrot-dummy-observability-probe-and-wcl-gap
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - addons/research/ZRotDummyProbe/**
+      - tools/research/wcl_readiness_raw_field_coverage_v1.py
+      - .github/workflows/zrot-dummy-observability-probe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify exact WCL field audit source, offline synthetic, and Lua safety contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/wcl_readiness_raw_field_coverage_v1.py
+          python -B tools/research/wcl_readiness_raw_field_coverage_v1.py >/tmp/wcl-gap-selftest.json
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          d=json.loads(Path('/tmp/wcl-gap-selftest.json').read_bytes())
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['checks']>=6 and d['WCL_API_requests']==0 and d['player_errors_claimed']==0
+          lua=Path('addons/research/ZRotDummyProbe/ZRotDummyProbe.lua').read_text()
+          toc=Path('addons/research/ZRotDummyProbe/ZRotDummyProbe.toc').read_text()
+          assert 'ZRotDummyProbeDB' in toc and 'ZRotDummyProbe.lua' in toc
+          assert 'UNIT_SPELLCAST_SUCCEEDED' in lua
+          assert 'SPELL_UPDATE_COOLDOWN' in lua and 'SPELL_UPDATE_CHARGES' in lua
+          assert 'issecretvalue' in lua and 'pcall' in lua
+          assert 'MAX_ROWS = 2400' in lua
+          for forbidden in ('COMBAT_LOG_EVENT_UNFILTERED','CastSpellByName(','CastSpellByID(',
+                            'RunMacroText(', 'LoadAddOn(', 'io.open(','debugstack(',
+                            'cooldownStartTime =', 'cooldownDuration ='):
+              assert forbidden not in lua, forbidden
+          print('DUMMY_PROBE_SAFE_SOURCE_CONTRACT_STATIC_PASS')
+          PY
+          sha256sum tools/research/wcl_readiness_raw_field_coverage_v1.py
+          sha256sum addons/research/ZRotDummyProbe/ZRotDummyProbe.lua
+          sha256sum addons/research/ZRotDummyProbe/ZRotDummyProbe.toc
+
+  lua-client-mock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4 test runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends lua5.4
+      - name: Lua syntax check and fake-client secret-safe persistence regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          luac5.4 -p addons/research/ZRotDummyProbe/ZRotDummyProbe.lua
+          luac5.4 -p addons/research/ZRotDummyProbe/test_mock_client.lua
+          lua5.4 addons/research/ZRotDummyProbe/test_mock_client.lua
+          echo 'LUA_MOCK_ONLY_NOT_ACTUAL_WOW_RUNTIME=PASS'
+
+  actual-wcl-readiness-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [offline-contract]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41463589665
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          path: /tmp/wcl-gap-discovery
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41473060401
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          path: /tmp/wcl-gap-holdout
+          github-token: ${{ github.token }}
+      - name: Repack original raw evidence without new WCL API calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          for role in ('discovery','holdout'):
+              folder=Path('/tmp/wcl-gap-'+role)
+              items=sorted(f for f in folder.rglob('*') if f.is_file())
+              assert 1<=len(items)<=40
+              with ZipFile('/tmp/wcl-gap-'+role+'.zip','w',ZIP_DEFLATED) as z:
+                  for f in items:z.write(f,arcname=str(f.relative_to(folder)))
+          PY
+      - name: Real WCL source field inventory and strict evidence authority boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/wcl_readiness_raw_field_coverage_v1.py \
+            --discovery-zip /tmp/wcl-gap-discovery.zip \
+            --holdout-zip /tmp/wcl-gap-holdout.zip \
+            --out /tmp/wcl-cooldown-observability-gap.json
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          d=json.loads(Path('/tmp/wcl-cooldown-observability-gap.json').read_bytes())
+          assert d['schema']=='ZrotWclReadinessRawFieldCoverageV1'
+          assert d['status']=='RAW_SOURCE_FIELD_INVENTORY_NOT_PROOF_OF_ABSENCE'
+          assert d['source_evidence_disjoint'] is True
+          assert d['total_cast_decisions']==105
+          assert d['gameplay_CD_ready_verified'] is False
+          assert d['general_priority_promoted'] is False
+          for role,cast_count,raw_count in (
+                  ('discovery',54,17083),('holdout',51,9101)):
+              sample=d[role]
+              assert sample['verified_actor_cast_count']==cast_count
+              assert sample['raw_event_count']==raw_count
+              assert sample['direct_competing_action_readiness_strict_pre']=='UNKNOWN'
+              assert sample['negative_inference_from_missing_fields'] is False
+              assert sample['cooldown_inference_from_cast_interval'] is False
+          print('REAL_WCL_TWO_REPORT_READINESS_FIELD_INVENTORY_PASS')
+          print('CANDIDATE_RAW_CD_CHARGE_FIELDS',json.dumps({
+              role:{'events':d[role]['actor_relevant_events'],
+                    'fields':d[role]['potential_readiness_like_field_occurrences'],
+                    'types':d[role]['actor_relevant_event_types']}
+              for role in ('discovery','holdout')},sort_keys=True))
+          PY
+      - name: Preserve small postlock raw-field coverage receipt
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postlock-wcl-cd-charge-raw-coverage-${{ github.sha }}
+          path: /tmp/wcl-cooldown-observability-gap.json
+          retention-days: 7
+          if-no-files-found: error
