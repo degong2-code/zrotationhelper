@@ -105,7 +105,7 @@ def selftest():
         except PatchError:pass
         else:raise AssertionError("ACCEPTED_CHANGED_NATIVE_IF_CODE")
     return {"status":"PASS_OFFLINE_SYNTHETIC","checks":7,
-        "real_native_compile":"NOT_RUN","full_semantic_parity":False}
+        "real_native_compile":"NOT_RUN","full_semantic_parity":False,"WCL_API_calls":0}
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
