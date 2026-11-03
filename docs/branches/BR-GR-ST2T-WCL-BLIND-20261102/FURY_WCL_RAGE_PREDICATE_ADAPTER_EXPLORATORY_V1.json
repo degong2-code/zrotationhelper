@@ -1,0 +1,45 @@
+{
+  "schema": "ZrotSpecPowerPredicateAdapterV1",
+  "scope_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "specialization": {
+    "class": "Warrior",
+    "spec": "Fury",
+    "spec_id": 72
+  },
+  "wcl_actor_power_type": 1,
+  "actor_resource_name": "rage",
+  "wcl_raw_units_per_game_resource": 10,
+  "factor_authority": "OBSERVATIONAL_ONLY_EXTERNAL_COMBAT_LOG_GUIDE_NOT_PATCH_PINNED_BLIZZARD_TRUTH",
+  "source_refs": {
+    "power_type_1": "https://warcraft.wiki.gg/wiki/COMBAT_LOG_EVENT",
+    "raw_tenths": "https://wowcoach.gg/docs/combat-log/advanced-logging",
+    "simc_apl": "https://github.com/simulationcraft/simc/blob/b522cded8c26b97dac03fdf56e57a03ec7e8faa6/profiles/MID2/MID2_Warrior_Fury.simc",
+    "rampage_cost_info": "https://www.wowhead.com/spell=184367/rampage",
+    "recklessness_spell": "https://www.wowhead.com/spell=1719/recklessness",
+    "enrage_spell": "https://www.wowhead.com/spell=184362/enrage"
+  },
+  "action_buff_numeric_ids": {
+    "buff.recklessness.up": 1719,
+    "buff.enrage.up": 184362
+  },
+  "source_apl_thresholds": [
+    {
+      "list": "slayer",
+      "action": "rampage",
+      "expr": "buff.recklessness.up&rage>=100",
+      "source_position_zero_based": 2
+    }
+  ],
+  "speculative_resource_coverage_threshold": 100,
+  "base_rampage_rage_cost_from_external_spell_data": 80,
+  "allowed_conclusion": "RAW_STRICT_PRE_OBSERVED_PREDICATES_ONLY",
+  "forbidden_claims": [
+    "COST_CURRENT_PLAYER_VERIFIED",
+    "GCD_READY",
+    "COOLDOWN_READY",
+    "ACTUAL_ACTIVE_ENEMIES",
+    "ALTERNATIVE_ACTION_READY",
+    "PRIORITY_PROVEN",
+    "DUMMY_MISTAKE"
+  ]
+}
