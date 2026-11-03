@@ -1,0 +1,7 @@
+## Interface: 120007
+## Title: zRot Dummy Observability Probe (Research Only)
+## Notes: Local player cast and non-secret cooldown/charge observability probe; not a rotation recommender
+## SavedVariables: ZRotDummyProbeDB
+## Version: 0.1.0-research
+
+ZRotDummyProbe.lua
