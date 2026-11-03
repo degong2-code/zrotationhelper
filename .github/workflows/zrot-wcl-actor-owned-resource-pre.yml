@@ -6,6 +6,8 @@ on:
     paths:
       - tools/research/wcl_actor_resource_owner_strict_pre_v1.py
       - tools/research/wcl_actor_rage_predicate_evidence_v1.py
+      - tools/research/wcl_aura_pre_to_simc_guard_v1.py
+      - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/AURA_PRE_SIMC_GUARD_FURY_FIXTURE_V1.json
       - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_WCL_RAGE_PREDICATE_ADAPTER_EXPLORATORY_V1.json
       - .github/workflows/zrot-wcl-actor-owned-resource-pre.yml
   workflow_dispatch:
@@ -56,6 +58,18 @@ jobs:
           print('ACTOR_RAGE_PREDICATES_AND_TENFOLD_SCALE_SYNTHETIC_PASS')
           PY
           sha256sum tools/research/wcl_actor_rage_predicate_evidence_v1.py
+          python -m py_compile tools/research/wcl_aura_pre_to_simc_guard_v1.py
+          python -B tools/research/wcl_aura_pre_to_simc_guard_v1.py >/tmp/aura-pre-selftest.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/aura-pre-selftest.json'))
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=9 and r['live_API_calls']==0
+          assert r['priority_rules_validated']==0
+          assert r['wrong_cast_flags']==0
+          print('STRICT_PRE_AURA_TRANSITION_INDEPENDENT_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/wcl_aura_pre_to_simc_guard_v1.py
 
   two-real-cohort-evidence:
     name: Independent WCL raw source/target actor resource gate
@@ -220,6 +234,66 @@ jobs:
                   'observed_enrage_buff_counts','observed_recklessness_and_rage_ge_100_counts')}
              for name in ('discovery','holdout')},sort_keys=True))
           PY
+      - name: Retrieve pinned source-derived SimC Slayer ordered-IF IR
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41541463955
+          name: simc-general-rotation-ordered-ifelse-ir-713905baad4d96bd2fbc033a4ee1c3fb793c5a4a
+          path: /tmp/frozen-simc-ifelse-source
+          github-token: ${{ github.token }}
+      - name: Independent WCL actor aura transition replay and original source SimC AST guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/wcl_aura_pre_to_simc_guard_v1.py \
+            --fixture docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/AURA_PRE_SIMC_GUARD_FURY_FIXTURE_V1.json \
+            --adapter docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_WCL_RAGE_PREDICATE_ADAPTER_EXPLORATORY_V1.json \
+            --source-ir /tmp/frozen-simc-ifelse-source/general-rotation-ifelse-research-ir.json \
+            --discovery-zip /tmp/predicate-discovery.zip \
+            --holdout-zip /tmp/predicate-holdout.zip \
+            --out /tmp/wcl-aura-simc-strict-pre-guard.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          obj=json.loads(Path('/tmp/wcl-aura-simc-strict-pre-guard.json').read_bytes())
+          assert obj['schema']=='ZrotWclAuraStrictPreSimcGuardAuditV1'
+          assert obj['cast_rows_total']==105
+          assert obj['same_timestamp_state_leakage'] is False
+          assert obj['action_ready_and_priority_truth']=='UNKNOWN'
+          assert obj['source_buff_duration_truth']=='UNVERIFIED'
+          assert obj['resource_scaling_patch_truth']=='UNVERIFIED'
+          assert obj['trainer_error_flags']==0
+          for role,expected in [('discovery',54),('holdout',51)]:
+              v=obj[role]
+              assert v['actor_casts']==expected
+              assert sum(v['source_apl_guard_counts'].values())==expected
+              assert v['source_apl_guard_extracted_and_executed'] is True
+              for cast in v['cast_records']:
+                  assert cast['source_apl_action']=='rampage'
+                  assert cast['source_apl_if']=='buff.recklessness.up&rage>=100'
+                  assert cast['expected_spell']=='UNKNOWN'
+                  assert cast['dummy_mistake_verdict']=='UNKNOWN'
+                  assert cast['competing_action_readiness']=='UNKNOWN'
+                  assert cast['active_target_count']=='UNKNOWN'
+                  for name,proof in cast['aura_pre_provenance'].items():
+                      if proof['source_timestamp'] is not None:
+                          assert proof['source_timestamp']<cast['timestamp']
+                      if proof['proof_status']=='PRE_REPLAY_MISMATCH_QUARANTINED':
+                          assert proof['active'] is None
+          print('REAL_105_CASTS_INDEPENDENT_AURA_PRE_AND_SOURCE_APL_AST_PASS')
+          print('AURA_GUARD_COUNTS',json.dumps({
+              role:{'source_guard':obj[role]['source_apl_guard_counts'],
+                    'aura_diagnostics':obj[role]['aura_reconstruction']}
+              for role in ('discovery','holdout')},sort_keys=True))
+          PY
+      - name: Preserve small dual-cohort original-source aura proof
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcl-source-apl-aura-strict-pre-${{ github.sha }}
+          path: /tmp/wcl-aura-simc-strict-pre-guard.json
+          if-no-files-found: error
+          retention-days: 7
       - name: Retain observed predicate evidence, no full raw archive duplication
         if: success()
         uses: actions/upload-artifact@v4
