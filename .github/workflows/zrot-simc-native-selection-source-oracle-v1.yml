@@ -8,6 +8,8 @@ on:
       - tools/research/simc_native_foreground_structural_replay_v1.py
       - tools/research/simc_native_if_expression_instrument_v1.py
       - tools/research/simc_native_if_condition_coverage_v1.py
+      - tools/research/simc_native_if_pre_operand_instrument_v1.py
+      - tools/research/simc_native_if_pre_operand_replay_v1.py
       - .github/workflows/zrot-simc-native-selection-source-oracle-v1.yml
   workflow_dispatch:
 
@@ -38,11 +40,15 @@ jobs:
           python -m py_compile tools/research/simc_native_foreground_structural_replay_v1.py
           python -m py_compile tools/research/simc_native_if_expression_instrument_v1.py
           python -m py_compile tools/research/simc_native_if_condition_coverage_v1.py
+          python -m py_compile tools/research/simc_native_if_pre_operand_instrument_v1.py
+          python -m py_compile tools/research/simc_native_if_pre_operand_replay_v1.py
           python -B tools/research/simc_native_select_trace_instrument_v1.py >/tmp/native-producer-selftest.json
           python -B tools/research/simc_native_select_trace_audit_v1.py >/tmp/native-audit-selftest.json
           python -B tools/research/simc_native_foreground_structural_replay_v1.py >/tmp/native-structural-selftest.json
           python -B tools/research/simc_native_if_expression_instrument_v1.py >/tmp/native-if-patch-selftest.json
           python -B tools/research/simc_native_if_condition_coverage_v1.py >/tmp/native-if-coverage-selftest.json
+          python -B tools/research/simc_native_if_pre_operand_instrument_v1.py >/tmp/native-pre-operand-patch-selftest.json
+          python -B tools/research/simc_native_if_pre_operand_replay_v1.py >/tmp/native-pre-operand-replay-selftest.json
           python - <<'PY'
           import json
           from pathlib import Path
@@ -50,7 +56,9 @@ jobs:
                              ('native-audit-selftest.json',7),
                              ('native-structural-selftest.json',10),
                              ('native-if-patch-selftest.json',7),
-                             ('native-if-coverage-selftest.json',8)]:
+                             ('native-if-coverage-selftest.json',8),
+                             ('native-pre-operand-patch-selftest.json',7),
+                             ('native-pre-operand-replay-selftest.json',10)]:
               d=json.loads((Path('/tmp')/file).read_bytes())
               assert d['status']=='PASS_OFFLINE_SYNTHETIC'
               assert d['checks']>=count
@@ -62,6 +70,8 @@ jobs:
           sha256sum tools/research/simc_native_foreground_structural_replay_v1.py
           sha256sum tools/research/simc_native_if_expression_instrument_v1.py
           sha256sum tools/research/simc_native_if_condition_coverage_v1.py
+          sha256sum tools/research/simc_native_if_pre_operand_instrument_v1.py
+          sha256sum tools/research/simc_native_if_pre_operand_replay_v1.py
 
   real-native-foreground-source-oracle:
     needs: [offline-python-provenance]
@@ -137,15 +147,17 @@ jobs:
           python -B tools/research/simc_native_select_trace_instrument_v1.py \
             --simc-root simc-upstream \
             --receipt /tmp/native-selected-source-patch.json
-          python -B tools/research/simc_native_if_expression_instrument_v1.py \
+          python -B tools/research/simc_native_if_pre_operand_instrument_v1.py \
             --simc-root simc-upstream \
             --receipt /tmp/native-if-expression-patch.json
           python - <<'PY'
           import json
           p=json.load(open('/tmp/native-if-expression-patch.json'))
-          assert p['schema']=='ZrotNativeIfEvaluationPassivePatchReceiptV1'
-          assert p['single_if_expression_eval_per_callsite'] is True
-          assert p['native_action_behaviour_validated_with_original']=='NOT_YET_RUN'
+          assert p['schema']=='ZrotNativeIfPreOperandPassivePatchV1'
+          assert p['uses_single_native_if_evaluation'] is True
+          assert p['fact_read_before_original_if_eval'] is True
+          assert p['native_if_predicate_result_used_as_fact'] is False
+          assert p['pristine_vs_instrumented_seq']=='NOT_YET_VALIDATED'
           print('NATIVE_IF_SOURCE_SINGLE_EVAL_PATCH_READY')
           PY
           python - <<'PY'
@@ -307,6 +319,38 @@ jobs:
               k:x[k]['counts'] for k in ('st','two_target')},sort_keys=True))
           PY
           sha256sum /tmp/native-source-if-condition-coverage.json
+      - name: Evaluate source-only numeric IF subset from real Native PRE operands
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_pre_operand_replay_v1.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --out /tmp/native-independent-pre-operand-ast-subset.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/native-independent-pre-operand-ast-subset.json').read_bytes())
+          assert r['schema']=='ZrotNativeIndependentPreIfRestrictedOperandReplayV1'
+          assert r['status']=='INDEPENDENT_NUMERIC_AST_SUBSET_ONLY_NATIVE_OPERAND_PARITY'
+          assert r['native_if_truth_used_as_AST_input'] is False
+          assert r['full_General_Rotation_model_complete'] is False
+          assert r['WCL_comparison_eligible'] is False
+          assert r['native_variable_side_effect_parity']=='NOT_PROVEN'
+          for label,attempts in [('st',1542),('two_target',1030)]:
+              x=r[label]['counts']
+              assert x['all_native_action_ready_attempts']==attempts
+              assert x['original_native_if_reports']==x['passive_pre_facts_paired']
+              assert x['passive_pre_facts_paired']==x['facts_attached_to_actual_ready_attempts']
+          print('NATIVE_REAL_PRE_OPERAND_SOURCE_REPLAY_VALIDATION_PASS')
+          print('INDEPENDENT_AST_REPLAY_COUNTS',json.dumps({
+              'matched':r['source_only_pre_operand_numeric_ast_matches'],
+              'st':r['st']['counts'],'two_target':r['two_target']['counts'],
+              'examples':r['st']['independent_matched_examples'][:4]
+          },sort_keys=True))
+          PY
+          sha256sum /tmp/native-independent-pre-operand-ast-subset.json
       - name: Preserve small native selection proof, never raw logs or character metadata
         if: success()
         uses: actions/upload-artifact@v4
@@ -319,5 +363,6 @@ jobs:
             /tmp/native-source-order-structural-replay.json
             /tmp/native-if-expression-patch.json
             /tmp/native-source-if-condition-coverage.json
+            /tmp/native-independent-pre-operand-ast-subset.json
           retention-days: 7
           if-no-files-found: error
