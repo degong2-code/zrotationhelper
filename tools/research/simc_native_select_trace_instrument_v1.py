@@ -125,7 +125,7 @@ def instrument_tree(root:Path):
 def selftest():
     example=(START+"\n{\n"
       "  // Mark this action list as visited with the APL internal id\n"
-      "  if ( a->action_ready() )\n"
+      "    if ( a->action_ready() )\n"
       "          return real_a;\n"
       "        return a;\n"
       "  return nullptr;\n}\n"+END+"\n{}\n").encode()
