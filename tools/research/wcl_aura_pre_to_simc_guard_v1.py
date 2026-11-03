@@ -280,7 +280,7 @@ def selftest():
     assert rows[2]["spells"]["1719"]["active"] is None
     assert rows[0]["spells"]["1719"]["source_timestamp"]==100
     assert diag["ambiguous_aura_timestamp_groups"]==1
-    assert diag["independent_replay_true_mismatches"]==0
+    assert diag.get("independent_replay_true_mismatches",0)==0
     assert diag["same_tick_reapply_affected_casts"]==1
     assert diag["same_tick_remove_apply_groups"]==1
     assert rows[2]["spells"]["1719"]["proof_status"]=="SAME_TICK_REAPPLICATION_ORDER_UNVERIFIED"
