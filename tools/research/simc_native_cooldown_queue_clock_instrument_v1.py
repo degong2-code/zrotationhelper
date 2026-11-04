@@ -78,32 +78,36 @@ def verify_math_source(root: Path) -> dict:
 
 def extend_player(instrumented: bytes) -> bytes:
     src = instrumented.decode("utf-8")
-    anchor = "    bool zrot_native_ready = a->action_ready();"
-    if src.count(anchor) != 1 or MARK in src:
-        raise QueueClockPatchError("ORIGINAL_NATIVE_ATTEMPT_NOT_UNIQUE")
+    # Source-pointer variables are LOCAL to the previous guard logging
+    # block. Insert within that block AFTER its complete guard print, not
+    # directly before the call outside its scope (historical CI compile FAIL).
+    ready_anchor = "    bool zrot_native_ready = a->action_ready();"
+    guard_print_end = (
+        "        zrot_moving, zrot_usable_move, zrot_cost_ok );"
+    )
+    if (src.count(ready_anchor) != 1 or
+        src.count(guard_print_end) != 1 or MARK in src):
+        raise QueueClockPatchError("ORIGINAL_SOURCE_SCOPED_GUARD_LOG_NOT_UNIQUE")
     additional = (
-        "    // Source raw timestamps, not a second call to is_ready().\n"
-        "    // A queue threshold only exists for action/player-bound cooldowns.\n"
-        "    if ( sim->log && !is_pet() && !is_enemy() )\n"
-        "    {\n"
+        "\n      // Raw source timestamps, never second is_ready() call.\n"
+        "      // The existing source owner/ordinal remain in this C++ scope.\n"
         "      const auto* zrot_cd_clock = a->cooldown;\n"
         "      const int zrot_cd_action_bound = zrot_cd_clock && zrot_cd_clock->action ? 1 : 0;\n"
         "      const int zrot_cd_player_bound = zrot_cd_clock && zrot_cd_clock->player ? 1 : 0;\n"
         "      const auto zrot_cd_ready_ms = zrot_cd_clock ? zrot_cd_clock->ready.total_millis() : 0;\n"
         "      const auto zrot_queue_ms = ( zrot_cd_action_bound && zrot_cd_player_bound ) ?\n"
         "        zrot_cd_clock->queueable().total_millis() : 0;\n"
-        "      // zrot_pre_owner and ordinal are from the existing source pointer scan.\n"
-        "      sim->print_log( \"" + MARK + "{}|{}|{}|{}|{}|{}|{}|{}\",\n"
+        '      sim->print_log( "' + MARK + '{}|{}|{}|{}|{}|{}|{}|{}",\n'
         "        sim->current_time().total_millis(), zrot_pre_owner,\n"
         "        zrot_pre_ordinal, a->name_str, zrot_cd_ready_ms,\n"
-        "        zrot_cd_action_bound, zrot_cd_player_bound, zrot_queue_ms );\n"
-        "    }\n"
+        "        zrot_cd_action_bound, zrot_cd_player_bound, zrot_queue_ms );"
     )
-    out = src.replace(anchor, additional + anchor, 1)
-    if (out.count(MARK) != 1 or out.count(anchor) != 1 or
+    out = src.replace(guard_print_end, guard_print_end + additional, 1)
+    if (out.count(MARK) != 1 or out.count(ready_anchor) != 1 or
         out.count("a->cooldown->is_ready()") != 1 or
-        out.index(MARK) > out.index(anchor)):
-        raise QueueClockPatchError("QUEUE_CLOCK_SOURCE_RECORD_NOT_PRE_OR_ADDED_CALL")
+        out.index(guard_print_end) >= out.index(MARK) or
+        out.index(MARK) >= out.index(ready_anchor)):
+        raise QueueClockPatchError("QUEUE_CLOCK_SCOPED_PRE_ORIGINAL_CALL_CHANGED")
     return out.encode("utf-8")
 
 
