@@ -60,3 +60,12 @@ Derived receipt SHA256 8fd2df01ebdba7096a3c9c10c9718e168205005f064edbbc4647b8e1f
 | Existing AST with buff extension | tools/research/simc_native_if_buff_pre_replay_v1.py; SHA256 7165c5fc28517b4e7759583434bae9f3da2ffc09fe2a5b9d1a294a704c971092; [Actions #41761805054](https://github.com/degong2-code/zrotationhelper/actions/runs/41761805054) | 477 actual Native Fury IF events (ST 131/255, 2T 142/222), 273 independent matches / 204 UNKNOWN. Prior talent-only 210 reproduced and +63 new sound cases. Original-vs-reporter exact actions unchanged. Not a full ready() or action choice oracle. |
 
 Receipt SHA256 1be31f4c758079d2c19b63a7bac4a1cc619c63cd59f7454da42431911583ff72. Artifact #13291335905 expires 2026-11-11T02:37:39Z. Historical CI #41761382312 and #41761581156 failed source pin order and C++ log scope respectively, and remain failure evidence; #41761805054 is the tested successor. Remaining 204 UNKNOWN are primarily simulation movement and raid event, plus GCD, cooldown, time-to-die and trinket/variable. Reuse existing generic AST/readiness providers and test baseline, never create Fury-specific semantic shortcut. MAIN/FROZEN not updated.
+
+## Native action-scoped GCD/cooldown evidence reuse — 2026-11-04
+
+| Function | Reusable artifact | Proven boundary |
+| --- | --- | --- |
+| APL-if action-context GCD/cooldown PRE observation | tools/research/simc_native_if_action_gcd_cd_pre_instrument_v1.py, SHA256 9025dd4916f80e811e2cd30dce8772af39f5b7e92c7e9b0031a1bd8bd16ff37a | Official action_t::gcd duration and existing cooldown_t::up. NOT player GCD remaining or queueable is_ready. Unrecognized source suffix and absent cooldown stay UNKNOWN. |
+| Source-tied typed AST replay with previous 273 proofs | tools/research/simc_native_if_action_gcd_cd_pre_replay_v1.py, SHA256 42ef54af6a805e9efbf47206bf8a100f2c639cd5930355eee79975fc0ad2906a; [Actions #41763588110](https://github.com/degong2-code/zrotationhelper/actions/runs/41763588110) | Real Native IF: 273 old + 44 new ST = 317/477 independently matched, 160 UNKNOWN; ST 175/255 and 2T 142/222. Actual pristine/instrumented action sequence identical. No full Native action_ready oracle. |
+
+Result receipt SHA256 f0c410f6e86bfe98e0d7921d65e66a8cdb1b1a3b009dfa8dd7dd0d15597a67bb. Artifact #13291702924 expires 2026-11-11T02:54:43Z. Failed intermediary Actions #41763311442 preserved. Next priority is proving generic readiness across actual action-ready attempts, not merely more IF truth matches. MAIN/FROZEN not promoted.
