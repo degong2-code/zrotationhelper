@@ -100,6 +100,24 @@ class WarriorPriorityAdapter:
         self.counts["new_source_warrior_numeric_exclusion"]+=1
         return row
 
+    def partial_positive_gate(self,pending:dict,row:dict)->bool|None:
+        """Only the inherited Warrior range/channel predicate; never full READY."""
+        w=pending.get("warrior_ready",[])
+        a=pending.get("warrior_action",[])
+        if len(w)!=1 or len(a)!=1:
+            return None
+        if (a[0]["route"] not in (
+                "NO_REPLACEMENT_OR_ZERO_DURATION",
+                "REPLACEMENT_INACTIVE_QUALIFIED_BASE") or
+            w[0]["stage"]!="QUALIFIED_BASE_AND_WARRIOR_READY_TRUE" or
+            pending.get("base_ready_entries")!=1):
+            return None
+        calc=independent_warrior_numeric(w[0])
+        if (not calc["compared"] or calc["numeric_route"]!=
+                "SOURCE_WARRIOR_RANGE_CHANNEL_PASS_ONLY"):
+            raise WarriorReplayError("SOURCE_WARRIOR_PARTIAL_POSITIVE_NOT_INDEPENDENT")
+        return True
+
     def summary(self)->dict:
         return dict(sorted(self.counts.items()))
 
