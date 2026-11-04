@@ -50,7 +50,7 @@ def sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
-def source_inventory(ir):
+def candidate_inventory(ir):
     symbols = set()
     for rows in ir["action_lists"].values():
         for row in rows:
@@ -59,11 +59,22 @@ def source_inventory(ir):
             for symbol in row["expression_fields"]["if"]["symbols"]:
                 if symbol == "gcd" or symbol.startswith("cooldown."):
                     symbols.add(symbol)
-    if not 1 <= len(symbols) <= MAX_SOURCE_SYMBOLS:
-        raise ActionExprPatchError("ACTION_EXPR_SOURCE_INVENTORY_EMPTY_OR_TOO_LARGE")
-    if any(s != "gcd" and not CD_RE.fullmatch(s) for s in symbols):
-        raise ActionExprPatchError("UNSUPPORTED_APL_ACTION_EXPR")
     return sorted(symbols)
+
+
+def source_inventory(ir):
+    candidates = candidate_inventory(ir)
+    # This is a bounded operand producer. Unsupported cooldown suffixes are
+    # explicitly left UNKNOWN, never turned into values and never a blocker.
+    recognized = [s for s in candidates if s == "gcd" or CD_RE.fullmatch(s)]
+    if not 1 <= len(recognized) <= MAX_SOURCE_SYMBOLS:
+        raise ActionExprPatchError("ACTION_EXPR_SOURCE_INVENTORY_EMPTY_OR_TOO_LARGE")
+    return recognized
+
+
+def unsupported_inventory(ir):
+    supported = set(source_inventory(ir))
+    return [s for s in candidate_inventory(ir) if s not in supported]
 
 
 def verify_semantics(root):
@@ -215,6 +226,7 @@ def run(root, profile, expected_profile_git_blob):
         "APL_if_talent_inventory": talents,
         "APL_if_buff_inventory": buffs,
         "APL_if_action_expr_inventory": actions,
+        "unsupported_cooldown_symbols_left_UNKNOWN": unsupported_inventory(ir),
         "semantics": semantics,
         "native_IF_result_only_verification": True,
         "native_ready_used_as_AST_operand": False,
@@ -238,6 +250,12 @@ def selftest():
         source_inventory(synthetic),
     )
     assert scoped == ["cooldown.bladestorm.ready", "gcd"]
+    partial = parse_profile(
+        b"actions=x,if=gcd<1.5&cooldown.bladestorm.ready&cooldown.other.remains>2\n",
+        require_source=False,
+    )
+    assert source_inventory(partial) == scoped
+    assert unsupported_inventory(partial) == ["cooldown.other.remains"]
     example = (BEFORE + "  if ( !ready() ) return false;\n" +
                IF_OLD + "\n  return true;\n}\n" + AFTER +
                "  return true;\n}\n").encode()
