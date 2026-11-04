@@ -1,0 +1,98 @@
+name: zrot-simc-multi-spec-source-cold-start-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_simc_multi_spec_cold_start_v1.py
+      - tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json
+      - tools/research/simc_apl_semantic_ir_v2.py
+      - .github/workflows/zrot-simc-multi-spec-source-cold-start-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Generic APL parser and exact source manifest synthetic checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_simc_multi_spec_cold_start_v1.py \
+            tools/research/simc_apl_semantic_ir_v2.py
+          python -B tools/research/simc_apl_semantic_ir_v2.py > /tmp/generic-source-ir-selftest.json
+          python -B tools/research/general_rotation_simc_multi_spec_cold_start_v1.py > /tmp/multi-spec-manifest-selftest.json
+          python - <<'PY'
+          import json
+          m=json.load(open('/tmp/multi-spec-manifest-selftest.json'))
+          assert m['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert m['checks']>=8 and m['unrelated_class_examples']==2
+          assert m['WCL_API_calls']==0
+          print('GENERIC_TWO_CLASS_SOURCE_MANIFEST_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_simc_multi_spec_cold_start_v1.py
+
+  pinned-real-simc-profiles:
+    needs: [portable-synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          submodules: false
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Actual pinned original Warrior and Mage APL semantic source cold-start
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_simc_multi_spec_cold_start_v1.py \
+            --source-root simc-upstream \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
+            --out /tmp/general-rotation-multi-spec-source-receipt.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/general-rotation-multi-spec-source-receipt.json'))
+          assert x['schema']=='ZrotGeneralRotationSimcMultiSpecColdStartV1'
+          assert x['distinct_class_count']>=2
+          assert len(x['profiles'])>=2
+          assert x['total_action_rows']>0
+          assert x['all_profile_source_blobs_verified'] is True
+          assert x['Native_action_ready_independently_proven'] is False
+          assert x['WCL_independent_blind_holdout_completed'] is False
+          assert x['General_Rotation_opener_verified'] is False
+          assert x['WCL_API_calls']==0
+          print('ACTUAL_PINNED_MULTI_CLASS_SIMC_APL_SOURCE_COLD_START_PASS')
+          for p in x['profiles']:
+              print('PINNED_GENERIC_SPEC_SOURCE',p['key'],p['source_action_rows'],
+                    p['action_list_count'],p['source_symbol_count'])
+          PY
+          sha256sum /tmp/general-rotation-multi-spec-source-receipt.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pinned-two-class-simc-apl-source-ir
+          path: /tmp/general-rotation-multi-spec-source-receipt.json
+          retention-days: 7
+          if-no-files-found: error
