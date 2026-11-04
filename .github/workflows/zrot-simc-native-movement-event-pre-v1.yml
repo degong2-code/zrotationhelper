@@ -18,6 +18,7 @@ on:
       - tools/research/simc_native_if_action_gcd_cd_pre_replay_v1.py
       - tools/research/simc_native_if_movement_event_pre_instrument_v1.py
       - tools/research/simc_native_if_movement_event_pre_replay_v1.py
+      - tools/research/simc_native_moving_cohort_if_replay_v1.py
       - .github/workflows/zrot-simc-native-movement-event-pre-v1.yml
   workflow_dispatch:
 
@@ -149,6 +150,18 @@ jobs:
           PY
           sha256sum tools/research/simc_native_if_movement_event_pre_instrument_v1.py
           sha256sum tools/research/simc_native_if_movement_event_pre_replay_v1.py
+          python -m py_compile tools/research/simc_native_moving_cohort_if_replay_v1.py
+          python -B tools/research/simc_native_moving_cohort_if_replay_v1.py >/tmp/moving-cohort-selftest.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/moving-cohort-selftest.json'))
+          assert p['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert p['checks']>=9 and p['WCL_API_calls']==0
+          assert p['moving_native_run'] is False
+          assert p['Native_IF_truth_as_AST_fact'] is False
+          print('MOVING_NATIVE_SEPARATE_COHORT_AST_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_native_moving_cohort_if_replay_v1.py
 
   real-native-foreground-source-oracle:
     needs: [offline-python-provenance]
@@ -413,6 +426,42 @@ jobs:
           print("NATIVE_GENERIC_ACTIVE_MOVEMENT_EVENT_OBSERVED",json.dumps(cases,sort_keys=True))
           PY
           sha256sum /tmp/native-generic-movement-scenario.json
+      - name: Independently replay actual 476 Native moving-cohort IF conditions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_moving_cohort_if_replay_v1.py \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --moving-profile /tmp/native-fury-light-movement.simc \
+            --official-sim-clock-source simc-upstream/engine/sim/sim.cpp \
+            --native-moving-scenario-proof /tmp/native-generic-movement-scenario.json \
+            --native-moving-st-dir /tmp/instrumented-native-move-st \
+            --native-moving-2t-dir /tmp/instrumented-native-move-2t \
+            --out /tmp/native-moving-cohort-independent-if.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('/tmp/native-moving-cohort-independent-if.json').read_bytes())
+          assert p['schema']=='ZrotActualNativeMovingCohortIndependentIfV1'
+          assert p['moving_Native_IF_total']==476
+          assert p['moving_independent_AST_matched']+p['moving_IF_UNKNOWN']==476
+          assert p['moving_positive_distance_PRE_count']==17
+          assert p['actual_movement_exercised'] is True
+          assert p['moving_event_is_SimC_forecast_not_WoW_forecast'] is True
+          assert p['Native_IF_truth_used_as_AST_fact'] is False
+          assert p['Native_ready_used_as_AST_fact'] is False
+          assert p['full_action_ready_independently_proven'] is False
+          assert p['WCL_API_calls']==0
+          assert p['st']['Native_IF_count']==253
+          assert p['two_target']['Native_IF_count']==223
+          print('ACTUAL_MOVING_NATIVE_INDEPENDENT_AST_MATCHES',
+                p['moving_independent_AST_matched'],p['moving_IF_UNKNOWN'])
+          for side in ('st','two_target'):
+              s=p[side]
+              print('MOVING_SCENARIO_AST',side,s['independent_AST_matched'],s['UNKNOWN'],
+                    s['source_unknown_symbol_incidence'])
+          PY
+          sha256sum /tmp/native-moving-cohort-independent-if.json
       - name: Independently audit pointer-identified native selected rows
         shell: bash
         run: |
@@ -704,6 +753,7 @@ jobs:
             /tmp/native-action-gcd-cd-pre-replay.json
             /tmp/native-movement-event-pre-ast.json
             /tmp/native-generic-movement-scenario.json
+            /tmp/native-moving-cohort-independent-if.json
             /tmp/native-if-expression-patch.json
           retention-days: 7
           if-no-files-found: error
