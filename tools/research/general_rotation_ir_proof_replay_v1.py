@@ -151,7 +151,6 @@ def evaluate(model:dict,raw:bytes,at_ms:int,
                 # control action readiness or source option attributes.
                 # Never leak a positive proof through an unsupported
                 # target_if, moving, cycle, target_number, etc.
-                source=row["source_text"]
                 parsed_row=parsed["action_lists"][source_list][idx]
                 attr_names={a["key"] for a in parsed_row["attributes"]}
                 is_regular=(row["kind"]=="EXECUTABLE_SOURCE_CANDIDATE" and
@@ -263,7 +262,6 @@ def selftest()->dict:
     assert no["bounded_source_result"]["reason"]=="ACTION_READINESS_UNOBSERVED"
     first=evaluate(m,sample,100,pre(2),{("default",1):proof})
     assert first["bounded_source_result"]["reason"]=="ACTION_READINESS_UNOBSERVED"
-    blocked=evaluate(m,sample,100,pre(1,100),{("default",1):proof}) if False else None
     try:evaluate(m,sample,100,pre(1,100),{("default",1):proof})
     except ProofReplayError:pass
     else:raise AssertionError("SAME_TIME_PRE_ACCEPTED")
@@ -288,7 +286,7 @@ def selftest()->dict:
                "INDEPENDENT_WCL_PRE","WCL_STRICT_PRE",99,"synthetic"),))
     fail=evaluate(special,options,100,{},{("default",0):ev})
     assert fail["bounded_source_result"]["reason"]=="ACTION_READINESS_UNOBSERVED"
-    assert fail["candidate_proof_counts"]["source_READY"]==0
+    assert fail["candidate_proof_counts"].get("source_READY",0)==0
     control=b"actions=call_action_list,name=inner\nactions.inner=alpha\n"
     cm=compile_profile(control,{"key":"sample_c","class_key":"class_c",
                                 "git_blob":git_blob(control)})
