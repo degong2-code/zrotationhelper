@@ -29,6 +29,7 @@ on:
       - tools/research/simc_native_resource_cost_replay_v1.py
       - tools/research/simc_native_postguard_source_instrument_v1.py
       - tools/research/simc_native_postguard_source_replay_v1.py
+      - tools/research/simc_native_if_false_priority_frontier_v1.py
       - .github/workflows/zrot-simc-native-movement-event-pre-v1.yml
   workflow_dispatch:
 
@@ -260,6 +261,16 @@ jobs:
           PY
           sha256sum tools/research/simc_native_postguard_source_instrument_v1.py
           sha256sum tools/research/simc_native_postguard_source_replay_v1.py
+          python -m py_compile tools/research/simc_native_if_false_priority_frontier_v1.py
+          python -B tools/research/simc_native_if_false_priority_frontier_v1.py > /tmp/frontier-selftest.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/frontier-selftest.json'))
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC' and r['checks']>=13
+          assert r['full_action_priority_proven'] is False
+          print('IF_FALSE_PRIORITY_FRONTIER_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_native_if_false_priority_frontier_v1.py
 
   real-native-foreground-source-oracle:
     needs: [offline-python-provenance]
@@ -719,6 +730,31 @@ jobs:
                     case['unknown_reasons'])
           PY
           sha256sum /tmp/native-postguard-source-replay.json
+      - name: Join independent IF false decisions and source candidate frontier
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_false_priority_frontier_v1.py \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --native-moving-st-dir /tmp/instrumented-native-move-st \
+            --native-moving-2t-dir /tmp/instrumented-native-move-2t \
+            --out /tmp/native-if-false-priority-frontier.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/native-if-false-priority-frontier.json'))
+          t=r['totals']
+          assert t['Native_action_ready_attempts']==5408
+          assert t['real_source_IF_samples']==953
+          assert t['Native_source_IF_FALSE_exit_joined']==663
+          assert t['IF_FALSE_exits_independently_proved']+t['IF_FALSE_exits_UNKNOWN']==663
+          assert r['native_selected_action_not_independently_ready'] is True
+          assert r['WCL_API_calls']==0
+          print('SOURCE_IF_FALSE_FRONTIER',t)
+          print('SOURCE_FRONTIER_PREFIX',r['foreground_frontier'])
+          PY
+          sha256sum /tmp/native-if-false-priority-frontier.json
       - name: Independently audit pointer-identified native selected rows
         shell: bash
         run: |
@@ -1017,5 +1053,6 @@ jobs:
             /tmp/native-raw-tolerance-exact-replay.json
             /tmp/native-base-resource-cost-replay.json
             /tmp/native-postguard-source-replay.json
+            /tmp/native-if-false-priority-frontier.json
           retention-days: 7
           if-no-files-found: error
