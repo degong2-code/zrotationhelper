@@ -1,0 +1,13 @@
+# Handoff preparation work log — 2026-11-04
+**Authority and work type:** documentation-only isolated BR-GR-ST2T-WCL-BLIND-20261102 branch successor. No new source implementation, Native SimC run, WCL API calls, WoW client test, MAIN promotion or FROZEN edit in this handoff preparation.
+
+1. Read official scope lock, scope prose, AGENTS.md, Engine-First charter, continuity protocol and existing branch handoff generation 1.
+2. Enumerated repository Git tree and found existing SimC parsers, Native source recorders, off-line AST/ledger replay, WCL discovery/holdout pipelines, current status and developer notes. Existing features indexed in FEATURE_EVIDENCE_REUSE_INDEX_20261104.md rather than rewritten.
+3. Verified baseline research branch HEAD 502e2e9c8364034d7b485c86aa5d49bcc0d8476b, MAIN HEAD 4790f77f76a75f26ff0558d1d18c16cd9d630c4b, policy blob 14b9f5174a9d1652a56dcca03af1f2302b78c22d, policy SHA256 157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295.
+4. Independently queried GitHub Actions completion: Native source+AST run 41584822737 PASS; ledger offline replay 41585210821 PASS; older structural replay 41580466416 PASS; native profile AST+effective list runs 41563832907 and 41563013349 PASS; WCL discovery and holdout 41463589665 and 41473060401 PASS. Historic failure runs intentionally not rewritten.
+5. Confirmed latest valid scientific statement: 477 actual Native IF evaluations; 66 decidable independent Python AST matches (3 exact/63 partial); 411 unknown; offline 477-row reuse PASS but not second independent oracle. Main implementation and product linkage incomplete.
+6. Existing branch LATEST_HANDOFF generation 1 was outdated and incorrectly had 'real WCL NOT_COLLECTED'. Archive its original **exact bytes** and link new generation 2 to parent SHA256 f2c4181a31662fa8868705b3d0ff949443017da9c73e07a5517f531a588ad2c1; keep full unmodified policy JSON snapshot.
+7. Deliver new concise status, reuse index, developer-note pointer, current-status pointer, continuation handoff, and standalone updated new-chat prompt; prohibit next-chat actions until the user says '진행'.
+8. Validation of the **new handoff commit** is separate from historical successful CI. Check Github scope survival workflow and exact HEAD after the documentation commit; do not claim it PASSED before result exists.
+
+**Operational rule:** if existing source is adequate, REUSE it; if only missing fields block proof, EXTEND a narrow adapter; if semantic conflicts are found, REPLACE minimally with focused regression and preserve old evidence. Group independent investigations and run equivalent gates only once per changed input. PASS count is not an outcome metric.

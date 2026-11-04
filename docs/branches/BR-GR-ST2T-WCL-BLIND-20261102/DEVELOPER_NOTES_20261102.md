@@ -70,3 +70,8 @@ The repository tree on this research branch does not contain a local copy of `RO
 ## 7. Immediate next chat: **RESTORE ONLY, THEN STOP**
 
 Before the next user's explicit `진행`: read-only HEAD/CI/source inspection and a concise restoration report are allowed. **Do not implement, run simulations/collect WCL, trigger workflows, write files, create branches/commits/PRs, or change promotion pointers.** After reporting the exact restored goal, evidence ranges, blockers and both Exact Next fields, wait for user instruction. No background execution.
+
+
+## 2026-11-04 verified SimC-first handoff successor
+
+Historical sections above include superseded "collect WCL next" directions; latest **user mandate** is to FINISH APL → Native-equivalent reusable General Rotation **engine before** WCL comparison or addon expansion. New canonical branch-local short status: HANDOFF_STATUS_20261104.md; detailed feature/source/receipt reuse index: FEATURE_EVIDENCE_REUSE_INDEX_20261104.md; generation-2 LATEST_HANDOFF and NEW_CHAT_START_PROMPT_20261104.md. The latest Native operand proof is **66/477** cases (3 numeric + 63 logically partial), **411 UNKNOWN**; 477-row ledger cheap offline recheck uses the same Python evaluator, not a second independent oracle. Native ST/2T selected-root structural match requires Native ready() booleans. Reuse earlier resource/variable/IF instrumenters; implement a minimal *generic* provenance-gated operand provider before new pipelines. Missing evidence ≠ code not written ≠ product model validation. New chat FIRST RESPONSE READ-ONLY RESTORE AND STOP until '진행'.
