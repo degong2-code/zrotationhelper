@@ -92,7 +92,9 @@ def compile_profile(raw:bytes,metadata:dict)->dict:
             action=row["action"]
             control=(action in CONTROL_COMMANDS or
                      row["behavior"] in ("CALL","RUN","SWAP_UNSUPPORTED","VARIABLE"))
+            side_effect=(row["behavior"]=="SIDE_EFFECT_SOURCE_MODEL_UNVERIFIED")
             if control:control_counts[row["behavior"]]+=1
+            if side_effect:control_counts["SIDE_EFFECT_UNKNOWN"]+=1
             conditions={}
             targets=[]
             symbols=set()
@@ -123,7 +125,10 @@ def compile_profile(raw:bytes,metadata:dict)->dict:
                 },
                 "source_text":row["source_text"],
                 "action":action,"behavior":row["behavior"],
-                "kind":"APL_CONTROL" if control else "EXECUTABLE_SOURCE_CANDIDATE",
+                "kind":("APL_CONTROL" if control else
+                        "SOURCE_SIDE_EFFECT_NOT_CONFIRMED_CAST" if side_effect
+                        else "EXECUTABLE_SOURCE_CANDIDATE"),
+                "is_user_cast_spell":"UNKNOWN",
                 "source_priority_ordinal":index,
                 "conditions":conditions,
                 "control_destination":dest,
@@ -205,7 +210,7 @@ def run(root:Path,manifest_path:Path)->dict:
 
 def selftest():
     raw=(
-        b"actions.precombat=mark\n"
+        b"actions.precombat=snapshot_stats\n"
         b"actions=variable,name=20swindow,op=set,value=1\n"
         b"actions+=/call_action_list,name=cleave,if=active_enemies>=2\n"
         b"actions+=/filler,if=rage>=50&movement.distance<5\n"
@@ -217,6 +222,7 @@ def selftest():
     assert model["coverage"]["source_action_rows"]==6
     assert model["coverage"]["action_lists"]==3
     assert model["opener_hypothesis"]["precombat_source_rows"]==1
+    assert model["source_only_priority_graph"]["lists"]["precombat"][0]["kind"]=="SOURCE_SIDE_EFFECT_NOT_CONFIRMED_CAST"
     assert model["opener_hypothesis"]["first_actual_cast"]=="UNKNOWN"
     lists=model["source_only_priority_graph"]["lists"]
     assert lists["default"][1]["kind"]=="APL_CONTROL"
@@ -226,6 +232,7 @@ def selftest():
     assert lists["default"][1]["literal_target_count_comparisons_not_verified_breakpoints"][0]["literal"]==2
     assert lists["cleave"][0]["literal_target_count_comparisons_not_verified_breakpoints"][0]["literal"]==3
     assert lists["default"][2]["expected_ready"]=="UNKNOWN"
+    assert lists["default"][2]["is_user_cast_spell"]=="UNKNOWN"
     assert model["evidence_status"]["validated_general_rotation_priority"] is False
     assert count_literal_comparisons(["binary",">=",["symbol","variable.aoe_count"],["number",2.0]],"if")==[]
     try:compile_profile(raw,{"key":"alpha","class_key":"other","git_blob":"a"*40})
