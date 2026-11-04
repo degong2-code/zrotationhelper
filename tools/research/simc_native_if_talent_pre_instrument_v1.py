@@ -19,6 +19,7 @@ from pathlib import Path
 from simc_apl_semantic_ir_v2 import parse_profile, git_blob
 from simc_native_if_expression_instrument_v1 import (
     PINNED_COMMIT, ACTION_CPP_BLOB, TARGET, BEFORE, AFTER, OLD as IF_OLD,
+    PatchError,
 )
 from simc_native_if_pre_operand_instrument_v1 import (
     instrument as instrument_original, NEW_LOG as OLD_PRE_FACT_LOG,
@@ -154,7 +155,7 @@ def selftest():
         raise AssertionError("ACCEPTED_UNSUPPORTED_SYMBOL")
     try:
         instrument(output.encode(), inventory, strict=False)
-    except (TalentPatchError, OperandPatchError):
+    except (TalentPatchError, OperandPatchError, PatchError):
         pass
     else:
         raise AssertionError("ACCEPTED_DOUBLE_INSTRUMENT")
