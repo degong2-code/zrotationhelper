@@ -103,16 +103,16 @@ def extend_action(text:str)->str:
         "  if ( resource == RESOURCE_NONE )\n"
         "  {\n"
         "    if ( sim->log && player && !player->is_pet() && !player->is_enemy() )\n"
-        '      sim->print_log( "'+ACTION_MARK+'{}|{}|{}|{:.17g}",\n'
+        '      sim->print_log( "'+ACTION_MARK+'{}|{}|{}|{}|{:.17g}",\n'
         "        sim->current_time().total_millis(), name_str,\n"
-        "        static_cast<int>( resource ), 0.0 );\n"
+        "        static_cast<int>( resource ), 1, 0.0 );\n"
         "    return true;\n"
         "  }\n"
         "  const double zrot_original_cost_once = cost();\n"
         "  if ( sim->log && player && !player->is_pet() && !player->is_enemy() )\n"
-        '    sim->print_log( "'+ACTION_MARK+'{}|{}|{}|{:.17g}",\n'
+        '    sim->print_log( "'+ACTION_MARK+'{}|{}|{}|{}|{:.17g}",\n'
         "      sim->current_time().total_millis(), name_str,\n"
-        "      static_cast<int>( resource ), zrot_original_cost_once );\n"
+        "      static_cast<int>( resource ), 0, zrot_original_cost_once );\n"
         "  return player->resource_available( resource, zrot_original_cost_once );\n"
         "}\n"
     )
