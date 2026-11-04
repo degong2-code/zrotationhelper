@@ -181,7 +181,8 @@ jobs:
           assert p['native_ready_used_as_operand'] is False
           assert p['runtime_nonperturbation']=='NOT_YET_VALIDATED'
           assert 'talent.slayers_dominance' in p['APL_IF_talent_inventory']
-          assert len(p['APL_IF_talent_inventory']) == 7
+          assert len(p['APL_IF_talent_inventory']) == 5
+          assert 'talent.lightning_strikes' in p['APL_IF_talent_inventory']
           print('NATIVE_IF_GENERIC_TALENT_PRE_PATCH_READY',p['APL_IF_talent_inventory'])
           PY
           python - <<'PY'
