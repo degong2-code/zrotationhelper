@@ -244,7 +244,7 @@ def selftest():
     try:
         instrument(changed.encode(), talent_inventory(ir), buff_inventory(ir),
                    action_inventory(ir), symbols, strict=False)
-    except (MovementPatchError, PatchError, Exception):
+    except ValueError:
         pass
     else:
         raise AssertionError("REPEATED_SOURCE_PROBE_ACCEPTED")
