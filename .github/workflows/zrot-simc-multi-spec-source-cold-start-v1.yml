@@ -4,6 +4,7 @@ on:
     branches: [work/gr-simc-st-2t-wcl-blind-20261102]
     paths:
       - tools/research/general_rotation_simc_multi_spec_cold_start_v1.py
+      - tools/research/general_rotation_source_hypothesis_ir_v1.py
       - tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json
       - tools/research/simc_apl_semantic_ir_v2.py
       - .github/workflows/zrot-simc-multi-spec-source-cold-start-v1.yml
@@ -33,18 +34,26 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             tools/research/general_rotation_simc_multi_spec_cold_start_v1.py \
+            tools/research/general_rotation_source_hypothesis_ir_v1.py \
             tools/research/simc_apl_semantic_ir_v2.py
           python -B tools/research/simc_apl_semantic_ir_v2.py > /tmp/generic-source-ir-selftest.json
           python -B tools/research/general_rotation_simc_multi_spec_cold_start_v1.py > /tmp/multi-spec-manifest-selftest.json
+          python -B tools/research/general_rotation_source_hypothesis_ir_v1.py > /tmp/general-rotation-ir-selftest.json
           python - <<'PY'
           import json
           m=json.load(open('/tmp/multi-spec-manifest-selftest.json'))
           assert m['status']=='PASS_OFFLINE_SYNTHETIC'
           assert m['checks']>=8 and m['unrelated_class_examples']==2
           assert m['WCL_API_calls']==0
+          ir=json.load(open('/tmp/general-rotation-ir-selftest.json'))
+          assert ir['schema']=='ZrotGeneralRotationSourceHypothesisIRV1'
+          assert ir['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert ir['checks']>=15 and ir['WCL_API_calls']==0
           print('GENERIC_TWO_CLASS_SOURCE_MANIFEST_SYNTHETIC_PASS')
+          print('GENERIC_GENERAL_ROTATION_SOURCE_IR_SYNTHETIC_PASS')
           PY
           sha256sum tools/research/general_rotation_simc_multi_spec_cold_start_v1.py
+          sha256sum tools/research/general_rotation_source_hypothesis_ir_v1.py
 
   pinned-real-simc-profiles:
     needs: [portable-synthetic]
@@ -90,9 +99,44 @@ jobs:
                     p['action_list_count'],p['source_symbol_count'])
           PY
           sha256sum /tmp/general-rotation-multi-spec-source-receipt.json
+      - name: Generate class-neutral General Rotation opener and priority source-hypothesis IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_source_hypothesis_ir_v1.py \
+            --source-root simc-upstream \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
+            --out /tmp/general-rotation-two-class-hypothesis-ir.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/general-rotation-two-class-hypothesis-ir.json'))
+          old=json.load(open('/tmp/general-rotation-multi-spec-source-receipt.json'))
+          assert x['schema']=='ZrotMultiSpecGeneralRotationSourceHypothesisIRV1'
+          assert x['class_count']==2
+          assert x['source_action_rows_total']==old['total_action_rows']==172
+          assert x['native_positive_ready_NOT_proven'] is True
+          assert x['WCL_API_calls']==0 and x['MAIN_promoted'] is False
+          for m in x['models']:
+              c=m['coverage']
+              assert c['source_action_rows']>0
+              assert c['action_lists']>0
+              assert m['opener_hypothesis']['first_actual_cast']=='UNKNOWN'
+              assert m['opener_hypothesis']['runtime_opener_sequence']=='UNKNOWN'
+              assert m['evidence_status']['complete_positive_READY_proven'] is False
+              assert m['evidence_status']['validated_general_rotation_priority'] is False
+              assert sum(len(v) for v in m['source_only_priority_graph']['lists'].values())==c['source_action_rows']
+              print('REAL_GENERIC_SOURCE_HYPOTHESIS_IR',m['spec_key'],
+                    c['source_action_rows'],c['action_lists'],
+                    c['literal_target_count_comparisons'],
+                    c['condition_context_hints'])
+          print('GENERIC_SOURCE_OPENER_AND_PRIORITY_IR_SOURCE_ONLY_PASS')
+          PY
+          sha256sum /tmp/general-rotation-two-class-hypothesis-ir.json
       - uses: actions/upload-artifact@v4
         with:
           name: pinned-two-class-simc-apl-source-ir
-          path: /tmp/general-rotation-multi-spec-source-receipt.json
+          path: |
+            /tmp/general-rotation-multi-spec-source-receipt.json
+            /tmp/general-rotation-two-class-hypothesis-ir.json
           retention-days: 7
           if-no-files-found: error
