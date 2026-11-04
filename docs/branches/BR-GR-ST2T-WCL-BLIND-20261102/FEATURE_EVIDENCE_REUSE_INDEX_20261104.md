@@ -87,3 +87,12 @@ Receipt SHA256 158e08b32a44755446da7c0cad5a9c841e230449a02a2479a6cbfab0e028edb2,
 | Generic actually moving scenario E2E in same Native workflow | SimC built-in LightMovement, profile Git blob 063cce2e3072e8bd9ae52f42118971c684e46f12, same seed 31459 and fixed 30s, controlled ST/2T | Native movement occurred: ST 253 PRE-IF readout groups, 8 positive movement distances; 2T 223 groups, 9 positive distances. Future-event state observed. Original and instrumented actual performed actions exact equality for each scenario. Independent AST parity for moving scenario NOT RUN. |
 
 Current fixed default-context replay SHA256 f9894123ba2440fded52dbd228e3e4b2350f7b1b105f6cb97a6272be34d2d5c5; active-movement receipt SHA256 17a8859fa680e9fccb8179659670b7f29595b25c778dc61de1a83f59bae94007. Retained artifact #13294949311 until 2026-11-11T04:18:54Z. No WCL query. Do not confuse SimC LightMovement source event with an observable WoW future event or create encounter plans. User-approved research is UNIFIED: stationary is a conditional branch, not a prerequisite phase. Next evidence producer is independent moving-scenario AST source replay and full generic readiness witness. No MAIN/FROZEN promotion.
+
+## Independent moving Native source replay reuse (2026-11-04)
+
+| Item | Actual provenance | Scope |
+| --- | --- | --- |
+| Moving ST and 2 target source-based IF replay | tools/research/simc_native_moving_cohort_if_replay_v1.py; SHA256 159e0588efd415df8adcba3c9eb8a708598522ff9ecbf5f7d58e153fcaa8aa01; [Actions #41773228489](https://github.com/degong2-code/zrotationhelper/actions/runs/41773228489) | Real generic LightMovement ST=250/253 matches, 2T=220/223 matches; 470/476 matches, 6 UNKNOWN, zero observed conflicts. Pristine/instrumented performed actions exact, Native IF truth only comparison. |
+| Previous separate no-event source-based replay | tools/research/simc_native_if_movement_event_pre_replay_v1.py | 469/477 matches, 8 UNKNOWN, also passed in newest CI. Separate cohort, no event imputation in live WoW. |
+
+Moving receipt SHA256 fc47a022c97387fad29b5c3016eca6f7979ab4c46387bdbe6fc66bc6f2e70e61; GitHub artifact 13295369177 expires 2026-11-11. Reuse existing typed AST, original Native source pin and scenario nonperturbation. Next high-value engine work: independent source-guard readiness witness and source-ordered action selection. Previous 2572 observed Native ready attempts are not independent readiness proofs. MAIN/FROZEN untouched.
