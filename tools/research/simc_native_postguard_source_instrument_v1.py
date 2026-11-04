@@ -68,11 +68,10 @@ def verify_postguard_source(root:Path):
         "if ( option.moving != -1 && option.moving != ( player->is_moving() ? 1 : 0 ) )",
         "if ( if_expr && !if_expr->success() )",
         "if ( !cooldown_allow_casting_success &&",
-        "return true;"
     )
     pos=[]
     for s in anchors:
-        if body.count(s)!=1 and s!="return true;":
+        if body.count(s)!=1:
             raise PostguardProducerError("ORIGINAL_POSTGUARD_GUARD_CHANGED:"+s)
         pos.append(body.index(s))
     if pos!=sorted(pos):
