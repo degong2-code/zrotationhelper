@@ -125,8 +125,7 @@ def replay_log(trace: str, ir: dict) -> dict:
             index = pre["ordinal"] - 1
             if index < 0 or index >= len(rows):
                 raise ReadinessWitnessError("GUARD_SOURCE_POINTER_OUT_OF_RANGE")
-            if pre["native_name"] != rows[index]["action"] and not (
-                pre["native_name"] and rows[index]["action"]):
+            if not pre["native_name"] or not rows[index]["action"]:
                 raise ReadinessWitnessError("GUARD_SOURCE_ACTION_MISSING")
             pending.append({"pre": pre, "action_entries":0, "ready_entries":0,
                             "observed_method_names":Counter()})
@@ -299,7 +298,8 @@ def selftest() -> dict:
     x = replay_log(trace, synthetic)
     assert x["counts"]["source_negative_vs_native_false_MATCH"] == 1
     for bad in (
-        trace.replace("|foo|0\n","|foo|1\n"),
+        trace.replace("ZROT_NATIVE_SELECT_V1|ATTEMPT|10|default|default|1|foo|0",
+                      "ZROT_NATIVE_SELECT_V1|ATTEMPT|10|default|default|1|foo|1"),
         trace.replace("|foo|0|1|0|-1|-1","|foo|0|1|0|0|-1"),
         trace.replace("|default|1|foo|0|1","|default|2|foo|0|1"),
     ):
