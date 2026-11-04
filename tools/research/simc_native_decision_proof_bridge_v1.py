@@ -16,7 +16,7 @@ from collections import Counter
 
 from general_rotation_decision_proof_engine_v1 import (
     Identity, Fact, GateContract, decide_candidate, evaluate_priority,
-    NOT_READY, READY, UNKNOWN, DecisionProofError
+    NOT_READY, READY, UNKNOWN, CONTROL_COMMANDS, DecisionProofError
 )
 from simc_native_cooldown_tolerance_replay_v1 import independent_raw_tolerance_queue
 from simc_native_target_eligibility_source_replay_v1 import (
@@ -156,6 +156,9 @@ class NativeProofBridge:
                 "at_ms":identity.t_ms,"ordinal":identity.ordinal,
                 "same_key_occurrence":identity.occurrence},
             "decision":verdict["decision"],
+            "source_action_kind":(
+                "APL_CONTROL" if row["source_action"] in CONTROL_COMMANDS
+                else "EXECUTABLE_SOURCE_ACTION"),
             "blockers":verdict["blockers"],
             "independent_true_gates":verdict["independent_true"],
             "independent_false_gates":verdict["independent_false"],
@@ -181,10 +184,18 @@ class NativeProofBridge:
                                  native_selected_name=observed_name)
         self.counters["source_root_scans"]+=1
         if returned:
+            kind=proof[-1]["source_action_kind"]
+            if kind not in ("APL_CONTROL","EXECUTABLE_SOURCE_ACTION"):
+                raise NativeProofBridgeError("UNKNOWN_SELECTED_SOURCE_KIND")
+            result["source_return_kind"]=kind
             self.counters["source_returned_roots"]+=1
+            self.counters["returned_"+kind]+=1
             self.counters["returned_"+result["returned_READINESS"]]+=1
             if result["earlier_UNKNOWN"]==0:
                 self.counters["returned_all_prior_proven_not_ready_but_winner_unknown"]+=1
+                self.counters["returned_"+kind+"_all_prior_excluded_but_winner_UNKNOWN"]+=1
+            else:
+                self.counters["returned_"+kind+"_with_prior_UNKNOWN"]+=1
             for field in proof[-1]["blockers"]:
                 self.counters["selected_blocker_"+field]+=1
         return result
@@ -198,7 +209,6 @@ class NativeProofBridge:
                 "WCL_API_calls":0}
 
 def selftest():
-    from simc_native_if_false_priority_frontier_v1 import one_attempt
     # Minimal source-pointer-compatible proof: independent proven
     # negative stays negative, source-observed true stays UNKNOWN.
     h="a"*64
@@ -228,8 +238,17 @@ def selftest():
     assert root["earlier_NOT_READY"]==1
     assert root["decision"]==UNKNOWN
     assert root["returned_READINESS"]==UNKNOWN
+    assert root["source_return_kind"]=="EXECUTABLE_SOURCE_ACTION"
     ctl=dict(nxt,source_action="run_action_list")
-    assert bridge.evaluate_attempt(pending,ctl)["decision"]==UNKNOWN
+    control_proof=bridge.evaluate_attempt(pending,ctl)
+    assert control_proof["decision"]==UNKNOWN
+    assert control_proof["source_action_kind"]=="APL_CONTROL"
+    root_control=bridge.evaluate_root(
+        [{"generic_proof":a},{"generic_proof":control_proof}],
+        returned=True,observed_name="run_action_list")
+    assert root_control["source_return_kind"]=="APL_CONTROL"
+    assert bridge.summary()["counts"]["returned_APL_CONTROL"]==1
+    assert bridge.summary()["counts"]["returned_EXECUTABLE_SOURCE_ACTION"]==1
     # Fake native positive bit cannot certify a skill: this adapter does
     # not even expose Native ready as an accepted input.
     assert "native_ready" not in bridge.summary()["counts"]
