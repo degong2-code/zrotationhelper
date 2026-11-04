@@ -91,7 +91,11 @@ def resolve_selected(row: dict, ir: dict):
         "source_sha256": source["source_sha256"],
     }
     if pointer != expected:
-        raise ContextEvidenceError("NATIVE_SELECTED_SOURCE_POINTER_MISMATCH")
+        changed = [key for key in sorted(set(pointer) | set(expected))
+                   if pointer.get(key) != expected.get(key)]
+        raise ContextEvidenceError("NATIVE_SELECTED_SOURCE_POINTER_MISMATCH:"
+                                   + str(name) + ":" + str(index) + ":"
+                                   + ",".join(changed))
     if not row.get("native_action_ready_observed"):
         raise ContextEvidenceError("SOURCE_SELECTED_WITHOUT_NATIVE_READY_OBSERVATION")
     at = row.get("root_time_ms")
