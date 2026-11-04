@@ -30,7 +30,7 @@ from simc_native_if_buff_pre_replay_v1 import (
     group_actual_pre_buffs, compare_with_previous,
 )
 from simc_native_if_action_gcd_cd_pre_instrument_v1 import (
-    MARK, source_inventory,
+    MARK, source_inventory, unsupported_inventory,
 )
 
 SCHEMA = "ZrotNativeActionGcdCooldownPreAstReplayV1"
@@ -240,6 +240,7 @@ def run(profile, clock, st, two):
         "status": "ACTION_SCOPED_IF_OPERAND_REPLAY_NOT_ACTION_READY_PARITY",
         "official_profile_git_blob_sha1": PINNED_FURY_BLOB,
         "source_scoped_symbols": scoped,
+        "unobserved_cooldown_suffixes_left_UNKNOWN": unsupported_inventory(ir),
         "prior_source_buff_independent_IF_checks": 273,
         "additional_source_scoped_independent_checks":
             overall["newly_decidable_action_expr"],

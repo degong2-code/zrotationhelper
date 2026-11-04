@@ -223,6 +223,7 @@ jobs:
           assert p['semantics']['ready_is_not_cooldown_up'] is True
           assert p['semantics']['gcd_is_not_gcd_remaining'] is True
           assert p['APL_if_action_expr_inventory']==['cooldown.bladestorm.ready','gcd']
+          assert 'cooldown.recklessness.remains' in p['unsupported_cooldown_symbols_left_UNKNOWN']
           assert p['native_IF_result_only_verification'] is True
           assert p['native_ready_used_as_AST_operand'] is False
           assert p['native_nonperturbation']=='NOT_YET_VERIFIED'
@@ -510,6 +511,7 @@ jobs:
           assert r['additional_source_scoped_independent_checks']==r['independently_replayed_IF_matches']-273
           assert r['remaining_IF_UNKNOWN']==477-r['independently_replayed_IF_matches']
           assert r['source_scoped_symbols']==['cooldown.bladestorm.ready','gcd']
+          assert 'cooldown.recklessness.remains' in r['unobserved_cooldown_suffixes_left_UNKNOWN']
           assert r['unknown_cooldown_id_remains_UNKNOWN'] is True
           assert r['Native_IF_result_used_as_AST_fact'] is False
           assert r['native_ready_used_as_AST_fact'] is False
