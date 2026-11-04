@@ -5,6 +5,8 @@ on:
     paths:
       - tools/research/general_rotation_simc_multi_spec_cold_start_v1.py
       - tools/research/general_rotation_source_hypothesis_ir_v1.py
+      - tools/research/general_rotation_ir_proof_replay_v1.py
+      - tools/research/general_rotation_decision_proof_engine_v1.py
       - tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json
       - tools/research/simc_apl_semantic_ir_v2.py
       - .github/workflows/zrot-simc-multi-spec-source-cold-start-v1.yml
@@ -35,10 +37,12 @@ jobs:
           python -m py_compile \
             tools/research/general_rotation_simc_multi_spec_cold_start_v1.py \
             tools/research/general_rotation_source_hypothesis_ir_v1.py \
+            tools/research/general_rotation_ir_proof_replay_v1.py \
             tools/research/simc_apl_semantic_ir_v2.py
           python -B tools/research/simc_apl_semantic_ir_v2.py > /tmp/generic-source-ir-selftest.json
           python -B tools/research/general_rotation_simc_multi_spec_cold_start_v1.py > /tmp/multi-spec-manifest-selftest.json
           python -B tools/research/general_rotation_source_hypothesis_ir_v1.py > /tmp/general-rotation-ir-selftest.json
+          python -B tools/research/general_rotation_ir_proof_replay_v1.py > /tmp/generic-ir-proof-replay-selftest.json
           python - <<'PY'
           import json
           m=json.load(open('/tmp/multi-spec-manifest-selftest.json'))
@@ -50,10 +54,19 @@ jobs:
           assert ir['status']=='PASS_OFFLINE_SYNTHETIC'
           assert ir['checks']>=15 and ir['WCL_API_calls']==0
           print('GENERIC_TWO_CLASS_SOURCE_MANIFEST_SYNTHETIC_PASS')
+          proof=json.load(open('/tmp/generic-ir-proof-replay-selftest.json'))
+          assert proof['schema']=='ZrotGeneralRotationIRProofCarryingDecisionReplayV1'
+          assert proof['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert proof['checks']>=15
+          assert proof['generic_classes']==3
+          assert proof['all_positive_READINESS_claims_synthetic_only'] is True
+          assert proof['WCL_API_calls']==0
           print('GENERIC_GENERAL_ROTATION_SOURCE_IR_SYNTHETIC_PASS')
+          print('GENERIC_PROOF_CARRYING_IR_REPLAY_SYNTHETIC_PASS')
           PY
           sha256sum tools/research/general_rotation_simc_multi_spec_cold_start_v1.py
           sha256sum tools/research/general_rotation_source_hypothesis_ir_v1.py
+          sha256sum tools/research/general_rotation_ir_proof_replay_v1.py
 
   pinned-real-simc-profiles:
     needs: [portable-synthetic]
@@ -132,11 +145,44 @@ jobs:
           print('GENERIC_SOURCE_OPENER_AND_PRIORITY_IR_SOURCE_ONLY_PASS')
           PY
           sha256sum /tmp/general-rotation-two-class-hypothesis-ir.json
+      - name: Replay official Fury and Arcane IR with no invented PRE or READY
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_ir_proof_replay_v1.py \
+            --source-root simc-upstream \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
+            --out /tmp/general-rotation-two-class-proof-replay.json
+          python - <<'PY'
+          import json
+          source=json.load(open('/tmp/general-rotation-two-class-hypothesis-ir.json'))
+          report=json.load(open('/tmp/general-rotation-two-class-proof-replay.json'))
+          assert report['schema']=='ZrotMultiSpecGeneralRotationIRProofReplayV1'
+          assert len(report['reports'])==len(source['models'])==2
+          assert report['full_positive_ready_proven'] is False
+          assert report['WCL_independent_holdout_completed'] is False
+          assert report['WCL_API_calls']==0
+          for model,case in zip(source['models'],report['reports']):
+              assert model['spec_key']==case['source_spec']
+              assert case['source_typed_graph_verified'] is True
+              assert case['hypothetical_selected_source_row'] is None
+              assert case['dummy_feedback_permitted'] is False
+              assert case['source_order_optimality_proven'] is False
+              assert case['candidate_proof_counts'].get('source_READY',0)==0
+              assert sum(case['candidate_proof_counts'].values())==model['coverage']['source_action_rows']
+              assert case['bounded_source_result']['verdict']=='UNKNOWN'
+              print('OFFICIAL_GENERIC_IR_PROOF_REPLAY',case['source_spec'],
+                    case['candidate_proof_counts'],
+                    case['bounded_source_result'])
+          print('ACTUAL_PINNED_IR_PROOF_REPLAY_FAIL_CLOSED_PASS')
+          PY
+          sha256sum /tmp/general-rotation-two-class-proof-replay.json
       - uses: actions/upload-artifact@v4
         with:
           name: pinned-two-class-simc-apl-source-ir
           path: |
             /tmp/general-rotation-multi-spec-source-receipt.json
             /tmp/general-rotation-two-class-hypothesis-ir.json
+            /tmp/general-rotation-two-class-proof-replay.json
           retention-days: 7
           if-no-files-found: error
