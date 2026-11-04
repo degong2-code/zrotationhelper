@@ -29,3 +29,17 @@ Long-term reusable Engine: official patch source + SimC-first opener and conditi
 **Product Exact Next:** finish generic SimC APL execution / opener and condition model, validate against Native execution across ST/2T/AoE/builds; then locked WCL replay + Blizzard mechanics + selective holdout/counterfactual; then trainer.
 **Session Exact Next (only AFTER user's explicit '진행'):** inspect existing SimC operand/resource/variable source producers and pinned ledger; implement minimum generic provenance-gated pre-IF operand provider for buff.recklessness.up, hero-talent state and variable.* where official source permits; replay the existing 477 rows offline first, run actual Native once only for new observational facts; compare decisions without Native truth leakage, preserving UNKNOWN. Batch independent changes and reuse same acceptance matrix.
 **First new-chat reply:** READ-ONLY verify actual GitHub branch HEAD/policy/parent handoff/CI and report restoration, blockers and short/long roadmap; STOP. No coding, pushes, tests, simulations, API calls, Actions dispatch, commits or promotion until '진행'.
+
+## 2026-11-04 session successor — source-clock operand
+
+**Current bounded independent Native IF proof: 68/477 matched, 409 UNKNOWN.** Earlier 66/477 (411 UNKNOWN) is the immutable baseline and remains valid for its earlier operand set. Two additional IFs became decidable with a source-backed time operand; all prior 66 still matched.
+
+Source: tools/research/simc_native_if_source_clock_successor_v1.py (Git blob 2bc7fc9d8ea8a8e05ee6aaf248e8eae915024273; tested file SHA256 41e23ede7e0aa5fb7c3ef5b56f5472ca3a7aff96967b0e95cefb2c2860967abd). Native official SimC source commit b522cded8c26b97dac03fdf56e57a03ec7e8faa6, engine/sim/sim.cpp blob ae5c258953787196e0aecad58814ff14d4cd2bed, direct time-to-event_mgr.current_time binding. Existing 477-row ledger SHA256 ebf8a902bff1c1167306217535ac5fc10466bc3a1d4512adc175a2449e7fbd13.
+
+[Actions #41753660425](https://github.com/degong2-code/zrotationhelper/actions/runs/41753660425) SUCCESS: Python 3.12 and 3.14 compile/synthetic plus pinned 477 ledger replay. New receipt SHA256 310eb9f369e537eac5916ebbcb23ea34bc6de558ca34f43b3e359bc76c57d85d. Temporary artifact ID 13286884187 expires 2026-11-11T01:23:24Z. No Native SimC rerun, WCL API, addon or second independent AST implementation. Native truth is used only after independent AST calculation; Native ready is never an operand. Same-time clock observation at IF evaluation is not a WCL Strict PRE state transition.
+
+Repeated unknown symbol incidences (overlapping): talent.slayers_dominance=103; buff.recklessness.up=77; movement.distance=71; buff.whirlwind.stack=39; talent.improved_whirlwind=39; buff.enrage.remains=29; gcd=29. These counts do not add up to independent recoverable cases.
+
+**Next Session Exact Next:** Inspect official player_t::create_expression talent meaning and existing Native reporters, then source-drive passive pre-IF talent-value capture using a generic APL-derived symbol inventory (prioritize talent.slayers_dominance), validate pristine-vs-instrumented ST/2T nonperturbation and independent AST replay. Then consider buff.recklessness.up and variable values; never use selected Native action as a substitute for talent facts.
+
+G2, G4, G5, G6 and G7 complete gates remain NOT ESTABLISHED. General Rotation and target-dummy feedback incomplete, WCL comparison paused. MAIN, FROZEN and global handoff unchanged; Seq578 FAILED_QUARANTINED, Seq637 UNKNOWN.

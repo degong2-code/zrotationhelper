@@ -34,3 +34,11 @@
 4. Strict PRE requires transition timestamp < action time. Do not use same-time/future state. Absent alternate cooldown/charge/readiness remains UNKNOWN.
 5. Do not add Fury/Slayer meaning to the generic engine. Put specialization specifics in adapters; validate generality with another executed spec/build after Fury vertical semantics.
 6. MAIN alone may elevate shared state. Seq578=FAILED_QUARANTINED; Seq637=UNKNOWN; FROZEN unchanged.
+
+## Source-clock successor reuse — 2026-11-04
+
+| Capability / role | Reusable source and receipt | Scope |
+| --- | --- | --- |
+| Native PRE-IF time operand using immutable 477-row ledger | tools/research/simc_native_if_source_clock_successor_v1.py; [Actions #41753660425](https://github.com/degong2-code/zrotationhelper/actions/runs/41753660425); receipt SHA256 310eb9f369e537eac5916ebbcb23ea34bc6de558ca34f43b3e359bc76c57d85d | Source-pinned official event_mgr.current_time clock; old 66 matched + 2 new = 68/477, remaining 409 UNKNOWN. No Native/WCL run, no readiness or complete action-choice parity. |
+
+Source file SHA256 41e23ede7e0aa5fb7c3ef5b56f5472ca3a7aff96967b0e95cefb2c2860967abd. New artifact 13286884187 expires 2026-11-11T01:23:24Z. This is a successor, NOT a rewrite of the original 66/477 frozen-corpus result. The largest observed unresolved symbol is talent.slayers_dominance (103 overlapping appearances); next work should produce source-accounted passive talent state with a generic APL-symbol inventory instead of hardcoding Fury interpretation or expanding WCL/addon.
