@@ -87,12 +87,19 @@ def resolve_selected(row: dict, ir: dict):
         "source_index": source["index"],
         "source_action": source["action"],
         "source_text": source["source_text"],
-        "source_file_line": source["source_line"],
         "source_sha256": source["source_sha256"],
     }
-    if pointer != expected:
-        changed = [key for key in sorted(set(pointer) | set(expected))
-                   if pointer.get(key) != expected.get(key)]
+    # Native trace source_file_line is an EFFECTIVE-APL line number. The
+    # official source profile contains non-action settings/comments and its
+    # physical line number must be preserved separately, never equated here.
+    effective_line = pointer.get("source_file_line")
+    if type(effective_line) is not int or effective_line < 1:
+        raise ContextEvidenceError("INVALID_EFFECTIVE_APL_LINE_PROVENANCE")
+    pointer_content = {k: v for k, v in pointer.items()
+                       if k != "source_file_line"}
+    if pointer_content != expected:
+        changed = [key for key in sorted(set(pointer_content) | set(expected))
+                   if pointer_content.get(key) != expected.get(key)]
         raise ContextEvidenceError("NATIVE_SELECTED_SOURCE_POINTER_MISMATCH:"
                                    + str(name) + ":" + str(index) + ":"
                                    + ",".join(changed))
@@ -162,6 +169,9 @@ def opener_candidates(selected, ir, *, window_ms: int):
             "role": role,
             "source_list": source["list"],
             "source_index": source["index"],
+            "native_effective_apl_line": r["selected_row_pointer_proof"]["source_file_line"],
+            "official_profile_physical_line": source["source_line"],
+            "line_origin_may_differ_but_pointer_hash_matches": True,
             **info,
         })
     return {
@@ -236,6 +246,7 @@ def audit(ir, native_selected, native_pre_if, native_scoped,
         "no_environment_variable_false_or_zero_imputation": True,
         "no_environment_only_row_automatically_deleted": True,
         "mixed_OR_condition_core_branch_preserved": True,
+        "effective_APL_line_and_official_profile_line_separately_preserved": True,
         "dummy_environment_and_simulation_event_is_separated": True,
         "source_context_count_of_native_IFs": dict(sorted(overall.items())),
         "source_identified_native_IF_count": 477,
@@ -295,6 +306,9 @@ def selftest():
         "movement.distance"]
     assert got["native_selection_events_in_time_order"][1]["source_condition"] == (
         "time<=0.5|movement.distance>5")
+    shifted = selected(opener_row, 0)
+    shifted["selected_row_pointer_proof"]["source_file_line"] += 20
+    assert resolve_selected(shifted, ir)["source_sha256"] == opener_row["source_sha256"]
     a = selected(opener_row, 0)
     a["selected_row_pointer_proof"]["source_sha256"] = "f"*64
     try:
