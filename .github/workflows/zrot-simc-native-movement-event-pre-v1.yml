@@ -1,0 +1,604 @@
+name: zrot-simc-native-movement-event-pre-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_native_select_trace_instrument_v1.py
+      - tools/research/simc_native_select_trace_audit_v1.py
+      - tools/research/simc_native_foreground_structural_replay_v1.py
+      - tools/research/simc_native_if_expression_instrument_v1.py
+      - tools/research/simc_native_if_condition_coverage_v1.py
+      - tools/research/simc_native_if_pre_operand_instrument_v1.py
+      - tools/research/simc_native_if_pre_operand_replay_v1.py
+      - tools/research/simc_native_if_talent_pre_instrument_v1.py
+      - tools/research/simc_native_if_talent_pre_replay_v1.py
+      - tools/research/simc_native_if_buff_pre_instrument_v1.py
+      - tools/research/simc_native_if_buff_pre_replay_v1.py
+      - tools/research/simc_native_if_action_gcd_cd_pre_instrument_v1.py
+      - tools/research/simc_native_if_action_gcd_cd_pre_replay_v1.py
+      - tools/research/simc_native_if_movement_event_pre_instrument_v1.py
+      - tools/research/simc_native_if_movement_event_pre_replay_v1.py
+      - .github/workflows/zrot-simc-native-movement-event-pre-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-python-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Independent reporter and auditor offline contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_native_select_trace_instrument_v1.py
+          python -m py_compile tools/research/simc_native_select_trace_audit_v1.py
+          python -m py_compile tools/research/simc_native_foreground_structural_replay_v1.py
+          python -m py_compile tools/research/simc_native_if_expression_instrument_v1.py
+          python -m py_compile tools/research/simc_native_if_condition_coverage_v1.py
+          python -m py_compile tools/research/simc_native_if_pre_operand_instrument_v1.py
+          python -m py_compile tools/research/simc_native_if_pre_operand_replay_v1.py
+          python -B tools/research/simc_native_select_trace_instrument_v1.py >/tmp/native-producer-selftest.json
+          python -B tools/research/simc_native_select_trace_audit_v1.py >/tmp/native-audit-selftest.json
+          python -B tools/research/simc_native_foreground_structural_replay_v1.py >/tmp/native-structural-selftest.json
+          python -B tools/research/simc_native_if_expression_instrument_v1.py >/tmp/native-if-patch-selftest.json
+          python -B tools/research/simc_native_if_condition_coverage_v1.py >/tmp/native-if-coverage-selftest.json
+          python -B tools/research/simc_native_if_pre_operand_instrument_v1.py >/tmp/native-pre-operand-patch-selftest.json
+          python -B tools/research/simc_native_if_pre_operand_replay_v1.py >/tmp/native-pre-operand-replay-selftest.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for file,count in [('native-producer-selftest.json',8),
+                             ('native-audit-selftest.json',7),
+                             ('native-structural-selftest.json',10),
+                             ('native-if-patch-selftest.json',7),
+                             ('native-if-coverage-selftest.json',8),
+                             ('native-pre-operand-patch-selftest.json',7),
+                             ('native-pre-operand-replay-selftest.json',10)]:
+              d=json.loads((Path('/tmp')/file).read_bytes())
+              assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert d['checks']>=count
+              assert d.get('WCL_API_calls',d.get('WCL_API_requests'))==0
+          print('NATIVE_SELECT_REPORTER_AND_INDEPENDENT_AUDITOR_OFFLINE_PASS')
+          PY
+          sha256sum tools/research/simc_native_select_trace_instrument_v1.py
+          sha256sum tools/research/simc_native_select_trace_audit_v1.py
+          sha256sum tools/research/simc_native_foreground_structural_replay_v1.py
+          sha256sum tools/research/simc_native_if_expression_instrument_v1.py
+          sha256sum tools/research/simc_native_if_condition_coverage_v1.py
+          sha256sum tools/research/simc_native_if_pre_operand_instrument_v1.py
+          sha256sum tools/research/simc_native_if_pre_operand_replay_v1.py
+          python -m py_compile tools/research/simc_native_if_talent_pre_instrument_v1.py
+          python -m py_compile tools/research/simc_native_if_talent_pre_replay_v1.py
+          python -B tools/research/simc_native_if_talent_pre_instrument_v1.py >/tmp/talent-pre-instrument-selftest.json
+          python -B tools/research/simc_native_if_talent_pre_replay_v1.py >/tmp/talent-pre-replay-selftest.json
+          python - <<'PY'
+          import json
+          for file, checks in [
+             ('/tmp/talent-pre-instrument-selftest.json',9),
+             ('/tmp/talent-pre-replay-selftest.json',10),
+          ]:
+              r=json.load(open(file))
+              assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert r['checks']>=checks
+              assert r['WCL_API_calls']==0
+          print('SOURCE_DERIVED_TALENT_PRE_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_native_if_talent_pre_instrument_v1.py
+          sha256sum tools/research/simc_native_if_talent_pre_replay_v1.py
+          python -m py_compile tools/research/simc_native_if_buff_pre_instrument_v1.py
+          python -m py_compile tools/research/simc_native_if_buff_pre_replay_v1.py
+          python -B tools/research/simc_native_if_buff_pre_instrument_v1.py >/tmp/buff-pre-instrument-selftest.json
+          python -B tools/research/simc_native_if_buff_pre_replay_v1.py >/tmp/buff-pre-replay-selftest.json
+          python - <<'PY'
+          import json
+          for file,checks in [
+             ('/tmp/buff-pre-instrument-selftest.json',10),
+             ('/tmp/buff-pre-replay-selftest.json',11),
+          ]:
+              x=json.load(open(file))
+              assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert x['checks']>=checks and x['WCL_API_calls']==0
+          print('BUFF_SOURCE_PASSIVE_PRE_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_native_if_buff_pre_instrument_v1.py
+          sha256sum tools/research/simc_native_if_buff_pre_replay_v1.py
+          python -m py_compile tools/research/simc_native_if_action_gcd_cd_pre_instrument_v1.py
+          python -m py_compile tools/research/simc_native_if_action_gcd_cd_pre_replay_v1.py
+          python -B tools/research/simc_native_if_action_gcd_cd_pre_instrument_v1.py >/tmp/action-scoped-pre-patch-selftest.json
+          python -B tools/research/simc_native_if_action_gcd_cd_pre_replay_v1.py >/tmp/action-scoped-pre-replay-selftest.json
+          python - <<'PY'
+          import json
+          for name, minimum in [
+             ('/tmp/action-scoped-pre-patch-selftest.json',10),
+             ('/tmp/action-scoped-pre-replay-selftest.json',12),
+          ]:
+              r=json.load(open(name))
+              assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert r['checks']>=minimum
+              assert r['WCL_API_calls']==0
+          print('ACTION_SCOPED_GCD_CD_PRODUCER_AND_REPLAY_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_native_if_action_gcd_cd_pre_instrument_v1.py
+          sha256sum tools/research/simc_native_if_action_gcd_cd_pre_replay_v1.py
+          python -m py_compile tools/research/simc_native_if_movement_event_pre_instrument_v1.py
+          python -m py_compile tools/research/simc_native_if_movement_event_pre_replay_v1.py
+          python -B tools/research/simc_native_if_movement_event_pre_instrument_v1.py > /tmp/native-movement-producer-test.json
+          python -B tools/research/simc_native_if_movement_event_pre_replay_v1.py > /tmp/native-movement-replay-test.json
+          python - <<'PY'
+          import json
+          for path in ('/tmp/native-movement-producer-test.json',
+                       '/tmp/native-movement-replay-test.json'):
+              receipt=json.load(open(path))
+              assert receipt['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert receipt['checks']>=12
+              assert receipt['WCL_API_calls']==0
+          print('SOURCE_PINNED_NATIVE_MOVEMENT_AND_EVENT_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_native_if_movement_event_pre_instrument_v1.py
+          sha256sum tools/research/simc_native_if_movement_event_pre_replay_v1.py
+
+  real-native-foreground-source-oracle:
+    needs: [offline-python-provenance]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SIMC_SHA: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert official source profile and native player source pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = "$SIMC_SHA"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          def gblob(path):
+              raw=Path(path).read_bytes()
+              return hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          assert gblob('simc-upstream/engine/player/player.cpp')=='88e03a01ca87ff66fd3902c9d6e047fe1a03ecb8'
+          assert gblob('simc-upstream/engine/buff/buff.cpp')=='6e9b1d8bcf6facea53d0f6e7ac573dfcf52e0a96'
+          assert gblob('simc-upstream/engine/sim/cooldown.cpp')=='b73f7963ffc7434ee1aa0853e8335b39fe4cf96d'
+          assert gblob('simc-upstream/engine/sim/sim.cpp')=='ae5c258953787196e0aecad58814ff14d4cd2bed'
+          assert gblob('simc-upstream/engine/sim/raid_event.cpp')=='544316e502df365277d6f4ac876f2e767ced6d4a'
+          assert gblob('simc-upstream/engine/action/action.cpp')=='399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4'
+          assert gblob('simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc')=='3225992ed5b754ad5d61e8b785d9d859f1eed1be'
+          print('SIMC_NATIVE_SOURCE_AND_PROFILE_PIN_PASS')
+          PY
+      - name: Install ccache for original and instrumented build
+        shell: bash
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ccache
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: simc-ubuntu-gcc-b522cded8c26b97dac03fdf56e57a03ec7e8faa6-v1
+      - name: Compile official pristine native SimC source
+        shell: bash
+        run: |
+          set -euo pipefail
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-native-selection-build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_GUI=OFF -DBUILD_TESTING=OFF -DSC_NO_NETWORKING=ON \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-native-selection-build --target simc --parallel 3
+          test -x /tmp/zrot-native-selection-build/simc
+      - name: Capture pristine native ST and 2-target action sequences
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --spec fury --simc-bin /tmp/zrot-native-selection-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/pristine-native-st --timeout 180
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --spec fury --simc-bin /tmp/zrot-native-selection-build/simc \
+            --targets 2 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/pristine-native-2t --timeout 180
+      - name: Instrument actual select_action() without changing native ready evaluation count
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_movement_event_pre_instrument_v1.py \
+            --simc-root simc-upstream \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --expected-profile-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
+            --receipt /tmp/native-if-expression-patch.json
+          # The producer must check pristine player.cpp before the selection
+          # reporter writes its independent selection-call instrumentation.
+          python -B tools/research/simc_native_select_trace_instrument_v1.py \
+            --simc-root simc-upstream \
+            --receipt /tmp/native-selected-source-patch.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/native-if-expression-patch.json'))
+          assert p['schema']=='ZrotNativeSimcMovementAndEventPrePatchV1'
+          assert p['one_original_if_evaluation'] is True
+          assert p['native_IF_and_ready_not_AST_input'] is True
+          assert p['future_event_is_not_realtime_game_observation'] is True
+          assert p['native_nonperturbation']=='NOT_YET_PROVEN'
+          assert p['source_environment_symbols']==[
+              'movement.distance','raid_event.movement.distance',
+              'raid_event.movement.in']
+          assert p['source_environment_semantics']['no_matching_event_distance'].startswith('SimC')
+          assert len(p['source_talent_symbols'])==5
+          assert len(p['source_buff_symbols'])==13
+          assert p['source_action_scoped_symbols']==['cooldown.bladestorm.ready','gcd']
+          print('NATIVE_MOVEMENT_AND_EVENT_PRE_PATCH_READY',p['source_environment_symbols'])
+          PY
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/native-selected-source-patch.json'))
+          assert x['simc_commit']=='b522cded8c26b97dac03fdf56e57a03ec7e8faa6'
+          assert x['source_action_ready_evaluations_per_visited_row']==1
+          assert x['native_action_behavior_modified'] is False
+          print('PINNED_NATIVE_READ_ONLY_REPORTER_PATCH_APPLIED')
+          PY
+      - name: Rebuild only modified SimC source and run same ST / 2-target conditions
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake --build /tmp/zrot-native-selection-build --target simc --parallel 3
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --spec fury --simc-bin /tmp/zrot-native-selection-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/instrumented-native-st --timeout 180
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --spec fury --simc-bin /tmp/zrot-native-selection-build/simc \
+            --targets 2 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/instrumented-native-2t --timeout 180
+      - name: Independently compare pristine and reporter-backed actual performed-action sequences
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          summaries={}
+          for kind in ('st','2t'):
+              original=extract_json_sequence(Path('/tmp/pristine-native-'+kind))
+              observed=extract_json_sequence(Path('/tmp/instrumented-native-'+kind))
+              assert original['status']=='SEQUENCE_SNAPSHOTS_EXTRACTED'
+              assert observed['status']==original['status']
+              assert original['source_apl_sha256']==observed['source_apl_sha256']
+              assert original['source_profile_sha256']==observed['source_profile_sha256']
+              assert original['combat_sequence']==observed['combat_sequence']
+              assert original['precombat_sequence']==observed['precombat_sequence']
+              summaries[kind]={
+                  'performed_sequence_exact_json2_match':True,
+                  'combat_count':original['combat_count'],
+                  'precombat_count':original['precombat_count'],
+                  'same_profile_and_effective_apl':True}
+          d={'schema':'ZrotPristineVsReporterNativeActionSequenceV1',
+              'pristine_instrumented_behavior_observationally_equal':True,
+              'cases':summaries,
+              'claim_of_complete_apl_interpreter_parity':False,
+              'WCL_API_calls':0}
+          Path('/tmp/native-sequence-nonperturbation.json').write_text(
+              json.dumps(d,sort_keys=True,indent=2)+'\n')
+          print('PRISTINE_VS_INSTRUMENTED_SIMC_PERFORMED_ACTIONS_ST_2T_EXACT_MATCH_PASS')
+          print('SEQUENCE_COUNTERS',json.dumps(summaries,sort_keys=True))
+          PY
+      - name: Independently audit pointer-identified native selected rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_select_trace_audit_v1.py \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --out /tmp/native-foreground-selected-apl-rows.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/native-foreground-selected-apl-rows.json'))
+          assert d['schema']=='ZrotNativeSimcSelectedRowTwoTargetAuditV1'
+          assert d['status']=='NATIVE_SOURCE_SELECTED_ROWS_RECORDED_NOT_INDEPENDENT_MODEL_PARITY'
+          assert d['native_same_binary_effective_APL_st_and_2t'] is True
+          assert d['native_foreground_decisions_observed']>0
+          assert d['actual_native_choice_v2_model_parity']=='NOT_YET_PROVEN'
+          assert d['WCL_replay_allowed'] is False
+          for name in ('st','two_target'):
+              row=d[name]
+              assert row['source_action_ready_attempts']['total']>0
+              assert row['source_selection_calls']['root_foreground_scans']>0
+              assert row['source_selection_calls']['root_returned_action']>0
+              assert row['native_source_apl_rows']==121
+              assert row['native_action_selection_parity_with_independent_engine']=='NOT_RUN'
+              assert row['MAIN_promotion'] is False
+          print('REAL_NATIVE_FURY_ST_2T_FOREGROUND_SOURCE_POINTER_AUDIT_PASS')
+          print('NATIVE_SELECTED_SOURCE_COUNTS',json.dumps({
+              k:{'selection':d[k]['source_selection_calls'],
+                 'attempts':d[k]['source_action_ready_attempts'],
+                 'unknown':d[k]['source_unknowns'],
+                 'examples':d[k]['selected_foreground_root_examples'][:5]}
+              for k in ('st','two_target')},sort_keys=True))
+          PY
+          sha256sum /tmp/native-foreground-selected-apl-rows.json
+      - name: Independently replay every Native foreground select_action tree from source order and oracle readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_foreground_structural_replay_v1.py \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --native-selection-receipt /tmp/native-foreground-selected-apl-rows.json \
+            --pinned-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --out /tmp/native-source-order-structural-replay.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/native-source-order-structural-replay.json').read_bytes())
+          assert r['schema']=='ZrotNativeSimcConditionalScanStructureReplayV1'
+          assert r['status']=='SOURCE_SELECTION_STRUCTURE_CONDITIONAL_NATIVE_READY_INPUT_PASS'
+          assert r['source_structure_replay_accepted_roots']==214
+          assert r['total_foreground_root_scans']==214
+          assert r['real_native_foreground_selected_rows']==190
+          assert r['native_true_false_ready_inputs_used'] is True
+          assert r['independent_simc_if_expression_parity']=='NOT_TESTED'
+          assert r['independent_spell_ready_and_resource_parity']=='NOT_TESTED'
+          assert r['full_General_Rotation_model_complete'] is False
+          assert r['WCL_comparison_eligible'] is False
+          for label,roots,actions in [('st',118,100),('two_target',96,90)]:
+              o=r[label]
+              assert o['foreground_root_scans']==roots
+              assert o['foreground_replay_counts']['root_returned_action']==actions
+              assert o['foreground_replay_counts']['root_no_action']==roots-actions
+              assert o['parent_Calls_and_RUNs_source_control_parity_given_native_ready_bits']=='PASS_CONDITIONAL_SOURCE_ORDER_REPLAY'
+              assert len(o['root_examples'])==12
+          print('REAL_NATIVE_214_ROOTS_190_SELECTED_ROWS_SOURCE_SCAN_CONTROL_REPLAY_PASS')
+          print('REPLAY_COUNTS',json.dumps({
+              name:r[name]['foreground_replay_counts'] for name in ('st','two_target')
+          },sort_keys=True))
+          PY
+          sha256sum /tmp/native-source-order-structural-replay.json
+      - name: Audit actual native if_expr outcomes without inferring unvisited conditions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_condition_coverage_v1.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --out /tmp/native-source-if-condition-coverage.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('/tmp/native-source-if-condition-coverage.json').read_bytes())
+          assert x['schema']=='ZrotNativeIfConditionFuryTwoTargetV1'
+          assert x['status']=='REAL_NATIVE_IF_OUTCOME_COVERAGE_NO_INDEPENDENT_OPERAND_PARITY'
+          assert x['source_scans']==214
+          assert x['independent_if_semantic_parity']=='NOT_PROVEN'
+          assert x['generic_gameplay_priority_model']=='NOT_COMPLETE'
+          for name,scans,attempts in [('st',118,1542),('two_target',96,1030)]:
+              c=x[name]
+              assert c['native_root_foreground_scans']==scans
+              assert c['counts']['total_native_action_ready_attempts']==attempts
+              assert c['native_if_outcome_distinct_from_full_ready'] is True
+              assert c['source_expression_ast_independent_state_values']=='UNKNOWN'
+              assert c['WCL_eligible'] is False
+              assert c['player_rotation_error_verdict']=='UNKNOWN'
+          print('REAL_NATIVE_214_SCANS_IF_EXPR_EVALUATION_COVERAGE_PASS')
+          print('NATIVE_IF_COVERAGE_COUNTS',json.dumps({
+              k:x[k]['counts'] for k in ('st','two_target')},sort_keys=True))
+          PY
+          sha256sum /tmp/native-source-if-condition-coverage.json
+      - name: Evaluate source-only numeric IF subset from real Native PRE operands
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_pre_operand_replay_v1.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --out /tmp/native-independent-pre-operand-ast-subset.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/native-independent-pre-operand-ast-subset.json').read_bytes())
+          assert r['schema']=='ZrotNativeIndependentPreIfRestrictedOperandReplayV1'
+          assert r['status']=='INDEPENDENT_NUMERIC_AST_SUBSET_ONLY_NATIVE_OPERAND_PARITY'
+          assert r['native_if_truth_used_as_AST_input'] is False
+          assert r['full_General_Rotation_model_complete'] is False
+          assert r['WCL_comparison_eligible'] is False
+          assert r['native_variable_side_effect_parity']=='NOT_PROVEN'
+          for label,attempts in [('st',1542),('two_target',1030)]:
+              x=r[label]['counts']
+              assert x['all_native_action_ready_attempts']==attempts
+              assert x['original_native_if_reports']==x['passive_pre_facts_paired']
+              assert x['passive_pre_facts_paired']==x['facts_attached_to_actual_ready_attempts']
+          print('NATIVE_REAL_PRE_OPERAND_SOURCE_REPLAY_VALIDATION_PASS')
+          print('INDEPENDENT_AST_REPLAY_COUNTS',json.dumps({
+              'matched':r['source_only_pre_operand_numeric_ast_matches'],
+              'st':r['st']['counts'],'two_target':r['two_target']['counts'],
+              'examples':r['st']['independent_matched_examples'][:4]
+          },sort_keys=True))
+          PY
+          sha256sum /tmp/native-independent-pre-operand-ast-subset.json
+      - name: Replay real source-derived Native talent PRE operands with independent Python AST
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_talent_pre_replay_v1.py \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --official-sim-clock-source simc-upstream/engine/sim/sim.cpp \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --out /tmp/native-talent-pre-independent-ast.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/native-talent-pre-independent-ast.json').read_bytes())
+          assert r['schema']=='ZrotNativeSourceTalentPreIndependentAstV1'
+          assert r['original_rage_enemies_time_matched']==68
+          assert r['real_native_IF_events']==477
+          assert r['total_independently_matched']>=68
+          assert r['remaining_UNKNOWN']==477-r['total_independently_matched']
+          assert r['new_independent_talent_cases']==r['total_independently_matched']-68
+          assert r['source_readouts_not_native_IF_results'] is True
+          assert r['Native_IF_truth_only_compared_after_AST'] is True
+          assert r['Native_ready_boolean_as_AST_operand'] is False
+          assert r['General_Rotation_complete'] is False
+          assert r['WCL_API_calls']==0
+          print('ACTUAL_NATIVE_TALENT_PRE_AST_MATCH_COUNTS',
+                r['total_independently_matched'],r['remaining_UNKNOWN'],
+                r['new_independent_talent_cases'])
+          print('TALENT_PRE_PROVENANCE',r['source_derived_talent_symbols'])
+          PY
+          sha256sum /tmp/native-talent-pre-independent-ast.json
+      - name: Re-evaluate 477 actual Native PRE IFs from source-derived mutable buff values
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_buff_pre_replay_v1.py \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --official-sim-clock-source simc-upstream/engine/sim/sim.cpp \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --out /tmp/native-buff-pre-independent-ast.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/native-buff-pre-independent-ast.json').read_bytes())
+          assert r['schema']=='ZrotSourceNativeBuffPreIndependentAstV1'
+          assert r['original_independent_IF_matches']==210
+          assert r['native_IF_events']==477
+          assert r['independently_matched']>=210
+          assert r['remaining_IF_UNKNOWN']==477-r['independently_matched']
+          assert r['additional_independent_buff_matched']==r['independently_matched']-210
+          assert len(r['source_derived_buff_symbols'])==13
+          assert 'buff.recklessness.up' in r['source_derived_buff_symbols']
+          assert r['Native_IF_truth_used_as_AST_fact'] is False
+          assert r['Native_ready_used_as_AST_fact'] is False
+          assert r['complete_General_Rotation_priority'] is False
+          assert r['WCL_API_calls']==0
+          print('REAL_NATIVE_BUFF_PRE_AST_MATCH_COUNTS',
+                r['independently_matched'],r['remaining_IF_UNKNOWN'],
+                r['additional_independent_buff_matched'])
+          print('REMAINING_UNRESOLVED',
+                r['st']['remaining_unobserved_symbol_incidences'],
+                r['two_target']['remaining_unobserved_symbol_incidences'])
+          PY
+          sha256sum /tmp/native-buff-pre-independent-ast.json
+      - name: Independently replay action-specific GCD and source-cooldown IF operands
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_action_gcd_cd_pre_replay_v1.py \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --official-sim-clock-source simc-upstream/engine/sim/sim.cpp \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --out /tmp/native-action-gcd-cd-pre-replay.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/native-action-gcd-cd-pre-replay.json').read_bytes())
+          assert r['schema']=='ZrotNativeActionGcdCooldownPreAstReplayV1'
+          assert r['prior_source_buff_independent_IF_checks']==273
+          assert r['native_IF_evaluations']==477
+          assert r['independently_replayed_IF_matches']>=273
+          assert r['additional_source_scoped_independent_checks']==r['independently_replayed_IF_matches']-273
+          assert r['remaining_IF_UNKNOWN']==477-r['independently_replayed_IF_matches']
+          assert r['source_scoped_symbols']==['cooldown.bladestorm.ready','gcd']
+          assert 'cooldown.recklessness.remains' in r['unobserved_cooldown_suffixes_left_UNKNOWN']
+          assert r['unknown_cooldown_id_remains_UNKNOWN'] is True
+          assert r['Native_IF_result_used_as_AST_fact'] is False
+          assert r['native_ready_used_as_AST_fact'] is False
+          assert r['independent_full_action_ready']=='NOT_PROVEN'
+          assert r['independent_action_choice']=='NOT_PROVEN'
+          assert r['Full_General_Rotation']=='NOT_COMPLETE'
+          assert r['WCL_API_calls']==0
+          print('REAL_NATIVE_ACTION_SCOPED_IF_MATCHES',
+                r['independently_replayed_IF_matches'],r['remaining_IF_UNKNOWN'],
+                r['additional_source_scoped_independent_checks'])
+          print('ACTION_SCOPED_UNOBSERVED_SYMBOLS',r['st']['remaining_unknown_symbol_incidences'],r['two_target']['remaining_unknown_symbol_incidences'])
+          PY
+          sha256sum /tmp/native-action-gcd-cd-pre-replay.json
+      - name: Replay real Native movement and scheduled-event PRE facts after source-only AST
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_movement_event_pre_replay_v1.py \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --official-sim-clock-source simc-upstream/engine/sim/sim.cpp \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --out /tmp/native-movement-event-pre-ast.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/native-movement-event-pre-ast.json').read_bytes())
+          assert r['schema']=='ZrotNativeSimcMovementEventIndependentIfReplayV1'
+          assert r['source_environment_symbols']==[
+              'movement.distance','raid_event.movement.distance',
+              'raid_event.movement.in']
+          assert r['actual_native_IF_count']==477
+          assert r['previously_source_matched']==317
+          assert r['total_independent_IF_matches']>=317
+          assert r['remaining_IF_UNKNOWN']==477-r['total_independent_IF_matches']
+          assert r['newly_independent_environment_IF_matches']==r['total_independent_IF_matches']-317
+          assert r['Native_IF_boolean_used_as_AST_operand'] is False
+          assert r['Native_action_ready_used_as_AST_operand'] is False
+          assert r['simulated_future_event_not_real_game_forecast'] is True
+          assert r['independent_full_action_ready'] is False
+          assert r['independent_action_selection'] is False
+          assert r['general_rotation_completed'] is False
+          assert r['WCL_API_calls']==0
+          print('ACTUAL_NATIVE_SIMC_ENVIRONMENT_IF_MATCHES',
+                r['total_independent_IF_matches'],r['remaining_IF_UNKNOWN'],
+                r['newly_independent_environment_IF_matches'])
+          for side in ('st','two_target'):
+              s=r[side]
+              print('ENVIRONMENT_SOURCE_REPLAY',side,s['counts'],
+                    s['unresolved_symbol_incidences'])
+          PY
+          sha256sum /tmp/native-movement-event-pre-ast.json
+      - name: Preserve small native selection proof, never raw logs or character metadata
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-movement-event-pre-${{ github.sha }}
+          path: |
+            /tmp/native-foreground-selected-apl-rows.json
+            /tmp/native-sequence-nonperturbation.json
+            /tmp/native-selected-source-patch.json
+            /tmp/native-source-order-structural-replay.json
+            /tmp/native-if-expression-patch.json
+            /tmp/native-source-if-condition-coverage.json
+            /tmp/native-independent-pre-operand-ast-subset.json
+            /tmp/native-talent-pre-independent-ast.json
+            /tmp/native-buff-pre-independent-ast.json
+            /tmp/native-action-gcd-cd-pre-replay.json
+            /tmp/native-movement-event-pre-ast.json
+            /tmp/native-if-expression-patch.json
+          retention-days: 7
+          if-no-files-found: error
