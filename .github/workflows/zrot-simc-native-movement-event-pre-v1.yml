@@ -221,6 +221,34 @@ jobs:
             --spec fury --simc-bin /tmp/zrot-native-selection-build/simc \
             --targets 2 --seed 31459 --fight-seconds 30 \
             --out-dir /tmp/pristine-native-2t --timeout 180
+      - name: Exercise generic LightMovement fight style with exact pinned source profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0,"tools/research")
+          from simc_apl_semantic_ir_v2 import git_blob
+          src=Path("simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc").read_bytes()
+          assert git_blob(src)=="3225992ed5b754ad5d61e8b785d9d859f1eed1be"
+          assert b"fight_style=" not in src and b"raid_events=" not in src
+          # SimC's built-in generic movement pattern, NOT a boss timetable.
+          dst=Path("/tmp/native-fury-light-movement.simc")
+          with dst.open("xb") as out:
+              out.write(src+b"\nfight_style=LightMovement\n")
+          print("SIMC_LIGHT_MOVEMENT_PROFILE_SOURCE_PIN_PASS",git_blob(dst.read_bytes()))
+          PY
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile /tmp/native-fury-light-movement.simc \
+            --spec fury --simc-bin /tmp/zrot-native-selection-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/pristine-native-move-st --timeout 180
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile /tmp/native-fury-light-movement.simc \
+            --spec fury --simc-bin /tmp/zrot-native-selection-build/simc \
+            --targets 2 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/pristine-native-move-2t --timeout 180
       - name: Instrument actual select_action() without changing native ready evaluation count
         shell: bash
         run: |
@@ -275,6 +303,20 @@ jobs:
             --spec fury --simc-bin /tmp/zrot-native-selection-build/simc \
             --targets 2 --seed 31459 --fight-seconds 30 \
             --out-dir /tmp/instrumented-native-2t --timeout 180
+      - name: Capture instrumented native LightMovement ST and 2-target with identical seed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile /tmp/native-fury-light-movement.simc \
+            --spec fury --simc-bin /tmp/zrot-native-selection-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/instrumented-native-move-st --timeout 180
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile /tmp/native-fury-light-movement.simc \
+            --spec fury --simc-bin /tmp/zrot-native-selection-build/simc \
+            --targets 2 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/instrumented-native-move-2t --timeout 180
       - name: Independently compare pristine and reporter-backed actual performed-action sequences
         shell: bash
         run: |
@@ -309,6 +351,68 @@ jobs:
           print('PRISTINE_VS_INSTRUMENTED_SIMC_PERFORMED_ACTIONS_ST_2T_EXACT_MATCH_PASS')
           print('SEQUENCE_COUNTERS',json.dumps(summaries,sort_keys=True))
           PY
+      - name: Validate actual Native movement events without conflating them with real game forecasts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,"tools/research")
+          from simc_native_json_sequence import extract_json_sequence
+          from simc_native_if_movement_event_pre_replay_v1 import group_environment_facts
+          from simc_native_if_movement_event_pre_instrument_v1 import inventory
+          from simc_apl_semantic_ir_v2 import parse_profile
+          original_ir=parse_profile(
+              Path("simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc").read_bytes(),
+              require_source=False)
+          symbols=inventory(original_ir)
+          assert symbols==["movement.distance","raid_event.movement.distance","raid_event.movement.in"]
+          cases={}
+          for label in ("st","2t"):
+              before=Path("/tmp/pristine-native-move-"+label)
+              after=Path("/tmp/instrumented-native-move-"+label)
+              pristine=extract_json_sequence(before)
+              instrumented=extract_json_sequence(after)
+              assert pristine["status"]==instrumented["status"]=="SEQUENCE_SNAPSHOTS_EXTRACTED"
+              assert pristine["source_apl_sha256"]==instrumented["source_apl_sha256"]
+              assert pristine["source_profile_sha256"]==instrumented["source_profile_sha256"]
+              assert pristine["precombat_sequence"]==instrumented["precombat_sequence"]
+              assert pristine["combat_sequence"]==instrumented["combat_sequence"]
+              trace=(after/"simc_native_log.txt").read_text(encoding="utf-8")
+              grouped=group_environment_facts(trace,symbols)
+              assert len(grouped)>0
+              imminent=[g["facts"]["raid_event.movement.in"] for g in grouped
+                        if 0<g["facts"]["raid_event.movement.in"]<30]
+              if not imminent:
+                  raise AssertionError("SIMC_MOVEMENT_FORECAST_EVENT_NOT_EXERCISED")
+              moving=[g["facts"]["movement.distance"] for g in grouped
+                      if g["facts"]["movement.distance"]>0]
+              cases[label]={
+                  "pristine_instrumented_action_sequence_exact":True,
+                  "native_if_pre_observation_count":len(grouped),
+                  "scheduled_event_in_window_observed":True,
+                  "scheduled_event_min_positive_in_seconds":min(imminent),
+                  "nonzero_actor_movement_PRE_observations":len(moving),
+                  "max_observed_actor_movement_distance":max(moving,default=0.0),
+                  "source_profile_and_apl_equal_within_case":True,
+                  "scenario": "SimC LightMovement built-in generic fight style",
+              }
+          proof={
+              "schema":"ZrotNativeGenericSimcLightMovementScenarioV1",
+              "status":"GENERIC_MOVEMENT_NATIVE_NONPERTURBATION_AND_EVENT_FORECAST_OBSERVED",
+              "scenarios":cases,
+              "no_boss_specific_timeline_output":True,
+              "future_event_not_real_WoW_state":True,
+              "general_rotation_priority_validated":False,
+              "Native_ready_independent":False,
+              "WCL_API_calls":0,
+          }
+          Path("/tmp/native-generic-movement-scenario.json").write_text(
+              json.dumps(proof,sort_keys=True,separators=(",",":"))+"\n")
+          print("NATIVE_GENERIC_ACTIVE_MOVEMENT_EVENT_OBSERVED",json.dumps(cases,sort_keys=True))
+          PY
+          sha256sum /tmp/native-generic-movement-scenario.json
       - name: Independently audit pointer-identified native selected rows
         shell: bash
         run: |
@@ -599,6 +703,7 @@ jobs:
             /tmp/native-buff-pre-independent-ast.json
             /tmp/native-action-gcd-cd-pre-replay.json
             /tmp/native-movement-event-pre-ast.json
+            /tmp/native-generic-movement-scenario.json
             /tmp/native-if-expression-patch.json
           retention-days: 7
           if-no-files-found: error
