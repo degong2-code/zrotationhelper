@@ -43,3 +43,19 @@ Repeated unknown symbol incidences (overlapping): talent.slayers_dominance=103; 
 **Next Session Exact Next:** Inspect official player_t::create_expression talent meaning and existing Native reporters, then source-drive passive pre-IF talent-value capture using a generic APL-derived symbol inventory (prioritize talent.slayers_dominance), validate pristine-vs-instrumented ST/2T nonperturbation and independent AST replay. Then consider buff.recklessness.up and variable values; never use selected Native action as a substitute for talent facts.
 
 G2, G4, G5, G6 and G7 complete gates remain NOT ESTABLISHED. General Rotation and target-dummy feedback incomplete, WCL comparison paused. MAIN, FROZEN and global handoff unchanged; Seq578 FAILED_QUARANTINED, Seq637 UNKNOWN.
+
+## 2026-11-04 actual Native talent PRE operand successor
+
+**Latest verified bounded Native IF proof: 210/477 independently AST matched; 267 UNKNOWN.** Previous 68/477 (409 UNKNOWN) remains a valid historical source-clock baseline. This successor adds 142 genuinely decisive IF cases using new passive talent values; all 68 previous cases remain matched.
+
+Actual Native Fury ST and 2-target verification: [Actions #41757998253](https://github.com/degong2-code/zrotationhelper/actions/runs/41757998253) SUCCESS, run HEAD f609bcc81135a92b16a913c32a6c0685a6294474. Python 3.12/3.14 compile and synthetic PASS; official pristine vs instrumented SimC precombat/combat action sequences EXACT match in both scenarios. Previous 214 Native foreground roots, 190 selected source rows and 2,572 action_ready attempts remained structurally reproducible, but those structural proofs still consume Native readiness truth.
+
+Pinned SimC commit b522cded8c26b97dac03fdf56e57a03ec7e8faa6, official Fury APL blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be; official player.cpp blob 88e03a01ca87ff66fd3902c9d6e047fe1a03ecb8 implements actor talent expressions via spec/hero/class lookup and enabled/disabled/rank constant. Source-derived generic IF-only inventory contains FIVE symbols: talent.deep_wounds, talent.improved_whirlwind, talent.lightning_strikes, talent.slayers_dominance, talent.wrath_and_fury. Seven symbols in the profile overall are NOT seven IF symbols.
+
+New producer: tools/research/simc_native_if_talent_pre_instrument_v1.py SHA256 535fbae496684ca57bc75fe1316dfd82b173adc6cc3b5324ed90ca99ae02d4e9.
+New independent Python AST reporter: tools/research/simc_native_if_talent_pre_replay_v1.py SHA256 ed7328bef214196257a915e895dea7005e51b7a638475a6cf03d627b7da61125.
+Actual receipt SHA256 8fd2df01ebdba7096a3c9c10c9718e168205005f064edbbc4647b8e1f28f6948. Artifact #13288848180 expires 2026-11-11T02:03:07Z. Native IF truth was ONLY postcomputed comparator; Native readiness was never an AST operand; no WCL API calls, no addon validation, no independent second AST implementation.
+
+Historical failures preserved: #41757715589 FAIL due synthetic test exception-class mismatch; #41757774893 FAIL due CI erroneously expecting seven profile-wide talents instead of five IF-only talents. These are not Native semantic failures. Successor #41757998253 supersedes implementation defects, without altering prior receipts.
+
+**Session Exact Next:** inspect unknown operand incidence in the retained 210/477 receipt first; then add the highest-value official Native source-backed mutable buff/conditional operand (potentially buff.recklessness.up), with generic source-derived symbol inventory and nonperturbation ST/2T gate. Replay 477 real IFs via existing Python AST, never infer readiness, and avoid WCL or addon expansion. General Rotation remains incomplete. G2/G4/G5/G6/G7 final gates NOT proven; MAIN/FROZEN/global handoff untouched; Seq578 FAILED_QUARANTINED, Seq637 UNKNOWN.
