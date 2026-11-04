@@ -27,6 +27,8 @@ SCHEMA = "ZrotSourceFaithfulSimcAplSemanticIRV2"
 
 ROW = re.compile(r"^actions(?:\.([a-z][a-z_0-9]*))?(\+?=)(?:/)?(.+)$")
 COMMAND = re.compile(r"^[a-z][a-z_0-9]*$")
+# SimC APL variable names may start with digits; action/list names may not.
+VARIABLE_NAME = re.compile(r"^[a-z0-9_]+$")
 IDENT = r"[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_0-9]+)*"
 NUMBER = r"(?:[0-9]+\.[0-9]+|[0-9]+)"
 OPERATORS = ("~!=", "~<=", "~>=", "~=", "~<", "~>", "!=", "<=", ">=",
@@ -336,7 +338,7 @@ def parse_profile(raw, *, require_source=True, expected_git_blob=PROFILE_GIT_BLO
                 "source_line": source_line})
         if behavior == "VARIABLE":
             name = indexed.get("name")
-            if not name or not COMMAND.fullmatch(name):
+            if not name or not VARIABLE_NAME.fullmatch(name):
                 raise AplError("VARIABLE_WITHOUT_NAME")
             operation = indexed.get("op", "set")
             if operation not in VARIABLE_OPS:
@@ -645,6 +647,19 @@ def selftest():
        b"actions.sub+=/beta\n"
     )
     ir = parse_profile(simple, require_source=False)
+    # Cross-class SimC grammar: valid numeric-leading variable names must
+    # not broaden action/list/attribute identifiers.
+    m = parse_profile(
+        b"actions=variable,name=20ssteroid_trinket_equipped,op=set,value=1\n"
+        b"actions+=/spell,if=variable.20ssteroid_trinket_equipped\n",
+        require_source=False)
+    assert m["variable_definitions"].get("20ssteroid_trinket_equipped")
+    assert m["source_action_line_count"] == 2
+    try:
+        parse_profile(b"actions=variable,name=bad-name,op=set,value=1\n",
+                      require_source=False)
+    except AplError:pass
+    else:raise AssertionError("MALFORMED_VARIABLE_NAME_ACCEPTED")
     assert ir["source_action_line_count"] == 4
     a = bounded_decision(ir, {"rage": 50},
                          {"default:0": "READY", "sub:1": "NOT_READY", "default:1": "READY"})
