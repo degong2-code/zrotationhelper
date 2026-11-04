@@ -114,3 +114,12 @@ Guard negative reason counts: queueable cooldown 750, resource cost affordabilit
 | Numeric independent cooldown comparison at actual action attempts | tools/research/simc_native_cooldown_queue_clock_replay_v1.py, SHA256 25213ff2e2bf2fd91c821ed6afd060700f10d3854df2a25a4543483cae75815b; [Actions #41778567485](https://github.com/degong2-code/zrotationhelper/actions/runs/41778567485) | 5,403/5,408 source-clock numeric Boolean matches; 5 within-1ms UNKNOWN; 750 necessary source-base cooldown negatives supported, not 750 new failures. Full action-ready and skill-choice not validated. |
 
 Receipt SHA256 fe693e20dbe6b22c7ebb26cf4f1f5fddc2fc84ec9638b99a829d8c1a49e7c123. Artifact #13297753559 expires 2026-11-11T05:21:07Z. C++ scope first attempt Actions #41778347185 remains FAILED; successful successor #41778567485. Next generic engine work: source guard numeric costs/queueable tolerance and subclass/target/GCD conditions. MAIN and historical FROZEN untouched.
+
+## Exact source cooldown tolerance and queueability completed subproof (2026-11-04)
+
+| Capability | Existing reusable evidence | Proven boundary |
+| --- | --- | --- |
+| Source-pinned exact actor/default tolerance PRE producer | tools/research/simc_native_cooldown_tolerance_pre_instrument_v1.py; SHA256 15659a066545de6809bbb9aec94b1c2b6985a44ef63f093ca6576e505b5f4df9 | Read raw actor tolerance, SimC default, clock and bound flags BEFORE exact one original action_ready call; Native queueable clock only comparator. |
+| Exact integer tolerance selection/subtraction and cooldown is_ready independent replay | tools/research/simc_native_cooldown_tolerance_replay_v1.py; SHA256 4dc6765babd3c82a7fffdee967c6dc6615919c35e65257148b6a2caa1ceaaa77; [CI #41781223582](https://github.com/degong2-code/zrotationhelper/actions/runs/41781223582) | Same 4 actual Native scenarios 5408/5408 cooldown decisions, 5183/5183 queueable time exact source parity, prior 5 boundary UNKNOWN resolved. Not full READY, action priority or trainer verdict. |
+
+Raw independent result SHA256 bdd55ac2790b2dd2f85bdaf421009fd556f26d39c8031ed8b4086cb2a718766f, ZIP 13299362136 expires 2026-11-11T05:47:08Z. Historical initial source-assert FAIL run #41781051121 preserved, later #41781223582 Native SUCCESS. Next work should combine independent resource/cost and postguards, subclass semantics, selected priority choice; MAIN and FROZEN unmodified.
