@@ -251,9 +251,9 @@ def run(profile:Path,st:Path,two:Path,move_st:Path,move_two:Path):
             queue["counts"]["attempts"]!=expected or
             provenance["counts"]["all_native_action_ready_attempts"]!=expected):
             raise NumericResourceError("PREVIOUS_NATIVE_READINESS_COHORT_DRIFT")
-        if one["counts"].get("necessary_base_cost_negative_PROVEN",0)>old["counts"][
-            "PROVEN_BASE_GUARD_NOT_READY"] if "PROVEN_BASE_GUARD_NOT_READY" in old["counts"] else False:
-            raise NumericResourceError("NEGATIVE_BASE_COST_WITNESS_OVERRUN")
+        if (one["counts"].get("necessary_base_cost_negative_PROVEN",0)>
+            old["negative_witness_guard_distribution"].get("cost_affordable",0)):
+            raise NumericResourceError("NUMERIC_BASE_COST_NEGATIVE_EXCEEDS_SOURCE_GUARD")
         result[label]={
             **one,
             "native_source_log_sha256":sha(raw),
