@@ -68,7 +68,7 @@ def patch_target(action:bytes)->bytes:
   if ( zrot_target_invul )
   {
     if ( sim->log && player && !player->is_pet() && !player->is_enemy() )
-      sim->print_log( "'''+MARK+'''{}|{}|INVULNERABLE|0|1|-1|-1|{:.17g}|{:.17g}|-1",
+      sim->print_log( "'''+MARK+'''{}|{}|INVULNERABLE|0|1|1|-1|{:.17g}|{:.17g}|-1",
         sim->current_time().total_millis(), name_str, range,
         candidate_target->combat_reach );
     return false;
