@@ -115,7 +115,7 @@ def patch_player(base:bytes)->bytes:
       sim->print_log( "'''+CFG+'''{}|{}|{}|{}|{}|{}|{}|{}|{}",
         sim->current_time().total_millis(), zrot_pre_owner,
         zrot_pre_ordinal, a->name_str,
-        a->target_if_mode == TARGET_IF_NONE ? 1 : 0,
+        a->target_if_mode == action_t::TARGET_IF_NONE ? 1 : 0,
         a->option.cycle_targets ? 1 : 0,
         a->option.cycle_players ? 1 : 0,
         a->option.target_number,
