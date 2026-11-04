@@ -105,9 +105,10 @@ def instrument(original, talents, buffs, *, strict=True):
         for i, symbol in enumerate(buffs)
     )
     text = text.replace(SITE, reads + "\n" + SITE, 1)
-    # Append source facts at the end of the existing log branch; marker must
-    # remain after one original Native IF call but before ready ATTEMPT log.
-    tail = '    if ( !zrot_original_if_result )\n      return false;'
+    # Insert inside the original logging scope so the APL row identity
+    # variables remain in scope, after original Native IF is evaluated.
+    # The inserted facts still precede the action-ready ATTEMPT event.
+    tail = '    }\n    if ( !zrot_original_if_result )\n      return false;'
     if text.count(tail) != 1:
         raise BuffPatchError("NATIVE_IF_FINAL_BRANCH_ANCHOR_CHANGED")
     text = text.replace(tail, prints + "\n" + tail, 1)
