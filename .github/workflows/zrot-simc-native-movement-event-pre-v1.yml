@@ -34,6 +34,7 @@ on:
       - tools/research/simc_native_target_eligibility_source_replay_v1.py
       - tools/research/simc_native_warrior_spec_ready_instrument_v1.py
       - tools/research/simc_native_warrior_spec_ready_replay_v1.py
+      - tools/research/simc_native_warrior_priority_frontier_adapter_v1.py
       - .github/workflows/zrot-simc-native-movement-event-pre-v1.yml
   workflow_dispatch:
 
@@ -309,6 +310,22 @@ jobs:
           PY
           sha256sum tools/research/simc_native_warrior_spec_ready_instrument_v1.py
           sha256sum tools/research/simc_native_warrior_spec_ready_replay_v1.py
+          python -m py_compile tools/research/simc_native_warrior_priority_frontier_adapter_v1.py
+          python -B tools/research/simc_native_warrior_priority_frontier_adapter_v1.py > /tmp/warrior-frontier-adapter-selftest.json
+          python -B tools/research/simc_native_if_false_priority_frontier_v1.py > /tmp/generic-frontier-compat-selftest.json
+          python - <<'PY'
+          import json
+          for p,n in [
+              ('/tmp/warrior-frontier-adapter-selftest.json',7),
+              ('/tmp/generic-frontier-compat-selftest.json',13),
+          ]:
+              r=json.load(open(p))
+              assert r['status']=='PASS_OFFLINE_SYNTHETIC' and r['checks']>=n
+              assert r['WCL_API_calls']==0
+          print('GENERIC_FRONTIER_PLUS_ISOLATED_WARRIOR_ADAPTER_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_native_warrior_priority_frontier_adapter_v1.py
+          sha256sum tools/research/simc_native_if_false_priority_frontier_v1.py
 
   real-native-foreground-source-oracle:
     needs: [offline-python-provenance]
@@ -850,6 +867,43 @@ jobs:
           print('NATIVE_WARRIOR_ACTION_ROUTING',r['source_action_ready_delegation_distribution'])
           PY
           sha256sum /tmp/native-warrior-spec-ready-replay.json
+      - name: Add independently calculated Warrior range and channel negatives to source priority frontier
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_false_priority_frontier_v1.py \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --native-moving-st-dir /tmp/instrumented-native-move-st \
+            --native-moving-2t-dir /tmp/instrumented-native-move-2t \
+            --spec-adapter warrior \
+            --out /tmp/native-warrior-augmented-priority-frontier.json
+          python - <<'PY'
+          import json
+          old=json.load(open('/tmp/native-if-false-priority-frontier.json'))
+          new=json.load(open('/tmp/native-warrior-augmented-priority-frontier.json'))
+          t=new['totals']
+          assert new['schema']=='ZrotNativeSpecAdapterSourcePriorityFrontierV1'
+          assert t['Native_action_ready_attempts']==5408
+          assert t['real_source_IF_samples']==953
+          assert t['Native_source_IF_FALSE_exit_joined']==663
+          assert t['IF_FALSE_exits_independently_proved']==old['totals']['IF_FALSE_exits_independently_proved']
+          assert t['IF_FALSE_exits_UNKNOWN']==old['totals']['IF_FALSE_exits_UNKNOWN']
+          assert t['foreground_prior_candidates_independently_eliminated']>=old['totals']['foreground_prior_candidates_independently_eliminated']
+          assert t['foreground_prior_candidates_UNKNOWN']<=old['totals']['foreground_prior_candidates_UNKNOWN']
+          assert new['SpecAdapter_source_witness'].get('new_source_warrior_numeric_exclusion',0)>0
+          assert new['native_selected_action_not_independently_ready'] is True
+          assert new['native_choice_not_optimality_proof'] is True
+          assert new['WCL_API_calls']==0
+          print('WARRIOR_AUGMENTED_SOURCE_FRONTIER_TOTALS',t)
+          print('WARRIOR_AUGMENTED_SOURCE_FRONTIER_PREFIX',new['foreground_frontier'])
+          print('WARRIOR_AUGMENTED_SOURCE_ADAPTER_WITNESS',new['SpecAdapter_source_witness'])
+          for k,v in new['four_scenarios'].items():
+              print('WARRIOR_AUGMENTED_SOURCE_CASE',k,v['counts'],
+                    v['foreground_prefix_screening'])
+          PY
+          sha256sum /tmp/native-warrior-augmented-priority-frontier.json
       - name: Independently audit pointer-identified native selected rows
         shell: bash
         run: |
@@ -1151,5 +1205,6 @@ jobs:
             /tmp/native-if-false-priority-frontier.json
             /tmp/native-target-eligibility-source-replay.json
             /tmp/native-warrior-spec-ready-replay.json
+            /tmp/native-warrior-augmented-priority-frontier.json
           retention-days: 7
           if-no-files-found: error
