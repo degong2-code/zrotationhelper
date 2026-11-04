@@ -184,14 +184,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -B tools/research/simc_native_select_trace_instrument_v1.py \
-            --simc-root simc-upstream \
-            --receipt /tmp/native-selected-source-patch.json
           python -B tools/research/simc_native_if_buff_pre_instrument_v1.py \
             --simc-root simc-upstream \
             --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
             --expected-profile-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
             --receipt /tmp/native-if-expression-patch.json
+          # The producer must check pristine player.cpp before the selection
+          # reporter writes its independent selection-call instrumentation.
+          python -B tools/research/simc_native_select_trace_instrument_v1.py \
+            --simc-root simc-upstream \
+            --receipt /tmp/native-selected-source-patch.json
           python - <<'PY'
           import json
           p=json.load(open('/tmp/native-if-expression-patch.json'))
