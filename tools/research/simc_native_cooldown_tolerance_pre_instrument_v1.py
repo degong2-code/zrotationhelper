@@ -70,7 +70,7 @@ def verify_tolerance_source(root: Path) -> dict:
     sim_header = src["engine/sim/sim.hpp"]
     time_header = src["engine/util/timespan.hpp"]
     for pat, content in (
-        ("timespan_t cooldown_tolerance_;", player_header),
+        ("timespan_t  cooldown_tolerance_;", player_header),
         ("timespan_t  default_cooldown_tolerance;",sim_header),
         ("constexpr time_t total_millis() const",time_header),
         ("return time;",time_header),
