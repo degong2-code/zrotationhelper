@@ -138,7 +138,7 @@ def patch_warrior(source:bytes)->bytes:
     if (replacement.count("this->replacement_action->ready()")!=1 or replacement.count("ab::ready()")!=1 or replacement.count("this->replacement_action->action_ready()")!=1 or replacement.count("ab::action_ready()")!=2 or replacement.count("buff.bladestorm->check()")!=1 or replacement.count("replacement_action_buff->check()")!=2):
         raise WarriorSourceError("INSTRUMENTED_CALL_COUNTER_DRIFT")
     final=s[:start]+chunk[:beg]+replacement+chunk[last:]+s[end:]
-    if final.count(READY_MARK)!=4 or final.count(ACTION_MARK)!=3:
+    if final.count(READY_MARK)!=5 or final.count(ACTION_MARK)!=3:
         raise WarriorSourceError("WARRIOR_SOURCE_PATH_RECEIPT_COUNT_INVALID")
     return final.encode()
 
@@ -207,7 +207,7 @@ def selftest():
         +REGION_END+"\n"
     ).encode()
     out=patch_warrior(original).decode()
-    assert out.count(READY_MARK)==4 and out.count(ACTION_MARK)==3
+    assert out.count(READY_MARK)==5 and out.count(ACTION_MARK)==3
     assert out.count("zrot_use_replacement")>=2
     assert out.count("ab::ready()")==1
     assert out.count("ab::action_ready()")==2
