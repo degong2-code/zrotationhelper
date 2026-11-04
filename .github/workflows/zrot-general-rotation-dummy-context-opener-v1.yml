@@ -1,0 +1,129 @@
+name: zrot-general-rotation-dummy-context-opener-v1
+
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_general_rotation_dummy_context_opener_v1.py
+      - .github/workflows/zrot-general-rotation-dummy-context-opener-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  synthetic-source-contract:
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.14']
+      fail-fast: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and test context separation and row provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_general_rotation_dummy_context_opener_v1.py
+          python -B tools/research/simc_general_rotation_dummy_context_opener_v1.py > /tmp/dummy-context-selftest.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/dummy-context-selftest.json'))
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert x['checks']>=12
+          assert x['native_simc_not_run'] is True
+          assert x['movement_false_imputation'] is False
+          assert x['full_action_ready_parity'] is False
+          assert x['WCL_API_calls']==0
+          print('DUMMY_CONTEXT_AND_SOURCE_OPENER_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_general_rotation_dummy_context_opener_v1.py
+
+  pinned-real-native-observed-opener:
+    needs: [synthetic-source-contract]
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+          path: official-simc
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41763588110
+          name: native-action-gcd-cd-pre-56aa5511e4cb5632ad98a41418d9e3909d4fd267
+          github-token: ${{ github.token }}
+          path: /tmp/frozen-native-evidence
+      - name: Build source-proven dummy-context audit and observed opener candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_general_rotation_dummy_context_opener_v1.py \
+            --official-profile official-simc/profiles/MID2/MID2_Warrior_Fury.simc \
+            --native-selected-receipt /tmp/frozen-native-evidence/native-foreground-selected-apl-rows.json \
+            --native-if-pre-receipt /tmp/frozen-native-evidence/native-independent-pre-operand-ast-subset.json \
+            --native-action-scoped-receipt /tmp/frozen-native-evidence/native-action-gcd-cd-pre-replay.json \
+            --opener-window-ms 12000 \
+            --out /tmp/dummy-context-observed-opener.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/dummy-context-observed-opener.json').read_bytes())
+          assert r['schema']=='ZrotGeneralRotationDummyContextOpenerCandidateV1'
+          assert r['source_identified_native_IF_count']==477
+          assert r['native_selected_source_root_rows_total']==190
+          assert r['native_ready_attempts_observed']==2572
+          assert r['independent_native_ready_attempts']==0
+          assert r['native_ready_observation_used_as_independent_provider'] is False
+          assert r['no_environment_variable_false_or_zero_imputation'] is True
+          assert r['no_environment_only_row_automatically_deleted'] is True
+          assert r['mixed_OR_condition_core_branch_preserved'] is True
+          assert r['simc_native_observations_not_mandatory_rotation'] is True
+          assert r['general_rotation_opener_verified'] is False
+          assert r['dummy_errored_cast_verdict_eligible'] is False
+          assert r['WCL_API_calls']==0
+          assert r['st']['observed_native_selected_opener_candidates']['selected_native_actions_total']==100
+          assert r['two_target']['observed_native_selected_opener_candidates']['selected_native_actions_total']==90
+          total=r['source_context_count_of_native_IFs']
+          assert sum(total.values())==477
+          assert total['MIXED_CORE_AND_ENVIRONMENT_CONDITION']>0
+          assert total['ENVIRONMENT_CONDITION_ONLY']>0
+          for label in ('st','two_target'):
+              seq=r[label]['observed_native_selected_opener_candidates']
+              items=seq['native_selection_events_in_time_order']
+              assert all(i['timestamp_ms']<=12000 for i in items)
+              assert all(i['source_row_sha256'] for i in items)
+              assert any(i['role']=='APL_CONTROL_NOT_PLAYER_CAST' for i in items)
+              assert any(i['source_apl_action']=='charge' and
+                         i['context_class']=='MIXED_CORE_AND_ENVIRONMENT_CONDITION'
+                         for i in items)
+          print('ACTUAL_NATIVE_SOURCE_OPENER_CONTEXT_AUDIT_PASS',
+                total,
+                'ST',r['st']['observed_native_selected_opener_candidates']['rotational_candidate_sequence_only'],
+                '2T',r['two_target']['observed_native_selected_opener_candidates']['rotational_candidate_sequence_only'])
+          PY
+          sha256sum /tmp/dummy-context-observed-opener.json
+      - name: Retain bounded candidate receipt only
+        uses: actions/upload-artifact@v4
+        with:
+          name: dummy-source-context-opener-${{ github.sha }}
+          path: /tmp/dummy-context-observed-opener.json
+          retention-days: 7
+          if-no-files-found: error
