@@ -1,0 +1,108 @@
+name: zrot-simc-native-pre-if-source-clock-successor
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_native_if_source_clock_successor_v1.py
+      - .github/workflows/zrot-simc-native-pre-if-source-clock-successor.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  source-clock-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and run source-backed clock regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_native_if_source_clock_successor_v1.py
+          python -B tools/research/simc_native_if_source_clock_successor_v1.py > /tmp/source-clock-selftest.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/source-clock-selftest.json'))
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert x['checks']>=11 and x['WCL_API_calls']==0
+          assert x['native_simc_rerun'] is False
+          assert x['second_independent_AST_oracle'] is False
+          print('SOURCE_CLOCK_SUCCESSOR_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_native_if_source_clock_successor_v1.py
+
+  pinned-477-replay:
+    runs-on: ubuntu-latest
+    needs: [source-clock-synthetic]
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-official
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+            engine/sim/sim.cpp
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 41584822737
+          name: native-fury-st-2t-source-select-4c2d0bdf29d5d3e7eeead3cd73a1b9356054c7e5
+          path: /tmp/pinned-native-if-pre
+          github-token: ${{ github.token }}
+      - name: Re-evaluate pinned 477 Native IFs with source-proven time
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_if_source_clock_successor_v1.py \
+            --official-profile simc-official/profiles/MID2/MID2_Warrior_Fury.simc \
+            --official-sim-clock-source simc-official/engine/sim/sim.cpp \
+            --native-pre-fact-receipt /tmp/pinned-native-if-pre/native-independent-pre-operand-ast-subset.json \
+            --out /tmp/native-source-clock-successor.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/native-source-clock-successor.json'))
+          assert x['schema']=='ZrotNativePreIfSourceClockSuccessorV1'
+          assert x['baseline_known']==66
+          assert x['native_if_evaluations']==477
+          assert x['independently_known']>=66
+          assert x['additional_known']==x['independently_known']-66
+          assert x['unknown']==477-x['independently_known']
+          assert x['supported_symbols']==['active_enemies','rage','time']
+          assert x['native_if_boolean_as_operand'] is False
+          assert x['native_ready_boolean_as_operand'] is False
+          assert x['native_simc_rerun'] is False
+          assert x['WCL_API_calls']==0
+          assert x['General_Rotation_complete'] is False
+          print('SOURCE_CLOCK_477_NATIVE_PRE_IF_REPLAY_PASS',
+                x['independently_known'], x['unknown'])
+          print('STILL_UNKNOWN_OPERAND_FAMILIES', x['unbound_operand_incidence'])
+          PY
+          sha256sum /tmp/native-source-clock-successor.json
+      - name: Preserve compact result, not raw gameplay log
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-clock-pre-if-${{ github.sha }}
+          path: /tmp/native-source-clock-successor.json
+          retention-days: 7
+          if-no-files-found: error
