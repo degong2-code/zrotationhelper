@@ -37,6 +37,7 @@ on:
       - tools/research/simc_native_warrior_priority_frontier_adapter_v1.py
       - tools/research/general_rotation_decision_proof_engine_v1.py
       - tools/research/simc_native_decision_proof_bridge_v1.py
+      - tools/research/general_rotation_native_pre_trace_compactor_v1.py
       - .github/workflows/zrot-simc-native-movement-event-pre-v1.yml
   workflow_dispatch:
 
@@ -347,6 +348,17 @@ jobs:
           PY
           sha256sum tools/research/general_rotation_decision_proof_engine_v1.py
           sha256sum tools/research/simc_native_decision_proof_bridge_v1.py
+          python -m py_compile tools/research/general_rotation_native_pre_trace_compactor_v1.py
+          python -B tools/research/general_rotation_native_pre_trace_compactor_v1.py > /tmp/native-compact-pre-source-selftest.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/native-compact-pre-source-selftest.json'))
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=7
+          assert r['WCL_API_calls']==0
+          print('GENERIC_NATIVE_PRE_MARKER_COMPACTOR_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_native_pre_trace_compactor_v1.py
 
   real-native-foreground-source-oracle:
     needs: [offline-python-provenance]
@@ -966,6 +978,41 @@ jobs:
           print('GENERIC_REAL_NATIVE_SOURCE_FRONTIER',r['foreground_frontier'])
           PY
           sha256sum /tmp/native-open-world-general-rotation-proof.json
+      - name: Export compact original PRE source markers with exact generic replay parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_native_pre_trace_compactor_v1.py \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --expected-profile-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
+            --native-case stationary_st=/tmp/instrumented-native-st/simc_native_log.txt \
+            --native-case stationary_two_target=/tmp/instrumented-native-2t/simc_native_log.txt \
+            --native-case moving_st=/tmp/instrumented-native-move-st/simc_native_log.txt \
+            --native-case moving_two_target=/tmp/instrumented-native-move-2t/simc_native_log.txt \
+            --out-dir /tmp/native-portable-source-pre-fixture \
+            > /tmp/native-portable-source-pre-fixture-summary.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.load(open('/tmp/native-portable-source-pre-fixture-summary.json'))
+          m=json.load(open('/tmp/native-portable-source-pre-fixture/manifest.json'))
+          assert r['schema']=='ZrotGenericSourceMarkedPortableNativePreFixtureV1'
+          assert r['status']=='ACTUAL_NATIVE_MARKER_TRACE_COMPACTED'
+          assert r['case_count']==4
+          assert r['all_original_vs_compact_generic_replay_exact'] is True
+          assert sum(c['native_attempt'] for c in r['case_counts'].values())==5408
+          assert m['source_markers_only'] is True
+          assert m['Native_pristine_action_output_not_included'] is True
+          assert r['WCL_API_calls']==0
+          print('ACTUAL_NATIVE_COMPACT_PRE_SOURCE_REPLAY_PARITY_PASS',r['case_counts'])
+          for label,case in m['cases'].items():
+              print('NATIVE_SOURCE_COMPACT_CASE',label,
+                    case['source_meta']['raw_log_bytes'],
+                    case['source_meta']['source_marker_bytes'],
+                    case['source_meta']['compressed_bytes'],
+                    case['source_meta']['filtered_source_markers_sha256'])
+          PY
+          sha256sum /tmp/native-portable-source-pre-fixture/manifest.json
       - name: Independently audit pointer-identified native selected rows
         shell: bash
         run: |
@@ -1269,5 +1316,7 @@ jobs:
             /tmp/native-warrior-spec-ready-replay.json
             /tmp/native-warrior-augmented-priority-frontier.json
             /tmp/native-open-world-general-rotation-proof.json
+            /tmp/native-portable-source-pre-fixture-summary.json
+            /tmp/native-portable-source-pre-fixture/
           retention-days: 7
           if-no-files-found: error
