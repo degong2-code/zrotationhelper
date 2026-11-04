@@ -951,11 +951,18 @@ jobs:
           assert p['proof_READY']==0 if 'proof_READY' in p else True
           assert p['source_returned_roots']==387
           assert p['returned_UNKNOWN']==387
+          assert p['returned_APL_CONTROL']==213
+          assert p['returned_EXECUTABLE_SOURCE_ACTION']==174
+          assert (p.get('returned_APL_CONTROL_all_prior_excluded_but_winner_UNKNOWN',0)
+                  +p.get('returned_EXECUTABLE_SOURCE_ACTION_all_prior_excluded_but_winner_UNKNOWN',0))==79
           assert p['returned_all_prior_proven_not_ready_but_winner_unknown']==79
+          assert p.get('proof_READY',0)==0
           assert r['native_selected_action_not_independently_ready'] is True
           assert r['full_General_Rotation_or_trainer_complete'] is False
           assert r['WCL_API_calls']==0
           print('GENERIC_REAL_NATIVE_OPEN_WORLD_PROOF',p)
+          print('GENERIC_SOURCE_RETURN_CLASSIFICATION',
+                {k:v for k,v in p.items() if k.startswith('returned_')})
           print('GENERIC_REAL_NATIVE_SOURCE_FRONTIER',r['foreground_frontier'])
           PY
           sha256sum /tmp/native-open-world-general-rotation-proof.json
