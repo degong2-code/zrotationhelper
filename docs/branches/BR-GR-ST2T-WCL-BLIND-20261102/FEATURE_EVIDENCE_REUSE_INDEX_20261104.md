@@ -186,3 +186,13 @@ Actual later source receipts sha256 native-warrior-augmented-priority-frontier.j
 | tools/research/general_rotation_native_pre_trace_compactor_v1.py SHA256 649d670cff50083d10efa66671900c80f7c0b9a582c3e2aca83c8c422c5defda | Actual Native #41797208028 SUCCESS; source original 8,432,350 bytes -> gzip 470,328 bytes (94.42% smaller), 5408 ready attempts, 953 IFs; base guard and postguard Python replayers exact identical original vs compact for all ST/2T stationary/movement. Manifest SHA256 44ac4316dcd718a42057832b45f6b6c746f8487462589a4513d177a38d16878a, artifact #13306210922 until 2026-11-11T08:10:09Z | Source marker only, no full pristine action log, no extra Native mechanic truth/selected READY; current fixture artifact expires after seven days |
 
 Product next: portable replay and cross-class SimC-first APL IR for moving/no-movement ST/2T/AoE, then audited positive path closure and second-spec Native, WCL independent blind lock/holdout and dummy. No shared MAIN or historical FROZEN mutation. No encounter plans, raid timeline, NSRT.
+
+## Generic two-class source General Rotation hypothesis IR reuse 2026-11-04
+
+| Asset | Actual verification | Strength / boundary |
+| --- | --- | --- |
+| tools/research/general_rotation_source_hypothesis_ir_v1.py SHA256 c666b04437c6d072ffffff22e83ad6c31e4d1774fc0830e1d4568af701586cce | #41799789205 SUCCESS Python 3.12/3.14 synthetic and pinned official Fury + unrelated Mage Arcane source; 172/172 complete original rows across 13 lists | Generic source-only IF condition AST / control graph / context hints and literal source count comparisons. Not evaluated opener/ready/winner/optimality. |
+| Revised control / executable / side effect categorization | Fury source 24 controls, 95 executable, 2 side effects; Mage Arcane 10 controls, 40 executable, 1 side effect. Source rows tie to line/hash/ordinal. | None of non-control source candidates automatically imply a physical spell cast or addon mistake. |
+| Actual result artifact #13306997331 | Real source IR JSON SHA256 7b32ae86ad20120360790020055c2bf1f761bddd7cdeed41a2d9e0d1e0020b5b, expires 2026-11-11T08:29:03Z | 0 WCL API calls, 0 Native C++ executions in this pipeline; no WCL holdout. |
+
+Next: reuse typed bounded_decision with generated IR and strict PRE/gate proof, cross-spec positive READY Native and WCL post-lock independent validation; no encounter products, MAIN or FROZEN promotions.
