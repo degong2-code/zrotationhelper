@@ -32,6 +32,8 @@ on:
       - tools/research/simc_native_if_false_priority_frontier_v1.py
       - tools/research/simc_native_target_eligibility_source_instrument_v1.py
       - tools/research/simc_native_target_eligibility_source_replay_v1.py
+      - tools/research/simc_native_warrior_spec_ready_instrument_v1.py
+      - tools/research/simc_native_warrior_spec_ready_replay_v1.py
       - .github/workflows/zrot-simc-native-movement-event-pre-v1.yml
   workflow_dispatch:
 
@@ -290,6 +292,23 @@ jobs:
           PY
           sha256sum tools/research/simc_native_target_eligibility_source_instrument_v1.py
           sha256sum tools/research/simc_native_target_eligibility_source_replay_v1.py
+          python -m py_compile tools/research/simc_native_warrior_spec_ready_instrument_v1.py
+          python -m py_compile tools/research/simc_native_warrior_spec_ready_replay_v1.py
+          python -B tools/research/simc_native_warrior_spec_ready_instrument_v1.py > /tmp/warrior-spec-adapter-producer-test.json
+          python -B tools/research/simc_native_warrior_spec_ready_replay_v1.py > /tmp/warrior-spec-adapter-replay-test.json
+          python - <<'PY'
+          import json
+          for fn,count in [
+              ('/tmp/warrior-spec-adapter-producer-test.json',12),
+              ('/tmp/warrior-spec-adapter-replay-test.json',12),
+          ]:
+              r=json.load(open(fn))
+              assert r['status']=='PASS_OFFLINE_SYNTHETIC' and r['checks']>=count
+              assert r['WCL_API_calls']==0
+          print('SOURCE_WARRIOR_SEMANTIC_ADAPTER_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_native_warrior_spec_ready_instrument_v1.py
+          sha256sum tools/research/simc_native_warrior_spec_ready_replay_v1.py
 
   real-native-foreground-source-oracle:
     needs: [offline-python-provenance]
@@ -399,7 +418,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -B tools/research/simc_native_target_eligibility_source_instrument_v1.py \
+          python -B tools/research/simc_native_warrior_spec_ready_instrument_v1.py \
             --simc-root simc-upstream \
             --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
             --expected-profile-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
@@ -407,15 +426,15 @@ jobs:
           python - <<'PY'
           import json
           r=json.load(open('/tmp/native-ready-guard-source-patch.json'))
-          assert r['schema']=='ZrotNativeBaseTargetEligibilityOneCallSourcePreV1'
-          assert r['original_target_is_sleeping_checks']==1
-          assert r['original_invulnerability_checks']==1
-          assert r['original_get_player_distance_calls']==1
-          assert r['extra_select_target_or_action_ready_calls']==0
-          assert r['native_nonperturbation']=='NOT_YET_TESTED'
-          assert r['source_target_method_return_for_comparison_only'] is True
+          assert r['schema']=='ZrotWarriorOriginalCallReadyAndReplacementSourceV1'
+          assert r['native_original_ready_calls_preserved'] is True
+          assert r['native_original_action_ready_calls_preserved'] is True
+          assert r['native_original_replacement_buff_checks_preserved'] is True
+          assert r['actual_Native_nonperturbation']=='NOT_YET_TESTED'
+          assert r['full_independent_virtual_ready'] is False
+          assert r['official_warrior_blob']=='38ee3dd0d5943eb9227ec55aefb21e7d47244f96'
           assert r['WCL_API_calls']==0
-          print('NATIVE_SOURCE_BASE_TARGET_ONE_CALL_PATCH_READY',r['source_patched_action_sha256'])
+          print('SOURCE_WARRIOR_SEMANTIC_ADAPTER_PINNED',r['produced_warrior_sha256'])
           PY
       - name: Rebuild only modified SimC source and run same ST / 2-target conditions
         shell: bash
@@ -800,6 +819,37 @@ jobs:
           print('NATIVE_BASE_TARGET_ELIGIBILITY_SOURCE_REPLAY',t)
           PY
           sha256sum /tmp/native-target-eligibility-source-replay.json
+      - name: Evaluate original Warrior override readiness source numeric distance and channel paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_warrior_spec_ready_replay_v1.py \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --native-st-dir /tmp/instrumented-native-st \
+            --native-2t-dir /tmp/instrumented-native-2t \
+            --native-moving-st-dir /tmp/instrumented-native-move-st \
+            --native-moving-2t-dir /tmp/instrumented-native-move-2t \
+            --out /tmp/native-warrior-spec-ready-replay.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/native-warrior-spec-ready-replay.json'))
+          t=r['totals']
+          assert r['schema']=='ZrotWarriorSourceOverrideReadyNumericDistanceChannelV1'
+          assert t['Native_action_ready_attempts']==5408
+          assert (t['Warrior_action_ready_route_source_attested']+
+                  t['UNKNOWN_no_unique_Warrior_action_ready_route']==5408)
+          assert t.get('Warrior_raw_numeric_range_channel_compared',0)>0
+          assert r['full_ability_READY_independent'] is False
+          assert r['source_ordered_choice_independent'] is False
+          assert r['WCL_API_calls']==0
+          for name,x in r['four_scenarios'].items():
+              print('NATIVE_WARRIOR_SOURCE_CASE',name,x['counts'],
+                    x['source_Warrior_ready_first_exit_distribution'])
+          print('NATIVE_WARRIOR_OVERRIDE_READY_SOURCE_TOTALS',t)
+          print('NATIVE_WARRIOR_NUMERIC_SOURCE',r['source_numeric_range_channel_distribution'])
+          print('NATIVE_WARRIOR_ACTION_ROUTING',r['source_action_ready_delegation_distribution'])
+          PY
+          sha256sum /tmp/native-warrior-spec-ready-replay.json
       - name: Independently audit pointer-identified native selected rows
         shell: bash
         run: |
@@ -1100,5 +1150,6 @@ jobs:
             /tmp/native-postguard-source-replay.json
             /tmp/native-if-false-priority-frontier.json
             /tmp/native-target-eligibility-source-replay.json
+            /tmp/native-warrior-spec-ready-replay.json
           retention-days: 7
           if-no-files-found: error
