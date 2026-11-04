@@ -130,7 +130,10 @@ def patched_action(raw: bytes, talents: list[str], buffs: list[str],
     )
     text = text.replace(READY_SITE, header1, 1)
     text = text.replace(A_READY_SITE, header2, 1)
-    if (text.count("if_expr->success()") != 1 or
+    # Other functions in action.cpp may contain unrelated IF evaluations.
+    # Enforce exactly one original IF call within this action_ready() only.
+    original_action_ready = text.split(BEFORE, 1)[1].split(AFTER, 1)[0]
+    if (original_action_ready.count("if_expr->success()") != 1 or
         text.count(BASE_READY_MARK) != 1 or
         text.count(BASE_ACTION_MARK) != 1):
         raise GuardPatchError("SOURCE_GUARD_ENTRY_ORIGINAL_IF_COUNT_CHANGED")
