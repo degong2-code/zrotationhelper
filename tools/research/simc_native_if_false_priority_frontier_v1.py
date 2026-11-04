@@ -172,7 +172,7 @@ def one_attempt(pending:dict, attempt:dict, ir:dict)->dict:
     }
 
 
-def analyze_trace(trace:str,ir:dict,samples:list[dict])->dict:
+def analyze_trace(trace:str,ir:dict,samples:list[dict],spec_adapter=None)->dict:
     stack=[]
     root=None
     current=None
@@ -192,6 +192,8 @@ def analyze_trace(trace:str,ir:dict,samples:list[dict])->dict:
                      "clock":None,"tolerance":None,
                      "base_action_entries":0,"base_ready_entries":0}
             continue
+        if spec_adapter is not None:
+            spec_adapter.consume(line,current)
         clock=read_clock(line)
         if clock is not None:
             if current is None or current["clock"] is not None or (
@@ -255,6 +257,8 @@ def analyze_trace(trace:str,ir:dict,samples:list[dict])->dict:
                     current["if"]["Native_IF_bool_POST_comparator"] not in (0,1)):
                     raise PriorityFrontierError("NATIVE_IF_COMPARATOR_MISSING")
                 one=one_attempt(current,attempt,ir)
+                if spec_adapter is not None:
+                    one=spec_adapter.improve_negative(current,attempt,one)
                 counts["Native_action_ready_attempts"]+=1
                 counts["status_"+one["status"]]+=1
                 if one["source_base_exit_observed"] is not None:
@@ -341,17 +345,20 @@ def analyze_trace(trace:str,ir:dict,samples:list[dict])->dict:
         "Native_ready_bit_used_as_independent_ready_input":False,
         "selected_winner_independent_positive_ready":False,
         "full_General_Rotation_priority_proven":False,
+        "SpecAdapter_name":type(spec_adapter).__name__ if spec_adapter else None,
+        "SpecAdapter_source_witness":spec_adapter.summary() if spec_adapter else {},
     }
 
 
 def run(profile:Path,stationary_st:Path,stationary_two:Path,
-        moving_st:Path,moving_two:Path)->dict:
+        moving_st:Path,moving_two:Path,adapter_factory=None)->dict:
     ir=parse_profile(profile.read_bytes(),require_source=True,
                      expected_git_blob=PINNED_FURY_BLOB)
     cases={}
     total=Counter()
     all_exits=Counter()
     all_prefix=Counter()
+    all_adapter=Counter()
     for name,folder,targets,actual_if,attempts in (
         ("stationary_st",stationary_st,1,255,1542),
         ("stationary_two_target",stationary_two,2,222,1030),
@@ -363,8 +370,10 @@ def run(profile:Path,stationary_st:Path,stationary_two:Path,
         raw=(folder/"simc_native_log.txt").read_bytes()
         trace=raw.decode("utf-8")
         samples=source_if_samples(trace,ir,base)
-        result=analyze_trace(trace,ir,samples)
+        adapter=adapter_factory() if adapter_factory is not None else None
+        result=analyze_trace(trace,ir,samples,spec_adapter=adapter)
         counts=result["counts"]
+        all_adapter.update(result["SpecAdapter_source_witness"])
         if (len(samples)!=actual_if or
             counts["real_source_IF_samples"]!=actual_if or
             counts["Native_action_ready_attempts"]!=attempts or
@@ -385,12 +394,15 @@ def run(profile:Path,stationary_st:Path,stationary_two:Path,
         len({x["official_native_binary_sha256"] for x in cases.values()})!=1):
         raise PriorityFrontierError("CROSS_SCENARIO_SOURCE_COHORT_NOT_IDENTICAL")
     return {
-        "schema":SCHEMA,"product_policy_id":POLICY,
+        "schema":(SCHEMA if adapter_factory is None else
+                  "ZrotNativeSpecAdapterSourcePriorityFrontierV1"),
+        "product_policy_id":POLICY,
         "status":"NATIVE_PRE_IF_SOURCE_FALSE_JOIN_PLUS_BOUNDED_PRIORITY_FRONTIER",
         "four_scenarios":cases,
         "totals":dict(sorted(total.items())),
         "total_actual_native_base_exit_reasons":dict(sorted(all_exits.items())),
         "foreground_frontier":dict(sorted(all_prefix.items())),
+        "SpecAdapter_source_witness":dict(sorted(all_adapter.items())),
         "Native_false_or_ready_bit_not_independent_AST_input":True,
         "independent_IF_only_at_observed_visited_source_rows":True,
         "native_selected_action_not_independently_ready":True,
@@ -476,6 +488,7 @@ def main():
     p.add_argument("--native-2t-dir",type=Path)
     p.add_argument("--native-moving-st-dir",type=Path)
     p.add_argument("--native-moving-2t-dir",type=Path)
+    p.add_argument("--spec-adapter",choices=["warrior"])
     p.add_argument("--out",type=Path)
     a=p.parse_args()
     args=(a.official_profile,a.native_st_dir,a.native_2t_dir,
@@ -483,7 +496,11 @@ def main():
     if not any(args):
         result=selftest()
     elif all(args):
-        result=run(*args)
+        factory=None
+        if a.spec_adapter=="warrior":
+            from simc_native_warrior_priority_frontier_adapter_v1 import WarriorPriorityAdapter
+            factory=WarriorPriorityAdapter
+        result=run(*args,adapter_factory=factory)
     else:p.error("all pinned actual Native input paths required")
     raw=(json.dumps(result,sort_keys=True,separators=(",",":"))+"\n").encode()
     if a.out:
