@@ -196,3 +196,11 @@ Product next: portable replay and cross-class SimC-first APL IR for moving/no-mo
 | Actual result artifact #13306997331 | Real source IR JSON SHA256 7b32ae86ad20120360790020055c2bf1f761bddd7cdeed41a2d9e0d1e0020b5b, expires 2026-11-11T08:29:03Z | 0 WCL API calls, 0 Native C++ executions in this pipeline; no WCL holdout. |
 
 Next: reuse typed bounded_decision with generated IR and strict PRE/gate proof, cross-spec positive READY Native and WCL post-lock independent validation; no encounter products, MAIN or FROZEN promotions.
+
+## 2026-11-05 generic proof-carrying General Rotation source IR replay
+
+New code: tools/research/general_rotation_ir_proof_replay_v1.py SHA256 31f44a873c11de23eff917f7b88cafcda94860a5b5470d43a1cbd7802663449d. Reuses typed APL parser, source hypothesis IR, bounded_decision and decide_candidate unchanged. Direct source identity, same event occurrence, typed AST parity, earlier numeric PRE, independently full gate closure required for hypothetical positive. Source controls/side effects and non-IF options cannot yield speculative actual spell recommendations.
+
+Actual GitHub Actions #41935516360 SUCCESS (https://github.com/degong2-code/zrotationhelper/actions/runs/41935516360). Official Fury 121 and Arcane 51 rows real source replay; 172 UNKNOWN with no state/READY evidence, 0 verified full positives, no selected rows or target dummy error. Python 3.12/3.14 synthetic cases test conditional source priority, closed positive synthetic, unknown predecessor, wrong row, same timestamp, options and control gates. No Mage Native execution or actual WCL holdout.
+
+Downloaded ZIP artifact #13374400703: replay JSON SHA256 01dbee6a487b3f6e51ae1180896e29832219bcde698e9f1f45f02134fbd6d82a, source IR JSON 7b32ae86ad20120360790020055c2bf1f761bddd7cdeed41a2d9e0d1e0020b5b; expires 2026-11-11T23:40:29Z. Failed synthetic CI #41935436081 retained as test counter bug, corrected #41935516360 SUCCESS. WCL 0. MAIN/FROZEN untouched. Next real positive virtual-route proof and locked independent WCL PRE/holdout, not duplicate parsing.
