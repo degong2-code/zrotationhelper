@@ -172,7 +172,7 @@ def one_attempt(pending:dict, attempt:dict, ir:dict)->dict:
     }
 
 
-def analyze_trace(trace:str,ir:dict,samples:list[dict],spec_adapter=None)->dict:
+def analyze_trace(trace:str,ir:dict,samples:list[dict],spec_adapter=None,proof_bridge=None)->dict:
     stack=[]
     root=None
     current=None
@@ -194,6 +194,8 @@ def analyze_trace(trace:str,ir:dict,samples:list[dict],spec_adapter=None)->dict:
             continue
         if spec_adapter is not None:
             spec_adapter.consume(line,current)
+        if proof_bridge is not None:
+            proof_bridge.consume(line,current)
         clock=read_clock(line)
         if clock is not None:
             if current is None or current["clock"] is not None or (
@@ -259,6 +261,9 @@ def analyze_trace(trace:str,ir:dict,samples:list[dict],spec_adapter=None)->dict:
                 one=one_attempt(current,attempt,ir)
                 if spec_adapter is not None:
                     one=spec_adapter.improve_negative(current,attempt,one)
+                if proof_bridge is not None:
+                    one["generic_proof"]=proof_bridge.evaluate_attempt(
+                        current,one,spec_adapter=spec_adapter)
                 counts["Native_action_ready_attempts"]+=1
                 counts["status_"+one["status"]]+=1
                 if one["source_base_exit_observed"] is not None:
@@ -297,6 +302,10 @@ def analyze_trace(trace:str,ir:dict,samples:list[dict],spec_adapter=None)->dict:
                 root_status="RETURNED_ACTION" if typ=="RETURN" else "NO_ACTION"
                 if typ=="RETURN":
                     counts["Native_foreground_root_returned"]+=1
+                if proof_bridge is not None:
+                    proof_bridge.evaluate_root(
+                        root["attempts"],returned=typ=="RETURN",
+                        observed_name=(marker["native_name"] if typ=="RETURN" else None))
                 prior=root["attempts"][:-1] if typ=="RETURN" else root["attempts"]
                 proved=sum(item["status"].startswith("EXCLUDED_") for item in prior)
                 unknown=len(prior)-proved
@@ -347,11 +356,13 @@ def analyze_trace(trace:str,ir:dict,samples:list[dict],spec_adapter=None)->dict:
         "full_General_Rotation_priority_proven":False,
         "SpecAdapter_name":type(spec_adapter).__name__ if spec_adapter else None,
         "SpecAdapter_source_witness":spec_adapter.summary() if spec_adapter else {},
+        "generic_open_world_proof":proof_bridge.summary() if proof_bridge else None,
     }
 
 
 def run(profile:Path,stationary_st:Path,stationary_two:Path,
-        moving_st:Path,moving_two:Path,adapter_factory=None)->dict:
+        moving_st:Path,moving_two:Path,adapter_factory=None,
+        proof_bridge_factory=None)->dict:
     ir=parse_profile(profile.read_bytes(),require_source=True,
                      expected_git_blob=PINNED_FURY_BLOB)
     cases={}
@@ -359,6 +370,7 @@ def run(profile:Path,stationary_st:Path,stationary_two:Path,
     all_exits=Counter()
     all_prefix=Counter()
     all_adapter=Counter()
+    all_proof=Counter()
     for name,folder,targets,actual_if,attempts in (
         ("stationary_st",stationary_st,1,255,1542),
         ("stationary_two_target",stationary_two,2,222,1030),
@@ -371,9 +383,13 @@ def run(profile:Path,stationary_st:Path,stationary_two:Path,
         trace=raw.decode("utf-8")
         samples=source_if_samples(trace,ir,base)
         adapter=adapter_factory() if adapter_factory is not None else None
-        result=analyze_trace(trace,ir,samples,spec_adapter=adapter)
+        bridge=proof_bridge_factory() if proof_bridge_factory is not None else None
+        result=analyze_trace(trace,ir,samples,spec_adapter=adapter,
+                             proof_bridge=bridge)
         counts=result["counts"]
         all_adapter.update(result["SpecAdapter_source_witness"])
+        if bridge is not None:
+            all_proof.update(result["generic_open_world_proof"]["counts"])
         if (len(samples)!=actual_if or
             counts["real_source_IF_samples"]!=actual_if or
             counts["Native_action_ready_attempts"]!=attempts or
@@ -403,6 +419,7 @@ def run(profile:Path,stationary_st:Path,stationary_two:Path,
         "total_actual_native_base_exit_reasons":dict(sorted(all_exits.items())),
         "foreground_frontier":dict(sorted(all_prefix.items())),
         "SpecAdapter_source_witness":dict(sorted(all_adapter.items())),
+        "generic_open_world_proof_counts":dict(sorted(all_proof.items())),
         "Native_false_or_ready_bit_not_independent_AST_input":True,
         "independent_IF_only_at_observed_visited_source_rows":True,
         "native_selected_action_not_independently_ready":True,
@@ -489,6 +506,7 @@ def main():
     p.add_argument("--native-moving-st-dir",type=Path)
     p.add_argument("--native-moving-2t-dir",type=Path)
     p.add_argument("--spec-adapter",choices=["warrior"])
+    p.add_argument("--proof-engine",choices=["open-world"])
     p.add_argument("--out",type=Path)
     a=p.parse_args()
     args=(a.official_profile,a.native_st_dir,a.native_2t_dir,
@@ -500,7 +518,12 @@ def main():
         if a.spec_adapter=="warrior":
             from simc_native_warrior_priority_frontier_adapter_v1 import WarriorPriorityAdapter
             factory=WarriorPriorityAdapter
-        result=run(*args,adapter_factory=factory)
+        proof_factory=None
+        if a.proof_engine=="open-world":
+            from simc_native_decision_proof_bridge_v1 import NativeProofBridge
+            proof_factory=NativeProofBridge
+        result=run(*args,adapter_factory=factory,
+                   proof_bridge_factory=proof_factory)
     else:p.error("all pinned actual Native input paths required")
     raw=(json.dumps(result,sort_keys=True,separators=(",",":"))+"\n").encode()
     if a.out:
