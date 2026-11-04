@@ -88,7 +88,6 @@ def verify_semantics(root):
             'return make_mem_fn_expr( name, *this, &action_t::gcd );',
             'timespan_t action_t::gcd() const',
             'if ( !ready() )',
-            'if ( if_expr && !if_expr->success() )',
         ),
         PLAYER_CPP: (
             'cooldown_t* player_t::find_cooldown( util::string_view name ) const',
@@ -106,6 +105,14 @@ def verify_semantics(root):
         for anchor in anchors:
             if data[p].count(anchor) != 1:
                 raise ActionExprPatchError("SOURCE_SEMANTIC_ANCHOR_CHANGED:" + p)
+    # The source contains another IF gate in call_action_list_t::action_ready;
+    # enforce the pinned action_t::action_ready scope, not global occurrences.
+    native_ready_body = action.split(
+        "bool action_t::action_ready()\n{", 1)[1].split(
+        "\nbool action_t::cost_affordable()", 1)[0]
+    if native_ready_body.count(
+        "if ( if_expr && !if_expr->success() )") != 1:
+        raise ActionExprPatchError("NATIVE_ACTION_IF_GATE_SITE_CHANGED")
     if 'if ( !cooldown->is_ready() )' not in action:
         raise ActionExprPatchError("NATIVE_READY_QUEUEABILITY_GUARD_CHANGED")
     if 'return queueable() <= sim.current_time();' not in cooldown:
@@ -242,9 +249,7 @@ def selftest():
     assert output.index('find_cooldown( "bladestorm" )') < output.index(SITE)
     assert " : -1;" in output and "->up() ? 1 : 0" in output
     assert output.index(MARK) > output.index(SITE)
-    for invalid in (["gcd", "gcd"], ["cooldown.foo.remains"], ["cooldown.foo.ready", "gcd"]):
-        if invalid == ["cooldown.foo.ready", "gcd"]:
-            continue
+    for invalid in (["gcd", "gcd"], ["cooldown.foo.remains"]):
         try:
             instrument(example, talents, buffs, invalid, strict=False)
         except ActionExprPatchError:
@@ -253,7 +258,7 @@ def selftest():
             raise AssertionError("UNSAFE_ACTION_EXPR_SOURCE_ACCEPTED")
     try:
         instrument(output.encode(), talents, buffs, scoped, strict=False)
-    except (ActionExprPatchError, PatchError, Exception):
+    except (ActionExprPatchError, PatchError):
         pass
     else:
         raise AssertionError("DOUBLE_INSTRUMENTED_NATIVE_SOURCE_ACCEPTED")
