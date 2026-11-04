@@ -126,9 +126,12 @@ def extend_action(base:bytes)->bytes:
         ("sync_action && !sync_action->action_ready()","false","SYNC_FALSE"),
         ("option.moving != -1 && option.moving != ( player->is_moving() ? 1 : 0 )","false","MOVING_OPTION_FALSE"),
     ):
-        block="if ( "+guard+" )\n    return "+return_type+";"
-        updated=("if ( "+guard+" )\n  {\n"+emit(reason,"    ")
-                 +"    return "+return_type+";\n  }")
+        original_indent = "      " if guard.startswith("rng().roll(") else "    "
+        brace_indent = "    " if guard.startswith("rng().roll(") else "  "
+        body_indent = "      " if guard.startswith("rng().roll(") else "    "
+        block="if ( "+guard+" )\n"+original_indent+"return "+return_type+";"
+        updated=("if ( "+guard+" )\n"+brace_indent+"{\n"+emit(reason,body_indent)
+                 +body_indent+"return "+return_type+";\n"+brace_indent+"}")
         replace(block,updated)
     # Source IF has been instrumented once upstream; retain its only call.
     block="    if ( !zrot_original_if_result )\n      return false;"
