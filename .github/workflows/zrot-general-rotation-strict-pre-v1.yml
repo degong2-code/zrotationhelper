@@ -1,0 +1,61 @@
+name: zrot-general-rotation-strict-pre-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_strict_pre_state_engine_v1.py
+      - tools/research/general_rotation_decision_proof_engine_v1.py
+      - .github/workflows/zrot-general-rotation-strict-pre-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generic-proof-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and run generic open-world proof and WCL strict-PRE tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_decision_proof_engine_v1.py \
+            tools/research/general_rotation_strict_pre_state_engine_v1.py
+          python -B tools/research/general_rotation_decision_proof_engine_v1.py \
+            > /tmp/decision-proof-synthetic.json
+          python -B tools/research/general_rotation_strict_pre_state_engine_v1.py \
+            > /tmp/strict-pre-replay-synthetic.json
+          python - <<'PY'
+          import json
+          core=json.load(open('/tmp/decision-proof-synthetic.json'))
+          pre=json.load(open('/tmp/strict-pre-replay-synthetic.json'))
+          assert core['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert core['generic_spec_count']==2
+          assert core['checks']>=20 and core['WCL_API_calls']==0
+          assert pre['schema']=='ZrotGeneralRotationStrictPreStateEngineV1'
+          assert pre['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert pre['checks']>=24 and pre['synthetic_specializations']==2
+          assert pre['real_candidate_holdout_completed'] is False
+          assert pre['actual_WCL_source_verified'] is False
+          assert pre['full_positive_ready_proven'] is False
+          assert pre['WCL_API_calls']==0
+          print('GENERIC_STRICT_PRE_SYNTHETIC_PASS',pre['checks'])
+          print('ACTUAL_WCL_HOLDOUT_NOT_RUN')
+          PY
+          sha256sum \
+            tools/research/general_rotation_decision_proof_engine_v1.py \
+            tools/research/general_rotation_strict_pre_state_engine_v1.py
+          sha256sum /tmp/decision-proof-synthetic.json \
+            /tmp/strict-pre-replay-synthetic.json
