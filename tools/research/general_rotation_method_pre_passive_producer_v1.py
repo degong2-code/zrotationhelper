@@ -18,7 +18,8 @@ import re
 import subprocess
 
 from general_rotation_source_route_audit_v1 import (
-    git_blob, _source_code_mask, _class_scope, _bounded_body
+    git_blob, _source_code_mask, _class_scope, _bounded_body,
+    SourceRouteAuditError
 )
 from general_rotation_original_pre_capture_engine_v1 import (
     canonical, digest, SCHEMA as TEMPLATE_SCHEMA
@@ -165,9 +166,12 @@ def patch_files(originals: dict[str, bytes], manifest: dict,
         lexical = _source_code_mask(code)
         injections = []
         for site in groups[path]:
-            scope = _class_scope(code, lexical, site["class_anchor"])
-            body, opening = _bounded_body(
-                code, lexical, site["signature"], scope)
+            try:
+                scope = _class_scope(code, lexical, site["class_anchor"])
+                body, opening = _bounded_body(
+                    code, lexical, site["signature"], scope)
+            except SourceRouteAuditError as exc:
+                raise MethodPREError("DECLARED_METHOD_SITE_NOT_IN_PINNED_SOURCE") from exc
             if (sha256(body.encode("utf-8")).hexdigest() !=
                 site["source_method_body_sha256"]):
                 raise MethodPREError("EXACT_METHOD_BODY_CHANGED")
