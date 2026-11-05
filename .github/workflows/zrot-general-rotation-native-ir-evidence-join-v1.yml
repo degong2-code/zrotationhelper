@@ -113,6 +113,23 @@ jobs:
           assert 1<=len(gap['bounded_cross_case_shortlist'])<=16
           assert all(row['source_row_sha256'] and row['physical_skill_READY']=='UNKNOWN'
                      and row['unproved_gates'] for row in gap['bounded_cross_case_shortlist'])
+          # Exact original-source cohort regression: independently replayed
+          # SYNC_LINE PRE numeric/pointer predicates must survive future
+          # integration without promoting full Native READY or gameplay.
+          assert p['independent_true_SYNC_LINE']>0
+          selected=next((row for row in gap['bounded_cross_case_shortlist']
+                         if row['case']=='moving_st' and row['at_simc_ms']==20031),None)
+          assert selected is not None
+          assert selected['source_action']=='rampage'
+          assert selected['source_list']=='slayer' and selected['source_index']==6
+          assert selected['source_row_sha256']=='217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2'
+          assert selected['earlier_independent_NOT_READY']==6
+          assert 'SYNC_LINE:MISSING' not in selected['unproved_gates']
+          assert selected['physical_skill_READY']=='UNKNOWN'
+          assert len(selected['unproved_gates'])<=5
+          print('ACTUAL_ORIGINAL_SOURCE_SYNC_LINE_PARTIAL_POSITIVE_PASS',
+                selected['case'],selected['at_simc_ms'],selected['source_action'],
+                selected['unproved_gates'])
           print('SOURCE_PINNED_POSITIVE_READY_GAP_SHORTLIST',gap['bounded_cross_case_shortlist'][:3])
           assert r['Native_comparator_not_independent_IF_input'] is True
           assert r['complete_positive_ability_READY_proven'] is False
