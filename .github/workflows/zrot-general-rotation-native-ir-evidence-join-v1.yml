@@ -8,6 +8,8 @@ on:
       - tools/research/general_rotation_source_hypothesis_ir_v1.py
       - tools/research/simc_native_if_false_priority_frontier_v1.py
       - tools/research/simc_native_decision_proof_bridge_v1.py
+      - tools/research/general_rotation_source_route_audit_v1.py
+      - tools/research/general_rotation_source_route_fixture_v1.py
       - tools/research/simc_native_warrior_priority_frontier_adapter_v1.py
       - .github/workflows/zrot-general-rotation-native-ir-evidence-join-v1.yml
   workflow_dispatch:
@@ -35,7 +37,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/research/general_rotation_native_ir_pre_evidence_join_v1.py
+          python -m py_compile tools/research/general_rotation_native_ir_pre_evidence_join_v1.py tools/research/general_rotation_source_route_audit_v1.py tools/research/general_rotation_source_route_fixture_v1.py
+          python -B tools/research/general_rotation_source_route_audit_v1.py >/tmp/source-route-audit-synthetic.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/source-route-audit-synthetic.json'))
+          assert r['schema']=='ZrotGeneralRotationSourceRouteObligationAuditV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['synthetic_spec_count']>=2
+          assert r['positive_READY_proven']==0
+          print('GENERIC_ROUTE_AUDITOR_SYNTHETIC_PASS')
+          PY
           python -B tools/research/general_rotation_native_ir_pre_evidence_join_v1.py > /tmp/native-ir-join-synthetic.json
           python - <<'PY'
           import json
@@ -159,9 +171,30 @@ jobs:
           print('REAL_PORTABLE_SOURCE_PRE_JOIN_TO_GENERIC_IR_PASS')
           PY
           sha256sum /tmp/native-to-general-rotation-ir-evidence-join.json
+          python -B tools/research/general_rotation_source_route_fixture_v1.py \
+            --source-root simc-upstream \
+            --native-join /tmp/native-to-general-rotation-ir-evidence-join.json \
+            --out /tmp/cross-spec-source-route-audit.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/cross-spec-source-route-audit.json'))
+          assert r['schema']=='ZrotGeneralRotationTwoSpecSourceRouteFixtureAuditV1'
+          assert r['spec_fixture_count']==2
+          assert r['one_generic_engine_two_source_fixtures'] is True
+          assert r['positive_READY_certified']==0
+          assert not r['dynamic_dispatch_and_guard_exhaustiveness_reviewed']
+          assert r['audits']['warrior_fury']['source_method_nodes_verified']==6
+          assert r['audits']['mage_arcane']['source_method_nodes_verified']==4
+          assert all(x['action_READY']=='UNKNOWN' for x in r['audits'].values())
+          assert r['actual_native_gap_example']['positive_READY']=='UNKNOWN'
+          print('ACTUAL_TWO_SPEC_SOURCE_ROUTE_AUDIT_PASS')
+          PY
+          sha256sum /tmp/cross-spec-source-route-audit.json
       - uses: actions/upload-artifact@v4
         with:
           name: general-rotation-native-ir-evidence-join
-          path: /tmp/native-to-general-rotation-ir-evidence-join.json
+          path: |
+            /tmp/native-to-general-rotation-ir-evidence-join.json
+            /tmp/cross-spec-source-route-audit.json
           retention-days: 7
           if-no-files-found: error
