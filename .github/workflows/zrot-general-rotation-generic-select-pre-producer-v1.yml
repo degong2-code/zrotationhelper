@@ -8,6 +8,8 @@ on:
       - tools/research/general_rotation_method_pre_passive_producer_v1.py
       - tools/research/general_rotation_method_pre_passive_replay_v1.py
       - tools/research/general_rotation_source_false_guard_engine_v1.py
+      - tools/research/general_rotation_call_scope_instrument_v1.py
+      - tools/research/general_rotation_call_scope_replay_v1.py
       - tools/research/general_rotation_select_pre_passive_replay_v1.py
       - tools/research/general_rotation_original_pre_capture_engine_v1.py
       - tools/research/general_rotation_original_pre_capture_fixture_v1.py
@@ -37,6 +39,22 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile tools/research/general_rotation_select_pre_passive_producer_v1.py tools/research/general_rotation_select_pre_passive_replay_v1.py tools/research/general_rotation_select_pre_source_adapter_v1.py tools/research/general_rotation_method_pre_passive_producer_v1.py tools/research/general_rotation_method_pre_passive_replay_v1.py tools/research/general_rotation_source_false_guard_engine_v1.py
+          python -m py_compile tools/research/general_rotation_call_scope_instrument_v1.py tools/research/general_rotation_call_scope_replay_v1.py
+          python -B tools/research/general_rotation_call_scope_instrument_v1.py >/tmp/generic-call-instrument-synthetic.json
+          python -B tools/research/general_rotation_call_scope_replay_v1.py >/tmp/generic-call-replay-synthetic.json
+          python - <<'PY'
+          import json
+          for path,schema in (
+              ('/tmp/generic-call-instrument-synthetic.json',
+               'ZrotGenericOriginalReadyCallScopeTraceProducerV1'),
+              ('/tmp/generic-call-replay-synthetic.json',
+               'ZrotGenericOriginalReadyCallScopeStrictReplayV1')):
+              r=json.load(open(path))
+              assert r['schema']==schema and r['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert r['positive_READY_certified']==0
+              assert r['WCL_API_calls']==0
+          print('GENERIC_STRICT_METHOD_CALL_SCOPE_SYNTHETIC_PASS')
+          PY
           python -B tools/research/general_rotation_source_false_guard_engine_v1.py >/tmp/generic-false-guard-synthetic.json
           python - <<'PY'
           import json
@@ -233,6 +251,27 @@ jobs:
           assert r['positive_READY_certified']==0
           print('SOURCE_PINNED_CXX_ORIGINAL_METHOD_ENTRY_INSTRUMENTED')
           PY
+      - name: Scope every original action-ready invocation and nested method call
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_call_scope_instrument_v1.py \
+            --simc-root simc-upstream \
+            --source-templates /tmp/zrot-generic-source-templates.json \
+            --select-pre-receipt /tmp/zrot-generic-select-pre-source-patch.json \
+            --method-pre-receipt /tmp/zrot-generic-method-pre-patch.json \
+            --receipt /tmp/zrot-generic-call-scope-patch.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-generic-call-scope-patch.json'))
+          assert r['schema']=='ZrotGenericOriginalReadyCallScopeTraceProducerV1'
+          assert r['source_method_count']==6
+          assert r['original_action_ready_call_count']==1
+          assert r['new_action_ready_calls']==0
+          assert r['method_PRE_marker_call_id_appended'] is True
+          assert r['native_cxx_compiled'] is False
+          print('SOURCE_PINNED_GENERIC_INVOCATION_RAII_PATCH_PASS')
+          PY
       - name: Rebuild patched Native SimC and capture same two independent specs
         shell: bash
         run: |
@@ -259,6 +298,8 @@ jobs:
           from simc_native_json_sequence import extract_json_sequence
           from general_rotation_select_pre_passive_replay_v1 import parse_marker_lines
           from general_rotation_method_pre_passive_replay_v1 import replay as method_replay
+          from general_rotation_call_scope_replay_v1 import replay as scope_replay
+          scope_report=json.load(open('/tmp/zrot-generic-call-scope-patch.json'))
           negative_rules=json.load(open('/tmp/zrot-generic-false-guard-contract.json'))
           report=json.load(open('/tmp/zrot-generic-select-pre-source-patch.json'))
           method_report=json.load(open('/tmp/zrot-generic-method-pre-patch.json'))
@@ -282,6 +323,15 @@ jobs:
               assert a['source_method_entry_PRE_proven'] is False
               assert a['positive_READY_certified']==0
               m=method_replay(native_trace,method_report,template_manifest,prof,negative_rules)
+              scoped=scope_replay(native_trace,prof,template_manifest,
+                                  scope_report,negative_rules)
+              assert scoped['schema']=='ZrotGenericOriginalReadyCallScopeStrictReplayV1'
+              assert scoped['selected_action_ready_original_calls']==a['original_select_PRE_attempt_count']
+              assert scoped['dynamic_method_calls_scope_linked']>0
+              assert scoped['exact_method_PRE_entries_linked']==scoped['dynamic_method_calls_scope_linked']
+              assert scoped['root_and_parent_id_source']=='EXPLICIT_GLOBAL_UNIQUE_CXX_RAII_STACK'
+              assert scoped['positive_FULL_action_READY_proven']==0
+              assert scoped['source_virtual_dispatch_exhaustive'] is False
               assert m['source_method_entry_total']>0
               assert m['by_method'].get('base_action',0)>0
               assert m['by_method'].get('base_ready',0)>0
@@ -324,6 +374,17 @@ jobs:
                   'original_PRE_independent_method_false_by_rule':
                       m['independent_method_return_false_by_rule'],
                   'source_false_method_not_action_READY':True,
+                  'strict_original_selection_call_roots':
+                      scoped['selected_action_ready_original_calls'],
+                  'strict_source_method_call_ids':
+                      scoped['dynamic_method_calls_scope_linked'],
+                  'max_observed_dynamic_call_depth':
+                      scoped['max_observed_trace_stack_depth'],
+                  'source_method_parent_child_edges':
+                      scoped['observed_parent_child_edges'],
+                  'scoped_method_return_false_by_rule':
+                      scoped['certified_false_method_returns_by_rule'],
+                  'incomplete_virtual_dispatch_still_unknown':True,
                   'unobserved_derived_override_route_closed':False,
                   'physical_action_READY':'UNKNOWN',
                   'WCL_API_calls':0
@@ -339,6 +400,7 @@ jobs:
               'class_owned_method_entry_observed_in_both_specs':True,
               'unobserved_virtual_and_spec_override_paths_remain_unknown':True,
               'independent_method_false_is_not_complete_ACTION_READY':True,
+              'strict_raii_selection_method_call_causality_replayed':True,
               'dummy_error_permitted':False,'WCL_API_calls':0
           }
           p=Path('/tmp/zrot-generic-select-pre-two-spec-a-b.json')
@@ -349,7 +411,9 @@ jobs:
                   v['observed_base_ready_method_entries'],
                   v['observed_spec_owned_method_entries'],
                   v['source_owned_method_raw_fields'],
-                  v['original_PRE_independent_method_false_by_rule']) for k,v in cases.items()])
+                  v['original_PRE_independent_method_false_by_rule'],
+                  v['strict_source_method_call_ids'],
+                  v['max_observed_dynamic_call_depth']) for k,v in cases.items()])
           PY
           sha256sum /tmp/zrot-generic-select-pre-two-spec-a-b.json
       - name: Preserve compact safe receipts only (never raw actor logs)
@@ -361,6 +425,7 @@ jobs:
             /tmp/zrot-generic-select-pre-source-patch.json
             /tmp/zrot-generic-method-pre-patch.json
             /tmp/zrot-generic-false-guard-contract.json
+            /tmp/zrot-generic-call-scope-patch.json
             /tmp/zrot-generic-select-pre-two-spec-a-b.json
           retention-days: 7
           if-no-files-found: error
