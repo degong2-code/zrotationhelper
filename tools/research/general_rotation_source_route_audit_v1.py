@@ -334,7 +334,7 @@ def selftest() -> dict:
         plan = RoutePlan("SPEC_ALPHA", "a", ("RESOURCE", "COOLDOWN", "MOVEMENT"), nodes)
         report = audit(plan, root)
         assert report["source_method_nodes_verified"] == 2
-        assert report["gates_without_source_site_hints"] == ["movement"]
+        assert report["gates_without_source_site_hints"] == ["MOVEMENT"]
         assert not report["source_positive_READY_closure_eligible"]
         assert report["action_READY"] == "UNKNOWN"
         sample={
