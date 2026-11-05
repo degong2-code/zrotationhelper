@@ -38,6 +38,7 @@ SCHEMA="ZrotGeneralRotationNativeSourcePreIrEvidenceJoinV1"
 POLICY="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
 FIXTURE_SCHEMA="ZrotGenericSourceMarkedPortableNativePreFixtureV1"
 SHA_PATTERN=re.compile(r"^[0-9a-f]{64}$")
+GIT_BLOB_PATTERN=re.compile(r"^[0-9a-f]{40}$")
 ADAPTER_PATTERN=re.compile(
     r"^simc_native_[a-z0-9_]+_adapter_v[0-9]+:[A-Z][A-Za-z0-9_]+$"
 )
@@ -150,7 +151,7 @@ def load_adapter_factory(source:str|None):
 def run(profile:Path,meta:dict,fixture_dir:Path,expect_manifest:str,
         adapter_factory=None)->dict:
     if (not SHA_PATTERN.fullmatch(expect_manifest) or
-        not SHA_PATTERN.fullmatch(meta.get("git_blob",""))):
+        not GIT_BLOB_PATTERN.fullmatch(meta.get("git_blob",""))):
         raise NativeIREvidenceError("SOURCE_PROFILE_AND_MANIFEST_PIN_REQUIRED")
     raw_profile=profile.read_bytes()
     if git_blob(raw_profile)!=meta["git_blob"]:
