@@ -23,7 +23,10 @@ from simc_native_resource_cost_replay_v1 import (
     read_cost, read_base_resource, independent_numeric_resource
 )
 from simc_native_resource_cost_pre_instrument_v1 import ACTION_MARK, PLAYER_MARK
-from simc_native_postguard_source_replay_v1 import parse_line, LINE_MARK
+from simc_native_postguard_source_replay_v1 import (
+    parse_line, parse_cast, independent_postguard_subset,
+    LINE_MARK, CAST_MARK
+)
 from simc_native_target_eligibility_source_replay_v1 import (
     parse_config,parse_target,independent_basic_target_truth,direct_path
 )
@@ -93,6 +96,18 @@ class NativeProofBridge:
             pending.setdefault("original_post_line_pre",[]).append(line_pre)
             if len(pending["original_post_line_pre"])!=1:
                 raise NativeProofBridgeError("DUPLICATE_SYNC_LINE_PRE_SOURCE_MARKER")
+            return
+        cast_pre=parse_cast(line)
+        if cast_pre is not None:
+            if pending is None or (
+                cast_pre["time_ms"],cast_pre["list"],cast_pre["ordinal"],
+                cast_pre["native_name"])!=(
+                pending["pre"]["time_ms"],pending["pre"]["list"],
+                pending["pre"]["ordinal"],pending["pre"]["native_name"]):
+                raise NativeProofBridgeError("CAST_PRE_SOURCE_POINTER_DRIFT")
+            pending.setdefault("original_post_cast_pre",[]).append(cast_pre)
+            if len(pending["original_post_cast_pre"])!=1:
+                raise NativeProofBridgeError("DUPLICATE_CAST_PRE_SOURCE_MARKER")
             return
         cfg=parse_config(line)
         if cfg is not None:
@@ -193,6 +208,44 @@ class NativeProofBridge:
                     self.counters["independent_source_sync_line_positive"]+=1
             else:
                 self.counters["sync_line_base_route_missing_unknown"]+=1
+        # Reuse the already audited numeric postguard subset. These are
+        # specific source predicates, NOT a proof of full MOVEMENT or
+        # CAST_GCD: class-specific movement directionality and the base
+        # usable-while-casting/GCD route still need source evidence.
+        original_postguard_subguards=None
+        post_casts=pending.get("original_post_cast_pre",[])
+        if len(post_casts)>1:
+            raise NativeProofBridgeError("DUPLICATE_CAST_PRE_SOURCE_MARKER")
+        if post_casts and not post_lines:
+            raise NativeProofBridgeError("CAST_PRE_WITHOUT_LINE_PRE_MARKER")
+        if post_lines and post_casts:
+            cast=post_casts[0]
+            if (cast["time_ms"],cast["list"],cast["ordinal"],
+                cast["native_name"])!=k:
+                raise NativeProofBridgeError("CAST_PRE_ATTEMPT_IDENTITY_CHANGED")
+            source_subset=independent_postguard_subset(post_lines[0],cast)
+            movement_option_ok=not source_subset["moving_option_mismatch"]
+            repeat_cast_ok=not source_subset["repeat_cast_prohibited"]
+            if row["source_base_exit_observed"]=="FULL_BASE_TRUE" and not (
+                    movement_option_ok and repeat_cast_ok):
+                raise NativeProofBridgeError(
+                    "ORIGINAL_PRE_GUARD_VS_FINAL_BASE_EXIT_CONFLICT")
+            original_postguard_subguards={
+                "movement_option_matches_source_PRE":movement_option_ok,
+                "repeat_cast_rule_matches_source_PRE":repeat_cast_ok,
+                "base_ready_movement_branch_bypassed":(
+                    pending.get("base_ready_entries")==1 and
+                    pending["pre"]["player_is_moving"]==0),
+                "movement_directionality":"UNKNOWN",
+                "cast_GCD_full_route":"UNKNOWN",
+                "movement_full_route":"UNKNOWN",
+                "original_source_virtual_ready_used_as_operand":False,
+            }
+            self.counters["independent_source_postguard_subset"]+=1
+            if movement_option_ok:
+                self.counters["independent_source_moving_option_pass"]+=1
+            if repeat_cast_ok:
+                self.counters["independent_source_repeat_cast_pass"]+=1
         if row["independent_IF_bool"] is not None:
             insert("APL_IF",bool(row["independent_IF_bool"]),
                    receipt="chronological_official_APL_independent_AST")
@@ -268,6 +321,7 @@ class NativeProofBridge:
                 else "EXECUTABLE_SOURCE_ACTION"),
             "blockers":verdict["blockers"],
             "missing_or_unverified":verdict["missing_or_unverified"],
+            "original_PRE_postguard_subpredicates":original_postguard_subguards,
             "independent_true_gates":verdict["independent_true"],
             "independent_false_gates":verdict["independent_false"],
             "source_only_positive_gates":verdict["source_only"],
@@ -328,6 +382,8 @@ class NativeProofBridge:
                     "earlier_candidates":len(proof)-1,
                     "earlier_independent_NOT_READY":result["earlier_NOT_READY"],
                     "unproved_gates":candidate["missing_or_unverified"],
+                    "original_PRE_postguard_subpredicates":(
+                        candidate["original_PRE_postguard_subpredicates"]),
                     "native_observed_post_only_gates":candidate["source_only_positive_gates"],
                     "native_observed_base_exit_comparator":chosen["source_base_exit_observed"],
                     "physical_skill_READY":"UNKNOWN","source_order_complete":False
@@ -415,6 +471,35 @@ def selftest():
     assert sync_ok["decision"]==UNKNOWN
     assert "SYNC_LINE" in sync_ok["independent_true_gates"]
     assert "SYNC_LINE:MISSING" not in sync_ok["missing_or_unverified"]
+    scoped_sub=NativeProofBridge()
+    scoped_pending=fresh_post_pending() if "fresh_post_pending" in locals() else dict(
+        resource_pending,original_post_line_pre=[])
+    scoped_sub.consume(line_ready,scoped_pending)
+    scoped_sub.consume(CAST_MARK+"20|default|1|alpha|0|0|0|0|0|0",scoped_pending)
+    sub_out=scoped_sub.evaluate_attempt(scoped_pending,nxt)
+    check=sub_out["original_PRE_postguard_subpredicates"]
+    assert check["movement_option_matches_source_PRE"] is True
+    assert check["repeat_cast_rule_matches_source_PRE"] is True
+    assert check["movement_full_route"]=="UNKNOWN"
+    assert check["cast_GCD_full_route"]=="UNKNOWN"
+    assert "MOVEMENT:MISSING" in sub_out["missing_or_unverified"]
+    assert "CAST_GCD:MISSING" in sub_out["missing_or_unverified"]
+    assert sub_out["decision"]==UNKNOWN
+    wrong_repeat=NativeProofBridge()
+    wrong_pending=dict(resource_pending,original_post_line_pre=[],
+                       original_post_cast_pre=[])
+    wrong_repeat.consume(line_ready,wrong_pending)
+    wrong_repeat.consume(CAST_MARK+"20|default|1|alpha|0|0|0|1|1|0",
+                         wrong_pending)
+    try:wrong_repeat.evaluate_attempt(wrong_pending,nxt)
+    except NativeProofBridgeError:pass
+    else:raise AssertionError("FORGED_POSTGUARD_FINAL_BASE_SUCCESS_ACCEPTED")
+    wrong_pointer=NativeProofBridge()
+    try:wrong_pointer.consume(
+        CAST_MARK+"20|default|2|alpha|0|0|0|0|0|0",
+        dict(resource_pending,original_post_line_pre=[]))
+    except NativeProofBridgeError:pass
+    else:raise AssertionError("CAST_PRE_POINTER_DRIFT_ACCEPTED")
     assert sync_bridge.summary()["counts"]["independent_source_sync_line_positive"]==1
     # A sync child requires its own unknown readiness; one positive
     # outer cooldown cannot certify its virtual recursive action_ready.
@@ -502,7 +587,7 @@ def selftest():
     # not even expose Native ready as an accepted input.
     assert "native_ready" not in bridge.summary()["counts"]
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":21,"real_native":"NOT_RUN","WCL_API_calls":0}
+            "checks":29,"real_native":"NOT_RUN","WCL_API_calls":0}
 
 if __name__=="__main__":
     import json
