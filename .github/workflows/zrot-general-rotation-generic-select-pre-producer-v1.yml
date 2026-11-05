@@ -15,6 +15,7 @@ on:
       - tools/research/general_rotation_apl_eligibility_replay_v1.py
       - tools/research/general_rotation_apl_init_guard_probe_v1.py
       - tools/research/general_rotation_apl_init_guard_replay_v1.py
+      - tools/research/general_rotation_source_eligibility_decision_ir_v1.py
       - tools/research/general_rotation_select_pre_passive_replay_v1.py
       - tools/research/general_rotation_original_pre_capture_engine_v1.py
       - tools/research/general_rotation_original_pre_capture_fixture_v1.py
@@ -77,6 +78,17 @@ jobs:
               assert v['positive_READY_certified']==0
               assert v['WCL_API_calls']==0
           print('GENERIC_ORIGINAL_ACTION_INIT_GUARD_SHORT_CIRCUIT_SYNTHETIC_PASS')
+          PY
+          python -m py_compile tools/research/general_rotation_source_eligibility_decision_ir_v1.py
+          python -B tools/research/general_rotation_source_eligibility_decision_ir_v1.py > /tmp/zrot-source-stage-decision-ir-synthetic.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-source-stage-decision-ir-synthetic.json'))
+          assert r['schema']=='ZrotGeneralRotationSourceStageEligibilityDecisionIRV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['positive_FULL_READY_proven']==0
+          assert r['dummy_verdict_permitted'] is False
+          print('GENERIC_SOURCE_STAGE_DECISION_IR_OFFLINE_SYNTHETIC_PASS')
           PY
           python -B tools/research/general_rotation_controlled_negative_profile_v1.py > /tmp/zrot-controlled-negative-profile-selftest.json
           python - <<'PY'
@@ -409,6 +421,7 @@ jobs:
           from general_rotation_call_scope_replay_v1 import replay as scope_replay
           from general_rotation_apl_eligibility_replay_v1 import replay as eligibility_replay
           from general_rotation_apl_init_guard_replay_v1 import replay as init_guard_replay
+          from general_rotation_source_eligibility_decision_ir_v1 import compose as source_stage_ir
           guard_report=json.load(open('/tmp/zrot-generic-action-init-guards-patch.json'))
           init_report=json.load(open('/tmp/zrot-generic-apl-eligibility-patch.json'))
           scope_report=json.load(open('/tmp/zrot-generic-call-scope-patch.json'))
@@ -439,6 +452,16 @@ jobs:
                                   scope_report,negative_rules)
               eligible=eligibility_replay(native_trace,prof,init_report)
               original_init_guards=init_guard_replay(native_trace,prof,guard_report)
+              joined=source_stage_ir(prof,eligible,original_init_guards,scoped)
+              assert joined['schema']=='ZrotGeneralRotationSourceStageEligibilityDecisionIRV1'
+              assert joined['source_replay_full_READY_proven']==0
+              assert joined['source_order_complete'] is False
+              assert joined['source_frontier_proof']['decision']=='UNKNOWN'
+              assert joined['observed_original_ready_call_roots']==a['original_select_PRE_attempt_count']
+              assert joined['WCL_blind_candidate_discovery_semantics_injected'] is False
+              assert joined['dummy_error_permitted'] is False
+              Path('/tmp/zrot-source-stage-ir-'+spec+'.json').write_text(
+                  json.dumps(joined,sort_keys=True,separators=(',',':'))+'\n')
               assert original_init_guards['source_mapped_init_guard_invocations_total']>0
               assert original_init_guards['positive_FULL_ACTION_READY_proven']==0
               assert eligible['schema']=='ZrotGenericOriginalAPLInitializationEligibilityStrictReplayV1'
@@ -498,6 +521,11 @@ jobs:
                   'source_false_method_not_action_READY':True,
                   'source_init_registry_stage_counts':eligible['stage_registry_receipts'],
                   'source_init_foreground_observation_replayed':True,
+                  'source_stage_decision_IR_generated':True,
+                  'source_stage_decision_IR_rows':joined['source_row_count'],
+                  'source_stage_init_negative_causal_rows':
+                      joined['original_init_guard_fails_source_rows_confirmed'],
+                  'source_stage_full_READY_held_UNKNOWN':True,
                   'original_init_guard_evidence_for_reference_action':
                       original_init_guards['source_action_init_guard_evidence'].get(
                           'rampage' if spec=='fury' else 'arcane_blast',{}),
@@ -557,6 +585,15 @@ jobs:
               scope_report,negative_rules)
           negative_init=eligibility_replay(negative_trace,negative_profile,init_report)
           negative_guard=init_guard_replay(negative_trace,negative_profile,guard_report)
+          negative_join=source_stage_ir(
+              negative_profile,negative_init,negative_guard,negative_scopes)
+          assert negative_join['schema']=='ZrotGeneralRotationSourceStageEligibilityDecisionIRV1'
+          assert negative_join['source_replay_full_READY_proven']==0
+          assert negative_join['source_order_complete'] is False
+          assert negative_join['WCL_blind_candidate_discovery_semantics_injected'] is False
+          assert negative_join['source_frontier_proof']['decision']=='UNKNOWN'
+          Path('/tmp/zrot-source-stage-ir-controlled-fury.json').write_text(
+              json.dumps(negative_join,sort_keys=True,separators=(',',':'))+'\n')
           rampage_guard=negative_guard[
               'source_action_init_guard_evidence'].get('rampage',{})
           weapon_failed_rows=set(
@@ -574,6 +611,21 @@ jobs:
           assert (len(weapon_failed_rows)==
                   rampage_guard.get('guard_false_weapon',0))
           assert weapon_failed_rows==blocked_rows==blocked_missing_weapon_rows
+          claimed_rows=[
+              x for x in negative_join['source_row_decisions']
+              if x['source_action']=='rampage' and
+                 x['init_to_foreground_negative_causal_chain_proven']
+          ]
+          assert len(claimed_rows)==len(weapon_failed_rows)==14
+          assert {x['source_row_sha256'] for x in claimed_rows}==weapon_failed_rows
+          assert all(x['initialization_stage']=='SOURCE_INIT_GUARD_FALSE'
+                     and x['selection_stage']=='NO_ACTION_READY_CALL_OBSERVED_IN_BOUNDED_WINDOW'
+                     and x['physical_action_ready_decision']=='UNKNOWN'
+                     and x['source_order_priority_decision']=='UNKNOWN'
+                     and x['dummy_error_permitted'] is False
+                     for x in claimed_rows)
+          print('GENERIC_NATIVE_SOURCE_STAGE_IR_INIT_EXCLUSION_PASS',
+                len(claimed_rows),flush=True)
           assert (len(blocked_rows)==negative_init[
               'source_action_stage_observations']['INIT_FINISHED_END'][
                   'rampage']['background_true'])
@@ -660,6 +712,10 @@ jobs:
               'source_row_exact_guard_to_init_background_concordant':True,
               'source_row_exact_guard_to_init_background_rows':
                   len(weapon_failed_rows),
+              'source_stage_decision_ir_generated':True,
+              'source_stage_decision_ir_init_causal_rows':
+                  len(claimed_rows),
+              'source_stage_priority_READY_still_UNKNOWN':True,
               'source_forced_background_at_init_evidence':
                   rampage_guard.get('source_forced_background_instances',0),
               'guard_failed_not_a_full_ACTION_READY_proof':True,
@@ -706,6 +762,9 @@ jobs:
             /tmp/zrot-generic-call-scope-patch.json
             /tmp/zrot-generic-apl-eligibility-patch.json
             /tmp/zrot-generic-action-init-guards-patch.json
+            /tmp/zrot-source-stage-ir-fury.json
+            /tmp/zrot-source-stage-ir-arcane.json
+            /tmp/zrot-source-stage-ir-controlled-fury.json
             /tmp/zrot-controlled-fury-no-offhand-provenance.json
             /tmp/zrot-generic-select-pre-two-spec-a-b.json
           retention-days: 7
