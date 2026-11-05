@@ -24,9 +24,7 @@ from pathlib import Path
 import re
 
 from general_rotation_original_pre_capture_engine_v1 import canonical
-from general_rotation_decision_proof_engine_v1 import (
-    evaluate_priority, UNKNOWN
-)
+from general_rotation_decision_proof_engine_v1 import UNKNOWN
 from general_rotation_apl_eligibility_replay_v1 import (
     SCHEMA as INIT_SCHEMA
 )
@@ -182,10 +180,9 @@ def compose(profile:bytes,init:dict,guards:dict,calls:dict)->dict:
         rejected=sum(current_guard["guard_false_"+n] for n in fail_names) if current_guard else 0
         if (current_guard and finished and rejected>finished["background_true"]):
             raise SourceStageIRError("INIT_GUARD_FALSE_NOT_REFLECTED_IN_BACKGROUND")
-        if (roots>0 and not finished):
-            # Native attempts cannot be attributed to a source row which
-            # this initialized actor never registered as mapped.
-            raise SourceStageIRError("READY_ATTEMPT_NOT_PRESENT_IN_SOURCE_INIT")
+        # Runtime registration can be dynamic. An action_ready call with no
+        # original init snapshot row is still an observed call; the actor's
+        # earlier registration cause stays UNKNOWN rather than erroring.
         if len(locations)>1:
             init_state="DUPLICATE_SOURCE_ROW_IDENTITY_UNKNOWN"
             physically_ambiguous+=1
@@ -226,6 +223,7 @@ def compose(profile:bytes,init:dict,guards:dict,calls:dict)->dict:
             "source_row_sha256":h,"source_action":action,
             "source_locations":locations,
             "exact_unique_APL_source_location":len(locations)==1,
+            "physical_native_action_object_pointer_join_proven":False,
             "initialization_stage":init_state,
             "source_original_init_guard_failed_types":fail_names,
             "source_original_init_guard_observed_invocations":
@@ -246,16 +244,24 @@ def compose(profile:bytes,init:dict,guards:dict,calls:dict)->dict:
             "source_order_priority_decision":UNKNOWN,
             "dummy_error_permitted":False,
         })
-    priority=evaluate_priority(
-        [{"decision":UNKNOWN} for _ in rows],
-        None,source_order_complete=False)
-    assert priority["decision"]=="UNKNOWN"
+    # A corpus of initialized APL rows from multiple action lists is NOT
+    # one actionable/timestamped priority frontier. Do not fabricate "earlier"
+    # candidates, a winner, or source priority order from aggregate counters.
+    priority={
+        "decision":UNKNOWN,
+        "source_order_complete":False,
+        "actual_single_timestamp_priority_frontier_reconstructed":False,
+        "reason":"SOURCE_STAGE_AGGREGATES_ARE_NOT_ACTION_ORDER",
+        "native_selected_name_used_as_ready_input":False,
+        "dummy_error_permitted":False
+    }
     return {
         "schema":SCHEMA,"product_policy_id":POLICY,
         "source_profile_git_blob_sha1":profile_blob,
         "source_stage_provenance":[INIT_SCHEMA,GUARD_SCHEMA,CALL_SCHEMA],
         "source_row_count":len(rows),
         "physical_source_row_ambiguous_count":physically_ambiguous,
+        "exact_native_object_pointer_causality_proven":False,
         "observed_original_ready_call_roots":
             calls["selected_action_ready_original_calls"],
         "original_init_guard_fails_source_rows_confirmed":
@@ -335,6 +341,8 @@ def selftest()->dict:
     assert row["init_to_foreground_negative_causal_chain_proven"] is True
     assert row["physical_action_ready_decision"]=="UNKNOWN"
     assert actual["source_frontier_proof"]["decision"]=="UNKNOWN"
+    assert actual["source_frontier_proof"][
+        "actual_single_timestamp_priority_frontier_reconstructed"] is False
     for changed in (
         ("profile",b'warrior="Other"\nspec=fury\nactions=/rampage\n'),
         ("init",dict(init,source_profile_git_blob_sha1="0"*40)),
@@ -368,6 +376,16 @@ def selftest()->dict:
     assert healthy["selection_stage"]=="ACTION_READY_CALLED"
     assert healthy["physical_action_ready_decision"]=="UNKNOWN"
     assert healthy["source_order_priority_decision"]=="UNKNOWN"
+    # A source row can be registered dynamically after the bounded init
+    # inventory. Preserve its actual ready-call evidence with init UNKNOWN.
+    dynamic=copy.deepcopy(fg)
+    for stage in STAGES:
+        dynamic["source_row_stage_observations_by_sha256"][stage]={}
+        dynamic["stage_registry_receipts"][stage]["source_mapped_instances"]=0
+    later=compose(profile,dynamic,okg,activity)["source_row_decisions"][0]
+    assert later["initialization_stage"]=="NOT_OBSERVED_IN_SOURCE_MAPPED_INIT_UNKNOWN"
+    assert later["selection_stage"]=="ACTION_READY_CALLED"
+    assert later["physical_action_ready_decision"]=="UNKNOWN"
     return {
         "schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
         "checks":12,
