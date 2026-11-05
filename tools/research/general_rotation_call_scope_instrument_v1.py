@@ -106,7 +106,7 @@ def _sh(data:bytes)->str:
 def _add_header_include(data:bytes)->bytes:
     source=data.decode("utf-8")
     include='#include "zrot_generic_call_scope_v1.hpp"\n'
-    if include in source or TRACE_MARK in source:
+    if include in source:
         raise CallScopeError("SOURCE_ALREADY_HAS_CALL_SCOPE")
     i=source.find("#include ")
     if i<0:
