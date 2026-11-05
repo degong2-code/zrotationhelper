@@ -46,6 +46,51 @@ class MethodPREError(ValueError):
     pass
 
 
+# This grammar is deliberately narrower than a C++ expression parser.
+# Only a pinned member path or the original const buff_t::check() accessor
+# may be emitted. No C++ dynamic dispatch, target, ready, RNG, mutation,
+# arbitrary function calls, new operators, delimiters or source-derived code
+# from an untrusted profile may enter the generated instrumented C++.
+MEMBER_PATH=re.compile(
+    r"(?:this->|p\(\)->)[a-z_][a-z0-9_]*"
+    r"(?:(?:->|\.)[a-z_][a-z0-9_]*)*(?:->check\(\))?\Z"
+)
+READ_RULES=frozenset((
+    "bool_nonnull", "bool_weapon_none", "bool_const_buff_check"
+))
+
+
+def _read_recipe(field:dict,source_method_body:str | None=None)->tuple[str,str]:
+    rule=field.get("original_pre_read_kind")
+    token=field.get("source_operand_literal")
+    if (rule not in READ_RULES or not isinstance(token,str) or
+        not MEMBER_PATH.fullmatch(token)):
+        raise MethodPREError("UNSAFE_OR_UNDECLARED_CXX_SOURCE_READ")
+    if rule=="bool_nonnull":
+        if token.endswith("->check()") or token.endswith(".type"):
+            raise MethodPREError("NONNULL_SOURCE_FIELD_NOT_A_POINTER")
+        expr="( "+token+" != nullptr ? 1 : 0 )"
+    elif rule=="bool_weapon_none":
+        if not token.startswith("p()->") or not token.endswith(".type"):
+            raise MethodPREError("WEAPON_NONE_SOURCE_READ_NOT_TYPED")
+        expr="( "+token+" == WEAPON_NONE ? 1 : 0 )"
+    else:
+        if (not token.startswith("p()->buffs.") or
+            not token.endswith("->check()")):
+            raise MethodPREError("CONST_BUFF_CHECK_SOURCE_READ_NOT_TYPED")
+        # buff.hpp: buff_t::check() const returns current_stack only;
+        # unlike up()/stack(), no benefit counter mutation.
+        expr="( "+token+" ? 1 : 0 )"
+    if field.get("value_kind")!="bool":
+        raise MethodPREError("SPECIALIZATION_RAW_BOOL_KIND_REQUIRED")
+    if source_method_body is not None:
+        if token not in source_method_body:
+            raise MethodPREError("DECLARED_OPERAND_ABSENT_FROM_PINNED_METHOD")
+        if rule=="bool_weapon_none" and "WEAPON_NONE" not in source_method_body:
+            raise MethodPREError("WEAPON_NONE_GUARD_ABSENT_FROM_SOURCE")
+    return "bool",expr
+
+
 def _validate_plan(manifest: dict) -> list[dict]:
     if (not isinstance(manifest, dict) or
         manifest.get("schema") != "ZrotGenericPassiveSelectTemplateManifestV1" or
@@ -94,21 +139,28 @@ def _validate_plan(manifest: dict) -> list[dict]:
         seen = set()
         for field in site["fields"]:
             key = (site["method_key"], field.get("operand_name"))
-            if key not in SOURCE_READS or key in seen:
-                raise MethodPREError("UNAPPROVED_OR_DUPLICATE_METHOD_READ")
+            if key in seen:
+                raise MethodPREError("DUPLICATE_METHOD_READ")
             seen.add(key)
-            if (field.get("field_id") not in {
+            if field.get("field_id") not in {
                 src["field_id"] for src in expected_fields
                 if src["operand_name"] == key[1]
-            } or field.get("value_kind") != SOURCE_READS[key][0]):
-                raise MethodPREError("METHOD_READ_FIELD_OR_TYPE_UNPINNED")
-            used_reads.add(key)
+            }:
+                raise MethodPREError("METHOD_READ_FIELD_NOT_SOURCE_PINNED")
+            if key in SOURCE_READS:
+                if (field.get("value_kind")!=SOURCE_READS[key][0] or
+                    "original_pre_read_kind" in field or
+                    "source_operand_literal" in field):
+                    raise MethodPREError("GENERIC_BASE_FIELD_RECIPE_DRIFT")
+                used_reads.add(key)
+            else:
+                _read_recipe(field)
     if used_reads != set(SOURCE_READS):
         raise MethodPREError("REQUIRED_COMMON_BASE_METHOD_READS_MISSING")
     return sorted(sites, key=lambda x: (x["source_path"], x["method_key"]))
 
 
-def _block(site: dict) -> str:
+def _block(site: dict,source_method_body: str | None=None) -> str:
     key = site["method_key"]
     fmt = ('    if ( this->sim->log && this->player &&'
            ' !this->player->is_pet() && !this->player->is_enemy() &&'
@@ -138,7 +190,11 @@ def _block(site: dict) -> str:
         return line + ' );\n'
     fmt += record("ENTRY", "-", "-", None)
     for field in sorted(site["fields"], key=lambda x:x["operand_name"]):
-        kind,expr = SOURCE_READS[(key, field["operand_name"])]
+        slot=(key,field["operand_name"])
+        if slot in SOURCE_READS:
+            kind,expr=SOURCE_READS[slot]
+        else:
+            kind,expr=_read_recipe(field,source_method_body)
         fmt += record("FIELD", field["field_id"], kind, expr)
     fmt += '          break;\n        }\n      }\n    }\n'
     return "\n" + fmt
@@ -176,7 +232,7 @@ def patch_files(originals: dict[str, bytes], manifest: dict,
             if (sha256(body.encode("utf-8")).hexdigest() !=
                 site["source_method_body_sha256"]):
                 raise MethodPREError("EXACT_METHOD_BODY_CHANGED")
-            injections.append((opening, _block(site)))
+            injections.append((opening, _block(site,body)))
         if len({o for o, _ in injections}) != len(injections):
             raise MethodPREError("DUPLICATE_METHOD_ENTRY_LOCATION")
         for opening, fragment in sorted(injections, reverse=True):
@@ -298,9 +354,35 @@ def selftest() -> dict:
         try:patch_files({"action.cpp":src},altered,enforce_pin=False)
         except MethodPREError:pass
         else:raise AssertionError("SOURCE_METHOD_GUARD_DRIFT_ACCEPTED")
+    # Source-owned typed collection can be added without changing the
+    # generic producer logic or trusting arbitrary injected C++ expressions.
+    valid={
+        "operand_name":"replacement_action_exists","value_kind":"bool",
+        "original_pre_read_kind":"bool_nonnull",
+        "source_operand_literal":"this->replacement_action"
+    }
+    assert _read_recipe(valid,"if ( !this->replacement_action )")[0]=="bool"
+    assert _read_recipe(dict(valid,original_pre_read_kind="bool_weapon_none",
+         source_operand_literal="p()->main_hand_weapon.type"),
+         "if ( p()->main_hand_weapon.type == WEAPON_NONE )")[0]=="bool"
+    assert _read_recipe(dict(valid,original_pre_read_kind="bool_const_buff_check",
+         source_operand_literal="p()->buffs.prismatic_bolt->check()"),
+         "if ( p()->buffs.prismatic_bolt->check() )")[0]=="bool"
+    for forged in (
+        dict(valid,source_operand_literal="p()->ready()"),
+        dict(valid,source_operand_literal="this->replacement_action; ready()"),
+        dict(valid,original_pre_read_kind="random_expression"),
+        dict(valid,value_kind="enum"),
+    ):
+        try:_read_recipe(forged,"if ( !this->replacement_action )")
+        except MethodPREError:pass
+        else:raise AssertionError("UNSAFE_SOURCE_READ_RECIPE_ACCEPTED")
+    try:_read_recipe(valid,"return true;")
+    except MethodPREError:pass
+    else:raise AssertionError("SOURCE_UNPINNED_READ_ACCEPTED")
     return {
         "schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-        "checks":12, "source_method_site_count":2,
+        "checks":20, "source_method_site_count":2,
         "positive_READY_certified":0,
         "actual_native_compiled":False,"WCL_API_calls":0
     }

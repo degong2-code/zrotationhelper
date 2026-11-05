@@ -168,7 +168,7 @@ jobs:
               'base_action','base_ready','warrior_action',
               'warrior_ready','rampage_ready','arcane_blast_ready'
           }
-          assert r['requested_original_method_PRE_operands']==2
+          assert r['requested_original_method_PRE_operands']==7
           assert r['new_original_ready_or_virtual_calls']==0
           assert r['native_compiled_and_executed'] is False
           assert r['positive_READY_certified']==0
@@ -225,7 +225,14 @@ jobs:
               assert m['source_method_entry_total']>0
               assert m['by_method'].get('base_action',0)>0
               assert m['by_method'].get('base_ready',0)>0
-              assert m['original_method_PRE_raw_field_count']==2*m['by_method']['base_ready']
+              expected_raw=(2*m['by_method']['base_ready']+
+                    sum(m['by_method'].get(key,0)*count
+                        for key,count in (
+                            (('warrior_action','warrior_ready','rampage_ready')[0],1),
+                            (('warrior_action','warrior_ready','rampage_ready')[1],1),
+                            ('rampage_ready',2),
+                            ('arcane_blast_ready',1))))
+              assert m['original_method_PRE_raw_field_count']==expected_raw
               # Only source-owned methods actually entered in this one
               # bounded original Native case may count as observed.
               source_owned=('warrior_action','warrior_ready','rampage_ready') if spec=='fury' else ('arcane_blast_ready',)
@@ -248,6 +255,9 @@ jobs:
                   'observed_spec_owned_method_entries':{key:m['by_method'].get(key,0)
                       for key in source_owned},
                   'method_entry_PRE_typed_raw_operands':m['original_method_PRE_raw_field_count'],
+                  'source_owned_method_raw_fields':{
+                      key:m['raw_field_counts_by_method'].get(key,0)
+                      for key in source_owned},
                   'unobserved_derived_override_route_closed':False,
                   'physical_action_READY':'UNKNOWN',
                   'WCL_API_calls':0
@@ -270,7 +280,8 @@ jobs:
                 [(k,v['observed_attempts'],
                   v['observed_base_action_method_entries'],
                   v['observed_base_ready_method_entries'],
-                  v['observed_spec_owned_method_entries']) for k,v in cases.items()])
+                  v['observed_spec_owned_method_entries'],
+                  v['source_owned_method_raw_fields']) for k,v in cases.items()])
           PY
           sha256sum /tmp/zrot-generic-select-pre-two-spec-a-b.json
       - name: Preserve compact safe receipts only (never raw actor logs)

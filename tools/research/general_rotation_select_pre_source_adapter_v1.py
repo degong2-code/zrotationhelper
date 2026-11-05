@@ -73,6 +73,24 @@ def pinned_method_entry_sites(templates:list[dict])->list[dict]:
         ("warrior_fury","rampage_ready"),
         ("mage_arcane","arcane_blast_ready"),
     )
+    # Read formulas are semantic adapter data, not per-spec instrumentation
+    # code. Every token must also be found in its pinned C++ method body,
+    # and the generic producer accepts only a small, audited read grammar.
+    branch_reads={
+        "warrior_action":(
+            ("replacement_action_exists","bool_nonnull",
+             "this->replacement_action"),),
+        "warrior_ready":(
+            ("warrior_channeling","bool_nonnull","p()->channeling"),),
+        "rampage_ready":(
+            ("main_hand_weapon_none","bool_weapon_none",
+             "p()->main_hand_weapon.type"),
+            ("off_hand_weapon_none","bool_weapon_none",
+             "p()->off_hand_weapon.type")),
+        "arcane_blast_ready":(
+            ("prismatic_bolt_buff_up","bool_const_buff_check",
+             "p()->buffs.prismatic_bolt->check()"),)
+    }
     source_plans={"warrior_fury":warrior_route(), "mage_arcane":mage_route()}
     report_templates={
         "warrior_fury":templates[0],"mage_arcane":templates[1]
@@ -96,6 +114,15 @@ def pinned_method_entry_sites(templates:list[dict])->list[dict]:
         expected_body={field["source_method_body_sha256"] for field in facts}
         if len(expected_body)!=1:
             raise ValueError("SPECIALIZATION_SOURCE_BODY_CONFLICT")
+        recipe_inputs=branch_reads[key]
+        selected=[]
+        for name,rule,token in recipe_inputs:
+            matches=[field for field in facts if field["operand_name"]==name]
+            if len(matches)!=1:
+                raise ValueError("SOURCE_RECIPE_OPERAND_NOT_UNIQUE")
+            selected.append(dict(matches[0],
+                                 original_pre_read_kind=rule,
+                                 source_operand_literal=token))
         sites.append({
             "method_key":key,
             "signature":method.signature,
@@ -103,7 +130,7 @@ def pinned_method_entry_sites(templates:list[dict])->list[dict]:
             "source_path":method.path,
             "source_git_blob_sha1":method.source_blob_sha1,
             "source_method_body_sha256":next(iter(expected_body)),
-            "fields":[],
+            "fields":selected,
         })
     if len(sites)!=6 or len({site["method_key"] for site in sites})!=6:
         raise ValueError("SOURCE_METHOD_SITE_COHORT_MISMATCH")
