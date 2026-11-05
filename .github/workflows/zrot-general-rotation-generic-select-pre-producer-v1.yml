@@ -20,6 +20,7 @@ on:
       - tools/research/general_rotation_time_scoped_priority_ir_v1.py
       - tools/research/general_rotation_root_actor_pre_producer_v1.py
       - tools/research/general_rotation_root_actor_pre_replay_v1.py
+      - tools/research/general_rotation_original_root_if_bridge_v1.py
       - tools/research/general_rotation_select_pre_passive_replay_v1.py
       - tools/research/general_rotation_original_pre_capture_engine_v1.py
       - tools/research/general_rotation_original_pre_capture_fixture_v1.py
@@ -98,6 +99,17 @@ jobs:
               assert r['schema']==schema and r['status']=='PASS_OFFLINE_SYNTHETIC'
               assert r['WCL_API_calls']==0
           print('GENERIC_ORIGINAL_ROOT_ACTOR_PRE_SOURCE_ORDER_SYNTHETIC_PASS')
+          PY
+          python -m py_compile tools/research/general_rotation_original_root_if_bridge_v1.py
+          python -B tools/research/general_rotation_original_root_if_bridge_v1.py > /tmp/zrot-original-native-if-bridge-selftest.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-original-native-if-bridge-selftest.json'))
+          assert r['schema']=='ZrotOriginalRootNativeIFComparatorProducerV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['independent_AST_native_IF_match_synthetic']==1
+          assert r['full_READY_proven']==0
+          print('ORIGINAL_ROOT_PRE_NATIVE_IF_LINKAGE_SYNTHETIC_PASS')
           PY
           python -m py_compile tools/research/general_rotation_select_sweep_instrument_v1.py
           python -m py_compile tools/research/general_rotation_time_scoped_priority_ir_v1.py
@@ -475,6 +487,23 @@ jobs:
           assert r['WCL_latest_transition_before_t_claim'] is False
           assert r['full_READY_proven']==0
           print('SOURCE_PINNED_PRE_CALL_ROOT_ACTIVE_ENEMIES_CAPTURE_PASS')
+          PY
+      - name: Observe original Native IF once per source root without new evaluations
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_original_root_if_bridge_v1.py \
+            --simc-root simc-upstream \
+            --root-pre-receipt /tmp/zrot-original-root-actor-pre-producer.json \
+            --receipt /tmp/zrot-original-native-if-bridge-producer.json
+          python - <<'PY'
+          import json
+          v=json.load(open('/tmp/zrot-original-native-if-bridge-producer.json'))
+          assert v['schema']=='ZrotOriginalRootNativeIFComparatorProducerV1'
+          assert v['original_native_if_expression_evaluations_per_callsite']==1
+          assert v['new_IF_ready_rng_target_calls']==0
+          assert v['full_READY_proven']==0
+          print('PINNED_NATIVE_ORIGINAL_IF_SINGLE_EVALUATION_CAPTURE_PASS')
           PY
       - name: Rebuild patched Native SimC and capture same two independent specs
         shell: bash
@@ -1011,6 +1040,49 @@ jobs:
               json.dumps(summary,sort_keys=True,separators=(',',':'))+'\n')
           PY
           sha256sum /tmp/zrot-original-root-actor-pre-summary.json
+      - name: Independently compare original root PRE AST with real Native IF return
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_original_root_if_bridge_v1 import corroborate
+          source=json.load(open('/tmp/zrot-original-root-actor-pre-producer.json'))
+          native=json.load(open('/tmp/zrot-original-native-if-bridge-producer.json'))
+          report={}
+          for spec,prof in (
+              ('fury','MID2_Warrior_Fury.simc'),
+              ('arcane','MID2_Mage_Arcane.simc')):
+              profile=Path('simc-upstream/profiles/MID2/'+prof).read_bytes()
+              for mode in ('st','2t'):
+                  name=spec+'-'+mode
+                  directory=spec if mode=='st' else spec+'-2t'
+                  trace=Path('/tmp/zrot-instrumented-'+directory+
+                      '/simc_native_log.txt').read_text(encoding='utf8')
+                  temporal=json.load(open(
+                      '/tmp/zrot-source-temporal-frontier-'+name+'.json'))
+                  proof=corroborate(trace,profile,temporal,source,native)
+                  assert proof['exact_original_action_ready_roots']==temporal['original_ready_calls']
+                  assert proof['independent_full_action_ready_proven']==0
+                  assert proof['source_order_complete'] is False
+                  assert proof['WCL_API_calls']==0
+                  if proof['independent_ast_vs_original_native_if_conflicts']:
+                      raise AssertionError('ORIGINAL_IF_AST_PARITY_CONFLICT:'+name)
+                  Path('/tmp/zrot-native-root-if-proof-'+name+'.json').write_text(
+                      json.dumps(proof,sort_keys=True,separators=(',',':'))+'\n')
+                  report[name]=proof['status_counts']
+                  print('ACTUAL_ORIGINAL_ROOT_NATIVE_IF_COMPARISON_BOUNDED',
+                        name,report[name],flush=True)
+          Path('/tmp/zrot-native-root-if-proof-summary.json').write_text(
+              json.dumps({
+                  'schema':'ZrotOriginalRootNativeIFST2TComparisonSummaryV1',
+                  'cases':report,'native_IF_is_post_only':True,
+                  'independent_full_READY_proven':0,
+                  'WCL_API_calls':0},sort_keys=True,separators=(',',':'))+'\n')
+          PY
+          sha256sum /tmp/zrot-native-root-if-proof-summary.json
       - name: Preserve compact safe receipts only (never raw actor logs)
         uses: actions/upload-artifact@v4
         if: success()
@@ -1025,6 +1097,12 @@ jobs:
             /tmp/zrot-generic-action-init-guards-patch.json
             /tmp/zrot-generic-select-sweep-patch.json
             /tmp/zrot-original-root-actor-pre-producer.json
+            /tmp/zrot-original-native-if-bridge-producer.json
+            /tmp/zrot-native-root-if-proof-summary.json
+            /tmp/zrot-native-root-if-proof-fury-st.json
+            /tmp/zrot-native-root-if-proof-fury-2t.json
+            /tmp/zrot-native-root-if-proof-arcane-st.json
+            /tmp/zrot-native-root-if-proof-arcane-2t.json
             /tmp/zrot-original-root-actor-pre-summary.json
             /tmp/zrot-original-root-actor-pre-fury-st.json
             /tmp/zrot-original-root-actor-pre-fury-2t.json
