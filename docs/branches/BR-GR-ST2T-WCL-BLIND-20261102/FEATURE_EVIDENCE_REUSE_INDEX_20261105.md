@@ -17,3 +17,9 @@
 **영수증 우선순위:** #41938527598 최신 actual source-IR IF join → #41935516360 Fury/Mage IR decision fail-closed → #41797208028 source fixture → #41794691821 tri-state negative/prefix. 과거 477건 #41584822737는 별도 cohort: 66/477, UNKNOWN 411. 새 953건과 분모를 누적하지 않는다. CI FAIL #41938411129(40자 Git blob vs 64자 SHA contract), #41935436081(0건 counter assertion) 보존; 해당 successor PASS와 구분.
 
 **적용 경계:** source parsing≠Native cast parity≠full READY≠WCL optimality≠target dummy feedback. 각 주장에 맞는 actual production evidence 필요. 생성 영수증은 기간 제한이므로 재생산 경로와 SHA를 기록. 새로운 기능 전 `INDEX→실제 코드→원본→Actions 로그/아티팩트`를 읽고 REUSE/EXTEND/REPLACE/UNKNOWN 결정.
+
+### 2026-11-05 actual source-selected positive-gap successor
+- 코드: `simc_native_decision_proof_bridge_v1.py` → `simc_native_if_false_priority_frontier_v1.py` → `general_rotation_native_ir_pre_evidence_join_v1.py`.
+- #41945383199 actual source fixture PASS; **79** source-pinned selected executable candidates with all earlier attempted candidates independently excluded, details output; generic actual READY remains 0. Bridge reuses `simc_native_resource_cost_replay_v1.py` original method cost/source player-resource numeric proof only for scoped positive `RESOURCE` gate, no user READY or mistake promotion.
+- Closest selected fixture: Fury `rampage` moving ST at 20,031ms, 6 earlier independent negatives; source row `217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2`; missing gates 7→6, still `UNKNOWN`. Actual JSON SHA256 `995ee68d1aeb9da02b078bb9c16039a0a7e943325cd549800577fea626195c6c`, artifact 13378442205.
+- CI history: failed #41944807494/#41944807502 (producer schema/synthetic test defects), corrected pass #41944965565/#41944965873, resource successor pass #41945383199. Index is branch-scoped only; do not claim new engine-wide completion.

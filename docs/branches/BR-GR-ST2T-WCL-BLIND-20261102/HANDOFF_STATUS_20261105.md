@@ -44,3 +44,11 @@
 
 ## Session Exact Next
 **새 채팅 첫 응답은 GitHub 실제 HEAD/정책 SHA/이전 인계 SHA/영수증을 읽기 전용 복원·검증하고 위 장·단기 로드맵과 완료·미완료를 보고한 뒤 중단한다. 사용자의 새로운 '진행' 이전에는 코드·문서 수정, Python/SimC 실행, WCL/API 수집, Actions/PR/커밋·승격을 하지 않는다.**
+
+## 2026-11-05 branch successor — 실제 선택 후보 READY 증명 공백 및 자원 조건
+- **현재 코드 HEAD**: `86849c9e6b5e117f3099cdfaeb623ad01119fb84` (브랜치 격리 변경). 기존 인계 gen3, MAIN/global pointers, FROZEN, Seq578/Seq637은 변경하지 않음.
+- **새 코드 경로**: 기존 `simc_native_decision_proof_bridge_v1.py`에 source-row/occurrence/timestamp 단위의 actual selected positive-gap preflight 및 기존 `simc_native_resource_cost_replay_v1.py`를 재사용하는 `RESOURCE` **부분적 독립 양성 증거**를 추가. `simc_native_if_false_priority_frontier_v1.py`에서 정확한 root에 연결하고 `general_rotation_native_ir_pre_evidence_join_v1.py`에 코호트별 사례를 노출. 기존 Generic `decide_candidate`/SpecAdapter/승격된 상태는 변경 없음.
+- **실제 Native 증거 재생**: [GitHub Actions #41945383199](https://github.com/degong2-code/zrotationhelper/actions/runs/41945383199) SUCCESS. 기존 5,408 attempts / 2,313 NOT_READY / 3,095 UNKNOWN / 0 READY, IF 953(939 independent, 14 UNKNOWN), 선행 후보 제외된 실행 후보 79건 불변. 최신 JSON SHA256 `995ee68d1aeb9da02b078bb9c16039a0a7e943325cd549800577fea626195c6c`; artifact `13378442205` (2026-11-12T01:00:18Z 만료).
+- **정확한 연구 fixture**: moving ST, `at_simc_ms=20031`, APL list `slayer` source_index 6 (0-based), `rampage`, 원본 row SHA256 `217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2`, same-key occurrence 0. 이전 후보 6개 독립 NOT_READY, 이 선택 행동의 `RESOURCE` 독립 참으로 개선. 남은 blocker 6개: `BASE_VIRTUAL_COMPLETE` (Native post comparator only), `CAST_GCD`, `MOVEMENT`, `NECESSARY_ELIGIBILITY`, `SPEC_OVERRIDE_TOTAL`, `SYNC_LINE`. **스킬 전체 READY·실제 source-order 확정·WCL optimality·허수아비 실수 증명은 여전히 0/UNKNOWN.**
+- **검증 실패 보존**: 첫 코드 커밋 `27d033fa...` CI #41944807494 / #41944807502 FAILED (신규 필드 누락 및 기존 synthetic fixture 형식). 교정 `8dfb0fdf...`의 #41944965565 source-pre evidence SUCCESS 및 #41944965873 native CI SUCCESS. 최종 자원조건 successor #41945383199 SUCCESS. 이전 실패를 PASS로 바꾸지 않는다.
+- **실제 다음 개발**: 20.031초 선택 사례의 남은 여섯 gate를 원본 SimC 코드·actual PRE source marker·SpecAdapter 경로로 감사하고, source completeness 검증 없는 `closed=True`를 금지. 완전 positive READY 1건 이후에만 G4 source selection parity, Arcane Native, opener/G5 및 WCL 비교로 진행한다.

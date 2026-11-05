@@ -27,3 +27,9 @@ Scope Lock → Scope prose → AGENTS → Engine-first Charter → Handoff Conti
 
 ## Exact next
 After a fresh approval, read source-mapped `ready()` paths for selected executable actions and create a specialization-neutral gate-completeness registry / SpecAdapter extension, using the existing 79/174 partial-prefix cases and compact fixture, then cross-class actual Native and post-lock WCL as justified. Keep Product Exact Next General Rotation opener & conditional priority engine, then truthful dummy feedback.
+
+## 2026-11-05 진행 중 개발 결과 (gen3 인계 이후, branch-only)
+- 브랜치 실제 코드 HEAD `86849c9e6b5e117f3099cdfaeb623ad01119fb84` 확인. 이 개발은 handoff gen3의 원래 인계 스냅샷 이후 successor이며 gen3 또는 MAIN/FROZEN을 소급 변경하지 않는다.
+- Source-pinned selected READY-gap preflight는 79건을 원본 SimC 시각/리스트/행 SHA로 식별해 최소 공백 사례를 고른다. 기존 `RESOURCE` 독립 원시 비용 비교 재사용으로 Fury `rampage` at 20,031ms, 6 prior NOT_READY의 미확인 gate가 7→6이 되었다.
+- Actual 4-case fixture CI #41945383199 SUCCESS; 5,408 attempts, READY 0, IF 판정 939/953; JSON SHA256 `995ee68d1aeb9da02b078bb9c16039a0a7e943325cd549800577fea626195c6c`. First implementation CI FAIL #41944807494/#41944807502 is retained, fixed successor PASS #41944965565/#41944965873.
+- Next: `BASE_VIRTUAL_COMPLETE`, `CAST_GCD`, `MOVEMENT`, `NECESSARY_ELIGIBILITY`, `SPEC_OVERRIDE_TOTAL`, `SYNC_LINE` on actual selected `rampage` 20,031ms; source-audited complete route proof without Native ready bit as input. Cannot claim full READY before that, or source-order completeness, WCL optimum, target dummy errors. Keep first-response-only read-only rule for **new** chats; the user has authorized this session with “진행”.
