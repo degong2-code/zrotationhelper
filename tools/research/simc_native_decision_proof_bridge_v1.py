@@ -418,36 +418,45 @@ def selftest():
     assert sync_bridge.summary()["counts"]["independent_source_sync_line_positive"]==1
     # A sync child requires its own unknown readiness; one positive
     # outer cooldown cannot certify its virtual recursive action_ready.
+    def fresh_post_pending():
+        # Every original source attempt has its own pending marker buffer.
+        # Reusing the prior test's mutable dict for a second attempt
+        # would correctly be flagged as a duplicate marker.
+        return dict(resource_pending,original_post_line_pre=[])
     with_sync=NativeProofBridge()
+    with_sync_pending=fresh_post_pending()
     with_sync.consume(LINE_MARK+"20|default|1|alpha|1|10|0|1|-1|0|1",
-                      resource_pending)
-    sync_unknown=with_sync.evaluate_attempt(resource_pending,nxt)
+                      with_sync_pending)
+    sync_unknown=with_sync.evaluate_attempt(with_sync_pending,nxt)
     assert "SYNC_LINE:MISSING" in sync_unknown["missing_or_unverified"]
     line_down=NativeProofBridge()
+    down_pending=fresh_post_pending()
     line_down.consume(LINE_MARK+"20|default|1|alpha|1|30|0|1|-1|0|0",
-                      resource_pending)
-    down_unknown=line_down.evaluate_attempt(resource_pending,nxt)
+                      down_pending)
+    down_unknown=line_down.evaluate_attempt(down_pending,nxt)
     assert "SYNC_LINE:MISSING" in down_unknown["missing_or_unverified"]
     absent_line=NativeProofBridge()
+    absent_pending=fresh_post_pending()
     absent_line.consume(LINE_MARK+"20|default|1|alpha|0|0|0|1|-1|0|0",
-                        resource_pending)
-    absent_unknown=absent_line.evaluate_attempt(resource_pending,nxt)
+                        absent_pending)
+    absent_unknown=absent_line.evaluate_attempt(absent_pending,nxt)
     assert "SYNC_LINE:MISSING" in absent_unknown["missing_or_unverified"]
     duplicate=NativeProofBridge()
-    duplicate.consume(line_ready,resource_pending)
-    try:duplicate.consume(line_ready,resource_pending)
+    duplicate_pending=fresh_post_pending()
+    duplicate.consume(line_ready,duplicate_pending)
+    try:duplicate.consume(line_ready,duplicate_pending)
     except NativeProofBridgeError:pass
     else:raise AssertionError("DUPLICATE_SYNC_LINE_SOURCE_PRE_ACCEPTED")
     mismatched=NativeProofBridge()
     try:mismatched.consume(line_ready.replace("|default|1|alpha|",
                                                   "|default|2|alpha|"),
-                           resource_pending)
+                           fresh_post_pending())
     except NativeProofBridgeError:pass
     else:raise AssertionError("MISMATCHED_SYNC_LINE_SOURCE_ROW_ACCEPTED")
     not_base=NativeProofBridge()
-    not_base.consume(line_ready,resource_pending)
-    not_base_result=not_base.evaluate_attempt(
-        dict(resource_pending,base_action_entries=0),nxt)
+    no_base_pending=dict(fresh_post_pending(),base_action_entries=0)
+    not_base.consume(line_ready,no_base_pending)
+    not_base_result=not_base.evaluate_attempt(no_base_pending,nxt)
     assert "SYNC_LINE:MISSING" in not_base_result["missing_or_unverified"]
     rejected_resource=NativeProofBridge()
     rejected_resource.consume(ACTION_MARK+"20|alpha|1|0|50",None)
