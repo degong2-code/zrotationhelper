@@ -234,8 +234,11 @@ class NativeProofBridge:
                 "movement_option_matches_source_PRE":movement_option_ok,
                 "repeat_cast_rule_matches_source_PRE":repeat_cast_ok,
                 "base_ready_movement_branch_bypassed":(
-                    pending.get("base_ready_entries")==1 and
-                    pending["pre"]["player_is_moving"]==0),
+                    True if (pending.get("base_ready_entries")==1 and
+                             pending["pre"].get("player_is_moving") == 0)
+                    else False if (pending.get("base_ready_entries")==1 and
+                                   pending["pre"].get("player_is_moving") == 1)
+                    else None),
                 "movement_directionality":"UNKNOWN",
                 "cast_GCD_full_route":"UNKNOWN",
                 "movement_full_route":"UNKNOWN",
@@ -480,6 +483,7 @@ def selftest():
     check=sub_out["original_PRE_postguard_subpredicates"]
     assert check["movement_option_matches_source_PRE"] is True
     assert check["repeat_cast_rule_matches_source_PRE"] is True
+    assert check["base_ready_movement_branch_bypassed"] is None
     assert check["movement_full_route"]=="UNKNOWN"
     assert check["cast_GCD_full_route"]=="UNKNOWN"
     assert "MOVEMENT:MISSING" in sub_out["missing_or_unverified"]
