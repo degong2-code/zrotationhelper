@@ -43,7 +43,7 @@ SOURCE_PHASE="SIMC_SELECT_ACTION_PRE"
 # This header introduces no SimC decision logic. It only owns identity and
 # stack restoration. One atomic counter supplies IDs unique across compiler
 # translation units and across concurrent SimC worker threads.
-CPP_HEADER=String = r"""#pragma once
+CPP_HEADER = r"""#pragma once
 #include <atomic>
 #include <cstdint>
 #include <type_traits>
@@ -216,7 +216,7 @@ def _append_method_call_ids(source:str, expected:int)->str:
         source=source[:q]+'|{}'+source[q:end].rstrip() + (
             ', zrot_generic_call_scope_v1::active_id() ')+source[end:]
         count+=1
-        offset=end+64
+        offset=q+4
     if count!=expected:
         raise CallScopeError("METHOD_PRE_FIELD_TOKENIZATION_COUNT_DRIFT")
     return source
