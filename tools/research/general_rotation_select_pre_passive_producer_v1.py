@@ -23,12 +23,9 @@ import re
 import subprocess
 
 from general_rotation_source_route_audit_v1 import git_blob
-from general_rotation_original_pre_capture_engine_v1 import canonical
-from general_rotation_source_route_fixture_v1 import audit_both
-from general_rotation_original_pre_capture_fixture_v1 import (
-    declared_operands, warrior_route, mage_route
+from general_rotation_original_pre_capture_engine_v1 import (
+    canonical, digest, SCHEMA as SOURCE_TEMPLATE_SCHEMA
 )
-from general_rotation_original_pre_capture_engine_v1 import compile_template
 
 SCHEMA = "ZrotGeneralRotationGenericSelectPREPassiveProducerV1"
 MARK = "ZROT_GENERIC_SELECT_PRE_V1|"
@@ -56,32 +53,47 @@ def sha(data:bytes)->str:
     return sha256(data).hexdigest()
 
 
-def approved_shared_fields(source_audit_root:Path)->list[dict]:
-    """Intersect existing independently source-audited class fixtures."""
-    report = audit_both(source_audit_root)
-    if report["pinned_source_commit"]!=REVISION:
-        raise PassiveProducerError("SIMC_SOURCE_REVISION_NOT_PINNED")
-    templates = [
-        compile_template(report["audits"]["warrior_fury"],
-                         declared_operands(warrior_route())),
-        compile_template(report["audits"]["mage_arcane"],
-                         declared_operands(mage_route())),
-    ]
-    shared={field["operand_name"]:field
-            for field in templates[0]["fields"] if field["operand_name"] in READS}
-    other={field["operand_name"]:field
-           for field in templates[1]["fields"] if field["operand_name"] in READS}
-    if set(shared)!=set(READS) or set(other)!=set(READS):
-        raise PassiveProducerError("SHARED_GENERIC_SOURCE_PRE_FIELD_MISSING")
+def approved_fields(manifest:dict)->list[dict]:
+    """Intersect arbitrary source-audited typed templates; no class import."""
+    if (not isinstance(manifest,dict) or
+        manifest.get("schema")!="ZrotGenericPassiveSelectTemplateManifestV1" or
+        manifest.get("pinned_source_commit")!=REVISION or
+        not isinstance(manifest.get("templates"),list) or
+        not manifest["templates"]):
+        raise PassiveProducerError("GENERIC_SOURCE_TEMPLATE_MANIFEST_REQUIRED")
+    templates=manifest["templates"]
+    shared=None
+    for template in templates:
+        if (template.get("schema")!=SOURCE_TEMPLATE_SCHEMA or
+            template.get("capture_producer_implemented") is not False or
+            template.get("source_route_exhaustive") is not False):
+            raise PassiveProducerError("UNVERIFIED_SOURCE_CAPTURE_TEMPLATE")
+        copy=dict(template)
+        claimed=copy.pop("template_sha256",None)
+        if claimed!=digest(copy):
+            raise PassiveProducerError("CAPTURE_TEMPLATE_HASH_CHANGED")
+        catalog={field["operand_name"]:field for field in template["fields"]
+                 if field["operand_name"] in READS}
+        if len(catalog)!=len(READS) or set(catalog)!=set(READS):
+            raise PassiveProducerError("REQUIRED_GENERAL_ACTOR_FIELDS_MISSING")
+        if shared is None:
+            shared=catalog
+        else:
+            for name in READS:
+                a,b=shared[name],catalog[name]
+                if any(a[x]!=b[x] for x in (
+                    "field_id","source_git_blob_sha1",
+                    "source_method_body_sha256",
+                    "source_guard_fragment_sha256","value_kind"
+                )):
+                    raise PassiveProducerError("CROSS_ADAPTER_GENERIC_FIELD_DRIFT")
     fields=[]
     for name in sorted(READS):
-        a,b=shared[name],other[name]
-        if (a["field_id"]!=b["field_id"] or
-            a["source_git_blob_sha1"]!=b["source_git_blob_sha1"] or
-            a["source_method_body_sha256"]!=b["source_method_body_sha256"] or
-            a["source_guard_fragment_sha256"]!=b["source_guard_fragment_sha256"] or
-            a["value_kind"]!=READS[name][0]):
-            raise PassiveProducerError("TWO_SPEC_SHARED_SOURCE_READ_DRIFT")
+        a=shared[name]
+        if (a["value_kind"]!=READS[name][0] or
+            a["source_path"]!="engine/action/action.cpp" or
+            a["source_git_blob_sha1"]!="399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4"):
+            raise PassiveProducerError("SHARED_SOURCE_METHOD_NOT_PINNED")
         fields.append({
             "field_id":a["field_id"],"operand_name":name,
             "kind":a["value_kind"],"guard_source_sha256":a["source_guard_fragment_sha256"],
@@ -156,14 +168,14 @@ def instrument(pristine:bytes,fields:list[dict],*,enforce_pin:bool=True)->bytes:
     return (text[:start]+changed+text[end:]).encode("utf-8")
 
 
-def generate(source_root:Path)->dict:
+def generate(source_root:Path,source_templates:Path)->dict:
     root=source_root.resolve(strict=True)
     rev=subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],
                        capture_output=True,check=True,text=True).stdout.strip()
     if rev!=REVISION:
         raise PassiveProducerError("SIMC_REVISION_NOT_OFFICIAL_PINNED")
     original=(root/PLAYER).read_bytes()
-    fields=approved_shared_fields(root)
+    fields=approved_fields(json.loads(source_templates.read_bytes()))
     output=instrument(original,fields)
     (root/PLAYER).write_bytes(output)
     return {
@@ -223,9 +235,14 @@ def selftest():
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--simc-root",type=Path)
+    p.add_argument("--source-templates",type=Path)
     p.add_argument("--receipt",type=Path)
     args=p.parse_args()
-    result=generate(args.simc_root) if args.simc_root else selftest()
+    if args.simc_root is not None and args.source_templates is not None:
+        result=generate(args.simc_root,args.source_templates)
+    elif args.simc_root is None and args.source_templates is None:
+        result=selftest()
+    else:p.error("--simc-root and --source-templates must be specified together")
     payload=canonical(result)
     if args.receipt:
         args.receipt.parent.mkdir(parents=True,exist_ok=True)
