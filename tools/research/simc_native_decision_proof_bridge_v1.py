@@ -19,6 +19,10 @@ from general_rotation_decision_proof_engine_v1 import (
     NOT_READY, READY, UNKNOWN, CONTROL_COMMANDS, DecisionProofError
 )
 from simc_native_cooldown_tolerance_replay_v1 import independent_raw_tolerance_queue
+from simc_native_resource_cost_replay_v1 import (
+    read_cost, read_base_resource, independent_numeric_resource
+)
+from simc_native_resource_cost_pre_instrument_v1 import ACTION_MARK, PLAYER_MARK
 from simc_native_target_eligibility_source_replay_v1 import (
     parse_config,parse_target,independent_basic_target_truth,direct_path
 )
@@ -40,10 +44,40 @@ class NativeProofBridge:
         self.occurrences=Counter()
         # Bounded, source-pinned gap witnesses, not positive READY certificates.
         self.positive_gap_shortlist=[]
+        # Source-original cost/resource reads occur before the PRE guard
+        # marker; pair by exact action/time at the only original invocation.
+        self._raw_cost=None
+        self._raw_resource=None
+        self._resource_ambiguous=False
 
     def consume(self,line:str,pending:dict|None):
         # Only current source-pointer-scope events are accepted. Nested
         # or otherwise unmatched source reads do not become positive facts.
+        cost=read_cost(line)
+        if cost is not None:
+            if pending is None:
+                if self._raw_cost is not None:
+                    self.counters["pre_resource_cost_unpaired_superseded"]+=1
+                self._raw_cost=cost
+                self._raw_resource=None
+                self._resource_ambiguous=False
+            else:
+                self.counters["nested_or_unscoped_base_cost"]+=1
+            return
+        resource=read_base_resource(line)
+        if resource is not None:
+            cost=self._raw_cost
+            if (pending is None and cost is not None and
+                not cost["resource_none"] and
+                (cost["time_ms"],cost["resource_id"],cost["cost"])==
+                (resource["time_ms"],resource["resource_id"],resource["cost"])):
+                if self._raw_resource is not None:
+                    self._resource_ambiguous=True
+                else:
+                    self._raw_resource=resource
+            else:
+                self.counters["unpaired_player_resource_base_read"]+=1
+            return
         cfg=parse_config(line)
         if cfg is not None:
             if (pending is None or
@@ -65,6 +99,12 @@ class NativeProofBridge:
 
     def evaluate_attempt(self,pending:dict,row:dict,*,spec_adapter=None)->dict:
         k=row["source_key"]
+        raw_cost=self._raw_cost
+        raw_resource=self._raw_resource
+        ambiguous_resource=self._resource_ambiguous
+        self._raw_cost=None
+        self._raw_resource=None
+        self._resource_ambiguous=False
         occurrence=self.occurrences[tuple(k)]
         self.occurrences[tuple(k)]+=1
         identity=Identity(f"{k[1]}::{k[3]}",row["source_sha256"],
@@ -88,6 +128,19 @@ class NativeProofBridge:
                 raise NativeProofBridgeError("PROVEN_NEGATIVE_WITHOUT_ORIGIN")
             insert("NECESSARY_ELIGIBILITY",False,
                    receipt="previous_proven_negative:"+why)
+        if (not ambiguous_resource and raw_cost is not None and
+            (raw_cost["time_ms"],raw_cost["native_action"])==(k[0],k[3]) and
+            pending["pre"].get("source_cost_affordable")==1 and
+            pending["base_action_entries"]==1 and
+            pending["base_ready_entries"]==1):
+            numerical,reason=independent_numeric_resource(raw_cost,raw_resource)
+            if numerical is not None:
+                if numerical!=1:
+                    raise NativeProofBridgeError(
+                        "ORIGINAL_PRE_COST_SUCCESS_CONTRADICTS_INDEPENDENT_NUMERIC")
+                insert("RESOURCE",True,
+                       receipt="original_cost_invocation_plus_independent_numeric:"+reason)
+                self.counters["independent_source_resource_positive"]+=1
         if row["independent_IF_bool"] is not None:
             insert("APL_IF",bool(row["independent_IF_bool"]),
                    receipt="chronological_official_APL_independent_AST")
@@ -290,6 +343,26 @@ def selftest():
     b=bridge.evaluate_attempt(pending,nxt)
     assert b["decision"]==UNKNOWN
     assert "BASE_VIRTUAL_COMPLETE" in b["source_only_positive_gates"]
+    resource_bridge=NativeProofBridge()
+    resource_bridge.consume(ACTION_MARK+"20|alpha|1|0|10",None)
+    resource_bridge.consume(PLAYER_MARK+"20|1|10|30|0",None)
+    resource_pending=dict(pending,
+        pre=dict(pending["pre"],source_cost_affordable=1),
+        base_action_entries=1,base_ready_entries=1)
+    positive_resource=resource_bridge.evaluate_attempt(resource_pending,nxt)
+    assert positive_resource["decision"]==UNKNOWN
+    assert "RESOURCE" in positive_resource["independent_true_gates"]
+    assert resource_bridge.summary()["counts"]["independent_source_resource_positive"]==1
+    assert "RESOURCE:MISSING" not in positive_resource["missing_or_unverified"]
+    rejected_resource=NativeProofBridge()
+    rejected_resource.consume(ACTION_MARK+"20|alpha|1|0|50",None)
+    rejected_resource.consume(PLAYER_MARK+"20|1|50|30|0",None)
+    try:
+        rejected_resource.evaluate_attempt(resource_pending,nxt)
+    except NativeProofBridgeError:
+        pass
+    else:
+        raise AssertionError("INDEPENDENT_NUMERIC_COST_CONFLICT_ACCEPTED")
     assert b["identity"]["same_key_occurrence"]==1
     root=bridge.evaluate_root([
         {"generic_proof":a,"source_key":row["source_key"],
