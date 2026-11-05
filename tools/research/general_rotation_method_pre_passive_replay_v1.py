@@ -58,8 +58,8 @@ def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes)->
             x["operand_name"] for x in site["fields"]}:
             raise MethodReplayError("INCOMPLETE_METHOD_ENTRY_PRE_FIELDS")
         groups+=1
-        methods[active["method_key"]]+=1
-        raw_values[active["method_key"]]+=len(active["raw_fields"])
+        methods[active["source_method_key"]]+=1
+        raw_values[active["source_method_key"]]+=len(active["raw_fields"])
         if len(real_entries)<5:
             real_entries.append(active)
         active=None
