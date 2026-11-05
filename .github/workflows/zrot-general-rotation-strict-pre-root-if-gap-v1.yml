@@ -1,0 +1,163 @@
+name: zrot-general-rotation-strict-pre-root-if-gap-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_strict_pre_root_if_gap_v1.py
+      - .github/workflows/zrot-general-rotation-strict-pre-root-if-gap-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Strict PRE exact root ID, timestamp and identity regression
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_strict_pre_root_if_gap_v1.py
+          python -B tools/research/general_rotation_strict_pre_root_if_gap_v1.py \
+            > /tmp/zrot-source-pre-test.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-source-pre-test.json'))
+          assert r['schema']=='ZrotGeneralRotationStrictPreIFRootGapAuditV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['strict_pre_timestamp_lt_action_enforced'] is True
+          assert r['real_native_root_PRE_captured'] is False
+          assert r['positive_full_READY_proven']==0
+          assert r['WCL_API_calls']==0
+          print('STRICT_PRE_CAUSAL_ROOT_AND_SAME_TIMESTAMP_REJECTION_PASS')
+          PY
+  actual-source-replay:
+    needs: synthetic
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+            profiles/MID2/MID2_Mage_Arcane.simc
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse exact previously verified four Native profiles
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          gh run view 41981462766 --repo degong2-code/zrotationhelper \
+            --json status,conclusion,headSha > /tmp/zrot-producer-status.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-producer-status.json'))
+          assert r['status']=='completed'
+          assert r['conclusion']=='success'
+          assert r['headSha']=='c44353112702c91303959503b92dc04b9a4573bd'
+          print('ORIGINAL_NATIVE_COHORT_SUCCESS_AND_SOURCE_PIN_PASS')
+          PY
+          mkdir -p /tmp/zrot-source-evidence
+          gh run download 41981462766 --repo degong2-code/zrotationhelper \
+            --name zrot-general-rotation-generic-select-pre-two-spec-receipts \
+            --dir /tmp/zrot-source-evidence
+          for spec in fury arcane; do
+            for variant in st 2t; do
+              test -s /tmp/zrot-source-evidence/zrot-source-temporal-frontier-$spec-$variant.json
+            done
+          done
+          echo EXISTING_REAL_SIMC_SOURCE_EVIDENCE_REUSED_NO_BUILD
+      - name: Emit real-source Strict PRE operand gaps without inventing ready/IF truths
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-pre-gap
+          for spec in fury arcane; do
+            if [ "$spec" = fury ]; then profile=MID2_Warrior_Fury.simc
+            else profile=MID2_Mage_Arcane.simc
+            fi
+            python -B tools/research/general_rotation_strict_pre_root_if_gap_v1.py \
+              --profile simc-upstream/profiles/MID2/$profile \
+              --st-time-ir /tmp/zrot-source-evidence/zrot-source-temporal-frontier-$spec-st.json \
+              --two-target-time-ir /tmp/zrot-source-evidence/zrot-source-temporal-frontier-$spec-2t.json \
+              --early-window-ms 10000 --out-dir /tmp/zrot-pre-gap/$spec
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result={}
+          for spec in ('fury','arcane'):
+              root=Path('/tmp/zrot-pre-gap')/spec
+              st=json.loads((root/'st.json').read_bytes())
+              two=json.loads((root/'2t.json').read_bytes())
+              comp=json.loads((root/'st2t_pre_requirements.json').read_bytes())
+              assert st['unique_action_ready_roots_checked']>0
+              assert two['unique_action_ready_roots_checked']>0
+              assert st['source_profile_git_blob_sha1']==two['source_profile_git_blob_sha1']
+              assert st['root_PRE_producer_contract_verified'] is False
+              assert two['root_PRE_producer_contract_verified'] is False
+              assert st['actual_original_native_condition_truth_confirmed'] is False
+              assert two['actual_original_native_condition_truth_confirmed'] is False
+              assert st['legacy_timestamp_list_ordinal_name_join_forbidden'] is True
+              assert two['legacy_timestamp_list_ordinal_name_join_forbidden'] is True
+              assert st['full_ready_proven']==two['full_ready_proven']==0
+              assert comp['independent_root_condition_proofs']==0
+              assert comp['target_count_switch_threshold_proven'] is False
+              result[spec]={
+                'ST_unique_source_root_calls':st['unique_action_ready_roots_checked'],
+                'two_target_unique_source_root_calls':two['unique_action_ready_roots_checked'],
+                'ST_if_evaluations_without_strict_PRE':
+                    st['status_counts'].get('source_if_unknown',0),
+                'two_target_if_evaluations_without_strict_PRE':
+                    two['status_counts'].get('source_if_unknown',0),
+                'prioritized_symbols':len(comp['root_PRE_operand_capture_impact_ranked']),
+                'top_symbols':comp['top_12_source_PRE_symbols'],
+                'independent_ready_proven':0}
+          summary={
+            'schema':'ZrotGeneralRotationRealNativeStrictPreRootGapSummaryV1',
+            'source':'PREVIOUS_OFFICIAL_NATIVE_ST_2T_SOURCE_SWEEP',
+            'source_run_id':41981462766,
+            'source_head':'c44353112702c91303959503b92dc04b9a4573bd',
+            'new_native_build_performed':False,
+            'verified_new_root_PRE_producer':False,
+            'WCL_blind_uncontaminated':True,
+            'cases':result,'WCL_API_calls':0}
+          out=Path('/tmp/zrot-pre-gap/summary.json')
+          out.write_text(json.dumps(summary,sort_keys=True,separators=(',',':'))+'\n')
+          print('SOURCE_REAL_STRICT_PRE_IF_ROOT_GAP_AUDIT_PASS',result)
+          PY
+          sha256sum /tmp/zrot-pre-gap/summary.json
+      - name: Retain only compact gap evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-source-strict-pre-root-gap-st2t
+          path: |
+            /tmp/zrot-pre-gap/fury/st.json
+            /tmp/zrot-pre-gap/fury/2t.json
+            /tmp/zrot-pre-gap/fury/st2t_pre_requirements.json
+            /tmp/zrot-pre-gap/arcane/st.json
+            /tmp/zrot-pre-gap/arcane/2t.json
+            /tmp/zrot-pre-gap/arcane/st2t_pre_requirements.json
+            /tmp/zrot-pre-gap/summary.json
+          retention-days: 7
+          if-no-files-found: error
