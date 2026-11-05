@@ -129,7 +129,7 @@ def _block(site: dict) -> str:
                 field_id + '|' + kind + '|' +
                 ('{}' if expression is not None else '-') +
                 '",\n'
-                '            sim->current_time().total_millis(),\n'
+                '            this->sim->current_time().total_millis(),\n'
                 '            zrot_method_owner.name_str,\n'
                 '            static_cast<unsigned>( zrot_method_idx + 1 ),\n'
                 '            this->name_str')
@@ -274,6 +274,7 @@ def selftest() -> dict:
     assert output.count("!cooldown->is_ready()")==1
     assert output.index(MARK)<output.index("if ( !ready() )")
     assert "this->sim->print_log" in output
+    assert "this->sim->current_time().total_millis()" in output
     assert "this->signature" in output
     assert "this->action_list" in output
     try:
