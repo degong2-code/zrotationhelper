@@ -312,8 +312,70 @@ def selftest() -> dict:
             pass
         else:
             raise AssertionError("UNVERIFIED_NATIVE_IF_PATCH_ACCEPTED")
+    p = b'warrior="Synthetic"\nspec=fury\nactions=/foo,if=active_enemies>=2\n'
+    row = parse_profile(p, require_source=False)["action_lists"]["default"][0]
+    temporal = {
+        "schema": TIME_SCHEMA, "product_policy_id": POLICY,
+        "source_profile_git_blob_sha1": git_blob(p),
+        "source_order_complete": False, "independent_FULL_READY_proven": 0,
+        "original_ready_calls": 1,
+        "observed_time_scoped_selection_frontiers": [{
+            "source_list": "default", "at_simc_ms": 100,
+            "observed_candidate_event_stream": [{
+                "stage": "ACTION_READY_CALLED",
+                "original_action_ready_root_id": 7,
+                "ordinal_one_based": 1,
+                "source_row_sha256": row["source_sha256"],
+                "source_action": "foo",
+                "simc_NATIVE_return_post_comparator": True}]}]}
+    root_receipt = {
+        "schema": ROOT_SCHEMA, "operand_symbol": "active_enemies",
+        "operand_source_cpp": "sim->active_enemies",
+        "root_PRE_marker": ROOT_MARK,
+        "original_action_ready_call_count": 1, "added_ready_calls": 0,
+        "direct_before_call_snapshot_same_simc_tick": True,
+        "WCL_latest_transition_before_t_claim": False}
+    bridge_receipt = {
+        "schema": SCHEMA, "source_revision": REVISION,
+        "native_if_marker": MARK, "new_IF_ready_rng_target_calls": 0,
+        "full_READY_proven": 0}
+    begin = TRACE_MARK + "100|BEGIN|SELECT|7|0|7|select_call|default|1|foo"
+    pre = ROOT_MARK + "100|7|active_enemies|2"
+    method_begin = TRACE_MARK + "100|BEGIN|METHOD|8|7|7|base_action|default|1|foo"
+    observed = MARK + "100|7|8|1"
+    method_end = TRACE_MARK + "100|END|METHOD|8|7|7|base_action|default|1|foo"
+    comparator = RESULT_MARK + "100|7|1"
+    end = TRACE_MARK + "100|END|SELECT|7|0|7|select_call|default|1|foo"
+    events = [begin, pre, method_begin, observed, method_end, comparator, end]
+    def check(records):
+        return corroborate("\n".join(records), p, temporal,
+                           root_receipt, bridge_receipt)
+    matched = check(events)
+    assert matched["status_counts"]["independent_ast_vs_original_native_if_match"] == 1
+    assert matched["independent_full_action_ready_proven"] == 0
+    no_if = check([x for x in events if x != observed])
+    assert no_if["status_counts"]["native_if_not_source_observed_unknown"] == 1
+    conflict = check([x.replace(MARK+"100|7|8|1", MARK+"100|7|8|0")
+                      if x == observed else x for x in events])
+    assert conflict["status_counts"]["independent_ast_vs_original_native_if_conflict"] == 1
+    for bad in (
+        [begin, pre, method_begin, method_end, comparator, observed, end],
+        [begin, pre, method_begin,
+         observed.replace("|7|8|", "|17|8|"),
+         method_end, comparator, end],
+        [begin, pre, method_begin,
+         observed.replace("|7|8|", "|7|9|"),
+         method_end, comparator, end],
+    ):
+        try:
+            check(bad)
+        except RootIFBridgeError:
+            pass
+        else:
+            raise AssertionError("UNSCOPED_NATIVE_IF_COMPARATOR_ACCEPTED")
     return {"schema": SCHEMA, "status": "PASS_OFFLINE_SYNTHETIC",
-            "checks": 5, "Native_CXX_executed": False,
+            "checks": 11, "Native_CXX_executed": False,
+            "independent_AST_native_IF_match_synthetic": 1,
             "full_READY_proven": 0, "WCL_API_calls": 0}
 
 
