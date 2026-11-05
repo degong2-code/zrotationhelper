@@ -53,6 +53,20 @@ def _atom(field:dict)->str:
     raise FalseGuardError("UNSUPPORTED_SOURCE_GUARD_OPERAND_RECIPE")
 
 
+def _false_witness(rule:dict, site:dict)->str:
+    fields=rule["raw_bool_fields"]
+    raw_by_name={x["operand_name"]:x for x in site["fields"]}
+    if any(name not in raw_by_name for name in fields):
+        raise FalseGuardError("RULE_FIELD_NOT_IN_SOURCE_METHOD")
+    expressions=[_atom(raw_by_name[name]) for name in fields]
+    expression=re.sub(r"\s+",""," || ".join(expressions))
+    form=rule["source_if_form"]
+    if form not in ("DIRECT_FALSE","BRACED_FALSE"):
+        raise FalseGuardError("UNSUPPORTED_FALSE_GUARD_FORM")
+    suffix="{returnfalse;}" if form=="BRACED_FALSE" else "returnfalse;"
+    return "if("+expression+")"+suffix
+
+
 def compile_rules(source_root:Path, manifest:dict)->dict:
     """Prove source code has exactly the declared false-return branch."""
     try:
@@ -85,17 +99,9 @@ def compile_rules(source_root:Path, manifest:dict)->dict:
             raise FalseGuardError("INVALID_FALSE_BRANCH_RULE_OR_ID")
         seen.add(rule_id)
         site=by_key[key]
-        raw_by_name={x["operand_name"]:x for x in site["fields"]}
-        if any(name not in raw_by_name for name in fields):
-            raise FalseGuardError("RULE_FIELD_NOT_IN_SOURCE_METHOD")
-        expressions=[_atom(raw_by_name[name]) for name in fields]
-        # Only OR is authorized for this first negative-only contract.
-        # The exact token ordering and operators must match pinned C++.
-        raw_expression=" || ".join(expressions)
-        expression=re.sub(r"\s+","",raw_expression)
-        if_source="if("+expression+")"
-        suffix="{returnfalse;}" if form=="BRACED_FALSE" else "returnfalse;"
-        witness=if_source+suffix
+        # The exact Boolean OR guard grammar is regenerated again at
+        # replay; no input controls an arbitrary C++ expression.
+        witness=_false_witness(rule,site)
         file=(root/site["source_path"]).resolve(strict=True)
         if not file.is_relative_to(root) or not file.is_file():
             raise FalseGuardError("RULE_SOURCE_OUTSIDE_PINNED_TREE")
@@ -169,6 +175,8 @@ def verify_rules(receipt:dict,manifest:dict)->dict:
             rule["source_if_form"]!=defined["source_if_form"] or
             rule["source_method_body_sha256"]!=site["source_method_body_sha256"] or
             rule["source_git_blob_sha1"]!=site["source_git_blob_sha1"] or
+            rule["source_guard_false_witness_sha256"]!=
+                sha256(_false_witness(defined,site).encode()).hexdigest() or
             rule["source_phase"]!=PRE or rule["logic"]!="ANY_TRUE"):
             raise FalseGuardError("SOURCE_GUARD_RULE_IDENTITY_DRIFT")
     return {x["source_method_key"]:x for x in rules}

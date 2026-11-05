@@ -154,6 +154,43 @@ jobs:
           assert r['rule_count']==2 and r['full_action_ready_certified']==0
           assert {x['source_method_key'] for x in r['source_rules']} == {
               'rampage_ready','arcane_blast_ready'}
+          import copy,sys
+          sys.path.insert(0,'tools/research')
+          from general_rotation_source_false_guard_engine_v1 import (
+              verify_rules,assess_method_entry,FalseGuardError,FALSE,UNKNOWN,PRE
+          )
+          from general_rotation_original_pre_capture_engine_v1 import digest
+          manifest=json.load(open('/tmp/zrot-generic-source-templates.json'))
+          certified=verify_rules(r,manifest)
+          weapon=certified['rampage_ready']
+          mage=certified['arcane_blast_ready']
+          def sample(rule,fields):
+              return {
+                  'source_method_key':rule['source_method_key'],
+                  'source_method_body_sha256':rule['source_method_body_sha256'],
+                  'capture_phase':PRE,'raw_fields':fields}
+          assert assess_method_entry(
+              sample(weapon,{'main_hand_weapon_none':True,
+                             'off_hand_weapon_none':False}),certified
+          )['method_return_verdict']==FALSE
+          assert assess_method_entry(
+              sample(weapon,{'main_hand_weapon_none':False,
+                             'off_hand_weapon_none':False}),certified
+          )['method_return_verdict']==UNKNOWN
+          assert assess_method_entry(
+              sample(mage,{'prismatic_bolt_buff_up':True}),certified
+          )['method_return_verdict']==FALSE
+          assert assess_method_entry(
+              sample(mage,{'prismatic_bolt_buff_up':False}),certified
+          )['method_return_verdict']==UNKNOWN
+          forged=copy.deepcopy(r)
+          forged['source_rules'][0]['source_guard_false_witness_sha256']='0'*64
+          forged.pop('ruleset_sha256')
+          forged['ruleset_sha256']=digest(forged)
+          try:verify_rules(forged,manifest)
+          except FalseGuardError:pass
+          else:raise AssertionError('SELF_HASHED_FORGED_SOURCE_GUARD_ACCEPTED')
+          print('ACTUAL_SOURCE_WITNESS_AND_SYNTHETIC_NEGATIVE_GUARD_PASS')
           print('ACTUAL_SIMC_TWO_SPEC_PINNED_FALSE_RETURN_RULES_PASS')
           PY
           python -B tools/research/general_rotation_select_pre_passive_producer_v1.py \
