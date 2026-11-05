@@ -110,20 +110,21 @@ def _validate_plan(manifest: dict) -> list[dict]:
 
 def _block(site: dict) -> str:
     key = site["method_key"]
-    fmt = ('    if ( sim->log && player && !player->is_pet() &&'
-           ' !player->is_enemy() && action_list && signature )\n'
+    fmt = ('    if ( this->sim->log && this->player &&'
+           ' !this->player->is_pet() && !this->player->is_enemy() &&'
+           ' this->action_list && this->signature )\n'
            '    {\n'
-           '      const auto& zrot_method_owner = *action_list;\n'
+           '      const auto& zrot_method_owner = *this->action_list;\n'
            '      for ( std::size_t zrot_method_idx = 0;\n'
            '            zrot_method_idx < zrot_method_owner.action_list.size();\n'
            '            ++zrot_method_idx )\n'
            '      {\n'
            '        if ( &( zrot_method_owner.action_list[ zrot_method_idx ] )'
-           ' == signature )\n'
+           ' == this->signature )\n'
            '        {\n')
     def record(event: str, field_id: str, kind: str, expression: str | None):
         # Names/ids are strictly source-audited, never profile/actor input.
-        line = ('          sim->print_log( "' + MARK +
+        line = ('          this->sim->print_log( "' + MARK +
                 '{}|{}|{}|{}|' + key + '|' + event + '|' +
                 field_id + '|' + kind + '|' +
                 ('{}' if expression is not None else '-') +
@@ -131,7 +132,7 @@ def _block(site: dict) -> str:
                 '            sim->current_time().total_millis(),\n'
                 '            zrot_method_owner.name_str,\n'
                 '            static_cast<unsigned>( zrot_method_idx + 1 ),\n'
-                '            name_str')
+                '            this->name_str')
         if expression is not None:
             line += ', ' + expression
         return line + ' );\n'
@@ -272,6 +273,9 @@ def selftest() -> dict:
     assert output.count("if ( !ready() )")==1
     assert output.count("!cooldown->is_ready()")==1
     assert output.index(MARK)<output.index("if ( !ready() )")
+    assert "this->sim->print_log" in output
+    assert "this->signature" in output
+    assert "this->action_list" in output
     try:
         patch_files({"action.cpp":revised["action.cpp"]},manifest,
                     enforce_pin=False)

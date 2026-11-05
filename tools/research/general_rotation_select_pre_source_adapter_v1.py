@@ -64,6 +64,49 @@ def pinned_method_entry_sites(templates:list[dict])->list[dict]:
             "source_method_body_sha256":source_fingerprint[2],
             "fields":sorted(selected,key=lambda x:x["operand_name"]),
         })
+    # Specialization-owned original source routes are declared solely here.
+    # The generic C++ patcher receives opaque source-site records and does
+    # not know Warrior, Mage, Rampage or Arcane Blast semantics.
+    owned=(
+        ("warrior_fury","warrior_action"),
+        ("warrior_fury","warrior_ready"),
+        ("warrior_fury","rampage_ready"),
+        ("mage_arcane","arcane_blast_ready"),
+    )
+    source_plans={"warrior_fury":warrior_route(), "mage_arcane":mage_route()}
+    report_templates={
+        "warrior_fury":templates[0],"mage_arcane":templates[1]
+    }
+    for spec,key in owned:
+        plan=source_plans[spec]
+        source=[method for method in plan.methods if method.key==key]
+        if len(source)!=1:
+            raise ValueError("SPECIALIZATION_SOURCE_METHOD_NOT_UNIQUE")
+        method=source[0]
+        template=report_templates[spec]
+        if template["source_route_name"]!=plan.name:
+            raise ValueError("SPECIALIZATION_TEMPLATE_IDENTITY_DRIFT")
+        facts=[field for field in template["fields"]
+               if field["source_node"]==key]
+        if not facts or any(
+            field["source_path"]!=method.path or
+            field["source_git_blob_sha1"]!=method.source_blob_sha1
+            for field in facts):
+            raise ValueError("SPECIALIZATION_METHOD_SOURCE_FACTS_MISSING")
+        expected_body={field["source_method_body_sha256"] for field in facts}
+        if len(expected_body)!=1:
+            raise ValueError("SPECIALIZATION_SOURCE_BODY_CONFLICT")
+        sites.append({
+            "method_key":key,
+            "signature":method.signature,
+            "class_anchor":method.class_anchor,
+            "source_path":method.path,
+            "source_git_blob_sha1":method.source_blob_sha1,
+            "source_method_body_sha256":next(iter(expected_body)),
+            "fields":[],
+        })
+    if len(sites)!=6 or len({site["method_key"] for site in sites})!=6:
+        raise ValueError("SOURCE_METHOD_SITE_COHORT_MISMATCH")
     return sites
 
 

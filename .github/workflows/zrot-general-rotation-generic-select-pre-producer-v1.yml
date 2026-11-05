@@ -163,7 +163,11 @@ jobs:
           r=json.load(open('/tmp/zrot-generic-method-pre-patch.json'))
           assert r['schema']=='ZrotGenericOriginalMethodEntryPREPassiveProducerV1'
           assert r['source_phase']=='SIMC_ORIGINAL_METHOD_PRE'
-          assert r['source_method_count']==2
+          assert r['source_method_count']==6
+          assert set(r['source_method_sites']) == {
+              'base_action','base_ready','warrior_action',
+              'warrior_ready','rampage_ready','arcane_blast_ready'
+          }
           assert r['requested_original_method_PRE_operands']==2
           assert r['new_original_ready_or_virtual_calls']==0
           assert r['native_compiled_and_executed'] is False
@@ -222,6 +226,12 @@ jobs:
               assert m['by_method'].get('base_action',0)>0
               assert m['by_method'].get('base_ready',0)>0
               assert m['original_method_PRE_raw_field_count']==2*m['by_method']['base_ready']
+              # Only source-owned methods actually entered in this one
+              # bounded original Native case may count as observed.
+              source_owned=('warrior_action','warrior_ready','rampage_ready') if spec=='fury' else ('arcane_blast_ready',)
+              cross_spec=('arcane_blast_ready',) if spec=='fury' else ('warrior_action','warrior_ready','rampage_ready')
+              assert all(m['by_method'].get(x,0)==0 for x in cross_spec)
+              assert m['by_method'].get(source_owned[0],0)>0
               assert m['full_action_READY_proven'] is False
               assert m['same_time_selection_call_pairing_proven'] is False
               assert m['positive_READY_certified']==0
@@ -235,6 +245,8 @@ jobs:
                   'source_method_entry_PRE_proven':True,
                   'observed_base_action_method_entries':m['by_method']['base_action'],
                   'observed_base_ready_method_entries':m['by_method']['base_ready'],
+                  'observed_spec_owned_method_entries':{key:m['by_method'].get(key,0)
+                      for key in source_owned},
                   'method_entry_PRE_typed_raw_operands':m['original_method_PRE_raw_field_count'],
                   'unobserved_derived_override_route_closed':False,
                   'physical_action_READY':'UNKNOWN',
@@ -248,6 +260,7 @@ jobs:
               'independent_action_READY_proven':False,
               'actual_method_PRE_capture_contract_closed':False,
               'generic_base_method_entry_observed_in_both_specs':True,
+              'class_owned_method_entry_observed_in_both_specs':True,
               'unobserved_virtual_and_spec_override_paths_remain_unknown':True,
               'dummy_error_permitted':False,'WCL_API_calls':0
           }
@@ -256,7 +269,8 @@ jobs:
           print('ACTUAL_GENERIC_TWO_SPEC_SELECT_AND_METHOD_PRE_A_B_PASS',
                 [(k,v['observed_attempts'],
                   v['observed_base_action_method_entries'],
-                  v['observed_base_ready_method_entries']) for k,v in cases.items()])
+                  v['observed_base_ready_method_entries'],
+                  v['observed_spec_owned_method_entries']) for k,v in cases.items()])
           PY
           sha256sum /tmp/zrot-generic-select-pre-two-spec-a-b.json
       - name: Preserve compact safe receipts only (never raw actor logs)
