@@ -559,6 +559,29 @@ jobs:
           negative_guard=init_guard_replay(negative_trace,negative_profile,guard_report)
           rampage_guard=negative_guard[
               'source_action_init_guard_evidence'].get('rampage',{})
+          weapon_failed_rows=set(
+              negative_guard['source_guard_failed_source_row_hashes'].get(
+                  'rampage.weapon',[]))
+          blocked_rows=set(
+              negative_init[
+                  'source_stage_background_nonforeground_row_hashes_by_action'
+              ]['INIT_FINISHED_END'].get('rampage',[]))
+          blocked_missing_weapon_rows=set(
+              negative_init[
+                  'source_stage_weapon_missing_background_nonforeground_row_hashes_by_action'
+              ]['INIT_FINISHED_END'].get('rampage',[]))
+          assert weapon_failed_rows, 'NO_REAL_WEAPON_INIT_GUARD_FAILURE_WITNESS'
+          assert (len(weapon_failed_rows)==
+                  rampage_guard.get('guard_false_weapon',0))
+          assert weapon_failed_rows==blocked_rows==blocked_missing_weapon_rows
+          assert (len(blocked_rows)==negative_init[
+              'source_action_stage_observations']['INIT_FINISHED_END'][
+                  'rampage']['background_true'])
+          assert (negative_init[
+              'source_action_stage_observations']['INIT_FINISHED_END'][
+                  'rampage']['foreground_true']==0)
+          print('GENERIC_SOURCE_ROW_EXACT_INIT_GUARD_TO_BACKGROUND_FOREGROUND_PASS',
+                len(weapon_failed_rows),flush=True)
           print('GENERIC_CONTROLLED_NEGATIVE_SOURCE_ACTION_INIT_GUARD_DIAGNOSTIC',
                 json.dumps({
                   'source_action':'rampage',
@@ -634,6 +657,9 @@ jobs:
               'rampage_ready_original_entry_count':rampage_called,
               'source_initialization_eligibility':rampage_init,
               'independent_original_init_guard_returns':rampage_guard,
+              'source_row_exact_guard_to_init_background_concordant':True,
+              'source_row_exact_guard_to_init_background_rows':
+                  len(weapon_failed_rows),
               'source_forced_background_at_init_evidence':
                   rampage_guard.get('source_forced_background_instances',0),
               'guard_failed_not_a_full_ACTION_READY_proof':True,

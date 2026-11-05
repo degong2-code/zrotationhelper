@@ -103,7 +103,11 @@ def replay(log:str,profile:bytes,producer:dict)->dict:
     if not completed or raw_guards==0:
         raise InitGuardReplayError("NO_OBSERVED_ORIGINAL_INIT_GUARD_CALLS")
     grouped={}
+    by_failed_rows={}
     for row in completed:
+        if row["failed_eligibility_guard"]:
+            key=(row["source_action"],row["failed_eligibility_guard"])
+            by_failed_rows.setdefault(key,set()).add(row["source_row_sha256"])
         a=row["source_action"]
         if a not in grouped:
             grouped[a]={
@@ -136,6 +140,10 @@ def replay(log:str,profile:bytes,producer:dict)->dict:
                 **{k:v for k,v in x.items() if k!="distinct_source_row_hashes"},
                 "distinct_source_rows":len(x["distinct_source_row_hashes"]),
             } for name,x in sorted(grouped.items())
+        },
+        "source_guard_failed_source_row_hashes":{
+            f"{action}.{guard_name}":sorted(sha_set)
+            for (action,guard_name),sha_set in sorted(by_failed_rows.items())
         },
         "bounded_failed_source_action_examples":[{
             "source_row_sha256":x["source_row_sha256"],

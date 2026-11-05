@@ -140,6 +140,24 @@ def replay(native_log:str,profile:bytes,producer_receipt:dict)->dict:
             for name in sorted(source_actions)
             if name not in by_stage[stage]
         }
+    background_not_foreground={}
+    weapon_missing_background_not_foreground={}
+    for stage in expected:
+        source_ids={}
+        source_weapon_ids={}
+        for row in observed.get(stage,[]):
+            if row["background"] and not row["foreground_member"]:
+                name=row["source_action"]
+                source_ids.setdefault(name,set()).add(row["source_row_sha256"])
+                if (row["actor_mainhand_weapon_none"] or
+                    row["actor_offhand_weapon_none"]):
+                    source_weapon_ids.setdefault(name,set()).add(row["source_row_sha256"])
+        background_not_foreground[stage]={
+            name:sorted(rows) for name,rows in sorted(source_ids.items())
+        }
+        weapon_missing_background_not_foreground[stage]={
+            name:sorted(rows) for name,rows in sorted(source_weapon_ids.items())
+        }
     no_source_cause="UNKNOWN_NO_CAUSAL_INIT_EXCLUSION_VERDICT"
     return {
         "schema":SCHEMA,
@@ -148,6 +166,10 @@ def replay(native_log:str,profile:bytes,producer_receipt:dict)->dict:
         "stage_registry_receipts":stage_end,
         "source_mapped_row_instances_total":real_rows,
         "source_action_stage_observations":by_stage,
+        "source_stage_background_nonforeground_row_hashes_by_action":
+            background_not_foreground,
+        "source_stage_weapon_missing_background_nonforeground_row_hashes_by_action":
+            weapon_missing_background_not_foreground,
         "source_apl_action_rows_not_seen_in_mapped_init_by_action":
             missing_by_stage,
         "unmapped_registry_instances_not_source_attributable":sum(
