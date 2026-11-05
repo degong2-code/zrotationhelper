@@ -191,7 +191,7 @@ def run(profile:Path,meta:dict,fixture_dir:Path,expect_manifest:str,
         if (counts["Native_action_ready_attempts"]!=source_marker_counts["native_attempt"]
             or counts["real_source_IF_samples"]!=len(samples)):
             raise NativeIREvidenceError("FRONTIER_SOURCE_PRE_COUNTS_DRIFT")
-        combined.update(frontier["independent_candidate_exclusion_reasons"])
+        combined.update(frontier["independent_source_negative_reasons"])
         totals.update({
             "Native_action_ready_attempts":counts["Native_action_ready_attempts"],
             "source_IF_evaluations":len(samples),
