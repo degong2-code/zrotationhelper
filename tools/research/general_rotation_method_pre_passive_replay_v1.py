@@ -53,7 +53,7 @@ def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes)->
         nonlocal active,groups
         if active is None:
             return
-        site=expected[active["method_key"]]
+        site=expected[active["source_method_key"]]
         if set(active["raw_fields"])!={
             x["operand_name"] for x in site["fields"]}:
             raise MethodReplayError("INCOMPLETE_METHOD_ENTRY_PRE_FIELDS")
