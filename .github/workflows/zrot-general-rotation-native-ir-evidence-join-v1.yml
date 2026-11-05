@@ -1,0 +1,125 @@
+name: zrot-general-rotation-native-ir-evidence-join-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_native_ir_pre_evidence_join_v1.py
+      - tools/research/general_rotation_native_pre_trace_compactor_v1.py
+      - tools/research/general_rotation_source_hypothesis_ir_v1.py
+      - tools/research/simc_native_if_false_priority_frontier_v1.py
+      - tools/research/simc_native_decision_proof_bridge_v1.py
+      - tools/research/simc_native_warrior_priority_frontier_adapter_v1.py
+      - .github/workflows/zrot-general-rotation-native-ir-evidence-join-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-static:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile generic evidence-to-source-IR join and reject forged identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_native_ir_pre_evidence_join_v1.py
+          python -B tools/research/general_rotation_native_ir_pre_evidence_join_v1.py > /tmp/native-ir-join-synthetic.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/native-ir-join-synthetic.json'))
+          assert r['schema']=='ZrotGeneralRotationNativeSourcePreIrEvidenceJoinV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=13
+          assert r['same_timestamp_duplicate_occurrence_kept'] is True
+          assert r['original_SimC_CXX_NOT_BUILT'] is True
+          assert r['WCL_API_calls']==0
+          print('GENERIC_SOURCE_IR_JOIN_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_native_ir_pre_evidence_join_v1.py
+
+  real-portable-native-ir-evidence:
+    needs: [generic-static]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          submodules: false
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: native-movement-event-pre-10beb978ba2444f9c195d73176845a15b74d3ff4
+          path: /tmp/source-pinned-native-artifact
+          run-id: 41797208028
+          github-token: ${{ github.token }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact source PRE IF observations and source priority frontier into General Rotation IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_native_ir_pre_evidence_join_v1.py \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --profile-key warrior_fury --class-key warrior \
+            --expected-profile-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
+            --fixture-dir /tmp/source-pinned-native-artifact/native-portable-source-pre-fixture \
+            --expected-manifest-sha256 44ac4316dcd718a42057832b45f6b6c746f8487462589a4513d177a38d16878a \
+            --spec-adapter simc_native_warrior_priority_frontier_adapter_v1:WarriorPriorityAdapter \
+            --out /tmp/native-to-general-rotation-ir-evidence-join.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/native-to-general-rotation-ir-evidence-join.json'))
+          assert r['schema']=='ZrotGeneralRotationNativeSourcePreIrEvidenceJoinV1'
+          assert r['source_IR_source_action_rows']==121
+          assert len(r['cases'])==4
+          c=r['totals']
+          assert c['Native_action_ready_attempts']==5408
+          assert c['source_IF_evaluations']==953
+          assert c['PROVEN_TRUE']+c['PROVEN_FALSE']==939
+          assert c['UNKNOWN']==14
+          p=r['source_generic_proof_counts']
+          assert p['proof_NOT_READY']==2313
+          assert p['proof_UNKNOWN']==3095
+          assert p.get('proof_READY',0)==0
+          assert p['returned_APL_CONTROL']==213
+          assert p['returned_EXECUTABLE_SOURCE_ACTION']==174
+          assert p['returned_EXECUTABLE_SOURCE_ACTION_all_prior_excluded_but_winner_UNKNOWN']==79
+          assert r['Native_comparator_not_independent_IF_input'] is True
+          assert r['complete_positive_ability_READY_proven'] is False
+          assert r['WCL_independent_blind_holdout_proven'] is False
+          assert r['real_target_dummy_error_proven'] is False
+          assert r['WCL_API_calls']==0
+          for label,case in r['cases'].items():
+              print('ACTUAL_SOURCE_PRE_IR_JOIN_CASE',label,case['independent_AST_IF_outcomes'],
+                    case['observed_source_rows_with_if'],
+                    case['native_source_foreground_partial_prefix'])
+          print('ACTUAL_SOURCE_PRE_IR_JOIN_TOTALS',c)
+          print('REAL_PORTABLE_SOURCE_PRE_JOIN_TO_GENERIC_IR_PASS')
+          PY
+          sha256sum /tmp/native-to-general-rotation-ir-evidence-join.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: general-rotation-native-ir-evidence-join
+          path: /tmp/native-to-general-rotation-ir-evidence-join.json
+          retention-days: 7
+          if-no-files-found: error
