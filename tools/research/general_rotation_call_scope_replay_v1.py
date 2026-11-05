@@ -338,14 +338,14 @@ def selftest()->dict:
         "source_method_count":2
     }
     def trace(ev,kind,call,parent,root,method):
-        return TRACE_MARK+f"20|{ev}|{kind}|{call}|{parent}|{root}|"+
-            f"{method}|default|1|rampage"
+        return (TRACE_MARK+f"20|{ev}|{kind}|{call}|{parent}|{root}|"+
+                f"{method}|default|1|rampage")
     def pre(method,ev,call,field="-",kind="-",value="-"):
-        return METHOD_MARK+f"20|default|1|rampage|{method}|{ev}|"+
-            f"{field}|{kind}|{value}|{call}"
+        return (METHOD_MARK+f"20|default|1|rampage|{method}|{ev}|"+
+                f"{field}|{kind}|{value}|{call}")
     select_records=[
-        SELECT_MARK+f"20|default|1|rampage|{sha256(name.encode()).hexdigest()}|"+
-            (("int|1000" if name=="gcd_ready_ms" else "bool|1"))
+        (SELECT_MARK+f"20|default|1|rampage|{sha256(name.encode()).hexdigest()}|"+
+         ("int|1000" if name=="gcd_ready_ms" else "bool|1"))
         for name in sorted(SELECT_READS)
     ]
     events=select_records+[
@@ -365,13 +365,6 @@ def selftest()->dict:
     assert out["dynamic_method_calls_scope_linked"]==2
     assert out["max_observed_trace_stack_depth"]==3
     assert out["positive_FULL_action_READY_proven"]==0
-    for bad in (
-        events[:],
-        events[:],
-        events[:],
-        events[:],
-    ):
-        pass
     broken=[
         events[:5]+[events[4]]+events[5:], # duplicate method BEGIN id
         [x.replace("|12|11|10|base_ready","|12|10|10|base_ready")
