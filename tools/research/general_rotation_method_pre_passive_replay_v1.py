@@ -19,6 +19,9 @@ from general_rotation_original_pre_capture_engine_v1 import canonical
 from general_rotation_method_pre_passive_producer_v1 import (
     SCHEMA as PRODUCER_SCHEMA, MARK, PHASE, _validate_plan, SOURCE_READS
 )
+from general_rotation_source_false_guard_engine_v1 import (
+    verify_rules, assess_method_entry, FALSE as METHOD_FALSE
+)
 
 SCHEMA = "ZrotGenericOriginalMethodEntryPREReplayV1"
 
@@ -27,13 +30,15 @@ class MethodReplayError(ValueError):
     pass
 
 
-def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes)->dict:
+def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes,
+           false_guard_receipt:dict | None=None)->dict:
     if (producer_receipt.get("schema") != PRODUCER_SCHEMA or
         producer_receipt.get("source_phase") != PHASE or
         producer_receipt.get("new_original_ready_or_virtual_calls") != 0 or
         producer_receipt.get("source_method_count") is None):
         raise MethodReplayError("NONORIGINAL_METHOD_PRE_PRODUCER_RECEIPT")
     sites=_validate_plan(manifest)
+    certified=verify_rules(false_guard_receipt,manifest) if false_guard_receipt is not None else {}
     expected={x["method_key"]:x for x in sites}
     if (set(producer_receipt["source_method_sites"])!=set(expected) or
         producer_receipt["source_method_count"]!=len(sites) or
@@ -45,6 +50,8 @@ def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes)->
     keycounts=Counter()
     methods=Counter()
     raw_values=Counter()
+    proven_method_false=Counter()
+    false_examples=[]
     real_entries=[]
     active=None
     groups=0
@@ -60,6 +67,19 @@ def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes)->
         groups+=1
         methods[active["source_method_key"]]+=1
         raw_values[active["source_method_key"]]+=len(active["raw_fields"])
+        verdict=assess_method_entry(active,certified)
+        if verdict["method_return_verdict"]==METHOD_FALSE:
+            proven_method_false[verdict["source_guard_rule_id"]]+=1
+            if len(false_examples)<3:
+                false_examples.append({
+                    "source_method_key":active["source_method_key"],
+                    "at_simc_ms":active["at_simc_ms"],
+                    "source_row_sha256":active["source_row_sha256"],
+                    "same_time_source_method_occurrence":
+                        active["same_time_source_method_occurrence"],
+                    "source_rule":verdict["source_guard_rule_id"],
+                    "method_verdict":METHOD_FALSE,
+                    "action_READY":"UNKNOWN"})
         if len(real_entries)<5:
             real_entries.append(active)
         active=None
@@ -134,6 +154,12 @@ def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes)->
         "original_method_PRE_raw_field_count":sum(raw_values.values()),
         "raw_field_counts_by_method":dict(sorted(raw_values.items())),
         "source_method_entry_before_original_guard":True,
+        "source_false_guard_rules_certified":len(certified),
+        "independent_method_return_false_total":sum(proven_method_false.values()),
+        "independent_method_return_false_by_rule":dict(sorted(proven_method_false.items())),
+        "bounded_method_false_examples":false_examples,
+        "negative_scope":"ONE_METHOD_INVOCATION_ONLY_NOT_ACTION_READY",
+        "independent_positive_method_ready_total":0,
         "source_method_entry_dynamically_observed":True,
         "dynamic_override_route_total_proven":False,
         "same_time_selection_call_pairing_proven":False,
@@ -229,17 +255,20 @@ def main():
     p.add_argument("--profile",type=Path)
     p.add_argument("--producer-receipt",type=Path)
     p.add_argument("--source-templates",type=Path)
+    p.add_argument("--certified-false-guards",type=Path)
     p.add_argument("--out",type=Path)
     a=p.parse_args()
     fields=(a.native_log,a.profile,a.producer_receipt,a.source_templates)
-    if all(x is None for x in fields):
+    if all(x is None for x in fields) and a.certified_false_guards is None:
         result=selftest()
     elif all(x is not None for x in fields):
         result=replay(
             a.native_log.read_text(encoding="utf-8"),
             json.loads(a.producer_receipt.read_bytes()),
             json.loads(a.source_templates.read_bytes()),
-            a.profile.read_bytes())
+            a.profile.read_bytes(),
+            json.loads(a.certified_false_guards.read_bytes())
+            if a.certified_false_guards else None)
     else:
         p.error("all native-log, profile, producer-receipt, source-templates required")
     raw=canonical(result)
