@@ -1,0 +1,209 @@
+name: zrot-general-rotation-generic-select-pre-producer-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_select_pre_passive_producer_v1.py
+      - tools/research/general_rotation_select_pre_passive_replay_v1.py
+      - tools/research/general_rotation_original_pre_capture_engine_v1.py
+      - tools/research/general_rotation_original_pre_capture_fixture_v1.py
+      - .github/workflows/zrot-general-rotation-generic-select-pre-producer-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generic-source-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and verify non-executable producer and replay contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_select_pre_passive_producer_v1.py tools/research/general_rotation_select_pre_passive_replay_v1.py
+          python -B tools/research/general_rotation_select_pre_passive_producer_v1.py > /tmp/generic-producer-selftest.json
+          python -B tools/research/general_rotation_select_pre_passive_replay_v1.py > /tmp/generic-replay-selftest.json
+          python - <<'PY'
+          import json
+          for f, schema in (
+            ('generic-producer-selftest.json','ZrotGeneralRotationGenericSelectPREPassiveProducerV1'),
+            ('generic-replay-selftest.json','ZrotGeneralRotationGenericSelectPREReplayV1')
+          ):
+              p=json.load(open('/tmp/'+f))
+              assert p['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert p['schema']==schema and p['positive_READY_certified'] == 0 if 'positive_READY_certified' in p else p['full_READY_proven'] is False
+              assert p['WCL_API_calls']==0
+          print('GENERIC_PASSIVE_SOURCE_PRE_PRODUCER_AND_REPLAYER_STATIC_PASS')
+          PY
+
+  actual-two-spec-original-vs-instrumented:
+    needs: generic-source-offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Confirm original official SimC source is pinned
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = "b522cded8c26b97dac03fdf56e57a03ec7e8faa6"
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0,'tools/research')
+          from general_rotation_source_route_audit_v1 import git_blob
+          assert git_blob(Path('simc-upstream/engine/player/player.cpp').read_bytes())=='88e03a01ca87ff66fd3902c9d6e047fe1a03ecb8'
+          print('SIMC_GENERIC_PRE_SOURCE_PIN_PASS')
+          PY
+      - name: Install and cache original source build compiler
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ccache
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: simc-ubuntu-gcc-b522cded8c26b97dac03fdf56e57a03ec7e8faa6-v1
+      - name: Compile pristine official Native SimC
+        shell: bash
+        run: |
+          set -euo pipefail
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-generic-pre-native-build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_GUI=OFF -DBUILD_TESTING=OFF -DSC_NO_NETWORKING=ON \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-generic-pre-native-build --target simc --parallel 3
+          test -x /tmp/zrot-generic-pre-native-build/simc
+      - name: Capture pristine two-spec actual Native 30-second action sequences
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --spec fury --simc-bin /tmp/zrot-generic-pre-native-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/zrot-pristine-fury --timeout 180
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc \
+            --spec arcane --simc-bin /tmp/zrot-generic-pre-native-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/zrot-pristine-arcane --timeout 180
+      - name: Apply same generic passive source producer once to both classes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_select_pre_passive_producer_v1.py \
+            --simc-root simc-upstream --receipt /tmp/zrot-generic-select-pre-source-patch.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-generic-select-pre-source-patch.json'))
+          assert r['schema']=='ZrotGeneralRotationGenericSelectPREPassiveProducerV1'
+          assert r['field_count']==3
+          assert r['original_action_ready_call_count']==1
+          assert r['new_action_ready_calls']==0
+          assert r['CXX_compiled'] is False
+          assert r['native_behavior_nonperturbation']=='NOT_TESTED'
+          assert r['positive_READY_proven']==0
+          print('GENERIC_SOURCE_PATCH_PRODUCER_OUTPUT_PASS')
+          PY
+      - name: Rebuild patched Native SimC and capture same two independent specs
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake --build /tmp/zrot-generic-pre-native-build --target simc --parallel 3
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --spec fury --simc-bin /tmp/zrot-generic-pre-native-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/zrot-instrumented-fury --timeout 180
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc \
+            --spec arcane --simc-bin /tmp/zrot-generic-pre-native-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/zrot-instrumented-arcane --timeout 180
+      - name: Independently replay actual Generic SELECT-PRE records and verify exact action parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          from general_rotation_select_pre_passive_replay_v1 import parse_marker_lines
+          report=json.load(open('/tmp/zrot-generic-select-pre-source-patch.json'))
+          cases={}
+          for spec,profile in (
+              ('fury','MID2_Warrior_Fury.simc'),
+              ('arcane','MID2_Mage_Arcane.simc')):
+              original=extract_json_sequence(Path('/tmp/zrot-pristine-'+spec))
+              patched=extract_json_sequence(Path('/tmp/zrot-instrumented-'+spec))
+              assert original['status']==patched['status']=='SEQUENCE_SNAPSHOTS_EXTRACTED'
+              assert original['source_profile_sha256']==patched['source_profile_sha256']
+              assert original['source_apl_sha256']==patched['source_apl_sha256']
+              assert original['combat_sequence']==patched['combat_sequence']
+              assert original['precombat_sequence']==patched['precombat_sequence']
+              native_trace=Path('/tmp/zrot-instrumented-'+spec+'/simc_native_log.txt').read_text(encoding='utf8')
+              prof=Path('simc-upstream/profiles/MID2/'+profile).read_bytes()
+              a=parse_marker_lines(native_trace,report,prof)
+              assert a['original_select_PRE_attempt_count']>0
+              assert a['original_select_PRE_marker_count']==a['original_select_PRE_attempt_count']*3
+              assert a['source_method_entry_PRE_proven'] is False
+              assert a['positive_READY_certified']==0
+              cases[spec]={
+                  'source_SELECT_PRE_recorded':True,
+                  'original_vs_patched_combat_exact':True,
+                  'original_vs_patched_precombat_exact':True,
+                  'same_effective_APL_and_source_profile':True,
+                  'observed_attempts':a['original_select_PRE_attempt_count'],
+                  'typed_raw_operands':a['original_select_PRE_marker_count'],
+                  'source_method_entry_PRE_proven':False,
+                  'physical_action_READY':'UNKNOWN',
+                  'WCL_API_calls':0
+              }
+          receipt={
+              'schema':'ZrotGenericOriginalSELECTPRETwoSpecActualNativeA_BV1',
+              'status':'REAL_NATIVE_TWO_SPEC_SELECT_PRE_AND_A_B_PARITY_PASS',
+              'cases':cases,'generic_producer_applied_once':True,
+              'original_action_ready_calls_preserved':True,
+              'independent_action_READY_proven':False,
+              'actual_method_PRE_capture_contract_closed':False,
+              'dummy_error_permitted':False,'WCL_API_calls':0
+          }
+          p=Path('/tmp/zrot-generic-select-pre-two-spec-a-b.json')
+          p.write_text(json.dumps(receipt,sort_keys=True,separators=(',',':'))+'\n')
+          print('ACTUAL_GENERIC_TWO_SPEC_SELECT_PRE_A_B_PASS',
+                [(k,v['observed_attempts']) for k,v in cases.items()])
+          PY
+          sha256sum /tmp/zrot-generic-select-pre-two-spec-a-b.json
+      - name: Preserve compact safe receipts only (never raw actor logs)
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: zrot-general-rotation-generic-select-pre-two-spec-receipts
+          path: |
+            /tmp/zrot-generic-select-pre-source-patch.json
+            /tmp/zrot-generic-select-pre-two-spec-a-b.json
+          retention-days: 7
+          if-no-files-found: error
