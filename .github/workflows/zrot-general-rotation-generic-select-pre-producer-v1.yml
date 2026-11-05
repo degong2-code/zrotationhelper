@@ -1072,7 +1072,14 @@ jobs:
                       raise AssertionError('ORIGINAL_IF_AST_PARITY_CONFLICT:'+name)
                   Path('/tmp/zrot-native-root-if-proof-'+name+'.json').write_text(
                       json.dumps(proof,sort_keys=True,separators=(',',':'))+'\n')
-                  report[name]=proof['status_counts']
+                  assert proof['native_if_parity_status'] in (
+                      'SOURCE_AST_NATIVE_IF_NONZERO_MATCH_OBSERVED',
+                      'UNKNOWN_NO_ORIGINAL_NATIVE_IF_OVERLAP')
+                  report[name]={
+                      'native_if_parity_status':proof['native_if_parity_status'],
+                      'independent_source_PRE_native_IF_comparisons':
+                          proof['native_if_independent_positive_comparison_count'],
+                      'counts':proof['status_counts']}
                   print('ACTUAL_ORIGINAL_ROOT_NATIVE_IF_COMPARISON_BOUNDED',
                         name,report[name],flush=True)
           Path('/tmp/zrot-native-root-if-proof-summary.json').write_text(
