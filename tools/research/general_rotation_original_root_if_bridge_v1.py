@@ -155,6 +155,9 @@ def corroborate(log: str, profile: bytes, temporal: dict,
     if (native_if_producer.get("schema") != SCHEMA or
         native_if_producer.get("source_revision") != REVISION or
         native_if_producer.get("native_if_marker") != MARK or
+        native_if_producer.get("capture_phase") !=
+            "NATIVE_IF_RESULT_AFTER_ORIGINAL_EVALUATION" or
+        native_if_producer.get("independent_source_PRE_ast_input") is not False or
         native_if_producer.get("new_IF_ready_rng_target_calls") != 0 or
         native_if_producer.get("original_native_if_expression_evaluations_per_callsite") != 1 or
         native_if_producer.get("root_PRE_producer_receipt_sha256") !=
@@ -247,11 +250,13 @@ def corroborate(log: str, profile: bytes, temporal: dict,
     conflicts = []
     for rid, (at, owner, ordinal, row) in roots.items():
         expr = row["expression_fields"].get("if")
+        comparators = native.get(rid, [])
         if expr is None:
             counts["root_without_apl_if"] += 1
+            if comparators:
+                counts["native_if_on_source_row_without_if_unknown"] += 1
             continue
         independently = truth(evaluate_ast(expr["ast"], {"active_enemies": pre[rid]}))
-        comparators = native.get(rid, [])
         if not comparators:
             counts["native_if_not_source_observed_unknown"] += 1
             continue
@@ -277,15 +282,23 @@ def corroborate(log: str, profile: bytes, temporal: dict,
             conflicts.append(sample)
     counts["original_if_ast_determinate_before_native_comparison"] = (
         base["counts"].get("if_recomputed_from_original_actor_PRE", 0))
-    if (counts["independent_ast_vs_original_native_if_match"] +
-        counts["independent_ast_vs_original_native_if_conflict"] >
-        counts["original_if_ast_determinate_before_native_comparison"]):
+    paired = (counts["independent_ast_vs_original_native_if_match"] +
+              counts["independent_ast_vs_original_native_if_conflict"])
+    if paired > counts["original_if_ast_determinate_before_native_comparison"]:
         raise RootIFBridgeError("IF_COMPARATOR_EXCEEDS_PRE_EVIDENCE")
+    # This explicit verdict cannot be inferred from CI green status or from
+    # previous PRE-only determinations.  A no-overlap replay remains UNKNOWN.
+    parity_status = ("SOURCE_AST_NATIVE_IF_CONFLICT"
+                     if counts["independent_ast_vs_original_native_if_conflict"]
+                     else "SOURCE_AST_NATIVE_IF_NONZERO_MATCH_OBSERVED"
+                     if paired else "UNKNOWN_NO_ORIGINAL_NATIVE_IF_OVERLAP")
     return {
         "schema": REPLAY_SCHEMA, "product_policy_id": POLICY,
         "source_profile_git_blob_sha1": git_blob(profile),
         "exact_original_action_ready_roots": len(roots),
         "status_counts": dict(sorted(counts.items())),
+        "native_if_parity_status": parity_status,
+        "native_if_independent_positive_comparison_count": paired,
         "independent_ast_vs_original_native_if_conflicts": conflicts[:12],
         "first_bounded_comparisons": examples,
         "native_if_comparison_truth_is_post_only": True,
@@ -343,6 +356,8 @@ def selftest() -> dict:
         "native_if_marker": MARK, "new_IF_ready_rng_target_calls": 0,
         "original_native_if_expression_evaluations_per_callsite": 1,
         "root_PRE_producer_receipt_sha256": digest(canonical(root_receipt)),
+        "capture_phase": "NATIVE_IF_RESULT_AFTER_ORIGINAL_EVALUATION",
+        "independent_source_PRE_ast_input": False,
         "full_READY_proven": 0}
     begin = TRACE_MARK + "100|BEGIN|SELECT|7|0|7|select_call|default|1|foo"
     pre = ROOT_MARK + "100|7|active_enemies|2"
@@ -357,12 +372,15 @@ def selftest() -> dict:
                            root_receipt, bridge_receipt)
     matched = check(events)
     assert matched["status_counts"]["independent_ast_vs_original_native_if_match"] == 1
+    assert matched["native_if_parity_status"] == "SOURCE_AST_NATIVE_IF_NONZERO_MATCH_OBSERVED"
     assert matched["independent_full_action_ready_proven"] == 0
     no_if = check([x for x in events if x != observed])
     assert no_if["status_counts"]["native_if_not_source_observed_unknown"] == 1
+    assert no_if["native_if_parity_status"] == "UNKNOWN_NO_ORIGINAL_NATIVE_IF_OVERLAP"
     conflict = check([x.replace(MARK+"100|7|8|1", MARK+"100|7|8|0")
                       if x == observed else x for x in events])
     assert conflict["status_counts"]["independent_ast_vs_original_native_if_conflict"] == 1
+    assert conflict["native_if_parity_status"] == "SOURCE_AST_NATIVE_IF_CONFLICT"
     for bad in (
         [begin, pre, method_begin, method_end, comparator, observed, end],
         [begin, pre, method_begin,
