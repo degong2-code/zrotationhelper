@@ -235,7 +235,8 @@ def extract(profile:bytes, source:dict, *, window_ms:int=10000)->dict:
 
 def compare(st:dict,two:dict)->dict:
     if (st.get("schema")!=SCHEMA or two.get("schema")!=SCHEMA or
-        st.get("product_policy_id")!=two.get("product_policy_id")!=POLICY or
+        st.get("product_policy_id")!=POLICY or
+        two.get("product_policy_id")!=POLICY or
         st.get("source_profile_git_blob_sha1")!=two.get("source_profile_git_blob_sha1") or
         st.get("target_count")!=1 or two.get("target_count")!=2 or
         st.get("early_observed_window_duration_ms")!=two.get(
@@ -297,11 +298,6 @@ def compare(st:dict,two:dict)->dict:
 
 def selftest():
     from simc_apl_semantic_ir_v2 import parse_profile
-    p=(b'warrior="Synthetic"\nspec=fury\n'
-       b'actions=/call_action_list,name=burn,if=target.time_to_die>10\n'
-       b'actions.burn=/rampage,if=rage>=80,target_if=max:debuff.stack\n')
-    # Parser handles supported expressions; target_if=max:... is not
-    # part of bounded expression grammar, so test with source-safe options.
     p=(b'warrior="Synthetic"\nspec=fury\n'
        b'actions=/call_action_list,name=burn,if=target.time_to_die>10\n'
        b'actions.burn=/rampage,if=rage>=80\n')
