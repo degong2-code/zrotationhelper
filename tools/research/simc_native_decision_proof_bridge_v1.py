@@ -23,6 +23,7 @@ from simc_native_resource_cost_replay_v1 import (
     read_cost, read_base_resource, independent_numeric_resource
 )
 from simc_native_resource_cost_pre_instrument_v1 import ACTION_MARK, PLAYER_MARK
+from simc_native_postguard_source_replay_v1 import parse_line, LINE_MARK
 from simc_native_target_eligibility_source_replay_v1 import (
     parse_config,parse_target,independent_basic_target_truth,direct_path
 )
@@ -77,6 +78,21 @@ class NativeProofBridge:
                     self._raw_resource=resource
             else:
                 self.counters["unpaired_player_resource_base_read"]+=1
+            return
+        # The original player_t::select_action() emits this physical option
+        # snapshot immediately before its only action_ready() invocation.
+        # It is an original PRE read, not a virtual/native verdict.
+        line_pre=parse_line(line)
+        if line_pre is not None:
+            if pending is None or (
+                line_pre["time_ms"],line_pre["list"],line_pre["ordinal"],
+                line_pre["native_name"])!=(
+                pending["pre"]["time_ms"],pending["pre"]["list"],
+                pending["pre"]["ordinal"],pending["pre"]["native_name"]):
+                raise NativeProofBridgeError("SYNC_LINE_PRE_SOURCE_POINTER_DRIFT")
+            pending.setdefault("original_post_line_pre",[]).append(line_pre)
+            if len(pending["original_post_line_pre"])!=1:
+                raise NativeProofBridgeError("DUPLICATE_SYNC_LINE_PRE_SOURCE_MARKER")
             return
         cfg=parse_config(line)
         if cfg is not None:
@@ -141,6 +157,42 @@ class NativeProofBridge:
                 insert("RESOURCE",True,
                        receipt="original_cost_invocation_plus_independent_numeric:"+reason)
                 self.counters["independent_source_resource_positive"]+=1
+        # Source-gated conjunction for base action_t::action_ready():
+        #   !line_cooldown->down() AND !sync_action
+        # A present line cooldown with ready_ms <= now is numerically
+        # ready (pinned cooldown_t::down() source). A null sync pointer
+        # makes virtual sync_action->action_ready() inapplicable.
+        # Do NOT promote a positive marker when a sync target exists:
+        # its own recursive readiness is not independently known.
+        # Nor treat absence of a line cooldown pointer as proof that
+        # the unconditional base method can run.
+        post_lines=pending.get("original_post_line_pre",[])
+        if len(post_lines)>1:
+            raise NativeProofBridgeError("DUPLICATE_SYNC_LINE_PRE_SOURCE_MARKER")
+        if post_lines:
+            line=post_lines[0]
+            if (line["time_ms"],line["list"],line["ordinal"],
+                line["native_name"])!=k:
+                raise NativeProofBridgeError("SYNC_LINE_PRE_ATTEMPT_IDENTITY_CHANGED")
+            if (pending.get("base_action_entries")==1 and
+                pending.get("base_ready_entries")==1 and
+                row["method_base_path_source_observed"]):
+                if not line["line_cd_present"]:
+                    self.counters["sync_line_base_cooldown_pointer_missing_unknown"]+=1
+                elif line["line_cd_ready_ms"]>k[0]:
+                    self.counters["sync_line_base_cooldown_down_unknown"]+=1
+                elif line["has_sync_action"]:
+                    self.counters["sync_line_nested_sync_readiness_unknown"]+=1
+                else:
+                    if row["source_base_exit_observed"] in (
+                            "LINE_COOLDOWN_FALSE","SYNC_FALSE"):
+                        raise NativeProofBridgeError(
+                            "INDEPENDENT_PRE_SYNC_LINE_VS_NATIVE_EXIT_CONFLICT")
+                    insert("SYNC_LINE",True,
+                           receipt="source_original_select_PRE_line_clock_and_no_sync")
+                    self.counters["independent_source_sync_line_positive"]+=1
+            else:
+                self.counters["sync_line_base_route_missing_unknown"]+=1
         if row["independent_IF_bool"] is not None:
             insert("APL_IF",bool(row["independent_IF_bool"]),
                    receipt="chronological_official_APL_independent_AST")
@@ -354,6 +406,49 @@ def selftest():
     assert "RESOURCE" in positive_resource["independent_true_gates"]
     assert resource_bridge.summary()["counts"]["independent_source_resource_positive"]==1
     assert "RESOURCE:MISSING" not in positive_resource["missing_or_unverified"]
+    # Two source-original physical predicates are both sufficient for
+    # SYNC_LINE, but not for the action's full virtual READY route.
+    line_ready=LINE_MARK+"20|default|1|alpha|1|10|0|1|-1|0|0"
+    sync_bridge=NativeProofBridge()
+    sync_bridge.consume(line_ready,resource_pending)
+    sync_ok=sync_bridge.evaluate_attempt(resource_pending,nxt)
+    assert sync_ok["decision"]==UNKNOWN
+    assert "SYNC_LINE" in sync_ok["independent_true_gates"]
+    assert "SYNC_LINE:MISSING" not in sync_ok["missing_or_unverified"]
+    assert sync_bridge.summary()["counts"]["independent_source_sync_line_positive"]==1
+    # A sync child requires its own unknown readiness; one positive
+    # outer cooldown cannot certify its virtual recursive action_ready.
+    with_sync=NativeProofBridge()
+    with_sync.consume(LINE_MARK+"20|default|1|alpha|1|10|0|1|-1|0|1",
+                      resource_pending)
+    sync_unknown=with_sync.evaluate_attempt(resource_pending,nxt)
+    assert "SYNC_LINE:MISSING" in sync_unknown["missing_or_unverified"]
+    line_down=NativeProofBridge()
+    line_down.consume(LINE_MARK+"20|default|1|alpha|1|30|0|1|-1|0|0",
+                      resource_pending)
+    down_unknown=line_down.evaluate_attempt(resource_pending,nxt)
+    assert "SYNC_LINE:MISSING" in down_unknown["missing_or_unverified"]
+    absent_line=NativeProofBridge()
+    absent_line.consume(LINE_MARK+"20|default|1|alpha|0|0|0|1|-1|0|0",
+                        resource_pending)
+    absent_unknown=absent_line.evaluate_attempt(resource_pending,nxt)
+    assert "SYNC_LINE:MISSING" in absent_unknown["missing_or_unverified"]
+    duplicate=NativeProofBridge()
+    duplicate.consume(line_ready,resource_pending)
+    try:duplicate.consume(line_ready,resource_pending)
+    except NativeProofBridgeError:pass
+    else:raise AssertionError("DUPLICATE_SYNC_LINE_SOURCE_PRE_ACCEPTED")
+    mismatched=NativeProofBridge()
+    try:mismatched.consume(line_ready.replace("|default|1|alpha|",
+                                                  "|default|2|alpha|"),
+                           resource_pending)
+    except NativeProofBridgeError:pass
+    else:raise AssertionError("MISMATCHED_SYNC_LINE_SOURCE_ROW_ACCEPTED")
+    not_base=NativeProofBridge()
+    not_base.consume(line_ready,resource_pending)
+    not_base_result=not_base.evaluate_attempt(
+        dict(resource_pending,base_action_entries=0),nxt)
+    assert "SYNC_LINE:MISSING" in not_base_result["missing_or_unverified"]
     rejected_resource=NativeProofBridge()
     rejected_resource.consume(ACTION_MARK+"20|alpha|1|0|50",None)
     rejected_resource.consume(PLAYER_MARK+"20|1|50|30|0",None)
@@ -398,7 +493,7 @@ def selftest():
     # not even expose Native ready as an accepted input.
     assert "native_ready" not in bridge.summary()["counts"]
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":10,"real_native":"NOT_RUN","WCL_API_calls":0}
+            "checks":21,"real_native":"NOT_RUN","WCL_API_calls":0}
 
 if __name__=="__main__":
     import json
