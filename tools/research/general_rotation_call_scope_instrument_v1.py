@@ -319,8 +319,8 @@ def selftest()->dict:
     try:_selector_scope(source)
     except CallScopeError:pass
     else:raise AssertionError("UNPINNED_SELECTION_PRE_PATCH_ACCEPTED")
-    source=source.replace(SELECT_MARK+"{}|{}",
-        "\n".join((SELECT_MARK+"{}|{}") for _ in range(3)))
+    source=source.decode("utf-8").replace(SELECT_MARK+"{}|{}",
+        "\n".join((SELECT_MARK+"{}|{}") for _ in range(3))).encode("utf-8")
     patched=_selector_scope(source)
     assert patched.decode().count("a->action_ready()")==1
     assert "make_scope" in patched.decode()
