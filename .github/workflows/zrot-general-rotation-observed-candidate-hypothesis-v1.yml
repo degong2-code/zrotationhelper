@@ -1,0 +1,168 @@
+name: zrot-general-rotation-observed-candidate-hypothesis-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_observed_candidate_hypothesis_v1.py
+      - .github/workflows/zrot-general-rotation-observed-candidate-hypothesis-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  synthetic-contract:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Check exact source-hypothesis contract and synthetic regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_observed_candidate_hypothesis_v1.py
+          python -B tools/research/general_rotation_observed_candidate_hypothesis_v1.py \
+            > /tmp/zrot-hypothesis-synthetic.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-hypothesis-synthetic.json'))
+          assert r['schema']=='ZrotGeneralRotationObservedCandidateHypothesisV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['actual_original_native_profile_replayed'] is False
+          assert r['independent_READY_proven']==0
+          assert r['WCL_API_calls']==0
+          print('GENERAL_ROTATION_OPENER_CONDITIONAL_SOURCE_HYPOTHESIS_SYNTHETIC_PASS')
+          PY
+
+  reuse-verified-native-evidence:
+    needs: synthetic-contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+            profiles/MID2/MID2_Mage_Arcane.simc
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch prior verified ST/2T source IR without recompiling SimC
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          gh run view 41981462766 \
+            --repo degong2-code/zrotationhelper \
+            --json status,conclusion,headSha > /tmp/zrot-pinned-native-run.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-pinned-native-run.json'))
+          assert r['status']=='completed' and r['conclusion']=='success'
+          assert r['headSha']=='c44353112702c91303959503b92dc04b9a4573bd'
+          print('SOURCE_NATIVE_PRODUCER_SUCCESS_AND_COMMIT_PIN_PASS')
+          PY
+          mkdir -p /tmp/zrot-native-evidence
+          gh run download 41981462766 \
+            --repo degong2-code/zrotationhelper \
+            --name zrot-general-rotation-generic-select-pre-two-spec-receipts \
+            --dir /tmp/zrot-native-evidence
+          for spec in fury arcane; do
+            for mode in st 2t; do
+              test -s /tmp/zrot-native-evidence/zrot-source-temporal-frontier-$spec-$mode.json
+            done
+          done
+          echo PINNED_REAL_NATIVE_ST2T_ARTIFACT_REUSED_NO_NEW_NATIVE_BUILD
+      - name: Produce original-source conditional candidate hypotheses from actual Native receipts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-hypotheses
+          for spec in fury arcane; do
+            if [ "$spec" = fury ]; then profile=MID2_Warrior_Fury.simc
+            else profile=MID2_Mage_Arcane.simc
+            fi
+            python -B tools/research/general_rotation_observed_candidate_hypothesis_v1.py \
+              --profile simc-upstream/profiles/MID2/$profile \
+              --st-time-ir /tmp/zrot-native-evidence/zrot-source-temporal-frontier-$spec-st.json \
+              --two-target-time-ir /tmp/zrot-native-evidence/zrot-source-temporal-frontier-$spec-2t.json \
+              --early-window-ms 10000 --out-dir /tmp/zrot-hypotheses/$spec
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          cases={}
+          for spec in ('fury','arcane'):
+              root=Path('/tmp/zrot-hypotheses')/spec
+              st=json.loads((root/'st.json').read_bytes())
+              two=json.loads((root/'2t.json').read_bytes())
+              comp=json.loads((root/'st2t_comparison.json').read_bytes())
+              assert st['target_count']==1 and two['target_count']==2
+              assert comp['source_profile_git_blob_sha1']==st['source_profile_git_blob_sha1']==two['source_profile_git_blob_sha1']
+              assert st['independent_FULL_READY_proven']==two['independent_FULL_READY_proven']==0
+              assert comp['independent_READY_proven']==0
+              assert comp['target_count_switch_threshold_proven'] is False
+              assert st['opener_skill_sequence_proven'] is False
+              assert st['observed_IF_condition_traces_evaluated'] is False
+              assert st['WCL_blind_discovery_uncontaminated'] is True
+              assert two['WCL_blind_discovery_uncontaminated'] is True
+              assert st['source_behavior_hypothesis_count']>0 and two['source_behavior_hypothesis_count']>0
+              assert comp['source_row_comparison_count']>0
+              cases[spec]={
+                  'ST_source_row_hypotheses':st['source_behavior_hypothesis_count'],
+                  'two_target_source_row_hypotheses':two['source_behavior_hypothesis_count'],
+                  'ST2T_rows_compared':comp['source_row_comparison_count'],
+                  'ST_observed_sweeps':st['sweeps_covered'],
+                  'two_target_observed_sweeps':two['sweeps_covered'],
+                  'ST_rows_with_original_if':sum(
+                      bool(r['if_source_expression'])
+                      for r in st['source_behavior_hypotheses']),
+                  'fully_proven_ready':0,
+                  'source_control_effect_causality_proven':False}
+          summary={
+              'schema':'ZrotGeneralRotationRealSourceHypothesisReplayReceiptV1',
+              'source':'PREVIOUS_SUCCESSFUL_ACTUAL_SIMC_NATIVE_ST2T',
+              'source_native_run_id':41981462766,
+              'source_native_head':'c44353112702c91303959503b92dc04b9a4573bd',
+              'cases':cases,
+              'fresh_SimC_compilation_or_production':False,
+              'thresholds_certified':0,
+              'independent_FULL_READY_proven':0,
+              'actual_WCL_API_calls':0}
+          Path('/tmp/zrot-hypotheses/replay-summary.json').write_text(
+              json.dumps(summary,sort_keys=True,separators=(',',':'))+'\n')
+          print('REAL_NATIVE_ST2T_CONDITIONAL_SOURCE_HYPOTHESIS_REPLAY_PASS',cases)
+          PY
+          sha256sum /tmp/zrot-hypotheses/replay-summary.json
+      - name: Save bounded SimC-first hypothesis evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-general-rotation-source-hypothesis-st2t
+          path: |
+            /tmp/zrot-hypotheses/fury/st.json
+            /tmp/zrot-hypotheses/fury/2t.json
+            /tmp/zrot-hypotheses/fury/st2t_comparison.json
+            /tmp/zrot-hypotheses/arcane/st.json
+            /tmp/zrot-hypotheses/arcane/2t.json
+            /tmp/zrot-hypotheses/arcane/st2t_comparison.json
+            /tmp/zrot-hypotheses/replay-summary.json
+          retention-days: 7
+          if-no-files-found: error
