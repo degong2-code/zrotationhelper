@@ -22,9 +22,8 @@ SCHEMA="ZrotGenericPassiveSelectTemplateManifestV1"
 
 def build(root:Path)->dict:
     audits=audit_both(root)
-    if (audits["pinned_source_commit"]!=UPSTREAM or
-        audits["source_virtual_dispatch_complete"] if
-            "source_virtual_dispatch_complete" in audits else False):
+    if (audits.get("pinned_source_commit")!=UPSTREAM or
+        audits.get("dynamic_dispatch_and_guard_exhaustiveness_reviewed") is not False):
         raise ValueError("SOURCE_ROUTE_ADAPTER_OR_REVISION_DRIFT")
     templates=[
         compile_template(audits["audits"]["warrior_fury"],
