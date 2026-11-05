@@ -414,6 +414,10 @@ jobs:
                       scoped['selected_action_ready_original_calls'],
                   'strict_source_method_call_ids':
                       scoped['dynamic_method_calls_scope_linked'],
+                  'original_source_BACKGROUND_skips_before_readiness':
+                      scoped['source_loop_skips_before_action_READY'],
+                  'original_source_BACKGROUND_skips_by_action':
+                      scoped['source_loop_skips_by_action'],
                   'max_observed_dynamic_call_depth':
                       scoped['max_observed_trace_stack_depth'],
                   'source_method_parent_child_edges':
@@ -478,9 +482,12 @@ jobs:
               controlled_disposition='UPSTREAM_BACKGROUND_SKIPPED_BEFORE_READY'
           else:
               controlled_disposition='REAL_METHOD_FALSE_UNREACHED_UNKNOWN'
+          hypothesis_status=('REAL_ORIGINAL_METHOD_FALSE_CONFIRMED'
+              if condition_count>0 else 'FAIL_NO_REAL_METHOD_FALSE_TRIGGER')
           print('GENERIC_CONTROLLED_NEGATIVE_CAUSAL_DISPOSITION',
                 controlled_disposition,
-                {'false_method_count':condition_count,
+                {'hypothesis_status':hypothesis_status,
+                 'false_method_count':condition_count,
                  'rampage_method_entries':rampage_called,
                  'rampage_background_skips':background_skips},flush=True)
           assert condition_count==negative_methods[
@@ -490,7 +497,7 @@ jobs:
           fixture_receipt=json.load(open('/tmp/zrot-controlled-fury-no-offhand-provenance.json'))
           assert fixture_receipt['expected_negative_condition']=='ITEM_SLOT_WEAPON_NONE'
           assert fixture_receipt['source_apl_rows_unchanged'] is True
-          receipt['controlled_real_negative_source_cohort']={
+          receipt['controlled_negative_probe_cohort']={
               'scenario_id':fixture_receipt['scenario_id'],
               'source_profile_git_blob_sha1':
                   fixture_receipt['source_profile_git_blob_sha1'],
@@ -502,6 +509,7 @@ jobs:
               'original_vs_instrumented_precombat_exact':True,
               'independent_actual_method_false_return_count':condition_count,
               'causal_disposition':controlled_disposition,
+              'negative_branch_hypothesis_status':hypothesis_status,
               'source_loop_rampage_background_skip_count':background_skips,
               'rampage_ready_original_entry_count':rampage_called,
               'negative_method_return_claim_supported':condition_count>0,
@@ -514,8 +522,9 @@ jobs:
               'full_virtual_dispatch_exhaustive':False,
               'WCL_API_calls':0
           }
-          print('ACTUAL_GENERIC_CONTROLLED_SOURCE_ELIGIBILITY_COHORT_PASS',
-                controlled_disposition,condition_count,background_skips)
+          print('ACTUAL_GENERIC_CONTROLLED_COHORT_REPLAY_PASS_HYPOTHESIS_SEPARATE',
+                hypothesis_status,controlled_disposition,condition_count,
+                background_skips)
           p=Path('/tmp/zrot-generic-select-pre-two-spec-a-b.json')
           p.write_text(json.dumps(receipt,sort_keys=True,separators=(',',':'))+'\n')
           print('ACTUAL_GENERIC_TWO_SPEC_SELECT_AND_METHOD_PRE_A_B_PASS',
