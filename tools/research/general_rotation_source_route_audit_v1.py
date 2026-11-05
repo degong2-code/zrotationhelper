@@ -327,11 +327,11 @@ def selftest() -> dict:
         pin = git_blob(sample)
         nodes = (
             MethodSite("a", "pinned.cpp", pin, "bool ready()", "struct A : B",
-                       ("if (x)",), ("b",), ("resource",), True),
+                       ("if (x)",), ("b",), ("RESOURCE",), True),
             MethodSite("b", "pinned.cpp", pin, "bool B::ready()", None,
-                       ("if (y)",), (), ("cooldown",), False),
+                       ("if (y)",), (), ("COOLDOWN",), False),
         )
-        plan = RoutePlan("SPEC_ALPHA", "a", ("resource", "cooldown", "movement"), nodes)
+        plan = RoutePlan("SPEC_ALPHA", "a", ("RESOURCE", "COOLDOWN", "MOVEMENT"), nodes)
         report = audit(plan, root)
         assert report["source_method_nodes_verified"] == 2
         assert report["gates_without_source_site_hints"] == ["movement"]
@@ -340,11 +340,8 @@ def selftest() -> dict:
         sample={
             "source_row_sha256":"a"*64,"at_simc_ms":100,
             "source_action":"alpha","physical_skill_READY":"UNKNOWN",
-            "unproved_gates":["movement:MISSING","resource:NOT_INDEPENDENT"]
+            "unproved_gates":["MOVEMENT:MISSING","RESOURCE:NOT_INDEPENDENT"]
         }
-        # Uppercase gates are the standard external contract. Test a
-        # synthetic candidate against source sites, without making READY.
-        sample["unproved_gates"]=["MOVEMENT:MISSING","RESOURCE:NOT_INDEPENDENT"]
         worklist=missing_source_obligation_worklist(report,sample)
         assert worklist["missing_gate_count"]==2
         assert worklist["gates_without_declared_method_sites"]==["MOVEMENT"]
