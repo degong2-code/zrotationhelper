@@ -198,7 +198,7 @@ def selftest()->dict:
         [x.replace("|1|1|0","|2|1|0") for x in lines],
         [x.replace("|default|1|rampage","|default|9|rampage")
          for x in lines],
-        [x.replace("|1|1|0|1|0|1","|1|1|2|1|0|1") for x in lines],
+        [x.replace("|rampage|1|0|1|0|1","|rampage|1|2|1|0|1") for x in lines],
         lines[:2],
         [lines[2],lines[3],lines[0],lines[1]],
     ]
