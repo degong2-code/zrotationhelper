@@ -8,6 +8,7 @@ on:
       - tools/research/general_rotation_method_pre_passive_producer_v1.py
       - tools/research/general_rotation_method_pre_passive_replay_v1.py
       - tools/research/general_rotation_source_false_guard_engine_v1.py
+      - tools/research/general_rotation_controlled_negative_profile_v1.py
       - tools/research/general_rotation_call_scope_instrument_v1.py
       - tools/research/general_rotation_call_scope_replay_v1.py
       - tools/research/general_rotation_select_pre_passive_replay_v1.py
@@ -39,7 +40,17 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile tools/research/general_rotation_select_pre_passive_producer_v1.py tools/research/general_rotation_select_pre_passive_replay_v1.py tools/research/general_rotation_select_pre_source_adapter_v1.py tools/research/general_rotation_method_pre_passive_producer_v1.py tools/research/general_rotation_method_pre_passive_replay_v1.py tools/research/general_rotation_source_false_guard_engine_v1.py
-          python -m py_compile tools/research/general_rotation_call_scope_instrument_v1.py tools/research/general_rotation_call_scope_replay_v1.py
+          python -m py_compile tools/research/general_rotation_call_scope_instrument_v1.py tools/research/general_rotation_call_scope_replay_v1.py tools/research/general_rotation_controlled_negative_profile_v1.py
+          python -B tools/research/general_rotation_controlled_negative_profile_v1.py > /tmp/zrot-controlled-negative-profile-selftest.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/zrot-controlled-negative-profile-selftest.json'))
+          assert p['schema']=='ZrotGeneralRotationControlledNegativeNativeProfileFixtureV1'
+          assert p['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert p['positive_READY_certified']==0
+          assert p['WCL_API_calls']==0
+          print('GENERIC_NEGATIVE_PROFILE_TRANSFORM_SYNTHETIC_PASS')
+          PY
           python -B tools/research/general_rotation_call_scope_instrument_v1.py >/tmp/generic-call-instrument-synthetic.json
           python -B tools/research/general_rotation_call_scope_replay_v1.py >/tmp/generic-call-replay-synthetic.json
           python - <<'PY'
@@ -142,6 +153,8 @@ jobs:
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build /tmp/zrot-generic-pre-native-build --target simc --parallel 3
           test -x /tmp/zrot-generic-pre-native-build/simc
+          cp /tmp/zrot-generic-pre-native-build/simc /tmp/zrot-original-uninstrumented-simc
+          test -x /tmp/zrot-original-uninstrumented-simc
       - name: Capture pristine two-spec actual Native 30-second action sequences
         shell: bash
         run: |
@@ -251,6 +264,23 @@ jobs:
           assert r['positive_READY_certified']==0
           print('SOURCE_PINNED_CXX_ORIGINAL_METHOD_ENTRY_INSTRUMENTED')
           PY
+      - name: Build and run source-pinned controlled negative fixture on pristine SimC
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_controlled_negative_profile_v1.py \
+            --simc-root simc-upstream \
+            --source-templates /tmp/zrot-generic-source-templates.json \
+            --certified-false-guards /tmp/zrot-generic-false-guard-contract.json \
+            --scenario-id fury_rampage_missing_offhand \
+            --out-profile simc-upstream/profiles/MID2/Zrot_Controlled_Fury_NoOffhand.simc \
+            --receipt /tmp/zrot-controlled-fury-no-offhand-provenance.json
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/Zrot_Controlled_Fury_NoOffhand.simc \
+            --spec fury --simc-bin /tmp/zrot-original-uninstrumented-simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/zrot-original-fury-no-offhand --timeout 180
+          echo ORIGINAL_SOURCE_CONTROLLED_NEGATIVE_FIXTURE_NATIVE_CAPTURE_PASS
       - name: Scope every original action-ready invocation and nested method call
         shell: bash
         run: |
@@ -287,6 +317,11 @@ jobs:
             --spec arcane --simc-bin /tmp/zrot-generic-pre-native-build/simc \
             --targets 1 --seed 31459 --fight-seconds 30 \
             --out-dir /tmp/zrot-instrumented-arcane --timeout 180
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/Zrot_Controlled_Fury_NoOffhand.simc \
+            --spec fury --simc-bin /tmp/zrot-generic-pre-native-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/zrot-instrumented-fury-no-offhand --timeout 180
       - name: Independently replay actual Generic SELECT-PRE records and verify exact action parity
         shell: bash
         run: |
@@ -403,6 +438,54 @@ jobs:
               'strict_raii_selection_method_call_causality_replayed':True,
               'dummy_error_permitted':False,'WCL_API_calls':0
           }
+          # Independent controlled negative cohort: source rule plus actual
+          # observed METHOD-PRE. Do not promote a guard-only synthetic fixture.
+          before_negative=extract_json_sequence(Path('/tmp/zrot-original-fury-no-offhand'))
+          after_negative=extract_json_sequence(Path('/tmp/zrot-instrumented-fury-no-offhand'))
+          assert before_negative['status']==after_negative['status']=='SEQUENCE_SNAPSHOTS_EXTRACTED'
+          assert before_negative['source_profile_sha256']==after_negative['source_profile_sha256']
+          assert before_negative['source_apl_sha256']==after_negative['source_apl_sha256']
+          assert before_negative['combat_sequence']==after_negative['combat_sequence']
+          assert before_negative['precombat_sequence']==after_negative['precombat_sequence']
+          negative_trace=Path('/tmp/zrot-instrumented-fury-no-offhand/simc_native_log.txt').read_text(encoding='utf8')
+          negative_profile=Path('simc-upstream/profiles/MID2/Zrot_Controlled_Fury_NoOffhand.simc').read_bytes()
+          negative_methods=method_replay(
+              negative_trace,method_report,template_manifest,
+              negative_profile,negative_rules)
+          negative_scopes=scope_replay(
+              negative_trace,negative_profile,template_manifest,
+              scope_report,negative_rules)
+          condition_count=negative_scopes['certified_false_method_returns_by_rule'].get(
+              'warrior_rampage_weapon_absence',0)
+          assert condition_count>0, 'CONTROLLED_REAL_NEGATIVE_GUARD_NOT_OBSERVED'
+          assert condition_count==negative_methods[
+              'independent_method_return_false_by_rule'].get(
+              'warrior_rampage_weapon_absence',0)
+          assert negative_scopes['positive_FULL_action_READY_proven']==0
+          fixture_receipt=json.load(open('/tmp/zrot-controlled-fury-no-offhand-provenance.json'))
+          assert fixture_receipt['expected_negative_condition']=='ITEM_SLOT_WEAPON_NONE'
+          assert fixture_receipt['source_apl_rows_unchanged'] is True
+          receipt['controlled_real_negative_source_cohort']={
+              'scenario_id':fixture_receipt['scenario_id'],
+              'source_profile_git_blob_sha1':
+                  fixture_receipt['source_profile_git_blob_sha1'],
+              'controlled_profile_sha256':
+                  fixture_receipt['controlled_profile_sha256'],
+              'source_certified_negative_rule_id':
+                  fixture_receipt['source_certified_negative_rule_id'],
+              'original_vs_instrumented_combat_exact':True,
+              'original_vs_instrumented_precombat_exact':True,
+              'independent_actual_method_false_return_count':condition_count,
+              'observed_call_roots':
+                  negative_scopes['selected_action_ready_original_calls'],
+              'observed_method_calls':
+                  negative_scopes['dynamic_method_calls_scope_linked'],
+              'positive_FULL_action_READY_proven':0,
+              'full_virtual_dispatch_exhaustive':False,
+              'WCL_API_calls':0
+          }
+          print('ACTUAL_GENERIC_CONTROLLED_SOURCE_NEGATIVE_METHOD_FALSE_PASS',
+                condition_count)
           p=Path('/tmp/zrot-generic-select-pre-two-spec-a-b.json')
           p.write_text(json.dumps(receipt,sort_keys=True,separators=(',',':'))+'\n')
           print('ACTUAL_GENERIC_TWO_SPEC_SELECT_AND_METHOD_PRE_A_B_PASS',
@@ -426,6 +509,7 @@ jobs:
             /tmp/zrot-generic-method-pre-patch.json
             /tmp/zrot-generic-false-guard-contract.json
             /tmp/zrot-generic-call-scope-patch.json
+            /tmp/zrot-controlled-fury-no-offhand-provenance.json
             /tmp/zrot-generic-select-pre-two-spec-a-b.json
           retention-days: 7
           if-no-files-found: error

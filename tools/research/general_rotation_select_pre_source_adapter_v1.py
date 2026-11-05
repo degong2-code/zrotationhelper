@@ -154,6 +154,17 @@ def build(root:Path)->dict:
         "source_fixture_count":len(templates),
         "templates":templates,
         "method_entry_sites":pinned_method_entry_sites(templates),
+        "controlled_negative_scenarios":[
+            {
+                "scenario_id":"fury_rampage_missing_offhand",
+                "source_profile_path":"profiles/MID2/MID2_Warrior_Fury.simc",
+                "source_profile_git_blob_sha1":"3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+                "spec":"fury",
+                "source_negative_guard_rule_id":"warrior_rampage_weapon_absence",
+                "transform_kind":"DROP_EQUIPMENT_SLOT_V1",
+                "item_slot":"off_hand"
+            }
+        ],
         "method_false_guard_rules":[
             {"rule_id":"warrior_rampage_weapon_absence",
              "method_key":"rampage_ready",
