@@ -90,9 +90,16 @@ def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes,
         if line.count(MARK)!=1:
             raise MethodReplayError("MULTIPLE_METHOD_MARKERS_ON_ONE_LINE")
         source=line.split(MARK,1)[1].strip().split("|")
-        if len(source)!=9:
+        if len(source)==9:
+            clock,owner,ordinal,native,method,event,field_id,kind,raw=source
+            call_scope_id=None
+        elif len(source)==10:
+            clock,owner,ordinal,native,method,event,field_id,kind,raw,scope=source
+            if not scope.isdigit():
+                raise MethodReplayError("METHOD_ENTRY_SCOPE_ID_INVALID")
+            call_scope_id=int(scope)
+        else:
             raise MethodReplayError("MALFORMED_SOURCE_METHOD_ENTRY_RECORD")
-        clock,owner,ordinal,native,method,event,field_id,kind,raw=source
         if (not clock.isdigit() or not ordinal.isdigit() or
             not owner or not native or int(ordinal)<1):
             raise MethodReplayError("INVALID_METHOD_ENTRY_PRE_TIME_OR_OWNER")
@@ -118,12 +125,14 @@ def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes,
                 "source_method_body_sha256":site["source_method_body_sha256"],
                 "same_time_source_method_occurrence":ix,
                 "capture_phase":PHASE,"raw_fields":{},
+                "explicit_method_call_scope_id":call_scope_id,
             }
         elif event=="FIELD":
             if active is None or (
                 active["at_simc_ms"],active["source_list"],
                 active["ordinal_one_based"],active["native_name_identity_only"],
-                active["source_method_key"],active["source_row_sha256"]) != scope:
+                active["source_method_key"],active["source_row_sha256"]) != scope or
+                active["explicit_method_call_scope_id"]!=call_scope_id:
                 raise MethodReplayError("METHOD_FIELD_OUTSIDE_EXACT_ENTRY_SCOPE")
             declarations=[x for x in site["fields"] if x["field_id"]==field_id]
             if len(declarations)!=1:
