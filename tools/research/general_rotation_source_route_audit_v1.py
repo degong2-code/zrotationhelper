@@ -26,7 +26,7 @@ class SourceRouteAuditError(ValueError):
 
 
 def git_blob(data: bytes) -> str:
-    return sha1(b"blob " + str(len(data)).encode("ascii") + b"\\0" + data).hexdigest()
+    return sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
 
 
 def _source_code_mask(raw: str) -> str:
@@ -54,7 +54,7 @@ def _source_code_mask(raw: str) -> str:
                 i += 1
                 continue
         elif mode == "line":
-            if a == "\\n":
+            if a == "\n":
                 mode = "code"
             else:
                 chars[i] = " "
@@ -66,12 +66,12 @@ def _source_code_mask(raw: str) -> str:
                 mode = "code"
                 i += 2
                 continue
-            if a != "\\n":
+            if a != "\n":
                 chars[i] = " "
             i += 1
             continue
         else:
-            if a == "\\\\":
+            if a == "\\":
                 chars[i] = " "
                 if i + 1 < n:
                     chars[i + 1] = " "
