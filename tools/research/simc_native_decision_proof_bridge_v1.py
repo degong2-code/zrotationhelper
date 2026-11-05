@@ -38,6 +38,8 @@ class NativeProofBridge:
     def __init__(self):
         self.counters=Counter()
         self.occurrences=Counter()
+        # Bounded, source-pinned gap witnesses, not positive READY certificates.
+        self.positive_gap_shortlist=[]
 
     def consume(self,line:str,pending:dict|None):
         # Only current source-pointer-scope events are accepted. Nested
@@ -188,6 +190,52 @@ class NativeProofBridge:
             if kind not in ("APL_CONTROL","EXECUTABLE_SOURCE_ACTION"):
                 raise NativeProofBridgeError("UNKNOWN_SELECTED_SOURCE_KIND")
             result["source_return_kind"]=kind
+            if (kind=="EXECUTABLE_SOURCE_ACTION" and
+                    result["returned_READINESS"]==UNKNOWN and
+                    result["earlier_UNKNOWN"]==0 and
+                    result["earlier_READY"]==0):
+                # The Native-selected row is a provenance comparator only.
+                # Proof gates and prior NOT_READY outcomes came from
+                # independent source replay, not the Native ready bit.
+                chosen=attempts[-1]
+                candidate=proof[-1]
+                key=chosen["source_key"]
+                if (key[0]!=candidate["identity"]["at_ms"] or
+                    key[1]!=candidate["identity"]["scope"].split("::",1)[0] or
+                    key[2]-1!=candidate["identity"]["ordinal"] or
+                    chosen["source_sha256"]!=candidate["identity"]["source_sha256"]):
+                    raise NativeProofBridgeError("POSITIVE_GAP_SOURCE_POINTER_DRIFT")
+                if (candidate["full_ready_positive_closed"] or
+                    candidate["decision"]!=UNKNOWN):
+                    raise NativeProofBridgeError("UNCERTIFIED_SOURCE_SELECTED_READY")
+                self.counters["positive_gap_actual_selected_candidates"]+=1
+                if result["earlier_NOT_READY"]>0:
+                    self.counters["positive_gap_with_nonempty_proven_prior"]+=1
+                else:
+                    self.counters["positive_gap_vacuous_empty_prior"]+=1
+                gap={
+                    "at_simc_ms":key[0],"source_list":key[1],
+                    "source_index":key[2]-1,"source_action":chosen["source_action"],
+                    "source_native_name_identity_only":key[3],
+                    "source_row_sha256":chosen["source_sha256"],
+                    "same_source_key_occurrence":candidate["identity"]["same_key_occurrence"],
+                    "earlier_candidates":len(proof)-1,
+                    "earlier_independent_NOT_READY":result["earlier_NOT_READY"],
+                    "unproved_gates":candidate["missing_or_unverified"],
+                    "native_observed_post_only_gates":candidate["source_only_positive_gates"],
+                    "native_observed_base_exit_comparator":chosen["source_base_exit_observed"],
+                    "physical_skill_READY":"UNKNOWN","source_order_complete":False
+                }
+                # Keep the smallest evidence gap first; preference is for
+                # a proven, nonempty earlier priority prefix. The shortlist
+                # is a source-grounded *research target*, not a recommendation.
+                self.positive_gap_shortlist.append(gap)
+                self.positive_gap_shortlist.sort(key=lambda e:(
+                    len(e["unproved_gates"]),len(e["native_observed_post_only_gates"]),
+                    -e["earlier_independent_NOT_READY"],
+                    e["at_simc_ms"],e["source_list"],e["source_index"],
+                    e["same_source_key_occurrence"]))
+                del self.positive_gap_shortlist[12:]
             self.counters["source_returned_roots"]+=1
             self.counters["returned_"+kind]+=1
             self.counters["returned_"+result["returned_READINESS"]]+=1
@@ -206,6 +254,15 @@ class NativeProofBridge:
                 "Source_and_Native_comparators_not_readiness_operands":True,
                 "spec_semantics_only_via_adapter_callback":True,
                 "full_positive_ready_certified":False,
+                "positive_ready_preflight":{
+                    "schema":"ZrotSourcePinnedPositiveReadyGapPreflightV1",
+                    "candidate_count":self.counters["positive_gap_actual_selected_candidates"],
+                    "with_proven_nonempty_prior":self.counters["positive_gap_with_nonempty_proven_prior"],
+                    "vacuous_empty_prior":self.counters["positive_gap_vacuous_empty_prior"],
+                    "bounded_source_candidates":list(self.positive_gap_shortlist),
+                    "complete_source_virtual_route_closure":False,
+                    "Native_return_never_positive_ready_evidence":True,
+                    "WCL_priority_or_dummy_error_proven":False},
                 "WCL_API_calls":0}
 
 def selftest():
@@ -249,6 +306,14 @@ def selftest():
     assert root_control["source_return_kind"]=="APL_CONTROL"
     assert bridge.summary()["counts"]["returned_APL_CONTROL"]==1
     assert bridge.summary()["counts"]["returned_EXECUTABLE_SOURCE_ACTION"]==1
+    preflight=bridge.summary()["positive_ready_preflight"]
+    assert preflight["candidate_count"]==1
+    assert preflight["with_proven_nonempty_prior"]==1
+    assert preflight["vacuous_empty_prior"]==0
+    assert preflight["bounded_source_candidates"][0]["source_row_sha256"]==h
+    assert preflight["bounded_source_candidates"][0]["physical_skill_READY"]==UNKNOWN
+    assert "BASE_VIRTUAL_COMPLETE" in preflight["bounded_source_candidates"][0]["native_observed_post_only_gates"]
+    assert preflight["complete_source_virtual_route_closure"] is False
     # Fake native positive bit cannot certify a skill: this adapter does
     # not even expose Native ready as an accepted input.
     assert "native_ready" not in bridge.summary()["counts"]

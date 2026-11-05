@@ -357,6 +357,8 @@ def analyze_trace(trace:str,ir:dict,samples:list[dict],spec_adapter=None,proof_b
         "SpecAdapter_name":type(spec_adapter).__name__ if spec_adapter else None,
         "SpecAdapter_source_witness":spec_adapter.summary() if spec_adapter else {},
         "generic_open_world_proof":proof_bridge.summary() if proof_bridge else None,
+        "positive_ready_preflight":(
+            proof_bridge.summary()["positive_ready_preflight"] if proof_bridge else None),
     }
 
 

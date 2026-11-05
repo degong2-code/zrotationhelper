@@ -208,10 +208,31 @@ def run(profile:Path,meta:dict,fixture_dir:Path,expect_manifest:str,
             "native_source_frontier_counts":counts,
             "native_source_foreground_partial_prefix":frontier["foreground_prefix_screening"],
             "native_source_proof_counters":frontier["generic_open_world_proof"]["counts"],
+            "native_source_positive_ready_preflight":frontier["positive_ready_preflight"],
             "original_source_method_guard_and_selection_trace_replayed":True,
             "source_priority_order_optimality":"UNKNOWN",
         }
         totals.update(evidence["independent_AST_IF_outcomes"])
+    positive_preflight_cases=[
+        (name,case["native_source_positive_ready_preflight"])
+        for name,case in sorted(results.items())
+    ]
+    if any(value is None for _,value in positive_preflight_cases):
+        raise NativeIREvidenceError("POSITIVE_READY_PREFLIGHT_MISSING")
+    selected_count=sum(x["candidate_count"] for _,x in positive_preflight_cases)
+    if (selected_count!=generic_totals[
+            "returned_EXECUTABLE_SOURCE_ACTION_all_prior_excluded_but_winner_UNKNOWN"] or
+        any(x["complete_source_virtual_route_closure"] for _,x in positive_preflight_cases)):
+        raise NativeIREvidenceError("POSITIVE_READY_GAP_COHORT_ACCOUNTING_DRIFT")
+    shortlist=[
+        dict(item,case=name)
+        for name,value in positive_preflight_cases
+        for item in value["bounded_source_candidates"]
+    ]
+    shortlist.sort(key=lambda e:(
+        len(e["unproved_gates"]),len(e["native_observed_post_only_gates"]),
+        -e["earlier_independent_NOT_READY"],e["case"],e["at_simc_ms"],
+        e["source_list"],e["source_index"]))
     if totals["Native_action_ready_attempts"]<=0 or totals["source_IF_evaluations"]<=0:
         raise NativeIREvidenceError("SOURCE_EVIDENCE_COHORT_EMPTY")
     if (generic_totals["attempts"]!=totals["Native_action_ready_attempts"] or
@@ -228,6 +249,18 @@ def run(profile:Path,meta:dict,fixture_dir:Path,expect_manifest:str,
         "totals":dict(sorted(totals.items())),
         "source_frontier_partial_prefix":dict(sorted(front_totals.items())),
         "source_generic_proof_counts":dict(sorted(generic_totals.items())),
+        "source_positive_ready_preflight":{
+            "schema":"ZrotSourcePinnedPositiveReadyGapPreflightV1",
+            "candidate_count":selected_count,
+            "with_proven_nonempty_prior":sum(
+                x["with_proven_nonempty_prior"] for _,x in positive_preflight_cases),
+            "vacuous_empty_prior":sum(
+                x["vacuous_empty_prior"] for _,x in positive_preflight_cases),
+            "bounded_cross_case_shortlist":shortlist[:16],
+            "complete_source_virtual_route_closure":False,
+            "source_order_complete":False,
+            "positive_READY_certified":0,
+            "WCL_priority_or_dummy_error_proven":False},
         "independent_exclusion_reasons":dict(sorted(combined.items())),
         "Native_comparator_not_independent_IF_input":True,
         "real_opening_cast_sequence_verified":False,

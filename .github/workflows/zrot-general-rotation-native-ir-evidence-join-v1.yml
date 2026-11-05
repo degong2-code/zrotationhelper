@@ -104,6 +104,16 @@ jobs:
           assert p['returned_APL_CONTROL']==213
           assert p['returned_EXECUTABLE_SOURCE_ACTION']==174
           assert p['returned_EXECUTABLE_SOURCE_ACTION_all_prior_excluded_but_winner_UNKNOWN']==79
+          gap=r['source_positive_ready_preflight']
+          assert gap['schema']=='ZrotSourcePinnedPositiveReadyGapPreflightV1'
+          assert gap['candidate_count']==79
+          assert gap['with_proven_nonempty_prior']+gap['vacuous_empty_prior']==79
+          assert gap['positive_READY_certified']==0
+          assert gap['complete_source_virtual_route_closure'] is False
+          assert 1<=len(gap['bounded_cross_case_shortlist'])<=16
+          assert all(row['source_row_sha256'] and row['physical_skill_READY']=='UNKNOWN'
+                     and row['unproved_gates'] for row in gap['bounded_cross_case_shortlist'])
+          print('SOURCE_PINNED_POSITIVE_READY_GAP_SHORTLIST',gap['bounded_cross_case_shortlist'][:3])
           assert r['Native_comparator_not_independent_IF_input'] is True
           assert r['complete_positive_ability_READY_proven'] is False
           assert r['WCL_independent_blind_holdout_proven'] is False
