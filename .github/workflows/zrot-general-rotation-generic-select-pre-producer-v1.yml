@@ -16,6 +16,7 @@ on:
       - tools/research/general_rotation_apl_init_guard_probe_v1.py
       - tools/research/general_rotation_apl_init_guard_replay_v1.py
       - tools/research/general_rotation_source_eligibility_decision_ir_v1.py
+      - tools/research/general_rotation_select_sweep_instrument_v1.py
       - tools/research/general_rotation_select_pre_passive_replay_v1.py
       - tools/research/general_rotation_original_pre_capture_engine_v1.py
       - tools/research/general_rotation_original_pre_capture_fixture_v1.py
@@ -80,6 +81,16 @@ jobs:
           print('GENERIC_ORIGINAL_ACTION_INIT_GUARD_SHORT_CIRCUIT_SYNTHETIC_PASS')
           PY
           python -m py_compile tools/research/general_rotation_source_eligibility_decision_ir_v1.py
+          python -m py_compile tools/research/general_rotation_select_sweep_instrument_v1.py
+          python -B tools/research/general_rotation_select_sweep_instrument_v1.py > /tmp/zrot-select-sweep-producer-synthetic.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-select-sweep-producer-synthetic.json'))
+          assert r['schema']=='ZrotGenericOriginalSelectionSweepSourceProducerV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['positive_READY_certified']==0
+          print('GENERIC_ORIGINAL_SELECTION_SWEEP_SOURCE_STATIC_PASS')
+          PY
           python -B tools/research/general_rotation_source_eligibility_decision_ir_v1.py > /tmp/zrot-source-stage-decision-ir-synthetic.json
           python - <<'PY'
           import json
@@ -388,6 +399,25 @@ jobs:
           assert r['positive_action_READY_proven']==0
           print('SOURCE_PINNED_GENERIC_ORIGINAL_ACTION_INIT_GUARD_WITNESS_PASS')
           PY
+      - name: Trace exact Original select_action invocation boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_select_sweep_instrument_v1.py \
+            --simc-root simc-upstream \
+            --call-scope-receipt /tmp/zrot-generic-call-scope-patch.json \
+            --init-inventory-receipt /tmp/zrot-generic-apl-eligibility-patch.json \
+            --receipt /tmp/zrot-generic-select-sweep-patch.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-generic-select-sweep-patch.json'))
+          assert r['schema']=='ZrotGenericOriginalSelectionSweepSourceProducerV1'
+          assert r['source_original_action_ready_call_count']==1
+          assert r['additional_action_ready_calls']==0
+          assert r['source_temporal_frontier_complete'] is False
+          assert r['positive_FULL_READY_certified']==0
+          print('SOURCE_PINNED_ORIGINAL_SELECT_SWEEP_INSTRUMENTATION_PASS')
+          PY
       - name: Rebuild patched Native SimC and capture same two independent specs
         shell: bash
         run: |
@@ -423,6 +453,7 @@ jobs:
           from general_rotation_apl_eligibility_replay_v1 import replay as eligibility_replay
           from general_rotation_apl_init_guard_replay_v1 import replay as init_guard_replay
           from general_rotation_source_eligibility_decision_ir_v1 import compose as source_stage_ir
+          sweep_report=json.load(open('/tmp/zrot-generic-select-sweep-patch.json'))
           guard_report=json.load(open('/tmp/zrot-generic-action-init-guards-patch.json'))
           init_report=json.load(open('/tmp/zrot-generic-apl-eligibility-patch.json'))
           scope_report=json.load(open('/tmp/zrot-generic-call-scope-patch.json'))
@@ -450,7 +481,24 @@ jobs:
               assert a['positive_READY_certified']==0
               m=method_replay(native_trace,method_report,template_manifest,prof,negative_rules)
               scoped=scope_replay(native_trace,prof,template_manifest,
-                                  scope_report,negative_rules)
+                                  scope_report,negative_rules,sweep_report)
+              assert scoped['source_selection_sweeps_observed']>0
+              assert scoped['source_sweep_priority_proven'] is False if (
+                  'source_sweep_priority_proven' in scoped) else (
+                    scoped['full_READY_in_any_frontier_proven'] is False)
+              assert scoped['original_native_ready_return_post_comparators'][
+                  'true']+scoped['original_native_ready_return_post_comparators'][
+                  'false']==scoped['selected_action_ready_original_calls']
+              assert all(sweep['full_READY_proven'] is False and
+                         sweep['complete_source_order_proven'] is False
+                         for sweep in scoped['source_sweep_frontiers'])
+              Path('/tmp/zrot-select-sweep-frontier-'+spec+'.json').write_text(
+                  json.dumps(scoped['source_sweep_frontiers'],
+                      sort_keys=True,separators=(',',':'))+'\n')
+              print('GENERIC_ACTUAL_ORIGINAL_SOURCE_SWEEP_FRONTS_PASS',spec,
+                    scoped['source_selection_sweeps_observed'],
+                    scoped['source_selection_nested_sweep_calls'],
+                    scoped['selected_action_ready_original_calls'],flush=True)
               eligible=eligibility_replay(native_trace,prof,init_report)
               original_init_guards=init_guard_replay(native_trace,prof,guard_report)
               joined=source_stage_ir(prof,eligible,original_init_guards,scoped)
@@ -529,6 +577,13 @@ jobs:
                   'source_init_registry_stage_counts':eligible['stage_registry_receipts'],
                   'source_init_foreground_observation_replayed':True,
                   'source_stage_decision_IR_generated':True,
+                  'original_select_sweeps_observed':
+                      scoped['source_selection_sweeps_observed'],
+                  'original_nested_select_sweep_calls':
+                      scoped['source_selection_nested_sweep_calls'],
+                  'original_action_ready_native_POST_comparator_counts':
+                      scoped['original_native_ready_return_post_comparators'],
+                  'source_sweep_priority_still_UNKNOWN':True,
                   'source_stage_decision_IR_rows':joined['source_row_count'],
                   'source_stage_init_negative_causal_rows':
                       joined['original_init_guard_fails_source_rows_confirmed'],
@@ -589,7 +644,9 @@ jobs:
               negative_profile,negative_rules)
           negative_scopes=scope_replay(
               negative_trace,negative_profile,template_manifest,
-              scope_report,negative_rules)
+              scope_report,negative_rules,sweep_report)
+          assert negative_scopes['source_selection_sweeps_observed']>0
+          assert negative_scopes['full_READY_in_any_frontier_proven'] is False
           negative_init=eligibility_replay(negative_trace,negative_profile,init_report)
           negative_guard=init_guard_replay(negative_trace,negative_profile,guard_report)
           negative_join=source_stage_ir(
@@ -771,6 +828,9 @@ jobs:
             /tmp/zrot-generic-call-scope-patch.json
             /tmp/zrot-generic-apl-eligibility-patch.json
             /tmp/zrot-generic-action-init-guards-patch.json
+            /tmp/zrot-generic-select-sweep-patch.json
+            /tmp/zrot-select-sweep-frontier-fury.json
+            /tmp/zrot-select-sweep-frontier-arcane.json
             /tmp/zrot-source-stage-ir-fury.json
             /tmp/zrot-source-stage-ir-arcane.json
             /tmp/zrot-source-stage-ir-controlled-fury.json
