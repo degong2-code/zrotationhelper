@@ -4,6 +4,7 @@ on:
     branches: [work/gr-simc-st-2t-wcl-blind-20261102]
     paths:
       - tools/research/general_rotation_select_pre_passive_producer_v1.py
+      - tools/research/general_rotation_select_pre_source_adapter_v1.py
       - tools/research/general_rotation_select_pre_passive_replay_v1.py
       - tools/research/general_rotation_original_pre_capture_engine_v1.py
       - tools/research/general_rotation_original_pre_capture_fixture_v1.py
@@ -32,7 +33,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/research/general_rotation_select_pre_passive_producer_v1.py tools/research/general_rotation_select_pre_passive_replay_v1.py
+          python -m py_compile tools/research/general_rotation_select_pre_passive_producer_v1.py tools/research/general_rotation_select_pre_passive_replay_v1.py tools/research/general_rotation_select_pre_source_adapter_v1.py
           python -B tools/research/general_rotation_select_pre_passive_producer_v1.py > /tmp/generic-producer-selftest.json
           python -B tools/research/general_rotation_select_pre_passive_replay_v1.py > /tmp/generic-replay-selftest.json
           python - <<'PY'
@@ -113,8 +114,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python -B tools/research/general_rotation_select_pre_source_adapter_v1.py \
+            --simc-root simc-upstream --out /tmp/zrot-generic-source-templates.json
           python -B tools/research/general_rotation_select_pre_passive_producer_v1.py \
-            --simc-root simc-upstream --receipt /tmp/zrot-generic-select-pre-source-patch.json
+            --simc-root simc-upstream \
+            --source-templates /tmp/zrot-generic-source-templates.json \
+            --receipt /tmp/zrot-generic-select-pre-source-patch.json
           python - <<'PY'
           import json
           r=json.load(open('/tmp/zrot-generic-select-pre-source-patch.json'))
