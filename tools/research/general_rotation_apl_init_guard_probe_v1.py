@@ -97,7 +97,7 @@ def patch_source(pristine:bytes,patched:bytes)->bytes:
                   "verify_actor_weapon()"):
         if changed.count(guard)!=original_body.count(guard):
             raise InitGuardError("ADDED_SOURCE_GUARD_CALL_OR_SHORT_CIRCUIT")
-    if changed.count(MARK)!=1 or changed.count("zrot_original_guard_result(")!=4:
+    if changed.count(MARK)!=1 or changed.count("zrot_original_guard_result(")!=3:
         raise InitGuardError("GUARD_WRAPPER_OR_LOG_SITE_DRIFT")
     start=current.index(active_body)
     output=current[:start]+changed+current[start+len(active_body):]
@@ -165,7 +165,7 @@ def selftest()->dict:
     for g in ("verify_actor_level()","verify_actor_spec()","verify_actor_weapon()"):
         assert value.count(g)==1
     assert value.count(MARK)==1
-    assert value.count("zrot_original_guard_result(")==4
+    assert value.count("zrot_original_guard_result(")==3
     assert "background = true;" in value
     for wrong in (
         base.replace("verify_actor_spec()","verify_other_spec()"),
