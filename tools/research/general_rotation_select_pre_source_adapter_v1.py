@@ -20,6 +20,53 @@ from general_rotation_original_pre_capture_fixture_v1 import declared_operands
 SCHEMA="ZrotGenericPassiveSelectTemplateManifestV1"
 
 
+def pinned_method_entry_sites(templates:list[dict])->list[dict]:
+    """Declare *common* original C++ method entry sites; no raw C++ code."""
+    from general_rotation_source_route_fixture_v1 import warrior_route, mage_route
+    declared=[
+        ("base_action","bool action_t::action_ready()",()),
+        ("base_ready","bool action_t::ready()",
+         ("gcd_ready_ms","usable_while_casting")),
+    ]
+    class_routes=(warrior_route(),mage_route())
+    sites=[]
+    for key,signature,names in declared:
+        methods=[next(x for x in route.methods if x.key==key)
+                 for route in class_routes]
+        if (any(x.signature!=signature or x.path!="engine/action/action.cpp"
+                or x.class_anchor is not None or
+                x.source_blob_sha1!=methods[0].source_blob_sha1
+                for x in methods)):
+            raise ValueError("CROSS_SPEC_METHOD_SIGNATURE_SOURCE_MISMATCH")
+        selected=[]
+        source_fingerprint=None
+        for template in templates:
+            all_fields=[f for f in template["fields"] if f["source_node"]==key]
+            if not all_fields:
+                raise ValueError("REQUIRED_BASE_METHOD_SOURCE_SITE_MISSING")
+            for f in all_fields:
+                p=(f["source_path"],f["source_git_blob_sha1"],
+                   f["source_method_body_sha256"])
+                if source_fingerprint is None:source_fingerprint=p
+                if p!=source_fingerprint:
+                    raise ValueError("CROSS_SPEC_BASE_METHOD_BODY_DRIFT")
+            wanted=[f for f in all_fields if f["operand_name"] in names]
+            if set(x["operand_name"] for x in wanted)!=set(names):
+                raise ValueError("METHOD_ENTRY_RAW_FIELDS_NOT_SOURCE_DECLARED")
+            if not selected:selected=wanted
+            elif ({x["field_id"] for x in selected}!=
+                  {x["field_id"] for x in wanted}):
+                raise ValueError("CROSS_SPEC_METHOD_ENTRY_FIELD_IDS_DIFFER")
+        sites.append({
+            "method_key":key,"signature":signature,"class_anchor":None,
+            "source_path":source_fingerprint[0],
+            "source_git_blob_sha1":source_fingerprint[1],
+            "source_method_body_sha256":source_fingerprint[2],
+            "fields":sorted(selected,key=lambda x:x["operand_name"]),
+        })
+    return sites
+
+
 def build(root:Path)->dict:
     audits=audit_both(root)
     if (audits.get("pinned_source_commit")!=UPSTREAM or
@@ -36,6 +83,7 @@ def build(root:Path)->dict:
         "pinned_source_commit":UPSTREAM,
         "source_fixture_count":len(templates),
         "templates":templates,
+        "method_entry_sites":pinned_method_entry_sites(templates),
         "actual_native_CAPTURE_execution":False,
         "positive_READY_proven":0,
         "WCL_API_calls":0,

@@ -5,6 +5,8 @@ on:
     paths:
       - tools/research/general_rotation_select_pre_passive_producer_v1.py
       - tools/research/general_rotation_select_pre_source_adapter_v1.py
+      - tools/research/general_rotation_method_pre_passive_producer_v1.py
+      - tools/research/general_rotation_method_pre_passive_replay_v1.py
       - tools/research/general_rotation_select_pre_passive_replay_v1.py
       - tools/research/general_rotation_original_pre_capture_engine_v1.py
       - tools/research/general_rotation_original_pre_capture_fixture_v1.py
@@ -33,7 +35,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/research/general_rotation_select_pre_passive_producer_v1.py tools/research/general_rotation_select_pre_passive_replay_v1.py tools/research/general_rotation_select_pre_source_adapter_v1.py
+          python -m py_compile tools/research/general_rotation_select_pre_passive_producer_v1.py tools/research/general_rotation_select_pre_passive_replay_v1.py tools/research/general_rotation_select_pre_source_adapter_v1.py tools/research/general_rotation_method_pre_passive_producer_v1.py tools/research/general_rotation_method_pre_passive_replay_v1.py
+          python -B tools/research/general_rotation_method_pre_passive_producer_v1.py > /tmp/generic-method-producer-selftest.json
+          python -B tools/research/general_rotation_method_pre_passive_replay_v1.py > /tmp/generic-method-replay-selftest.json
+          python - <<'PY'
+          import json
+          for p,s in (
+              ('/tmp/generic-method-producer-selftest.json',
+               'ZrotGenericOriginalMethodEntryPREPassiveProducerV1'),
+              ('/tmp/generic-method-replay-selftest.json',
+               'ZrotGenericOriginalMethodEntryPREReplayV1')):
+              x=json.load(open(p))
+              assert x['schema']==s
+              assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert x['positive_READY_certified']==0
+              assert x['WCL_API_calls']==0
+          print('GENERIC_METHOD_ENTRY_PRE_SYNTHETIC_PASS')
+          PY
           python -B tools/research/general_rotation_select_pre_passive_producer_v1.py > /tmp/generic-producer-selftest.json
           python -B tools/research/general_rotation_select_pre_passive_replay_v1.py > /tmp/generic-replay-selftest.json
           python - <<'PY'
@@ -132,6 +150,26 @@ jobs:
           assert r['positive_READY_proven']==0
           print('GENERIC_SOURCE_PATCH_PRODUCER_OUTPUT_PASS')
           PY
+      - name: Instrument pinned Original C++ method entry sites without new readiness calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_method_pre_passive_producer_v1.py \
+            --simc-root simc-upstream \
+            --source-templates /tmp/zrot-generic-source-templates.json \
+            --receipt /tmp/zrot-generic-method-pre-patch.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-generic-method-pre-patch.json'))
+          assert r['schema']=='ZrotGenericOriginalMethodEntryPREPassiveProducerV1'
+          assert r['source_phase']=='SIMC_ORIGINAL_METHOD_PRE'
+          assert r['source_method_count']==2
+          assert r['requested_original_method_PRE_operands']==2
+          assert r['new_original_ready_or_virtual_calls']==0
+          assert r['native_compiled_and_executed'] is False
+          assert r['positive_READY_certified']==0
+          print('SOURCE_PINNED_CXX_ORIGINAL_METHOD_ENTRY_INSTRUMENTED')
+          PY
       - name: Rebuild patched Native SimC and capture same two independent specs
         shell: bash
         run: |
@@ -157,7 +195,10 @@ jobs:
           sys.path.insert(0,'tools/research')
           from simc_native_json_sequence import extract_json_sequence
           from general_rotation_select_pre_passive_replay_v1 import parse_marker_lines
+          from general_rotation_method_pre_passive_replay_v1 import replay as method_replay
           report=json.load(open('/tmp/zrot-generic-select-pre-source-patch.json'))
+          method_report=json.load(open('/tmp/zrot-generic-method-pre-patch.json'))
+          template_manifest=json.load(open('/tmp/zrot-generic-source-templates.json'))
           cases={}
           for spec,profile in (
               ('fury','MID2_Warrior_Fury.simc'),
@@ -176,6 +217,14 @@ jobs:
               assert a['original_select_PRE_marker_count']==a['original_select_PRE_attempt_count']*3
               assert a['source_method_entry_PRE_proven'] is False
               assert a['positive_READY_certified']==0
+              m=method_replay(native_trace,method_report,template_manifest,prof)
+              assert m['source_method_entry_total']>0
+              assert m['by_method'].get('base_action',0)>0
+              assert m['by_method'].get('base_ready',0)>0
+              assert m['original_method_PRE_raw_field_count']==2*m['by_method']['base_ready']
+              assert m['full_action_READY_proven'] is False
+              assert m['same_time_selection_call_pairing_proven'] is False
+              assert m['positive_READY_certified']==0
               cases[spec]={
                   'source_SELECT_PRE_recorded':True,
                   'original_vs_patched_combat_exact':True,
@@ -183,23 +232,31 @@ jobs:
                   'same_effective_APL_and_source_profile':True,
                   'observed_attempts':a['original_select_PRE_attempt_count'],
                   'typed_raw_operands':a['original_select_PRE_marker_count'],
-                  'source_method_entry_PRE_proven':False,
+                  'source_method_entry_PRE_proven':True,
+                  'observed_base_action_method_entries':m['by_method']['base_action'],
+                  'observed_base_ready_method_entries':m['by_method']['base_ready'],
+                  'method_entry_PRE_typed_raw_operands':m['original_method_PRE_raw_field_count'],
+                  'unobserved_derived_override_route_closed':False,
                   'physical_action_READY':'UNKNOWN',
                   'WCL_API_calls':0
               }
           receipt={
-              'schema':'ZrotGenericOriginalSELECTPRETwoSpecActualNativeA_BV1',
-              'status':'REAL_NATIVE_TWO_SPEC_SELECT_PRE_AND_A_B_PARITY_PASS',
+              'schema':'ZrotGenericOriginalSELECTAndMETHODPRETwoSpecActualNativeA_BV1',
+              'status':'REAL_NATIVE_TWO_SPEC_SELECT_METHOD_PRE_AND_A_B_PARITY_PASS',
               'cases':cases,'generic_producer_applied_once':True,
               'original_action_ready_calls_preserved':True,
               'independent_action_READY_proven':False,
               'actual_method_PRE_capture_contract_closed':False,
+              'generic_base_method_entry_observed_in_both_specs':True,
+              'unobserved_virtual_and_spec_override_paths_remain_unknown':True,
               'dummy_error_permitted':False,'WCL_API_calls':0
           }
           p=Path('/tmp/zrot-generic-select-pre-two-spec-a-b.json')
           p.write_text(json.dumps(receipt,sort_keys=True,separators=(',',':'))+'\n')
-          print('ACTUAL_GENERIC_TWO_SPEC_SELECT_PRE_A_B_PASS',
-                [(k,v['observed_attempts']) for k,v in cases.items()])
+          print('ACTUAL_GENERIC_TWO_SPEC_SELECT_AND_METHOD_PRE_A_B_PASS',
+                [(k,v['observed_attempts'],
+                  v['observed_base_action_method_entries'],
+                  v['observed_base_ready_method_entries']) for k,v in cases.items()])
           PY
           sha256sum /tmp/zrot-generic-select-pre-two-spec-a-b.json
       - name: Preserve compact safe receipts only (never raw actor logs)
@@ -209,6 +266,7 @@ jobs:
           name: zrot-general-rotation-generic-select-pre-two-spec-receipts
           path: |
             /tmp/zrot-generic-select-pre-source-patch.json
+            /tmp/zrot-generic-method-pre-patch.json
             /tmp/zrot-generic-select-pre-two-spec-a-b.json
           retention-days: 7
           if-no-files-found: error
