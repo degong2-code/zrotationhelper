@@ -13,6 +13,8 @@ on:
       - tools/research/general_rotation_call_scope_replay_v1.py
       - tools/research/general_rotation_apl_eligibility_instrument_v1.py
       - tools/research/general_rotation_apl_eligibility_replay_v1.py
+      - tools/research/general_rotation_apl_init_guard_probe_v1.py
+      - tools/research/general_rotation_apl_init_guard_replay_v1.py
       - tools/research/general_rotation_select_pre_passive_replay_v1.py
       - tools/research/general_rotation_original_pre_capture_engine_v1.py
       - tools/research/general_rotation_original_pre_capture_fixture_v1.py
@@ -58,6 +60,23 @@ jobs:
               assert r['status']=='PASS_OFFLINE_SYNTHETIC'
               assert r['positive_READY_certified']==0
           print('GENERIC_ORIGINAL_APL_INIT_AND_FOREGROUND_INVENTORY_SYNTHETIC_PASS')
+          PY
+          python -m py_compile tools/research/general_rotation_apl_init_guard_probe_v1.py tools/research/general_rotation_apl_init_guard_replay_v1.py
+          python -B tools/research/general_rotation_apl_init_guard_probe_v1.py > /tmp/zrot-generic-init-guard-probe-selftest.json
+          python -B tools/research/general_rotation_apl_init_guard_replay_v1.py > /tmp/zrot-generic-init-guard-replay-selftest.json
+          python - <<'PY'
+          import json
+          for path,schema in (
+              ('/tmp/zrot-generic-init-guard-probe-selftest.json',
+               'ZrotGenericOriginalActionInitGuardReturnProbeV1'),
+              ('/tmp/zrot-generic-init-guard-replay-selftest.json',
+               'ZrotGenericOriginalActionInitGuardReturnStrictReplayV1')):
+              v=json.load(open(path))
+              assert v['schema']==schema
+              assert v['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert v['positive_READY_certified']==0
+              assert v['WCL_API_calls']==0
+          print('GENERIC_ORIGINAL_ACTION_INIT_GUARD_SHORT_CIRCUIT_SYNTHETIC_PASS')
           PY
           python -B tools/research/general_rotation_controlled_negative_profile_v1.py > /tmp/zrot-controlled-negative-profile-selftest.json
           python - <<'PY'
@@ -338,6 +357,24 @@ jobs:
           assert r['positive_FULL_action_READY_proven']==0
           print('SOURCE_PINNED_GENERIC_APL_ELIGIBILITY_INIT_PATCH_PASS')
           PY
+      - name: Observe actual original action init eligibility guard return values
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_apl_init_guard_probe_v1.py \
+            --simc-root simc-upstream \
+            --init-inventory-receipt /tmp/zrot-generic-apl-eligibility-patch.json \
+            --prior-call-scope-receipt /tmp/zrot-generic-call-scope-patch.json \
+            --receipt /tmp/zrot-generic-action-init-guards-patch.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-generic-action-init-guards-patch.json'))
+          assert r['schema']=='ZrotGenericOriginalActionInitGuardReturnProbeV1'
+          assert r['original_guard_short_circuit_order_preserved'] is True
+          assert r['source_guard_call_count_delta']==0
+          assert r['positive_action_READY_proven']==0
+          print('SOURCE_PINNED_GENERIC_ORIGINAL_ACTION_INIT_GUARD_WITNESS_PASS')
+          PY
       - name: Rebuild patched Native SimC and capture same two independent specs
         shell: bash
         run: |
@@ -371,6 +408,8 @@ jobs:
           from general_rotation_method_pre_passive_replay_v1 import replay as method_replay
           from general_rotation_call_scope_replay_v1 import replay as scope_replay
           from general_rotation_apl_eligibility_replay_v1 import replay as eligibility_replay
+          from general_rotation_apl_init_guard_replay_v1 import replay as init_guard_replay
+          guard_report=json.load(open('/tmp/zrot-generic-action-init-guards-patch.json'))
           init_report=json.load(open('/tmp/zrot-generic-apl-eligibility-patch.json'))
           scope_report=json.load(open('/tmp/zrot-generic-call-scope-patch.json'))
           negative_rules=json.load(open('/tmp/zrot-generic-false-guard-contract.json'))
@@ -399,6 +438,9 @@ jobs:
               scoped=scope_replay(native_trace,prof,template_manifest,
                                   scope_report,negative_rules)
               eligible=eligibility_replay(native_trace,prof,init_report)
+              original_init_guards=init_guard_replay(native_trace,prof,guard_report)
+              assert original_init_guards['source_mapped_init_guard_invocations_total']>0
+              assert original_init_guards['positive_FULL_ACTION_READY_proven']==0
               assert eligible['schema']=='ZrotGenericOriginalAPLInitializationEligibilityStrictReplayV1'
               assert eligible['source_mapped_row_instances_total']>0
               assert set(eligible['source_initialization_stages'])=={
@@ -456,6 +498,9 @@ jobs:
                   'source_false_method_not_action_READY':True,
                   'source_init_registry_stage_counts':eligible['stage_registry_receipts'],
                   'source_init_foreground_observation_replayed':True,
+                  'original_init_guard_evidence_for_reference_action':
+                      original_init_guards['source_action_init_guard_evidence'].get(
+                          'rampage' if spec=='fury' else 'arcane_blast',{}),
                   'init_action_source_inventory':
                       eligible['source_action_stage_observations'][
                           'INIT_FINISHED_END'].get(
@@ -511,6 +556,15 @@ jobs:
               negative_trace,negative_profile,template_manifest,
               scope_report,negative_rules)
           negative_init=eligibility_replay(negative_trace,negative_profile,init_report)
+          negative_guard=init_guard_replay(negative_trace,negative_profile,guard_report)
+          rampage_guard=negative_guard[
+              'source_action_init_guard_evidence'].get('rampage',{})
+          print('GENERIC_CONTROLLED_NEGATIVE_SOURCE_ACTION_INIT_GUARD_DIAGNOSTIC',
+                json.dumps({
+                  'source_action':'rampage',
+                  'actual_original_init_guard_returns':rampage_guard,
+                  'source_guard_scope':'action_t::init only; not action_ready'
+                },sort_keys=True),flush=True)
           rampage_init={
               stage:negative_init['source_action_stage_observations'][stage].get('rampage',{})
               for stage in ('INIT_ACTIONS_END','INIT_FINISHED_END')
@@ -542,6 +596,8 @@ jobs:
               'observed_method_calls_by_site'].get('rampage_ready',0)
           if condition_count>0:
               controlled_disposition='REAL_METHOD_FALSE_OBSERVED'
+          elif rampage_guard.get('guard_false_weapon',0)>0 and rampage_called==0:
+              controlled_disposition='SOURCE_INIT_WEAPON_GUARD_FALSE_BEFORE_READY'
           elif background_skips>0 and rampage_called==0:
               controlled_disposition='UPSTREAM_BACKGROUND_SKIPPED_BEFORE_READY'
           else:
@@ -577,6 +633,10 @@ jobs:
               'source_loop_rampage_background_skip_count':background_skips,
               'rampage_ready_original_entry_count':rampage_called,
               'source_initialization_eligibility':rampage_init,
+              'independent_original_init_guard_returns':rampage_guard,
+              'source_forced_background_at_init_evidence':
+                  rampage_guard.get('source_forced_background_instances',0),
+              'guard_failed_not_a_full_ACTION_READY_proof':True,
               'source_init_registered_action_counts':negative_init[
                   'stage_registry_receipts'],
               'initialization_not_in_foreground_is_not_ready_failure':True,
@@ -592,7 +652,9 @@ jobs:
           }
           print('ACTUAL_GENERIC_CONTROLLED_COHORT_REPLAY_PASS_HYPOTHESIS_SEPARATE',
                 hypothesis_status,controlled_disposition,condition_count,
-                background_skips)
+                background_skips,
+                'source_init_weapon_false',
+                rampage_guard.get('guard_false_weapon',0))
           p=Path('/tmp/zrot-generic-select-pre-two-spec-a-b.json')
           p.write_text(json.dumps(receipt,sort_keys=True,separators=(',',':'))+'\n')
           print('ACTUAL_GENERIC_TWO_SPEC_SELECT_AND_METHOD_PRE_A_B_PASS',
@@ -617,6 +679,7 @@ jobs:
             /tmp/zrot-generic-false-guard-contract.json
             /tmp/zrot-generic-call-scope-patch.json
             /tmp/zrot-generic-apl-eligibility-patch.json
+            /tmp/zrot-generic-action-init-guards-patch.json
             /tmp/zrot-controlled-fury-no-offhand-provenance.json
             /tmp/zrot-generic-select-pre-two-spec-a-b.json
           retention-days: 7
