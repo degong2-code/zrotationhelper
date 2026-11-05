@@ -75,6 +75,9 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
     by_method=Counter()
     by_method_edges=Counter()
     false_by_rule=Counter()
+    selected_roots_by_source_row=Counter()
+    source_loop_skips_by_source_row=Counter()
+    method_false_by_source_row=Counter()
     method_pre_belongs_to_scope=0
     unlinked_legacy_method_pre=0
     selection_skips=Counter()
@@ -105,6 +108,8 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
         },certified)
         if witness["method_return_verdict"]==METHOD_FALSE:
             false_by_rule[witness["source_guard_rule_id"]]+=1
+            method_false_by_source_row[(frame["source_row_sha256"],
+                                        witness["source_guard_rule_id"])]+=1
             if len(examples)<3:
                 examples.append({
                     "method_call_id":frame["id"],"selected_root_call_id":frame["root"],
@@ -129,6 +134,7 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
             row=_exact_source_identity(apl,owner,int(ord_s),native)
             action=row["action"]
             selection_skips[(action,reason)]+=1
+            source_loop_skips_by_source_row[row["source_sha256"]]+=1
             if len(bounded_source_skips)<3:
                 bounded_source_skips.append({
                     "at_simc_ms":int(clock),
@@ -200,6 +206,7 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
                         raise ScopeReplayError("SELECT_ROOT_WITHOUT_TYPED_PRE")
                     queue.popleft()
                     selected_attempts+=1
+                    selected_roots_by_source_row[source_row["source_sha256"]]+=1
                     root_stacks[root].append(callid)
                 else:
                     if method not in sites or callid==root:
@@ -302,6 +309,14 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
         "bounded_original_source_loop_skip_examples":bounded_source_skips,
         "source_BACKGROUND_exclusion_not_a_READY_failure":True,
         "selected_action_ready_original_calls":selected_attempts,
+        "action_ready_call_roots_by_source_row_sha256":
+            dict(sorted(selected_roots_by_source_row.items())),
+        "source_loop_background_skips_by_source_row_sha256":
+            dict(sorted(source_loop_skips_by_source_row.items())),
+        "independent_negative_method_calls_by_source_row_sha256":{
+            f"{row_hash}.{rule}":n
+            for (row_hash,rule),n in sorted(method_false_by_source_row.items())
+        },
         "dynamic_method_calls_scope_linked":method_scopes,
         "exact_method_PRE_entries_linked":method_pre_belongs_to_scope,
         "uncorrelated_method_PRE_entries_or_fields":unlinked_legacy_method_pre,

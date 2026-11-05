@@ -105,6 +105,7 @@ def replay(native_log:str,profile:bytes,producer_receipt:dict)->dict:
     # A source APL row may be mapped to multiple native action objects.
     # Group by source *action name*, with exact row/provenance checked above.
     by_stage={}
+    by_source_row_at_stage={}
     for stage in expected:
         counts={}
         for row in observed.get(stage,[]):
@@ -132,6 +133,26 @@ def replay(native_log:str,profile:bytes,producer_receipt:dict)->dict:
                       for k,v in x.items())
             for name,x in sorted(counts.items())
         }
+        by_hash={}
+        for item in observed.get(stage,[]):
+            h=item["source_row_sha256"]
+            row=by_hash.setdefault(h,{
+                "source_action":item["source_action"],
+                "registered_mapped_instances":0,
+                "background_true":0,"foreground_true":0,
+                "active_list_true":0,"mainhand_weapon_none_true":0,
+                "offhand_weapon_none_true":0})
+            if row["source_action"]!=item["source_action"]:
+                raise EligibilityReplayError("CROSS_ACTION_ROW_HASH_COLLISION")
+            row["registered_mapped_instances"]+=1
+            for name,key in (
+                ("background_true","background"),
+                ("foreground_true","foreground_member"),
+                ("active_list_true","active_list_member"),
+                ("mainhand_weapon_none_true","actor_mainhand_weapon_none"),
+                ("offhand_weapon_none_true","actor_offhand_weapon_none")):
+                row[name]+=int(item[key])
+        by_source_row_at_stage[stage]=dict(sorted(by_hash.items()))
     source_actions=Counter(row["action"] for rows in apl.values() for row in rows)
     missing_by_stage={}
     for stage in expected:
@@ -166,6 +187,7 @@ def replay(native_log:str,profile:bytes,producer_receipt:dict)->dict:
         "stage_registry_receipts":stage_end,
         "source_mapped_row_instances_total":real_rows,
         "source_action_stage_observations":by_stage,
+        "source_row_stage_observations_by_sha256":by_source_row_at_stage,
         "source_stage_background_nonforeground_row_hashes_by_action":
             background_not_foreground,
         "source_stage_weapon_missing_background_nonforeground_row_hashes_by_action":

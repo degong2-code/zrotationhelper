@@ -104,7 +104,22 @@ def replay(log:str,profile:bytes,producer:dict)->dict:
         raise InitGuardReplayError("NO_OBSERVED_ORIGINAL_INIT_GUARD_CALLS")
     grouped={}
     by_failed_rows={}
+    grouped_by_sha={}
     for row in completed:
+        h=row["source_row_sha256"]
+        by_hash=grouped_by_sha.setdefault(h,{
+            "source_action":row["source_action"],
+            "observed_init_guard_invocations":0,
+            "guard_false_level":0,"guard_false_spec":0,
+            "guard_false_weapon":0,
+            "all_observed_guard_checks_passed":0})
+        if by_hash["source_action"]!=row["source_action"]:
+            raise InitGuardReplayError("CROSS_ACTION_INIT_SOURCE_HASH_COLLISION")
+        by_hash["observed_init_guard_invocations"]+=1
+        if row["failed_eligibility_guard"]:
+            by_hash["guard_false_"+row["failed_eligibility_guard"]]+=1
+        else:
+            by_hash["all_observed_guard_checks_passed"]+=1
         if row["failed_eligibility_guard"]:
             key=(row["source_action"],row["failed_eligibility_guard"])
             by_failed_rows.setdefault(key,set()).add(row["source_row_sha256"])
@@ -135,6 +150,8 @@ def replay(log:str,profile:bytes,producer:dict)->dict:
         "source_mapped_init_guard_invocations_total":len(completed),
         "original_guard_return_events":raw_guards,
         "original_cpp_short_circuit_order_verified_in_replay":True,
+        "source_row_init_guard_evidence_by_sha256":
+            dict(sorted(grouped_by_sha.items())),
         "source_action_init_guard_evidence":{
             name:{
                 **{k:v for k,v in x.items() if k!="distinct_source_row_hashes"},
