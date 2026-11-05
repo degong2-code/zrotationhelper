@@ -126,7 +126,22 @@ jobs:
           assert selected['earlier_independent_NOT_READY']==6
           assert 'SYNC_LINE:MISSING' not in selected['unproved_gates']
           assert selected['physical_skill_READY']=='UNKNOWN'
-          assert len(selected['unproved_gates'])<=5
+          assert len(selected['unproved_gates'])==5
+          sub=selected['original_PRE_postguard_subpredicates']
+          assert sub['base_ready_movement_branch_bypassed'] is True
+          assert sub['movement_option_matches_source_PRE'] is True
+          assert sub['repeat_cast_rule_matches_source_PRE'] is True
+          assert sub['movement_directionality']=='UNKNOWN'
+          assert sub['movement_full_route']=='UNKNOWN'
+          assert sub['cast_GCD_full_route']=='UNKNOWN'
+          assert sub['original_source_virtual_ready_used_as_operand'] is False
+          assert 'MOVEMENT:MISSING' in selected['unproved_gates']
+          assert 'CAST_GCD:MISSING' in selected['unproved_gates']
+          assert p['independent_source_postguard_subset']>0
+          assert p['independent_source_moving_option_pass']>0
+          assert p['independent_source_repeat_cast_pass']>0
+          print('SOURCE_PINNED_ORIGINAL_POSTGUARD_SUBPREDICATES_PASS',
+                selected['case'],selected['at_simc_ms'],selected['source_action'],sub)
           print('ACTUAL_ORIGINAL_SOURCE_SYNC_LINE_PARTIAL_POSITIVE_PASS',
                 selected['case'],selected['at_simc_ms'],selected['source_action'],
                 selected['unproved_gates'])
