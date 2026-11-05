@@ -157,7 +157,7 @@ def _selector_scope(original:bytes)->bytes:
         raise CallScopeError("ORIGINAL_BACKGROUND_SKIP_SOURCE_BRANCH_DRIFT")
     background_skip=r"""    if ( a->background )
     {
-      // Source loop excluded this action BEFORE a->action_ready().
+      // Source loop excluded this action before readiness evaluation.
       if ( sim->log && !is_pet() && !is_enemy() &&
            a->action_list && a->signature )
       {
