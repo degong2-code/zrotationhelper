@@ -128,11 +128,11 @@ def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes,
                 "explicit_method_call_scope_id":call_scope_id,
             }
         elif event=="FIELD":
-            if active is None or (
+            if (active is None or (
                 active["at_simc_ms"],active["source_list"],
                 active["ordinal_one_based"],active["native_name_identity_only"],
                 active["source_method_key"],active["source_row_sha256"]) != scope or
-                active["explicit_method_call_scope_id"]!=call_scope_id:
+                active["explicit_method_call_scope_id"]!=call_scope_id):
                 raise MethodReplayError("METHOD_FIELD_OUTSIDE_EXACT_ENTRY_SCOPE")
             declarations=[x for x in site["fields"] if x["field_id"]==field_id]
             if len(declarations)!=1:
