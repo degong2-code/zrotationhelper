@@ -36,6 +36,7 @@ from general_rotation_original_pre_capture_engine_v1 import canonical
 
 SCHEMA="ZrotGenericOriginalReadyCallScopeTraceProducerV1"
 TRACE_MARK="ZROT_GENERIC_CALL_SCOPE_V1|"
+SKIP_MARK="ZROT_GENERIC_SELECT_SKIP_V1|"
 HEADER="engine/zrot_generic_call_scope_v1.hpp"
 METHOD_PHASE="SIMC_ORIGINAL_METHOD_PRE"
 SOURCE_PHASE="SIMC_SELECT_ACTION_PRE"
@@ -151,10 +152,37 @@ def _selector_scope(original:bytes)->bytes:
         } );
       return a->action_ready();
     })() )"""
+    source_skip='    if ( a->background )\n      continue;'
+    if body.count(source_skip)!=1 or SKIP_MARK in body:
+        raise CallScopeError("ORIGINAL_BACKGROUND_SKIP_SOURCE_BRANCH_DRIFT")
+    background_skip=r"""    if ( a->background )
+    {
+      // Source loop excluded this action BEFORE a->action_ready().
+      if ( sim->log && !is_pet() && !is_enemy() &&
+           a->action_list && a->signature )
+      {
+        const auto& zrot_skip_owner = *a->action_list;
+        for ( std::size_t zrot_skip_index = 0;
+              zrot_skip_index < zrot_skip_owner.action_list.size();
+              ++zrot_skip_index )
+        {
+          if ( &( zrot_skip_owner.action_list[ zrot_skip_index ] ) == a->signature )
+          {
+            sim->print_log( "ZROT_GENERIC_SELECT_SKIP_V1|{}|{}|{}|{}|BACKGROUND",
+              sim->current_time().total_millis(),zrot_skip_owner.name_str,
+              static_cast<unsigned>( zrot_skip_index + 1 ),a->name_str );
+            break;
+          }
+        }
+      }
+      continue;
+    }"""
+    body=body.replace(source_skip,background_skip,1)
     new=body.replace(CALL,replacement,1)
     if (new.count("a->action_ready()")!=1 or new.count(TRACE_MARK)!=1 or
+        new.count(SKIP_MARK)!=1 or
         new.count(SELECT_MARK)!=body.count(SELECT_MARK)):
-        raise CallScopeError("ORIGINAL_READINESS_CALL_COUNT_CHANGED")
+        raise CallScopeError("ORIGINAL_READINESS_OR_BACKGROUND_SKIP_DRIFT")
     return (src[:start]+new+src[end:]).encode("utf-8")
 
 
@@ -296,7 +324,10 @@ def generate(source_root:Path,manifest_path:Path,
         (root/path).write_bytes(data)
     return {
         "schema":SCHEMA,"source_revision":REVISION,
-        "trace_marker":TRACE_MARK,"method_PRE_marker_call_id_appended":True,
+        "trace_marker":TRACE_MARK,
+        "source_select_skip_marker":SKIP_MARK,
+        "source_select_skip_contract":"ORIGINAL_BACKGROUND_BRANCH_BEFORE_ACTION_READY",
+        "method_PRE_marker_call_id_appended":True,
         "header_source_sha256":_sh(CPP_HEADER.encode()),
         "source_method_count":len(sites),
         "original_action_ready_call_count":1,
@@ -314,6 +345,7 @@ def generate(source_root:Path,manifest_path:Path,
 def selftest()->dict:
     # Verify exact call count and receipt hashes against synthetic C++.
     source=(START+"\n{\n  // select\n"+SELECT_MARK+"{}|{}\n"+
+            "    if ( a->background )\n      continue;\n"+
             "    if ( a->action_ready() )\n  {}\n}\n"+END+"\n").encode()
     # source has deliberately insufficient 3 original SELECT markers.
     try:_selector_scope(source)
@@ -325,6 +357,9 @@ def selftest()->dict:
     assert patched.decode().count("a->action_ready()")==1
     assert "make_scope" in patched.decode()
     assert patched.decode().count(TRACE_MARK)==1
+    assert patched.decode().count(SKIP_MARK)==1
+    assert patched.decode().count("if ( a->background )")==1
+    assert patched.decode().count("continue;")==1
     method=(r'this->sim->print_log( "'+METHOD_MARK+
             r'{}|{}|{}|{}|base_ready|ENTRY|-|-|-",'+
             "\n            this->name_str );\n")

@@ -29,7 +29,7 @@ from general_rotation_select_pre_passive_producer_v1 import (
     MARK as SELECT_MARK, READS as SELECT_READS
 )
 from general_rotation_call_scope_instrument_v1 import (
-    TRACE_MARK, SCHEMA as SOURCE_TRACE_SCHEMA
+    TRACE_MARK, SKIP_MARK, SCHEMA as SOURCE_TRACE_SCHEMA
 )
 from general_rotation_source_false_guard_engine_v1 import (
     verify_rules, assess_method_entry, FALSE as METHOD_FALSE
@@ -59,7 +59,8 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
         trace_receipt.get("trace_marker")!=TRACE_MARK or
         trace_receipt.get("original_action_ready_call_count")!=1 or
         trace_receipt.get("new_action_ready_calls")!=0 or
-        trace_receipt.get("method_PRE_marker_call_id_appended") is not True):
+        trace_receipt.get("method_PRE_marker_call_id_appended") is not True or
+        trace_receipt.get("source_select_skip_marker")!=SKIP_MARK):
         raise ScopeReplayError("SOURCE_SCOPE_PRODUCER_RECEIPT_REQUIRED")
     sites={x["method_key"]:x for x in _validate_plan(manifest)}
     if len(sites)!=trace_receipt.get("source_method_count"):
@@ -76,6 +77,8 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
     false_by_rule=Counter()
     method_pre_belongs_to_scope=0
     unlinked_legacy_method_pre=0
+    selection_skips=Counter()
+    bounded_source_skips=[]
     selection_pre_records=0
     selection_pre_complete=0
     selected_attempts=0
@@ -113,6 +116,29 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
                 })
 
     for rawline in log.splitlines():
+        if SKIP_MARK in rawline:
+            if rawline.count(SKIP_MARK)!=1:
+                raise ScopeReplayError("AMBIGUOUS_SOURCE_BACKGROUND_EXCLUSION")
+            parts=rawline.split(SKIP_MARK,1)[1].strip().split("|")
+            if len(parts)!=5:
+                raise ScopeReplayError("SOURCE_SELECT_SKIP_SHAPE_DRIFT")
+            clock,owner,ord_s,native,reason=parts
+            if (not clock.isdigit() or not ord_s.isdigit() or
+                reason!="BACKGROUND"):
+                raise ScopeReplayError("UNDECLARED_APL_LOOP_SKIP_CAUSE")
+            row=_exact_source_identity(apl,owner,int(ord_s),native)
+            action=row["action"]
+            selection_skips[(action,reason)]+=1
+            if len(bounded_source_skips)<3:
+                bounded_source_skips.append({
+                    "at_simc_ms":int(clock),
+                    "source_row_sha256":row["source_sha256"],
+                    "source_action":action,
+                    "source_loop_skip_reason":reason,
+                    "action_READY_called":False,
+                    "whole_action_NOT_READY_proven":False
+                })
+            continue
         if SELECT_MARK in rawline:
             if rawline.count(SELECT_MARK)!=1:
                 raise ScopeReplayError("AMBIGUOUS_SELECT_PRE_MARKER")
@@ -269,6 +295,12 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
         "schema":SCHEMA,
         "source_profile_git_blob_sha1":git_blob(profile),
         "select_PRE_records":selection_pre_records,
+        "source_loop_skips_before_action_READY":sum(selection_skips.values()),
+        "source_loop_skips_by_action":{
+            f"{act}.{reason}":n for (act,reason),n in sorted(selection_skips.items())
+        },
+        "bounded_original_source_loop_skip_examples":bounded_source_skips,
+        "source_BACKGROUND_exclusion_not_a_READY_failure":True,
         "selected_action_ready_original_calls":selected_attempts,
         "dynamic_method_calls_scope_linked":method_scopes,
         "exact_method_PRE_entries_linked":method_pre_belongs_to_scope,
@@ -335,6 +367,7 @@ def selftest()->dict:
         "schema":TRACE_SCHEMA, "trace_marker":TRACE_MARK,
         "original_action_ready_call_count":1,"new_action_ready_calls":0,
         "method_PRE_marker_call_id_appended":True,
+        "source_select_skip_marker":SKIP_MARK,
         "source_method_count":2
     }
     def trace(ev,kind,call,parent,root,method):
@@ -348,7 +381,7 @@ def selftest()->dict:
          ("int|1000" if name=="gcd_ready_ms" else "bool|1"))
         for name in sorted(SELECT_READS)
     ]
-    events=select_records+[
+    events=[SKIP_MARK+"19|default|1|rampage|BACKGROUND"]+select_records+[
         trace("BEGIN","SELECT",10,0,10,"select_call"),
         trace("BEGIN","METHOD",11,10,10,"base_action"),
         pre("base_action","ENTRY",11),
@@ -362,6 +395,8 @@ def selftest()->dict:
     ]
     out=replay("\n".join(events),profile,man,receipt)
     assert out["selected_action_ready_original_calls"]==1
+    assert out["source_loop_skips_by_action"]["rampage.BACKGROUND"]==1
+    assert out["source_BACKGROUND_exclusion_not_a_READY_failure"] is True
     assert out["dynamic_method_calls_scope_linked"]==2
     assert out["max_observed_trace_stack_depth"]==3
     assert out["positive_FULL_action_READY_proven"]==0
