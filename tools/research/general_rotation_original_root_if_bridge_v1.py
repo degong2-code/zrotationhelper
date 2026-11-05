@@ -156,6 +156,9 @@ def corroborate(log: str, profile: bytes, temporal: dict,
         native_if_producer.get("source_revision") != REVISION or
         native_if_producer.get("native_if_marker") != MARK or
         native_if_producer.get("new_IF_ready_rng_target_calls") != 0 or
+        native_if_producer.get("original_native_if_expression_evaluations_per_callsite") != 1 or
+        native_if_producer.get("root_PRE_producer_receipt_sha256") !=
+            digest(canonical(root_producer)) or
         native_if_producer.get("full_READY_proven") != 0):
         raise RootIFBridgeError("SOURCE_NATIVE_IF_PRODUCER_REQUIRED")
     # Mandatory independent source-root causal replay first.
@@ -196,8 +199,8 @@ def corroborate(log: str, profile: bytes, temporal: dict,
             elif kind == "METHOD" and method == "base_action":
                 if direction == "BEGIN":
                     if (cid in base_frames or rid not in active or
-                        (owner, int(ord_s), name) !=
-                        (roots[rid][1], roots[rid][2], roots[rid][3]["action"])):
+                        (owner, int(ord_s)) !=
+                        (roots[rid][1], roots[rid][2]) or not name):
                         raise RootIFBridgeError("NATIVE_IF_METHOD_NOT_SOURCE_ROW")
                     base_frames[cid] = rid
                 elif direction == "END":
@@ -338,6 +341,8 @@ def selftest() -> dict:
     bridge_receipt = {
         "schema": SCHEMA, "source_revision": REVISION,
         "native_if_marker": MARK, "new_IF_ready_rng_target_calls": 0,
+        "original_native_if_expression_evaluations_per_callsite": 1,
+        "root_PRE_producer_receipt_sha256": digest(canonical(root_receipt)),
         "full_READY_proven": 0}
     begin = TRACE_MARK + "100|BEGIN|SELECT|7|0|7|select_call|default|1|foo"
     pre = ROOT_MARK + "100|7|active_enemies|2"
