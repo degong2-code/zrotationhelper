@@ -50,6 +50,7 @@ def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes,
     keycounts=Counter()
     methods=Counter()
     raw_values=Counter()
+    source_bool_value_counts=Counter()
     proven_method_false=Counter()
     false_examples=[]
     real_entries=[]
@@ -67,6 +68,10 @@ def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes,
         groups+=1
         methods[active["source_method_key"]]+=1
         raw_values[active["source_method_key"]]+=len(active["raw_fields"])
+        for field,value in active["raw_fields"].items():
+            if type(value) is bool:
+                source_bool_value_counts[
+                    (active["source_method_key"],field,value)]+=1
         verdict=assess_method_entry(active,certified)
         if verdict["method_return_verdict"]==METHOD_FALSE:
             proven_method_false[verdict["source_guard_rule_id"]]+=1
@@ -162,6 +167,10 @@ def replay(log_text: str, producer_receipt:dict, manifest:dict, profile:bytes,
         "by_method":dict(sorted(methods.items())),
         "original_method_PRE_raw_field_count":sum(raw_values.values()),
         "raw_field_counts_by_method":dict(sorted(raw_values.items())),
+        "method_source_boolean_distributions":{
+            f"{method}.{field}.{str(value).lower()}":count
+            for (method,field,value),count in sorted(source_bool_value_counts.items())
+        },
         "source_method_entry_before_original_guard":True,
         "source_false_guard_rules_certified":len(certified),
         "independent_method_return_false_total":sum(proven_method_false.values()),

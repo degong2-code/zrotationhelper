@@ -457,6 +457,16 @@ jobs:
               scope_report,negative_rules)
           condition_count=negative_scopes['certified_false_method_returns_by_rule'].get(
               'warrior_rampage_weapon_absence',0)
+          print('GENERIC_CONTROLLED_NEGATIVE_DIAGNOSTIC',
+                json.dumps({
+                    'fixture':'fury_rampage_missing_offhand',
+                    'original_vs_modified_action_parity':True,
+                    'method_calls_by_site':negative_scopes['observed_method_calls_by_site'],
+                    'method_raw_boolean_counts':
+                        negative_methods['method_source_boolean_distributions'],
+                    'source_certified_method_false_count':condition_count,
+                    'positive_FULL_action_READY_proven':0
+                },sort_keys=True),flush=True)
           assert condition_count>0, 'CONTROLLED_REAL_NEGATIVE_GUARD_NOT_OBSERVED'
           assert condition_count==negative_methods[
               'independent_method_return_false_by_rule'].get(
