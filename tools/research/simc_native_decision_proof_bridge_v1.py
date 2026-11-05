@@ -162,6 +162,7 @@ class NativeProofBridge:
                 "APL_CONTROL" if row["source_action"] in CONTROL_COMMANDS
                 else "EXECUTABLE_SOURCE_ACTION"),
             "blockers":verdict["blockers"],
+            "missing_or_unverified":verdict["missing_or_unverified"],
             "independent_true_gates":verdict["independent_true"],
             "independent_false_gates":verdict["independent_false"],
             "source_only_positive_gates":verdict["source_only"],
@@ -290,8 +291,14 @@ def selftest():
     assert b["decision"]==UNKNOWN
     assert "BASE_VIRTUAL_COMPLETE" in b["source_only_positive_gates"]
     assert b["identity"]["same_key_occurrence"]==1
-    root=bridge.evaluate_root([{"generic_proof":a},{"generic_proof":b}],
-                              returned=True,observed_name="alpha")
+    root=bridge.evaluate_root([
+        {"generic_proof":a,"source_key":row["source_key"],
+         "source_sha256":h,"source_action":row["source_action"],
+         "source_base_exit_observed":row["source_base_exit_observed"]},
+        {"generic_proof":b,"source_key":nxt["source_key"],
+         "source_sha256":h,"source_action":nxt["source_action"],
+         "source_base_exit_observed":nxt["source_base_exit_observed"]}],
+        returned=True,observed_name="alpha")
     assert root["earlier_NOT_READY"]==1
     assert root["decision"]==UNKNOWN
     assert root["returned_READINESS"]==UNKNOWN
