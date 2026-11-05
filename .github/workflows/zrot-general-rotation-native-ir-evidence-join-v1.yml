@@ -10,6 +10,8 @@ on:
       - tools/research/simc_native_decision_proof_bridge_v1.py
       - tools/research/general_rotation_source_route_audit_v1.py
       - tools/research/general_rotation_source_route_fixture_v1.py
+      - tools/research/general_rotation_original_pre_capture_engine_v1.py
+      - tools/research/general_rotation_original_pre_capture_fixture_v1.py
       - tools/research/simc_native_warrior_priority_frontier_adapter_v1.py
       - .github/workflows/zrot-general-rotation-native-ir-evidence-join-v1.yml
   workflow_dispatch:
@@ -38,6 +40,18 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile tools/research/general_rotation_native_ir_pre_evidence_join_v1.py tools/research/general_rotation_source_route_audit_v1.py tools/research/general_rotation_source_route_fixture_v1.py
+          python -m py_compile tools/research/general_rotation_original_pre_capture_engine_v1.py tools/research/general_rotation_original_pre_capture_fixture_v1.py
+          python -B tools/research/general_rotation_original_pre_capture_engine_v1.py >/tmp/generic-pre-capture-synthetic.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/generic-pre-capture-synthetic.json'))
+          assert r['schema']=='ZrotGeneralRotationOriginalPRECaptureContractV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=17
+          assert r['positive_READY_certified']==0
+          assert r['actual_source_producer_tested'] is False
+          print('GENERIC_TYPED_ORIGINAL_PRE_CAPTURE_SELFTEST_PASS')
+          PY
           python -B tools/research/general_rotation_source_route_audit_v1.py >/tmp/source-route-audit-synthetic.json
           python - <<'PY'
           import json
@@ -199,11 +213,35 @@ jobs:
           print('ACTUAL_TWO_SPEC_SOURCE_ROUTE_AUDIT_PASS')
           PY
           sha256sum /tmp/cross-spec-source-route-audit.json
+          python -B tools/research/general_rotation_original_pre_capture_fixture_v1.py \
+            --route-report /tmp/cross-spec-source-route-audit.json \
+            --out /tmp/general-rotation-original-pre-capture-plan.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/general-rotation-original-pre-capture-plan.json'))
+          assert r['schema']=='ZrotGeneralRotationTwoSpecPRECaptureContractFixtureV1'
+          assert r['spec_template_count']==2
+          assert r['warrior_fury_template']['field_count']==12
+          assert r['mage_arcane_template']['field_count']==8
+          bound=r['source_selected_actual_warrior_capture_plan']
+          assert bound['schema']=='ZrotGeneralRotationOriginalPREBoundRequestsV1'
+          assert bound['source_missing_gate_count']==5
+          assert bound['requested_operand_count']==12
+          assert bound['gates_without_declared_operand_capture']==['BASE_VIRTUAL_COMPLETE']
+          assert r['raw_capture_transport_validation']['records_transport_validated']==0
+          assert r['raw_capture_transport_validation']['missing_request_count']==12
+          assert r['raw_capture_producer_executed'] is False
+          assert r['actual_arcane_native_E2E_executed'] is False
+          assert r['positive_READY_certified']==0
+          print('GENERIC_CROSS_SPEC_ORIGINAL_PRE_COLLECTION_CONTRACT_PASS')
+          PY
+          sha256sum /tmp/general-rotation-original-pre-capture-plan.json
       - uses: actions/upload-artifact@v4
         with:
           name: general-rotation-native-ir-evidence-join
           path: |
             /tmp/native-to-general-rotation-ir-evidence-join.json
             /tmp/cross-spec-source-route-audit.json
+            /tmp/general-rotation-original-pre-capture-plan.json
           retention-days: 7
           if-no-files-found: error
