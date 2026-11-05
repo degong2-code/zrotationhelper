@@ -35,6 +35,9 @@ from general_rotation_source_false_guard_engine_v1 import (
     verify_rules, assess_method_entry, FALSE as METHOD_FALSE
 )
 from simc_apl_semantic_ir_v2 import parse_profile, git_blob
+from general_rotation_select_sweep_instrument_v1 import (
+    SCHEMA as SWEEP_SCHEMA, SWEEP_MARK, RESULT_MARK, WAIT_MARK
+)
 
 SCHEMA="ZrotGenericOriginalReadyCallScopeStrictReplayV1"
 
@@ -54,7 +57,7 @@ def _exact_source_identity(apl:dict, owner:str,ordinal:int,native:str):
 
 
 def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
-           false_guards:dict|None=None)->dict:
+           false_guards:dict|None=None,sweep_receipt:dict|None=None)->dict:
     if (trace_receipt.get("schema")!=SOURCE_TRACE_SCHEMA or
         trace_receipt.get("trace_marker")!=TRACE_MARK or
         trace_receipt.get("original_action_ready_call_count")!=1 or
@@ -62,6 +65,15 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
         trace_receipt.get("method_PRE_marker_call_id_appended") is not True or
         trace_receipt.get("source_select_skip_marker")!=SKIP_MARK):
         raise ScopeReplayError("SOURCE_SCOPE_PRODUCER_RECEIPT_REQUIRED")
+    has_sweep=sweep_receipt is not None
+    if has_sweep and (
+        sweep_receipt.get("schema")!=SWEEP_SCHEMA or
+        sweep_receipt.get("source_sweep_marker")!=SWEEP_MARK or
+        sweep_receipt.get("source_result_comparator_marker")!=RESULT_MARK or
+        sweep_receipt.get("source_wait_skip_marker")!=WAIT_MARK or
+        sweep_receipt.get("source_original_action_ready_call_count")!=1 or
+        sweep_receipt.get("additional_action_ready_calls")!=0):
+        raise ScopeReplayError("SOURCE_PINNED_SELECTION_SWEEP_RECEIPT_REQUIRED")
     sites={x["method_key"]:x for x in _validate_plan(manifest)}
     if len(sites)!=trace_receipt.get("source_method_count"):
         raise ScopeReplayError("METHOD_SITE_COUNT_NOT_PINNED")
@@ -90,6 +102,11 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
     examples=[]
     pending_select=defaultdict(list)
     ready_selections=defaultdict(deque)
+    active_sweeps={}
+    completed_sweeps=[]
+    observed_ready_results=Counter()
+    ready_events_by_root={}
+    wait_on_ready_breaks=0
 
     def _register_method_outcome(frame):
         nonlocal method_pre_belongs_to_scope
@@ -107,6 +124,10 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
             "raw_fields":frame["raw_fields"]
         },certified)
         if witness["method_return_verdict"]==METHOD_FALSE:
+            event=ready_events_by_root.get(frame["root"])
+            if event is not None:
+                event["independent_method_local_false_rules"].append(
+                    witness["source_guard_rule_id"])
             false_by_rule[witness["source_guard_rule_id"]]+=1
             method_false_by_source_row[(frame["source_row_sha256"],
                                         witness["source_guard_rule_id"])]+=1
@@ -121,13 +142,101 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
                 })
 
     for rawline in log.splitlines():
+        if SWEEP_MARK in rawline:
+            if not has_sweep or rawline.count(SWEEP_MARK)!=1:
+                raise ScopeReplayError("SWEEP_RECEIPT_OR_MARKER_MISSING")
+            v=rawline.split(SWEEP_MARK,1)[1].strip().split("|")
+            if len(v)!=10:
+                raise ScopeReplayError("SWEEP_EVENT_FIELD_COUNT")
+            (t_s,event,id_s,parent_s,root_s,owner,
+             mode_s,random_s,skill_s,span_s)=v
+            if (not t_s.isdigit() or event not in ("BEGIN","END")
+                or not id_s.isdigit() or not parent_s.isdigit()
+                or root_s!="0" or not owner
+                or not re.fullmatch(r"-?[0-9]+",mode_s)
+                or not span_s.isdigit()):
+                raise ScopeReplayError("BAD_SWEEP_EVENT")
+            try:
+                random=float(random_s);skill=float(skill_s)
+            except ValueError as ex:
+                raise ScopeReplayError("SWEEP_SOURCE_CONTEXT_NOT_NUMERIC") from ex
+            import math
+            if not math.isfinite(random) or not math.isfinite(skill):
+                raise ScopeReplayError("SWEEP_SOURCE_CONTEXT_NOT_FINITE")
+            t=int(t_s);sid=int(id_s);parent=int(parent_s)
+            if sid==0:
+                raise ScopeReplayError("ZERO_SWEEP_ID")
+            if event=="BEGIN":
+                if sid in seen_ids or (parent and parent not in active_sweeps):
+                    raise ScopeReplayError("DUPLICATE_SWEEP_ID_OR_MISSING_PARENT")
+                seen_ids.add(sid)
+                item={"sweep_call_id":sid,"parent_sweep_call_id":parent,
+                      "at_simc_ms":t,"source_list":owner,
+                      "execute_type":int(mode_s),"list_random":random,
+                      "effective_skill":skill,"source_list_span_size":int(span_s),
+                      "observed_candidate_events":[],
+                      "complete_source_order_proven":False,
+                      "full_READY_proven":False}
+                active_sweeps[sid]=item
+                completed_sweeps.append(item)
+            else:
+                item=active_sweeps.get(sid)
+                if (item is None or item["parent_sweep_call_id"]!=parent or
+                    item["source_list"]!=owner or item["execute_type"]!=int(mode_s)
+                    or item["list_random"]!=random or
+                    item["effective_skill"]!=skill or
+                    item["source_list_span_size"]!=int(span_s) or
+                    any(x["parent_sweep_call_id"]==sid for x in active_sweeps.values() if x is not item)
+                    or any(x["parent"]==sid for x in open_by_id.values())
+                    or t<item["at_simc_ms"]):
+                    raise ScopeReplayError("SWEEP_ENDED_WITH_UNCLOSED_CHILD")
+                del active_sweeps[sid]
+            continue
+        if RESULT_MARK in rawline:
+            if not has_sweep or rawline.count(RESULT_MARK)!=1:
+                raise ScopeReplayError("NATIVE_POST_RETURN_UNPINNED")
+            v=rawline.split(RESULT_MARK,1)[1].strip().split("|")
+            if len(v)!=3 or not v[0].isdigit() or not v[1].isdigit() or v[2] not in ("0","1"):
+                raise ScopeReplayError("NATIVE_READY_RETURN_FORMAT")
+            rid=int(v[1]);frame=open_by_id.get(rid)
+            event=ready_events_by_root.get(rid)
+            if (frame is None or frame["kind"]!="SELECT" or event is None or
+                event["native_ready_post_comparator"] is not None or
+                int(v[0])<frame["time"]):
+                raise ScopeReplayError("NATIVE_RETURN_OUTSIDE_SOURCE_ROOT")
+            event["native_ready_post_comparator"]=v[2]=="1"
+            observed_ready_results[v[2]]+=1
+            continue
+        if WAIT_MARK in rawline:
+            if not has_sweep or rawline.count(WAIT_MARK)!=1:
+                raise ScopeReplayError("WAIT_BREAK_UNPINNED")
+            v=rawline.split(WAIT_MARK,1)[1].strip().split("|")
+            if len(v)!=4 or not v[0].isdigit() or not v[1].isdigit():
+                raise ScopeReplayError("MALFORMED_WAIT_BREAK")
+            _,sid,owner,native=v
+            sweep=active_sweeps.get(int(sid))
+            if sweep is None or sweep["source_list"]!=owner or not native:
+                raise ScopeReplayError("WAIT_BREAK_NOT_IN_ACTIVE_SWEEP")
+            sweep["observed_candidate_events"].append({
+                "stage":"WAIT_ON_READY_BREAK","source_native_name":native,
+                "priority_verdict":"UNKNOWN"})
+            wait_on_ready_breaks+=1
+            continue
         if SKIP_MARK in rawline:
             if rawline.count(SKIP_MARK)!=1:
                 raise ScopeReplayError("AMBIGUOUS_SOURCE_BACKGROUND_EXCLUSION")
             parts=rawline.split(SKIP_MARK,1)[1].strip().split("|")
-            if len(parts)!=5:
+            if len(parts)!=(6 if has_sweep else 5):
                 raise ScopeReplayError("SOURCE_SELECT_SKIP_SHAPE_DRIFT")
-            clock,owner,ord_s,native,reason=parts
+            if has_sweep:
+                clock,owner,ord_s,native,reason,sweep_s=parts
+                if not sweep_s.isdigit():
+                    raise ScopeReplayError("BACKGROUND_SKIP_SWEEP_ID_MALFORMED")
+                sweep=active_sweeps.get(int(sweep_s))
+                if sweep is None or sweep["source_list"]!=owner:
+                    raise ScopeReplayError("BACKGROUND_SKIP_WITHOUT_ACTIVE_SWEEP")
+            else:
+                clock,owner,ord_s,native,reason=parts
             if (not clock.isdigit() or not ord_s.isdigit() or
                 reason!="BACKGROUND"):
                 raise ScopeReplayError("UNDECLARED_APL_LOOP_SKIP_CAUSE")
@@ -135,6 +244,12 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
             action=row["action"]
             selection_skips[(action,reason)]+=1
             source_loop_skips_by_source_row[row["source_sha256"]]+=1
+            if has_sweep:
+                sweep["observed_candidate_events"].append({
+                    "stage":"BACKGROUND_SKIP_BEFORE_READY",
+                    "source_row_sha256":row["source_sha256"],
+                    "source_action":action,"ordinal_one_based":int(ord_s),
+                    "priority_verdict":"UNKNOWN"})
             if len(bounded_source_skips)<3:
                 bounded_source_skips.append({
                     "at_simc_ms":int(clock),
@@ -194,9 +309,22 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
                 if kind=="SELECT":
                     if callid!=root or method!="select_call":
                         raise ScopeReplayError("INVALID_SELECT_CALL_ROOT")
-                    if parent:
-                        # A nested select call requires an explicitly observed
-                        # parent frame. Do not infer nesting by same millisecond.
+                    if has_sweep:
+                        sweep=active_sweeps.get(parent)
+                        if sweep is None or sweep["source_list"]!=owner:
+                            raise ScopeReplayError("SELECT_ROOT_NOT_IN_SOURCE_SWEEP")
+                        event={"stage":"ACTION_READY_CALLED","at_simc_ms":int(clock),
+                               "root_call_id":callid,
+                               "source_row_sha256":source_row["source_sha256"],
+                               "source_action":source_row["action"],
+                               "ordinal_one_based":ordinal,
+                               "native_ready_post_comparator":None,
+                               "independent_method_local_false_rules":[],
+                               "physical_FULL_READY_proven":False,
+                               "priority_verdict":"UNKNOWN"}
+                        sweep["observed_candidate_events"].append(event)
+                        ready_events_by_root[callid]=event
+                    elif parent:
                         prior=open_by_id.get(parent)
                         if prior is None or parent!=root_stacks[prior["root"]][-1]:
                             raise ScopeReplayError("UNSCOPED_NESTED_SELECT_CALL")
@@ -239,6 +367,9 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
                     raise ScopeReplayError("RETURN_SCOPE_OR_PARENT_STACK_MISMATCH")
                 if kind=="METHOD":
                     _register_method_outcome(frame)
+                elif has_sweep and ready_events_by_root.get(root,{}).get(
+                        "native_ready_post_comparator") is None:
+                    raise ScopeReplayError("SELECT_ROOT_WITHOUT_NATIVE_RESULT_MARKER")
                 root_stacks[root].pop()
                 if not root_stacks[root]:
                     del root_stacks[root]
@@ -293,8 +424,13 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
                 raise ScopeReplayError("UNKNOWN_METHOD_PRE_EVENT")
             continue
 
-    if (open_by_id or root_stacks or pending_select or
+    if (open_by_id or root_stacks or pending_select or active_sweeps or
         any(q for q in ready_selections.values()) or
+        (has_sweep and (not completed_sweeps or
+           sum(1 for x in completed_sweeps
+               for event in x["observed_candidate_events"]
+               if event["stage"]=="ACTION_READY_CALLED")!=selected_attempts or
+           sum(observed_ready_results.values())!=selected_attempts)) or
         not selected_attempts or not method_scopes or
         method_pre_belongs_to_scope!=method_scopes):
         raise ScopeReplayError("UNBALANCED_OR_INCOMPLETE_REAL_CALL_TRACE")
@@ -309,6 +445,15 @@ def replay(log:str,profile:bytes,manifest:dict,trace_receipt:dict,
         "bounded_original_source_loop_skip_examples":bounded_source_skips,
         "source_BACKGROUND_exclusion_not_a_READY_failure":True,
         "selected_action_ready_original_calls":selected_attempts,
+        "source_selection_sweeps_observed":len(completed_sweeps),
+        "source_selection_nested_sweep_calls":sum(
+            int(x["parent_sweep_call_id"]!=0) for x in completed_sweeps),
+        "original_native_ready_return_post_comparators":{
+            "true":observed_ready_results["1"],
+            "false":observed_ready_results["0"]},
+        "source_wait_on_ready_breaks":wait_on_ready_breaks,
+        "source_sweep_frontiers":completed_sweeps,
+        "full_READY_in_any_frontier_proven":False,
         "action_ready_call_roots_by_source_row_sha256":
             dict(sorted(selected_roots_by_source_row.items())),
         "source_loop_background_skips_by_source_row_sha256":
@@ -443,11 +588,12 @@ def main():
     p.add_argument("--profile",type=Path)
     p.add_argument("--source-templates",type=Path)
     p.add_argument("--trace-receipt",type=Path)
+    p.add_argument("--select-sweep-receipt",type=Path)
     p.add_argument("--certified-false-guards",type=Path)
     p.add_argument("--out",type=Path)
     a=p.parse_args()
     req=(a.native_log,a.profile,a.source_templates,a.trace_receipt)
-    if all(x is None for x in req) and a.certified_false_guards is None:
+    if all(x is None for x in req) and a.certified_false_guards is None and a.select_sweep_receipt is None:
         result=selftest()
     elif all(x is not None for x in req):
         result=replay(
@@ -455,7 +601,9 @@ def main():
             json.loads(a.source_templates.read_bytes()),
             json.loads(a.trace_receipt.read_bytes()),
             json.loads(a.certified_false_guards.read_bytes())
-            if a.certified_false_guards else None)
+            if a.certified_false_guards else None,
+            json.loads(a.select_sweep_receipt.read_bytes())
+            if a.select_sweep_receipt else None)
     else:p.error("all four trace/source inputs required together")
     data=canonical(result)
     if a.out:
