@@ -249,6 +249,73 @@ def audit(plan: RoutePlan, source_root: Path) -> dict:
     }
 
 
+
+def missing_source_obligation_worklist(route_audit: dict, candidate: dict) -> dict:
+    """Map an exact bounded Native evidence gap to source-pinned method sites.
+
+    This is a reusable *collection plan*, not an inferred boolean guard
+    predicate. If a virtual path is not grounded, report it as such. Never
+    translate a missing gate into an assumed true/false readiness state.
+    """
+    if (route_audit.get("schema") != SCHEMA or
+        route_audit.get("source_positive_READY_closure_eligible") is not False or
+        route_audit.get("source_dispatch_exhaustive") is not False or
+        route_audit.get("action_READY") != "UNKNOWN"):
+        raise SourceRouteAuditError("SOURCE_ROUTE_WORKLIST_REQUIRES_OPEN_AUDIT")
+    if not isinstance(candidate, dict):
+        raise SourceRouteAuditError("EXACT_NATIVE_CANDIDATE_REQUIRED")
+    source_row_sha = candidate.get("source_row_sha256")
+    gaps = candidate.get("unproved_gates")
+    if (not isinstance(source_row_sha, str) or
+        not re.fullmatch(r"[0-9a-f]{64}", source_row_sha) or
+        type(candidate.get("at_simc_ms")) is not int or
+        candidate["at_simc_ms"] < 0 or
+        not candidate.get("source_action") or
+        candidate.get("physical_skill_READY") != "UNKNOWN" or
+        not isinstance(gaps, list) or not gaps or
+        len(gaps) != len(set(gaps))):
+        raise SourceRouteAuditError("UNSCOPED_OR_MALFORMED_SOURCE_CANDIDATE")
+    rows = []
+    for gap in sorted(gaps):
+        if (not isinstance(gap,str) or not
+            re.fullmatch(r"[A-Z][A-Z0-9_]*:(MISSING|NOT_INDEPENDENT)",gap)):
+            raise SourceRouteAuditError("UNSUPPORTED_UNPROVEN_GATE_STATE")
+        gate,reason=gap.split(":",1)
+        matched = []
+        for method in route_audit["source_method_evidence"]:
+            if gate in method["gate_hints"]:
+                matched.append({
+                    "source_node_key":method["node_key"],
+                    "source_path":method["source_path"],
+                    "source_git_blob_sha1":method["source_git_blob_sha1"],
+                    "method_body_sha256":method["method_body_sha256"],
+                    "source_site_guard_count":len(method["guard_sites"]),
+                    "virtual_dispatch_unresolved":method["dispatch_unresolved"]
+                })
+        rows.append({
+            "gate":gate, "unknown_reason":reason,
+            "source_site_candidates":matched,
+            "declared_method_sites_found":bool(matched),
+            "dynamic_dispatch_and_all_guard_paths_proven":False,
+            "new_original_PRE_or_independent_source_evidence_needed":True,
+            "skill_READY":"UNKNOWN",
+        })
+    return {
+        "schema":"ZrotGeneralRotationSourceObligationWorklistV1",
+        "source_route_audit":"PINNED_DECLARED_METHOD_SITES_ONLY",
+        "source_route_name":route_audit["source_route_name"],
+        "source_row_sha256":source_row_sha,
+        "source_action":candidate["source_action"],
+        "at_simc_ms":candidate["at_simc_ms"],
+        "missing_gate_count":len(rows),
+        "gates_without_declared_method_sites":[
+            row["gate"] for row in rows if not row["declared_method_sites_found"]],
+        "required_source_evidence":rows,
+        "actual_dynamic_route_parity":"UNKNOWN",
+        "physical_skill_READY":"UNKNOWN",
+        "priority_or_dummy_error_permitted":False
+    }
+
 def selftest() -> dict:
     import tempfile
     sample = (b"struct A : B { bool ready() { if (x) return false; "
@@ -270,6 +337,26 @@ def selftest() -> dict:
         assert report["gates_without_source_site_hints"] == ["movement"]
         assert not report["source_positive_READY_closure_eligible"]
         assert report["action_READY"] == "UNKNOWN"
+        sample={
+            "source_row_sha256":"a"*64,"at_simc_ms":100,
+            "source_action":"alpha","physical_skill_READY":"UNKNOWN",
+            "unproved_gates":["movement:MISSING","resource:NOT_INDEPENDENT"]
+        }
+        # Uppercase gates are the standard external contract. Test a
+        # synthetic candidate against source sites, without making READY.
+        sample["unproved_gates"]=["MOVEMENT:MISSING","RESOURCE:NOT_INDEPENDENT"]
+        worklist=missing_source_obligation_worklist(report,sample)
+        assert worklist["missing_gate_count"]==2
+        assert worklist["gates_without_declared_method_sites"]==["MOVEMENT"]
+        assert worklist["physical_skill_READY"]=="UNKNOWN"
+        for forged in (
+            dict(sample,physical_skill_READY="READY"),
+            dict(sample,source_row_sha256="0"*63),
+            dict(sample,unproved_gates=["RESOURCE:READY"]),
+        ):
+            try:missing_source_obligation_worklist(report,forged)
+            except SourceRouteAuditError:pass
+            else:raise AssertionError("FORGED_SOURCE_GAP_WORKLIST_ACCEPTED")
         for bad in (
             RoutePlan("SPEC_BETA", "a", plan.required_gates, (
                 nodes[0], MethodSite("b", "pinned.cpp", "0" * 40,
@@ -296,7 +383,7 @@ def selftest() -> dict:
         "schema":SCHEMA, "status":"PASS_OFFLINE_SYNTHETIC",
         "synthetic_spec_count":4,
         "positive_READY_proven":0,
-        "checks":9,
+        "checks":14,
         "source_checkout_or_real_native_used":False,
         "WCL_API_calls":0,
     }

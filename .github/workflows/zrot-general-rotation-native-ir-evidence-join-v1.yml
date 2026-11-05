@@ -187,6 +187,15 @@ jobs:
           assert r['audits']['mage_arcane']['source_method_nodes_verified']==4
           assert all(x['action_READY']=='UNKNOWN' for x in r['audits'].values())
           assert r['actual_native_gap_example']['positive_READY']=='UNKNOWN'
+          w=r['actual_native_gap_example']['generic_unmet_source_worklist']
+          assert w['schema']=='ZrotGeneralRotationSourceObligationWorklistV1'
+          assert w['missing_gate_count']==5
+          assert 'BASE_VIRTUAL_COMPLETE' in w['gates_without_declared_method_sites']
+          assert all(x['skill_READY']=='UNKNOWN' for x in w['required_source_evidence'])
+          assert w['priority_or_dummy_error_permitted'] is False
+          print('GENERIC_SOURCE_OBLIGATION_WORKLIST_PASS',
+                [(x['gate'],len(x['source_site_candidates']))
+                 for x in w['required_source_evidence']])
           print('ACTUAL_TWO_SPEC_SOURCE_ROUTE_AUDIT_PASS')
           PY
           sha256sum /tmp/cross-spec-source-route-audit.json

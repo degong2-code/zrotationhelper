@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 
 from general_rotation_source_route_audit_v1 import (
-    MethodSite, RoutePlan, audit, SourceRouteAuditError
+    MethodSite, RoutePlan, audit, missing_source_obligation_worklist, SourceRouteAuditError
 )
 from simc_native_decision_proof_bridge_v1 import GATES
 
@@ -144,7 +144,12 @@ def audit_both(source_root: Path, native_join: Path | None = None) -> dict:
                 or selected.get("earlier_independent_NOT_READY") != 6
                 or selected.get("physical_skill_READY") != "UNKNOWN"):
             raise SourceRouteAuditError("NATIVE_SOURCE_ROW_IDENTITY_CHANGED")
+        unmet=missing_source_obligation_worklist(evidence["warrior_fury"],selected)
+        if (unmet["missing_gate_count"]!=len(selected["unproved_gates"]) or
+            unmet["physical_skill_READY"]!="UNKNOWN"):
+            raise SourceRouteAuditError("CROSS_SOURCE_GAP_WORKLIST_ACCOUNTING")
         native_example = {
+            "generic_unmet_source_worklist":unmet,
             "source_spec":ledger["source_spec"], "at_simc_ms":selected["at_simc_ms"],
             "actual_source_action_comparator_only":selected["source_action"],
             "missing_or_unverified":selected["unproved_gates"],
