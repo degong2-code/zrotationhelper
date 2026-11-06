@@ -1,0 +1,101 @@
+name: ZRot Native Source Decision Reason Ledger
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/research/general_rotation_source_decision_reason_ledger_v1.py
+      - .github/workflows/zrot-source-decision-reason-ledger-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline-source-reason:
+    name: source-reason-offline-py${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile and synthetic tamper/replay test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_source_decision_reason_ledger_v1.py
+          python -B tools/research/general_rotation_source_decision_reason_ledger_v1.py > /tmp/zrot-reason-synthetic.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/zrot-reason-synthetic.json'))
+          assert d['schema']=='ZrotOriginalSourceDecisionReasonLedgerV1'
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['independent_FULL_READY_proven']==0
+          assert d['WCL_API_calls']==0
+          print('SOURCE_REASON_LEDGER_SYNTHETIC_TAMPER_PASS',d['checks'])
+          PY
+  reused-original-native-artifact:
+    name: replay-pinned-original-Native-source-receipts
+    runs-on: ubuntu-latest
+    needs: offline-source-reason
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # Reuse original official SimC 4-case Native E2E. Artifact expires Nov 13.
+      - name: Read previous successful source-proven Native receipts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42140591685
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: zrot-general-rotation-generic-select-pre-two-spec-receipts
+          path: /tmp/zrot-original-return-source
+      - name: Assemble temporary trace-free receipt archive and replay source decisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path('/tmp/zrot-original-return-source')
+          paths=sorted(root.glob('*.json'))
+          assert len(paths)>=30, 'PINNED_ORIGINAL_NATIVE_ARTIFACT_INCOMPLETE'
+          with zipfile.ZipFile('/tmp/zrot-reused-native-receipts.zip','w',compression=zipfile.ZIP_STORED) as z:
+              for p in paths:z.write(p,p.name)
+          print('PINNED_RECEIPT_FILES',len(paths),'RECOMPOSED_ZIP_FOR_OFFLINE_REPLAY')
+          PY
+          python -B tools/research/general_rotation_source_decision_reason_ledger_v1.py \
+            --receipt-zip /tmp/zrot-reused-native-receipts.zip \
+            --out /tmp/zrot-source-decision-reason-ledger.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/zrot-source-decision-reason-ledger.json'))
+          a=d['aggregate']
+          assert d['schema']=='ZrotOriginalSourceDecisionReasonLedger4CaseSummaryV1'
+          assert a['all_original_sweeps']==2121
+          assert a['retained_root_choice_examples']==64
+          assert a['unsampled_original_root_choices']==198
+          assert d['complete_positive_READY']==0
+          assert d['trainer_error_feedback_permitted'] is False
+          assert d['WCL_API_calls']==0
+          for k,case in d['cases'].items():
+              assert case['independent_entire_candidate_NOT_READY_proven']==0
+              assert case['user_dummy_error_verdict_permitted'] is False
+              assert case['root_chosen_return_examples_with_full_prior_event_stream']==16
+              print('SOURCE_REASON_ACTUAL',k,'source_sweeps',case['original_all_sweeps_reused'],
+                    'reason_counts',case['prior_evidence_reason_counts'],flush=True)
+          print('SOURCE_REASON_ACTUAL_REUSED_NATIVE_PASS',a)
+          PY
+          sha256sum /tmp/zrot-source-decision-reason-ledger.json
+      - name: Upload compact reason receipts, not raw actor logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-original-native-decision-reason-ledger
+          path: /tmp/zrot-source-decision-reason-ledger.json
+          if-no-files-found: error
+          retention-days: 7
