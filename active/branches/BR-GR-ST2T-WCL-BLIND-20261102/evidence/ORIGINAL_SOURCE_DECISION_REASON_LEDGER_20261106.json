@@ -1,0 +1,90 @@
+{
+  "schema": "ZrotBranchSourceDecisionReasonLedgerActualReplayedNativeReceiptV1",
+  "product_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "evidence_kind": "SOURCE_REPLAY_OF_PRIOR_ACTUAL_OFFICIAL_SIMC_NATIVE_NOT_NEW_CXX",
+  "status": "VERIFIED_BOUNDED_ORIGINAL_SOURCE_REASONS_NOT_FULL_READY",
+  "producer_code_commit": "8c241c39a9ba7694db10dc9441b977787eccf473",
+  "producer_path": "tools/research/general_rotation_source_decision_reason_ledger_v1.py",
+  "pipeline_workflow_path": ".github/workflows/zrot-source-decision-reason-ledger-v1.yml",
+  "github_actions": {
+    "run_id": 42146818557,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42146818557",
+    "python_312": "SUCCESS",
+    "python_314": "SUCCESS",
+    "prior_actual_Native_artifact_replay": "SUCCESS"
+  },
+  "original_native_evidence": {
+    "run_id": 42140591685,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42140591685",
+    "official_simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "artifact_id": 13467582601,
+    "artifact_sha256": "b347132dd935d4b9c5a9b5aea7357cda588deed92f222d418c6407eb3235b901",
+    "artifact_expires_at": "2026-11-13T00:59:57Z"
+  },
+  "derived_artifact": {
+    "id": 13470272367,
+    "name": "zrot-original-native-decision-reason-ledger",
+    "download_zip_sha256": "c7d52afbce6ed190b7daf25332da6fcc86ad39e8870654d1d3f790e1b0873c05",
+    "recomposed_temporary_input_zip_sha256": "f0d36fa5476419ccbceff4d4f8529dc9bcd1397ad30a751b6ea4b7671e71f173",
+    "expires_at": "2026-11-13T01:54:06Z"
+  },
+  "metrics": {
+    "original_source_sweeps_reused": 2121,
+    "original_top_level_chosen_source_rows": 262,
+    "original_chosen_examples_with_complete_root_candidate_event_stream": 64,
+    "original_chosen_rows_unsampled": 198,
+    "independent_source_PRE_native_IF_false_witnesses": 8,
+    "native_POST_ready_false_only_prior_events": 298,
+    "prior_CONTROL_TRUE_continued_or_nested": 54,
+    "independent_FULL_READY_proven": 0,
+    "independent_entire_candidate_NOT_READY_proven": 0,
+    "gameplay_mistake_verdict_permitted": false
+  },
+  "verified_case_metrics": {
+    "fury-st": {
+      "source_sweeps": 509,
+      "selected_root_samples": 16,
+      "independent_if_false": 0,
+      "native_false_post_only": 83
+    },
+    "fury-2t": {
+      "source_sweeps": 477,
+      "selected_root_samples": 16,
+      "independent_if_false": 8,
+      "native_false_post_only": 75
+    },
+    "arcane-st": {
+      "source_sweeps": 600,
+      "selected_root_samples": 16,
+      "independent_if_false": 0,
+      "native_false_post_only": 70
+    },
+    "arcane-2t": {
+      "source_sweeps": 535,
+      "selected_root_samples": 16,
+      "independent_if_false": 0,
+      "native_false_post_only": 70
+    }
+  },
+  "warnings": [
+    "The eight independently corroborated IF=false witnesses are all Fury 2-target run_action_list control-flow checks; not eight physical damage abilities independently proven unusable.",
+    "298 original native action_ready FALSE returns are POST comparisons, not independently reconstructed complete NOT_READY.",
+    "The original selected-source receipt intentionally retained only the first 16 root choice examples per case, 64 total; the remaining 198 original choices are not individually reconstructed by this run.",
+    "Original source returned APL row may be control, item or other utility, not guaranteed to be a physical damage cast.",
+    "For CHI​LD_PROPAGATED actions, original source return is observed but complete nested leaf route is not reconstructed by current bounded ledger.",
+    "No user target dummy mistakes may be inferred, and no Blizzard Secret Value or protected addon API was used."
+  ],
+  "implementation_design_reuse": [
+    "Hekili source-conditioned rejection reasons",
+    "per-candidate evidence ledger",
+    "SpecAdapter action classification to be completed",
+    "StateSnapshot provenance and UNKNOWN, not old live Hekili state collector"
+  ],
+  "exact_next": "Capture full per-root return path/strictly source-linked state for targeted actual executable opener actions, source-walk independent full READY and prior candidates; reuse verified IF conditions and expand only when user impact justifies new C++ instrumentation. Then current WCL blind validation and Dummy practice engine.",
+  "main_promoted": false,
+  "frozen_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
