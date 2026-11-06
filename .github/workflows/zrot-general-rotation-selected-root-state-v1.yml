@@ -78,7 +78,7 @@ jobs:
           assert a['exact_original_cpp_selected_leaf_root_resolved']==64
           assert a['unsampled_original_top_level_choices']==198
           assert a['exact_same_cpp_root_active_enemies_PRE']==9
-          assert a['source_pinned_arcane_orb_adapter_attached']>=2
+          assert a['source_pinned_mechanic_adapter_attached']>=2
           assert d['all_twelve_source_member_sha256_verified'] is True
           assert d['original_zip_bytes_directly_verified'] is False
           assert d['source_virtual_READY_route_independently_closed'] is False
