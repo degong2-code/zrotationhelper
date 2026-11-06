@@ -1,6 +1,15 @@
 # zRotationHelper — Feature Evidence Reuse Index (2026-11-05)
 이 파일은 20261104 장문 인덱스를 대체하는 **최신 길잡이**다. 구 인덱스·원본·FROZEN을 삭제/수정하지 않는다.
 
+## 2026-11-06 필수 외부 구조/정책 참조 (신규, branch-only)
+
+- **Hekili 설계 참고:** [`HEKILI_ARCHITECTURE_REFERENCE_20261106.md`](HEKILI_ARCHITECTURE_REFERENCE_20261106.md) — pinned old Hekili `thewarwithin` commit `36daec382e6557fd57a263bbfb060856ef9fe9d8`, `Core.lua` 조건/배제 이유, `Scripts.lua` 표현식, `State.lua` time simulation, `Classes.lua` SpecAdapter, `Hekili.lua` snapshot, `Events.lua` budget. **디자인만 참조**, 코드·현행 게임 API·DPS 정답 자동 승격 금지.
+- **Blizzard 정책/현행 API 제약:** [`RETAIL_ADDON_POLICY_CAPABILITY_GATE_20261106.md`](RETAIL_ADDON_POLICY_CAPABILITY_GATE_20261106.md) — Blizzard 공식 Midnight 전투 결정 제한, 12.1 aura Forbidden/Secret, 12.1.5 API 변경 기록의 증거 수준, real-client validation 필요, HekiLight secret-number error side-channel 미사용. 모호한 것은 `UNKNOWN`으로.
+- **장·단기 실행 로드맵:** [`GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md`](GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md) — 먼저 original Native SELECT 반환 + PRE를 이용한 `SourceDecisionReasonLedgerV1`; 그 후 실제 스킬의 완전 READY, ST/2T opener, WCL blind lock/holdout, offline dummy evaluator, 작은 안전 애드온.
+- **HekiLight 사용자 ZIP source receipt:** `HekiLight-v0.7.0(1).zip` SHA256 `d0c8af119de9d0ebd34b50bda11a24cbe4a8c4cbafd8b1e1f4c6de320315fc0d`; Blizzard Assisted Combat 현재 추천과 추가 icon filler를 독립 다단계 로테이션으로 오인하지 않는다.
+- **Scope unchanged:** `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`; no Encounter/NSRT, MAIN promotion, FROZEN change. 정본 브랜치 인계 `LATEST_HANDOFF.json`의 `2026-11-06` 참조 addendum과 함께 읽는다.
+
+
 | 기능·소유 코드 | 검증된 최근 증거 | REUSE / 미검증 지점 |
 | --- | --- | --- |
 | SimC APL parser `tools/research/simc_apl_semantic_ir_v2.py` | Fury/Mage source Cold Start #41796659187, #41799789205 SUCCESS | 기존 typed AST/variable 문법 재사용. Native readiness는 별도 |
