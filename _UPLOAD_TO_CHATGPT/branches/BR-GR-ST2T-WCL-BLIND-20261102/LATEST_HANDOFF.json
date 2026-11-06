@@ -125,7 +125,7 @@
   },
   "product_exact_next": "Complete a reusable Generic General Rotation opener and stateful conditional ST/2-target/cleave/AoE decision engine by proving actual positive source-pinned skill readiness and source-order selection, then independently reconcile locked WCL behavior and Blizzard mechanics and reuse the verified IR for evidence-bounded target-dummy feedback.",
   "chat_exact_next": "READ_ONLY_RESTORE_REPORT_THEN_STOP. Requery GitHub actual HEAD and MAIN, policy SHA256/blob and full snapshot, archive parent SHA256, latest source join CI and raw JSON, compare 953 source IF and earlier distinct 477 cohort, confirm 0 full READY, report roadmap. Wait for fresh user '진행'. No code/docs changes, tests, API collection, Actions, commit, PR or promotion.",
-  "session_exact_next_after_explicit_progress": "Use real Arcane Orb exact-root PRE and generic minimal source IF witnesses to explain earlier competing spells in both 2T chosen Orb decisions (prismatic_bolt, arcane_barrage, arcane_missiles) using source-pinned original C++ ready branch/skill PRE only where gating differs. Verify full action readiness independent from native POST before claiming skill priority. Build ST/2T conditional General Rotation IR; run independent WCL blind discovery candidate/threshold lock and holdout before any trainer mistake verdict. Keep additional AoE/build, game addon policy-gated; unknown remains UNKNOWN.",
+  "session_exact_next_after_explicit_progress": "Choose the highest-impact next physical source state: (a) narrowly capture Arcane Barrage's exact two prior-root original APL IF operands and independent AST negative if material, while (b) move independent WCL blind discovery toward a locked candidate/threshold and independent holdout without using SimC or Hekili answers before lock. Reuse 262 chosen PRE, 158 Orb READY, 137 rival READY, 8/10 independent 2T prior-row rejections and generic source AST witness; then only evidence-backed ST/2T General Rotation IF/ELSE and policy-gated offline dummy feedback. No full READY or optimality claim where unproven.",
   "entry_gate": {
     "mode": "READ_ONLY_RESTORE_REPORT_THEN_STOP",
     "requires_user_explicit_progress": "진행",
@@ -728,5 +728,74 @@
     "Seq578": "FAILED_QUARANTINED",
     "Seq637": "UNKNOWN",
     "read_evidence": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ARCANE_ORB_EXACT_SPEC_PRE_CONDITIONAL_IF_OPENER_20261106.json"
+  },
+  "branch_local_execution_successor_20261106_competitor_ready": {
+    "schema": "ZrotBranchOriginalArcane2TPriorCompetingAbilityReadyAndDecisionReasonHandoffV1",
+    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+    "date": "2026-11-06",
+    "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+    "source_commit": "simulationcraft/simc@b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "native_actual_validation": {
+      "run_id": 42186013774,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42186013774",
+      "python_312": "SUCCESS",
+      "python_314": "SUCCESS",
+      "original_vs_patched_CPP_two_specs_ST_2T": "SUCCESS",
+      "original_ready_competitor_roots_replayed": 137,
+      "source_local_missing_prismatic_buff": 38,
+      "source_local_missing_clearcasting": 3,
+      "source_local_missiles_initial_proc_delay": 2,
+      "original_CXX_total_action_READY_extra_calls": 0,
+      "original_CXX_total_COST_extra_calls": 0,
+      "original_CXX_total_RNG_extra_calls": 0,
+      "extra_read_only_buff_check_PER_derived_ready": 1,
+      "artifact_id": 13487497851,
+      "zip_sha256": "7d2ae89075d64bc39aa9c62eaf98c16e6bf806724293281cce584467c809ab50",
+      "artifact_expires_utc": "2026-11-13T08:14:25Z"
+    },
+    "decision_ledger_actual_validation": {
+      "run_id": 42186794065,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42186794065",
+      "python_312": "SUCCESS",
+      "python_314": "SUCCESS",
+      "new_cpp_compilation": false,
+      "tamper_source_root_and_claim_rejected": 3,
+      "original_CPP_two_target_chosen_orb_timings_ms": [
+        7667,
+        14950
+      ],
+      "preceding_APL_rows_total": 10,
+      "independent_original_ROOT_local_ready_false": 6,
+      "independent_original_ROOT_source_apl_if_false": 2,
+      "native_original_APL_IF_FALSE_only_independent_PRE_UNKNOWN": 2,
+      "real_independent_source_row_rejection_count": 8,
+      "independent_entire_physical_priority_proven": false,
+      "artifact_id": 13487477840,
+      "zip_sha256": "3e1bc6b910da04cee4e080bdeeb4f2579c731a444321e0a87b577652cd0e04d5",
+      "artifact_expires_utc": "2026-11-13T08:19:07Z"
+    },
+    "new_code_paths": [
+      "tools/research/general_rotation_arcane_competitor_native_route_producer_v1.py",
+      "tools/research/general_rotation_arcane_competitor_native_route_replay_v1.py",
+      "tools/research/general_rotation_arcane_competitor_decision_ledger_v1.py"
+    ],
+    "branch_evidence": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ARCANE_2T_PRIOR_COMPETITOR_EXACT_READY_REASON_20261106.json",
+    "read_further": [
+      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md",
+      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md"
+    ],
+    "history_note": "Earlier source-patch attempt run 42185787114 FAIL due exact prismatic ready source whitespace template mismatch; final successor run 42186013774 PASS. Do not promote failed attempt or count as rotation hypothesis failure.",
+    "remaining_source_unknown": "Arcane Barrage 2T @7667/14950ms original CXX APL_IF_FALSE; independent exact-root source IF reconstruction requires Salvo react/Charge/talent/prev_gcd source values.",
+    "full_positive_READY_independently_proven": 0,
+    "WCL_blind_candidate_lock_and_holdout_executed": false,
+    "game_client_API_capability_tested": false,
+    "WoW_dummy_mistake_feedback_permitted": false,
+    "WCL_API_calls": 0,
+    "previous_session_exact_next": "Use real Arcane Orb exact-root PRE and generic minimal source IF witnesses to explain earlier competing spells in both 2T chosen Orb decisions (prismatic_bolt, arcane_barrage, arcane_missiles) using source-pinned original C++ ready branch/skill PRE only where gating differs. Verify full action readiness independent from native POST before claiming skill priority. Build ST/2T conditional General Rotation IR; run independent WCL blind discovery candidate/threshold lock and holdout before any trainer mistake verdict. Keep additional AoE/build, game addon policy-gated; unknown remains UNKNOWN.",
+    "session_exact_next": "Choose the highest-impact next physical source state: (a) narrowly capture Arcane Barrage's exact two prior-root original APL IF operands and independent AST negative if material, while (b) move independent WCL blind discovery toward a locked candidate/threshold and independent holdout without using SimC or Hekili answers before lock. Reuse 262 chosen PRE, 158 Orb READY, 137 rival READY, 8/10 independent 2T prior-row rejections and generic source AST witness; then only evidence-backed ST/2T General Rotation IF/ELSE and policy-gated offline dummy feedback. No full READY or optimality claim where unproven.",
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
   }
 }
