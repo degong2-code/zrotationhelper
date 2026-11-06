@@ -201,7 +201,7 @@ def _reconcile_original_native(original:dict,model:dict,case:dict,
         require(owner in model["source_only_priority_graph"]["lists"] and
                 type(ordinal) is int and ordinal>0 and
                 ordinal<=len(model["source_only_priority_graph"]["lists"][owner]) and
-                type(t) is int and t>=last_ms and
+                type(t) is int and t>=0 and t>=last_ms and
                 record.get("choice_index")==i and
                 record.get("original_native_source_return_observed") is True and
                 record.get("independent_full_READY_proven") is False and
