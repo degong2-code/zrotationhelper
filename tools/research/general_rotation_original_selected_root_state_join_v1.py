@@ -452,7 +452,9 @@ def selftest()->dict:
                "original_action_ready_root_id":8,
                "source_init_stage":"FOREGROUND_MEMBER_AT_INIT",
                "simc_NATIVE_return_post_comparator":True}]}
-    example={"return_kind":"CHILD_PROPAGATED","source_action":"arcane_orb",
+    example={"return_kind":"CHILD_PROPAGATED",
+             "source_original_return_kind":"CHILD_PROPAGATED",
+             "source_action":"arcane_orb",
              "source_row_sha256":row,"source_ordinal":1,"source_row_ordinal":1,
              "source_list":"cooldowns"}
     source=dict(example,simc_ms=0,source_row_ordinal=1)
