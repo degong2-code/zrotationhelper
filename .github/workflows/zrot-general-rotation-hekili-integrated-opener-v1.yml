@@ -1,0 +1,98 @@
+name: ZRot Hekili-Informed Integrated Source Opener
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/research/general_rotation_integrated_opener_research_v1.py
+      - .github/workflows/zrot-general-rotation-hekili-integrated-opener-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic:
+    name: bounded-state-and-APL-synthetic-py${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Source AST, synthetic state transition and tamper contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_integrated_opener_research_v1.py
+          python -B tools/research/general_rotation_integrated_opener_research_v1.py > /tmp/zrot-integrated-opener-synthetic.json
+          python - <<'PY'
+          import json
+          j=json.load(open('/tmp/zrot-integrated-opener-synthetic.json'))
+          assert j['schema']=='ZrotIntegratedHekiliInformedNativeOpenerResearchV1'
+          assert j['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert j['native_CXX_rebuilt'] is False and j['WCL_API_calls']==0
+          print('HEKILI_INSPIRED_STATE_SCRIPTS_SYNTHETIC_PASS',j['checks'])
+          PY
+  source-native-opener:
+    name: four-context-real-source-opener-replay-no-new-simc
+    needs: synthetic
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reuse actual original Native SimC source PRE and select receipts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42140591685
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: zrot-general-rotation-generic-select-pre-two-spec-receipts
+          path: /tmp/zrot-native
+      - name: Reuse verified original source reason ledger
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42146818557
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: zrot-original-native-decision-reason-ledger
+          path: /tmp/zrot-reasons
+      - name: Integrate source parser, reason selection and state provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_integrated_opener_research_v1.py \
+            --reason-json /tmp/zrot-reasons/zrot-source-decision-reason-ledger.json \
+            --original-native-receipts-dir /tmp/zrot-native \
+            --out /tmp/zrot-integrated-general-opener-research.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/zrot-integrated-general-opener-research.json'))
+          assert x['schema']=='ZrotIntegratedHekiliInformedNativeOpenerResearchV1'
+          assert x['aggregate']['native_cpp_sweep_records_reused']==2121
+          assert x['aggregate']['retained_source_opener_steps']==64
+          assert x['aggregate']['original_unretained_source_returns']==198
+          assert x['source_opener_hypothesis_baseline_only'] is True
+          assert x['authoritative_cast_sequence'] is False
+          assert x['trained_dummy_error_permitted'] is False
+          assert x['current_WCL_blind_validation_performed'] is False
+          for key in ('fury-st','fury-2t','arcane-st','arcane-2t'):
+              c=x['cases'][key]
+              assert len(c['timeline'])==16 and c['first_return_at_ms']==0
+              assert c['independent_full_action_READY_proven']==0
+              print('SIMC_ORIGINAL_SOURCE_OPENER',key,
+                [(r['simc_ms'],r['source_action'],r['source_action_kind'])
+                  for r in c['timeline'][:9]],flush=True)
+          print('INTEGRATED_HEKILI_SOURCE_OPENER_4_CASE_PASS')
+          PY
+          sha256sum /tmp/zrot-integrated-general-opener-research.json
+      - name: Preserve source-linked compact research output only
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-general-rotation-integrated-source-opener-st-2t
+          path: /tmp/zrot-integrated-general-opener-research.json
+          retention-days: 7
+          if-no-files-found: error
