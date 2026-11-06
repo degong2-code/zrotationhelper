@@ -48,16 +48,16 @@ def _integer(raw:str,reason:str)->int:
          "NON_INTEGER_SOURCE_CPP_BRANCH_"+reason)
     return int(raw)
 
-def _read(log:str,marker:str,nfields:int)->list[list[str]]:
+def _read(log:str,marker:str,nfields:int)->list[tuple[int,list[str]]]:
     out=[]
-    for line in log.splitlines():
+    for line_idx,line in enumerate(log.splitlines()):
         if marker not in line:continue
         need(line.count(marker)==1,
              "REPEATED_ORIGINAL_CPP_SOURCE_MARKER:"+marker)
         fields=line.split(marker,1)[1].strip().split("|")
         need(len(fields)==nfields,
              "CHANGED_ORIGINAL_CPP_SOURCE_FIELDS:"+marker)
-        out.append(fields)
+        out.append((line_idx,fields))
     return out
 
 def replay(log:str,temporal:dict,producer:dict)->dict:
@@ -113,7 +113,7 @@ def replay(log:str,temporal:dict,producer:dict)->dict:
     need(len(snapshots)==2 and
          set(sweep["at_simc_ms"] for sweep,_ in snapshots)==set(TARGET_TIMES),
          "ORIGINAL_SOURCE_PRIOR_SELECTED_SWEEP_IDENTITY_CHANGED")
-    for fields in _read(log,MARK_ACTION,5):
+    for line_idx,fields in _read(log,MARK_ACTION,5):
         ms,rid,phase,label,boolval=fields
         at=_integer(ms,"time");id_=_integer(rid,"id")
         row=all_rows.get(id_)
@@ -122,8 +122,8 @@ def replay(log:str,temporal:dict,producer:dict)->dict:
              boolval in ("0","1") and
              GATES[phase][label]==(boolval=="1"),
              "FOREIGN_OR_FAKE_ORIGINAL_CPP_ACTION_GATE_BRANCH")
-        row["events"].append((phase,label,boolval=="1"))
-    for fields in _read(log,MARK_PRE,6):
+        row["events"].append((line_idx,(phase,label,boolval=="1")))
+    for line_idx,fields in _read(log,MARK_PRE,6):
         ms,rid,which,buff,initial,delay=fields
         at=_integer(ms,"time");id_=_integer(rid,"id")
         row=all_rows.get(id_)
@@ -133,10 +133,10 @@ def replay(log:str,temporal:dict,producer:dict)->dict:
              _integer(buff,"buff")<=50 and
              initial in ("0","1") and delay in ("0","1"),
              "UNTRUSTED_CPP_SPECIALIZATION_PRE")
-        row["events"].append(("CLASS_PRE",{
+        row["events"].append((line_idx,("CLASS_PRE",{
             "buff_stack":int(buff),"gained_initial_clearcasting":int(initial),
-            "allow_arcane_missiles_delay":int(delay)}))
-    for fields in _read(log,MARK_CLASS,5):
+            "allow_arcane_missiles_delay":int(delay)})))
+    for line_idx,fields in _read(log,MARK_CLASS,5):
         ms,rid,which,label,result=fields
         at=_integer(ms,"time");id_=_integer(rid,"id")
         row=all_rows.get(id_)
@@ -149,14 +149,14 @@ def replay(log:str,temporal:dict,producer:dict)->dict:
              result in ("0","1") and
              (result=="0" if label!="CLASS_BASE_READY_DELEGATED" else True),
              "INVALID_CPP_SPECIALIZATION_CLASS_READY_RETURN")
-        row["events"].append(("CLASS",label,result=="1"))
+        row["events"].append((line_idx,("CLASS",label,result=="1")))
     totals=Counter()
     validated={}
     for rid,row in sorted(all_rows.items()):
         # Methods log at actual execution order: PRE class then maybe BASE
         # then CLASS return, finally ACTION ready outcome. Base may be
         # skipped for derived false local guards, never treated as TRUE.
-        seq=row["events"]
+        seq=[ev for _,ev in sorted(row["events"],key=lambda r:r[0])]
         names=[e[0] for e in seq]
         who=row["source_action"]
         if who=="arcane_barrage":
