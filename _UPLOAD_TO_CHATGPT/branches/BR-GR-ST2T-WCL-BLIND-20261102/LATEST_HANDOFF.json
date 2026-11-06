@@ -246,7 +246,10 @@
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/DEVELOPER_NOTES_20261105.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_PREPARATION_WORKLOG_20261105.md",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SIMC_APL_MODEL_COMPLETION_CONTRACT_20261103.md"
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SIMC_APL_MODEL_COMPLETION_CONTRACT_20261103.md",
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_ARCHITECTURE_REFERENCE_20261106.md",
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/RETAIL_ADDON_POLICY_CAPABILITY_GATE_20261106.md",
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md"
   ],
   "blocked_by": [
     "No independently proven positive full virtual action_ready on actually selected executable candidate",
@@ -332,5 +335,67 @@
     "user target dummy mistake scoring",
     "MAIN shared canonical registry, product pointers, global handoff and FROZEN"
   ],
-  "no_simc_wcl_gameplay_source_calls_during_this_handoff": true
+  "no_simc_wcl_gameplay_source_calls_during_this_handoff": true,
+  "branch_local_addendum_20261106_heki_policy": {
+    "date": "2026-11-06",
+    "type": "NON_SCOPE_CHANGING_BRANCH_LOCAL_RESEARCH_ARCHITECTURE_AND_POLICY_REFERENCE",
+    "confirmed_user_request": "Persist Hekili architecture design and verified Blizzard addon constraints in the current short/long General Rotation and Dummy Trainer roadmap; reuse on subsequent handoffs.",
+    "product_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+    "authority": "BRANCH_LOCAL_ONLY_MAIN_PROMOTION_REQUIRED",
+    "previous_handoff_version_and_chain_unchanged": true,
+    "mandatory_original_scope_read_first_unchanged": true,
+    "reference_documents": [
+      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_ARCHITECTURE_REFERENCE_20261106.md",
+      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/RETAIL_ADDON_POLICY_CAPABILITY_GATE_20261106.md",
+      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md"
+    ],
+    "hekili_source": {
+      "repo": "Hekili/hekili",
+      "branch": "thewarwithin",
+      "commit": "36daec382e6557fd57a263bbfb060856ef9fe9d8",
+      "usage": "OFFLINE_ARCHITECTURAL_REFERENCE_ONLY; OLD_WOW_11X_NOT_LIVE_COMPATIBLE",
+      "license_verification": "UNVERIFIED_IN_CURRENT_PINNED_TREE; NO_CODE_COPY"
+    },
+    "hekilight_user_zip": {
+      "file_name": "HekiLight-v0.7.0(1).zip",
+      "sha256": "d0c8af119de9d0ebd34b50bda11a24cbe4a8c4cbafd8b1e1f4c6de320315fc0d",
+      "usage": "BLIZZARD_ASSISTED_COMBAT_UI_REFERENCE_NOT_OWN_ROTATION",
+      "secret_exception_side_channel": "REJECTED"
+    },
+    "blizzard_source_tiers": {
+      "official_intent": [
+        "https://news.blizzard.com/en-us/article/24244638/how-midnights-upcoming-game-changes-will-impact-combat-addons",
+        "https://news.blizzard.com/en-us/article/24246290/combat-philosophy-and-addon-disarmament-in-midnight"
+      ],
+      "developer_notes_mirrored": [
+        "https://warcraft.wiki.gg/wiki/Patch_12.1.0/API_changes/notes",
+        "https://warcraft.wiki.gg/wiki/Patch_12.1.5/API_changes/notes"
+      ],
+      "historical_eight_point_addon_policy_mirrored_not_fresh_official_verified": "https://www.bluetracker.gg/wow/topic/us-en/24534-ui-add-on-development-policy/"
+    },
+    "actual_native_evidence_reused": {
+      "original_select_sweeps": 2121,
+      "top_level_source_row_returns": 262,
+      "original_IF_ast_native_matches": 209,
+      "independent_FULL_READY_proven": 0,
+      "run_id": 42140591685,
+      "source_commit": "ba0d490c18bf663b5972e9ea21db402c8446750f"
+    },
+    "present_status": "HEKILI_AND_POLICY_REFERENCE_DOCUMENTS_REGISTERED; NEW_REASON_LEDGER_NOT_IMPLEMENTED; WCL_AND_DUMMY_NOT_NEWLY_EXECUTED",
+    "short_term_exact_next": "From actual original C++ selected-row and per-root PRE evidence implement generic SourceDecisionReasonLedgerV1 with same-sweep prior-candidate reasons, strict native post vs independently proven readiness, then source-walk one executable damage skill and ST/2T opener.",
+    "medium_long_term_product_exact_next": "Extend validated Generic Rotation opener/conditional ST/2T/cleave/AoE across builds, WCL blind candidate lock and independent holdout, then evidence-bounded post-session dummy evaluation and minimal nonsecret opt-in recorder; any live behavior requires 12.1.5 client proof and current official API.",
+    "protected_runtime_no_go": [
+      "No in-client independent realtime combat decision automation",
+      "No protected actions or auto-target/cast",
+      "No secret-value inference via errors, visual state, timing, pcall or forbidden objects",
+      "No raw client memory or arbitrary file access",
+      "No unverified positive practice-error verdict"
+    ],
+    "validation": "SOURCE_RESEARCH_AND_GITHUB_DOCUMENT_UPDATE_ONLY; NO_NEW_LIVE_WOW_CLIENT_OR_WCL_PRODUCTION_VALIDATION",
+    "MAIN_promoted": false,
+    "product_scope_changed": false,
+    "previous_history_FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  }
 }
