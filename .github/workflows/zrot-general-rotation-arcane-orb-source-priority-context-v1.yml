@@ -79,24 +79,34 @@ jobs:
           # unavailable, even if the source ordinal is lower.
           original=Path('/tmp/zrot-original')
           temporal,chosen,gates=_read_verified(original,'2t')
+          def chosen_2t_orb(c):
+              return next(x for x in c['source_selected_rows']
+                          if x['action']=='arcane_orb' and x['at_simc_ms']==7667)
+          def earlier_attempt(t,c):
+              sid=chosen_2t_orb(c)['original_CPP_source_select_path'][-1]
+              sw=next(x for x in t['observed_time_scoped_selection_frontiers']
+                      if x['sweep_call_id']==sid)
+              return sw['observed_candidate_event_stream'][0]
+          def orb_selected_gate(g,c):
+              rid=chosen_2t_orb(c)['selected_CPP_ready_root_id']
+              return next(x for x in g['original_arcane_orb_ready_roots']
+                          if x['original_ready_root_id']==rid)
           for name,modifier in (
-              ('TRUE_INSTEAD_OF_EARLIER_FALSE',lambda t,c,g: t[
-                'observed_time_scoped_selection_frontiers'][0].__setitem__(
-                 'source_list','FORGED')),
-              ('FORGED_SELECTED_CPP_ROOT',lambda t,c,g:c[
-                'source_selected_rows'][0].__setitem__('selected_CPP_ready_root_id',-1)),
-              ('FALSE_SELECTED_ACTION_STAGE',lambda t,c,g:g[
-                'original_arcane_orb_ready_roots'][0].__setitem__(
-                  'original_CXX_action_ready_return_stage','ACTION_APL_IF_FALSE')),
+              ('EARLIER_SOURCE_POST_WAS_TRUE',
+                 lambda t,c,g:earlier_attempt(t,c).__setitem__(
+                     'simc_NATIVE_return_post_comparator',True)),
+              ('FORGED_SELECTED_CPP_ROOT',
+                 lambda t,c,g:chosen_2t_orb(c).__setitem__(
+                     'selected_CPP_ready_root_id',-1)),
+              ('FALSE_SELECTED_ACTION_STAGE',
+                 lambda t,c,g:orb_selected_gate(g,c).__setitem__(
+                     'original_CXX_action_ready_return_stage','ACTION_APL_IF_FALSE')),
           ):
               t,c,g=copy.deepcopy((temporal,chosen,gates))
               modifier(t,c,g)
               try:compose(t,c,g)
               except ArcanePriorityContextError:print('SOURCE_PRIORITY_NEGATIVE_REJECTED',name)
-              else:
-                  # Modified data might affect a different source event; a
-                  # mutation test must target an observed causal constraint.
-                  raise AssertionError('TAMPER_ACCEPTED:'+name)
+              else:raise AssertionError('TAMPER_ACCEPTED:'+name)
           print('ORIGINAL_CPP_OBSERVED_PRIOR_CHOICE_REASON_PASS')
           PY
           sha256sum /tmp/zrot-arcane-orb-chosen-vs-earlier-source.json
