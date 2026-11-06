@@ -225,16 +225,17 @@ def _source_adapter(choice:dict,adapter:dict,leaf:dict,
     if choice.get("source_action")!=adapter["source_action"]:
         return None
     fields=adapter["readiness_route"]
-    require=["arcane_orb_t_local_ready_override",
-             "inherited_arcane_mage_spell_ready",
-             "inherited_mage_spell_ready","base_action_t_ready",
-             "all_required_gates_closed","independent_FULL_READY_proven"]
-    check(all(k in fields for k in require) and
-          fields["all_required_gates_closed"] is False and
-          fields["independent_FULL_READY_proven"] is False and
+    # A reviewed SpecAdapter provides class-specific inherited method details.
+    # Generic state/ready cannot assume particular class names or buffs.
+    check(isinstance(fields,dict) and
+          fields.get("all_required_gates_closed") is False and
+          fields.get("independent_FULL_READY_proven") is False and
           adapter.get("status")==
             "SOURCE_PINNED_PARTIAL_MECHANICS_NOT_FULL_READY_NOT_LIVE_GAME_TRUTH" and
-          adapter["source_cpp_blob_sha1"]=="306d835f2db5f7418da221ce155d32e81c53f45c",
+          isinstance(adapter.get("source_cpp_blob_sha1"),str) and
+          HEX40.fullmatch(adapter["source_cpp_blob_sha1"]) is not None and
+          isinstance(adapter.get("source_class"),str) and
+          bool(adapter["source_class"]),
           "SOURCE_SPEC_ADAPTER_CLOSURE_OR_PIN_DRIFT")
     # Reuse the preexisting generic independent proof engine. This GateContract
     # is explicitly OPEN: the second obligation does not imply a discovered
@@ -299,16 +300,29 @@ def compose(original_native_zip:bytes|Path, integrated:dict,
           integrated.get("aggregate",{}).get("retained_source_opener_steps")==64 and
           integrated.get("aggregate",{}).get("native_cpp_sweep_records_reused")==2121,
           "ORIGINAL_INTEGRATED_OPENER_CONTRACT_CHANGED")
+    # The engine accepts a source-pinned *specialization adapter* by contract;
+    # class-specific status/effects live exclusively in that data file.
     check(adapter.get("schema")==ADAPTER_SCHEMA and
           adapter.get("policy_id")==POLICY and
-          adapter.get("source_cpp_path")=="engine/class_modules/sc_mage.cpp" and
-          adapter.get("source_simc_revision")=="b522cded8c26b97dac03fdf56e57a03ec7e8faa6" and
-          adapter.get("source_action")=="arcane_orb" and
-          adapter.get("source_profile_git_blob_sha1")==
-            "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f" and
-          adapter.get("source_cpp_blob_sha1")==
-            "306d835f2db5f7418da221ce155d32e81c53f45c" and
-          adapter.get("effect_projection",{}).get("simulate_with_unverified_data") is False,
+          adapter.get("source_simc_revision")==
+            "b522cded8c26b97dac03fdf56e57a03ec7e8faa6" and
+          isinstance(adapter.get("source_cpp_path"),str) and
+          adapter["source_cpp_path"].startswith("engine/class_modules/") and
+          adapter["source_cpp_path"].endswith(".cpp") and
+          isinstance(adapter.get("source_action"),str) and
+          re.fullmatch("[a-z][a-z0-9_]*",adapter["source_action"]) is not None and
+          isinstance(adapter.get("source_profile_git_blob_sha1"),str) and
+          HEX40.fullmatch(adapter["source_profile_git_blob_sha1"]) is not None and
+          isinstance(adapter.get("source_cpp_blob_sha1"),str) and
+          HEX40.fullmatch(adapter["source_cpp_blob_sha1"]) is not None and
+          isinstance(adapter.get("source_observations"),list) and
+          adapter["source_observations"] and
+          isinstance(adapter.get("execute_lines"),list) and
+          len(adapter["execute_lines"])==2 and
+          all(type(v) is int and v>0 for v in adapter["execute_lines"]) and
+          adapter["execute_lines"][0]<adapter["execute_lines"][1] and
+          adapter.get("effect_projection",{}).get("simulate_with_unverified_data") is False and
+          adapter.get("governance",{}).get("main_promoted") is False,
           "SPEC_ADAPTER_SOURCE_PIN_OR_SCOPE_FAILED")
     results={}
     totals=Counter()
@@ -382,7 +396,7 @@ def compose(original_native_zip:bytes|Path, integrated:dict,
                     if ctx["source_profile_git_blob_sha1"]==
                        adapter["source_profile_git_blob_sha1"] else None)
                 if spec_result is not None:
-                    totals["source_pinned_arcane_orb_adapter_attached"]+=1
+                    totals["source_pinned_mechanic_adapter_attached"]+=1
                 aligned.append({
                     "original_cpp_selected_top_sweep_id":sample["sweep_call_id"],
                     "original_cpp_simc_ms":choice["simc_ms"],
