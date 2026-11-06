@@ -21,6 +21,7 @@ from general_rotation_source_route_audit_v1 import _bounded_body, _source_code_m
 from general_rotation_select_pre_passive_producer_v1 import REVISION
 from general_rotation_root_actor_pre_producer_v1 import SCHEMA as ROOT_SCHEMA, MARK as ROOT_MARK
 from general_rotation_root_actor_pre_replay_v1 import replay as replay_original_root
+from general_rotation_root_resource_pre_replay_v1 import replay as replay_original_mana
 from general_rotation_call_scope_instrument_v1 import TRACE_MARK
 from general_rotation_select_sweep_instrument_v1 import RESULT_MARK
 from general_rotation_time_scoped_priority_ir_v1 import SCHEMA as TIME_SCHEMA
@@ -151,7 +152,8 @@ def _temporal_roots(profile: bytes, temporal: dict) -> dict:
 
 
 def corroborate(log: str, profile: bytes, temporal: dict,
-                root_producer: dict, native_if_producer: dict) -> dict:
+                root_producer: dict, native_if_producer: dict,
+                mana_pre_producer: dict | None = None) -> dict:
     if (native_if_producer.get("schema") != SCHEMA or
         native_if_producer.get("source_revision") != REVISION or
         native_if_producer.get("native_if_marker") != MARK or
@@ -166,6 +168,8 @@ def corroborate(log: str, profile: bytes, temporal: dict,
         raise RootIFBridgeError("SOURCE_NATIVE_IF_PRODUCER_REQUIRED")
     # Mandatory independent source-root causal replay first.
     base = replay_original_root(log, profile, temporal, root_producer)
+    mana = (None if mana_pre_producer is None else
+            replay_original_mana(log,temporal,root_producer,mana_pre_producer))
     roots = _temporal_roots(profile, temporal)
     active = set()
     pre = {}
@@ -257,7 +261,12 @@ def corroborate(log: str, profile: bytes, temporal: dict,
             if comparators:
                 counts["native_if_on_source_row_without_if_unknown"] += 1
             continue
-        independently = truth(evaluate_ast(expr["ast"], {"active_enemies": pre[rid]}))
+        facts = {"active_enemies": pre[rid]}
+        if mana is not None:
+            mana_value = mana["root_mana_pct"].get(rid)
+            if mana_value is not None:
+                facts["mana.pct"] = mana_value
+        independently = truth(evaluate_ast(expr["ast"], facts))
         if not comparators:
             counts["native_if_not_source_observed_unknown"] += 1
             continue
@@ -281,12 +290,21 @@ def corroborate(log: str, profile: bytes, temporal: dict,
             examples.append(sample)
         if not match:
             conflicts.append(sample)
-    counts["original_if_ast_determinate_before_native_comparison"] = (
+    counts["original_if_ast_determinate_from_active_enemies_only"] = (
         base["counts"].get("if_recomputed_from_original_actor_PRE", 0))
+    if mana is not None:
+        counts["mana_pct_source_original_pre_positive"] = mana["positive_mana_pct_count"]
+        counts["mana_pct_zero_max_unknown"] = mana["zero_max_unknown"]
+    independently_determinate = counts[
+        "independent_ast_vs_original_native_if_match"] + counts[
+        "independent_ast_vs_original_native_if_conflict"]
+    if mana is None and independently_determinate > (
+        base["counts"].get("if_recomputed_from_original_actor_PRE", 0)):
+        raise RootIFBridgeError("IF_COMPARATOR_EXCEEDS_PRE_EVIDENCE")
     paired = (counts["independent_ast_vs_original_native_if_match"] +
               counts["independent_ast_vs_original_native_if_conflict"])
-    if paired > counts["original_if_ast_determinate_before_native_comparison"]:
-        raise RootIFBridgeError("IF_COMPARATOR_EXCEEDS_PRE_EVIDENCE")
+    if paired > len(roots):
+        raise RootIFBridgeError("IF_COMPARATOR_EXCEEDS_SOURCE_ROOTS")
     # This explicit verdict cannot be inferred from CI green status or from
     # previous PRE-only determinations.  A no-overlap replay remains UNKNOWN.
     parity_status = ("SOURCE_AST_NATIVE_IF_CONFLICT"
@@ -300,6 +318,7 @@ def corroborate(log: str, profile: bytes, temporal: dict,
         "status_counts": dict(sorted(counts.items())),
         "native_if_parity_status": parity_status,
         "native_if_independent_positive_comparison_count": paired,
+        "source_root_mana_direct_PRE_evidence": mana is not None,
         "independent_ast_vs_original_native_if_conflicts": conflicts[:12],
         "first_bounded_comparisons": examples,
         "native_if_comparison_truth_is_post_only": True,
