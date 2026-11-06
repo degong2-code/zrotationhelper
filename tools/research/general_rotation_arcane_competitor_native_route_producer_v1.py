@@ -106,6 +106,7 @@ def _class_probe(who:str)->str:
   {
     if ( !p()->buffs.prismatic_bolt->check() )
       return false;
+
     return arcane_mage_spell_t::ready();
   }
 '''
