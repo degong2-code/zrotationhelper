@@ -88,6 +88,41 @@ jobs:
                   for r in c['timeline'][:9]],flush=True)
           print('INTEGRATED_HEKILI_SOURCE_OPENER_4_CASE_PASS')
           PY
+          python - <<'PY'
+          import copy,json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_integrated_opener_research_v1 import (
+              compose, OpenerIntegrationError, CASES)
+          original=json.load(open('/tmp/zrot-reasons/zrot-source-decision-reason-ledger.json'))
+          pre={}
+          for case in CASES:
+              pre[case]=json.load(open('/tmp/zrot-native/zrot-original-root-actor-pre-'+case+'.json'))
+          safe=compose(original,pre)
+          assert safe['aggregate']['retained_source_opener_steps']==64
+          tests=[
+              ('SWAPPED_SOURCE_SPEC',lambda a,b:b.__setitem__('fury-st',b['arcane-st'])),
+              ('SOURCE_ACTION_NAME_DRIFT',lambda a,b:b['arcane-st']['by_source_row_sha256'][
+                  a['cases']['arcane-st']['decisions'][1]['selected_original_source'][
+                      'source_row_sha256']].__setitem__('source_action','FORGED')),
+              ('INVALID_SELECTED_READY',lambda a,b:a['cases']['fury-st'][
+                  'decisions'][0]['selected_original_source'].__setitem__(
+                  'independently_FULL_READY','READY')),
+              ('SWAPPED_RETURN_SAMPLE_ORDER',lambda a,b:a['cases']['arcane-st'][
+                  'decisions'].__setitem__(slice(0,2),list(reversed(
+                  a['cases']['arcane-st']['decisions'][:2])))),
+              ('MISSING_ORIGINAL_ROOT_PRE',lambda a,b:b['fury-2t'].__setitem__(
+                  'source_actor_PRE_operand','secret_derived')),
+          ]
+          for name,mutation in tests:
+              a,b=copy.deepcopy((original,pre))
+              mutation(a,b)
+              try:compose(a,b)
+              except OpenerIntegrationError:
+                  print('SOURCE_OPENER_CAUSAL_TAMPER_REJECTED',name)
+              else:raise AssertionError('ACCEPTED_FORGED_SOURCE_OR_PRE:'+name)
+          print('INTEGRATED_SOURCE_PROVENANCE_NEGATIVE_TESTS_PASS',len(tests))
+          PY
           sha256sum /tmp/zrot-integrated-general-opener-research.json
       - name: Preserve source-linked compact research output only
         uses: actions/upload-artifact@v4
