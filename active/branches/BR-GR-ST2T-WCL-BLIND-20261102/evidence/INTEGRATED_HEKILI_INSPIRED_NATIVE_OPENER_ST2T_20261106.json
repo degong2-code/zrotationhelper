@@ -1,0 +1,109 @@
+{
+  "schema": "ZrotBranchHekiliInformedActualNativeIntegratedOpenerEvidenceV1",
+  "date": "2026-11-06",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "product_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "design_reference": {
+    "Hekili_repo": "Hekili/hekili",
+    "Hekili_thewarwithin_commit": "36daec382e6557fd57a263bbfb060856ef9fe9d8",
+    "provenance": "HISTORIC_ARCHITECTURAL_INSPIRATION_NO_LIVE_POLICY_PERMISSION",
+    "source_areas": [
+      "Scripts.lua:349-410",
+      "Core.lua:695-1042",
+      "Core.lua:1444",
+      "State.lua:6787-7246",
+      "Classes.lua:138-435",
+      "Hekili.lua:202-257"
+    ]
+  },
+  "new_code": "tools/research/general_rotation_integrated_opener_research_v1.py",
+  "new_workflow": ".github/workflows/zrot-general-rotation-hekili-integrated-opener-v1.yml",
+  "primary_implementation_commit": "cce19deb3ba40ebaa08fda1875e2f671d6d543c6",
+  "source_provenance_tamper_workflow_commit": "854e40c4a68aac109b62182c7c5589907d91cd78",
+  "latest_CI_run_id": 42149094904,
+  "latest_CI_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42149094904",
+  "latest_CI_jobs": {
+    "synthetic_python312": "SUCCESS",
+    "synthetic_python314": "SUCCESS",
+    "actual_previous_native_four_case_replay": "SUCCESS"
+  },
+  "source_negative_tests": [
+    "SWAPPED_SOURCE_SPEC",
+    "SOURCE_ACTION_NAME_DRIFT",
+    "INVALID_SELECTED_READY",
+    "SWAPPED_RETURN_SAMPLE_ORDER",
+    "MISSING_ORIGINAL_ROOT_PRE"
+  ],
+  "original_CPP_provenance": {
+    "official_SimC_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "actual_native_run_id": 42140591685,
+    "source_choice_reason_run_id": 42146818557,
+    "new_CPP_build_this_turn": false,
+    "WCL_API_calls_this_turn": 0,
+    "game_client_executed": false
+  },
+  "counts": {
+    "original_native_select_sweep_records_reused": 2121,
+    "original_native_selected_root_actions_total": 262,
+    "selected_root_return_examples_integrated": 64,
+    "unretained_original_source_returns": 198,
+    "potential_executable_source_actions_not_proven_cast": 38,
+    "run_action_list_control": 16,
+    "auto_attack_setup": 2,
+    "consumables_potion": 4,
+    "item_use": 2,
+    "use_items_control": 2,
+    "independently_FULL_READY_proven": 0,
+    "current_WCL_blind_rule_validation_completed": false,
+    "player_training_error_verdict_permitted": false
+  },
+  "per_case": {
+    "fury-st": {
+      "source_rows": 16,
+      "original_total_source_return": 100,
+      "first_source_action": "auto_attack",
+      "native_context_list": "slayer"
+    },
+    "fury-2t": {
+      "source_rows": 16,
+      "original_total_source_return": 90,
+      "first_source_action": "auto_attack",
+      "native_context_list": "slayer_aoe"
+    },
+    "arcane-st": {
+      "source_rows": 16,
+      "original_total_source_return": 35,
+      "first_source_action": "potion",
+      "observed_arcane_surge_at_ms": 907,
+      "observed_arcane_missiles_at_ms": 2513
+    },
+    "arcane-2t": {
+      "source_rows": 16,
+      "original_total_source_return": 37,
+      "first_source_action": "potion",
+      "observed_arcane_surge_at_ms": 907,
+      "observed_arcane_missiles_at_ms": 2510
+    }
+  },
+  "artifacts": {
+    "latest_run_artifact_id": 13472195231,
+    "download_zip_sha256": "b6a243cc5c2f724b346dbf814367e58e5db97ee6ef6c25ddf5dbd74782327553",
+    "inner_research_json_sha256": "fd55601886e10e6ffb73d3e2638b6df6c44b38626a15ce2d1fb0d7761eadda92",
+    "expires_at": "2026-11-13T02:15:15Z"
+  },
+  "decision_boundaries": [
+    "Hekili core and source typed AST reused only as design; no old in-client combat recommendation/source-port.",
+    "SimC run_action_list selection is queued control, unlike recursive Hekili forecast branch; no conversion to a player spell.",
+    "Original PRE per-row IF aggregate does not independently prove per-selected-root IF truth; UNKNOWN persists.",
+    "Synthetic-only state deltas are not original Native state and do not grant current retail combat observability.",
+    "64/262 returned source rows sampled; not complete 262 opener action descriptions or 262 verified spell casts.",
+    "No independent physical readiness, no WCL post-lock validation for this IR, no user dummy mistake verdict."
+  ],
+  "phase": "INTEGRATED_OPENER_SOURCE_OBSERVATION_EXECUTABLE_RESEARCH_PARTIAL_NOT_COMPLETE_GENERAL_ROTATION",
+  "next_exact": "Use current integrated AST/native reason interface to attach exact original selected-root actor/mana/buff/cooldown facts, source-pin minimal real physical spell SpecAdapter/full READY route, extend complete original source returned-leaf chain, then ST/2T -> AoE + WCL blind holdout + policy-limited offline dummy evaluator.",
+  "no_MAIN_promotion": true,
+  "no_FROZEN_change": true,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
