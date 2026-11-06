@@ -1,0 +1,183 @@
+{
+  "schema": "ZrotBranchFullNativeChosenRootPREStateEvidenceV1",
+  "date": "2026-11-06",
+  "product_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "authority": "BRANCH_EVIDENCE_NOT_MAIN_FROZEN",
+  "official_pinned_simc_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "actual_e2e": {
+    "run_id": 42155157024,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42155157024",
+    "python312": "SUCCESS",
+    "python314": "SUCCESS",
+    "original_vs_instrumented_CPP_30_sec_Fury_Arcane_ST_2T": "SUCCESS",
+    "WCL_API_calls": 0,
+    "WoW_client_tests": 0,
+    "code_commit": "e9e27b3ff8142ae7be2669e183cffed00522c1e5",
+    "added_new_ready_rng_resource_mutation_calls": 0,
+    "pipeline_history_note": "Earlier synthetics failed on return placement, and first actual full join failed on Python int-vs-JSON string keys, then foreground-init proof conflation; corrections in successor, actual final run PASS. These are pipeline changes, not semantic APL conflict."
+  },
+  "artifact": {
+    "id": 13472989884,
+    "name": "zrot-general-rotation-generic-select-pre-two-spec-receipts",
+    "file": "zrot-original-full-root-state-st2t-20261106.zip",
+    "zip_sha256": "c47a3eb6486be268fce8540acf3703af80c67cba01c4dc9f41ea8478e52e3a79",
+    "size_bytes": 207717,
+    "expires_utc": "2026-11-13T03:14:13Z",
+    "raw_cpp_actor_logs_exported": false,
+    "summary_json_sha256": "3a6a24d390850f5452d6b32398582572e05ac3ee344d29f24b589e83b3477958",
+    "case_json_sha256": {
+      "fury-st": "ef0e22ef7254e93ead1acdeaf78177fdef0186656e3f6f538674a90604dfff9a",
+      "fury-2t": "007c04eebaf421a1d5c8aa4fbf81febf264cae838b573d3fbd03b2198b3827bd",
+      "arcane-st": "f736766ae310f3665fbcd492ab05ff4704d453ab03720d2e2e5d9166de39494d",
+      "arcane-2t": "ed908c85fab7d6a7dd834c9769528a9b7f97bbf6fe122505de98cdec5acfd14e"
+    }
+  },
+  "implementation": {
+    "source_actor_PRE_replay": "tools/research/general_rotation_root_actor_pre_replay_v1.py",
+    "source_return_replay": "tools/research/general_rotation_original_selection_return_replay_v1.py",
+    "source_mana_PRE_replay": "tools/research/general_rotation_root_resource_pre_replay_v1.py",
+    "generic_state_join": "tools/research/general_rotation_full_root_state_join_v1.py",
+    "workflow": ".github/workflows/zrot-general-rotation-generic-select-pre-producer-v1.yml",
+    "arcane_orb_ready_source_walk": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/ARCANE_ORB_READY_SOURCE_WALK_20261106.md"
+  },
+  "metrics": {
+    "all_actual_original_CPP_ready_root_PRE_retained": 4682,
+    "all_actual_original_CPP_source_selection_sweeps": 2121,
+    "all_returned_source_rows_reconciled_to_same_READY_root_PRE": 262,
+    "original_source_root_rows_missing_after_replay": 0,
+    "original_selected_without_explicit_APL_IF": 54,
+    "original_selected_with_APL_IF_UNOBSERVED_ADDITIONAL_OPERANDS": 208,
+    "independent_complete_IF_true_on_selected_from_only_mana_and_targets": 0,
+    "independent_complete_positive_FULL_READY_proven": 0,
+    "physical_actual_casts_or_keystrokes_proven": 0,
+    "selected_nested_leafs": 68,
+    "selected_direct_leafs": 194,
+    "original_selected_source_initial_foreground_proven": 259,
+    "source_initial_foreground_unknown_or_other": 3,
+    "selected_with_observable_source_mana_pct": 72,
+    "selected_Fury_rage_state_available": false,
+    "WCL_independent_holdout_for_this_model": false,
+    "dummy_mistake_verdict_permitted": false
+  },
+  "cases": {
+    "fury-st": {
+      "full_PRE": 1542,
+      "selected": 100,
+      "no_explicit_if": 14,
+      "if_unknown": 86,
+      "source_init_other": 3,
+      "mana_pct_nonzero_known": 0,
+      "selected_rows_sha256": "ef0e22ef7254e93ead1acdeaf78177fdef0186656e3f6f538674a90604dfff9a"
+    },
+    "fury-2t": {
+      "full_PRE": 1030,
+      "selected": 90,
+      "no_explicit_if": 34,
+      "if_unknown": 56,
+      "source_init_other": 0,
+      "mana_pct_nonzero_known": 0,
+      "selected_rows_sha256": "007c04eebaf421a1d5c8aa4fbf81febf264cae838b573d3fbd03b2198b3827bd"
+    },
+    "arcane-st": {
+      "full_PRE": 1106,
+      "selected": 35,
+      "no_explicit_if": 4,
+      "if_unknown": 31,
+      "source_init_other": 0,
+      "mana_pct_nonzero_known": 35,
+      "selected_rows_sha256": "f736766ae310f3665fbcd492ab05ff4704d453ab03720d2e2e5d9166de39494d"
+    },
+    "arcane-2t": {
+      "full_PRE": 1004,
+      "selected": 37,
+      "no_explicit_if": 2,
+      "if_unknown": 35,
+      "source_init_other": 0,
+      "mana_pct_nonzero_known": 37,
+      "selected_rows_sha256": "ed908c85fab7d6a7dd834c9769528a9b7f97bbf6fe122505de98cdec5acfd14e"
+    }
+  },
+  "arcane_orb_observed_source_PRE_examples": [
+    {
+      "case": "arcane-st",
+      "simc_ms": 0,
+      "original_mana_pct": 98.47852296204759,
+      "source_if": "talent.splintering_sorcery",
+      "source_condition_result": "UNKNOWN"
+    },
+    {
+      "case": "arcane-2t",
+      "simc_ms": 0,
+      "original_mana_pct": 98.47852296204759,
+      "source_condition_result": "UNKNOWN"
+    },
+    {
+      "case": "arcane-2t",
+      "simc_ms": 7667,
+      "original_mana_pct": 44.70842681257065,
+      "source_condition_result": "UNKNOWN"
+    },
+    {
+      "case": "arcane-2t",
+      "simc_ms": 14950,
+      "original_mana_pct": 100,
+      "source_condition_result": "UNKNOWN"
+    }
+  ],
+  "high_impact_missing_source_operands": {
+    "fury_st": [
+      "talent.slayers_dominance",
+      "buff.recklessness.up",
+      "rage",
+      "buff.hack_and_slash.up",
+      "buff.enrage.remains"
+    ],
+    "fury_2t": [
+      "talent.slayers_dominance",
+      "buff.recklessness.up",
+      "buff.sudden_death.up"
+    ],
+    "arcane_st": [
+      "variable.aoe_count",
+      "buff.arcane_salvo.stack",
+      "buff.arcane_salvo.react",
+      "buff.clearcasting.react",
+      "buff.arcane_charge.stack",
+      "prev_gcd.1.arcane_surge"
+    ],
+    "arcane_2t": [
+      "variable.aoe_count",
+      "buff.arcane_salvo.stack",
+      "buff.arcane_salvo.react",
+      "buff.arcane_charge.stack",
+      "talent.orb_barrage",
+      "cooldown.arcane_orb.charges_fractional"
+    ]
+  },
+  "source_init_ambiguity": {
+    "case": "fury-st",
+    "action": "execute",
+    "times_ms": [
+      24159,
+      24914,
+      28345
+    ],
+    "reason": "DUPLICATE_SOURCE_ROW_IDENTITY_UNKNOWN",
+    "meaning": "C++ return proven but independent original init-list membership UNKNOWN"
+  },
+  "limits": [
+    "Every source-root PRE is original SimC C++ before action_ready in source execution order, not reconstructed WCL timestamp-before-t. Never reuse as WCL strict PRE.",
+    "Source selected root acts may be run_action_list/utility and do not prove performed user casts or optimality.",
+    "An explicit source APL IF may be present and the Native returned action true, yet independent IF replay is UNKNOWN if buff/proc/talent/CD/variables are missing. Do not coerce unknown to true.",
+    "Only Arcane has source mana pct (72 returned actions); Fury zero mana_max and resource rage was not captured in this experiment.",
+    "Original SimC action_t ready and action_ready inherited virtual chain still not independently source-gate closed. Full positive READY=0.",
+    "Historical Hekili architecture is a design guide only, Blizzard disallowed in-game combat decision work remains excluded."
+  ],
+  "next_product_exact": "Capture a minimal proven subset of missing original PRE symbols by source-specific SpecAdapter, prioritize physical executable opener decisions over run_list control; pass independent full READY source-route, then WCL blind independent candidate lock and holdout, General Rotation ST/2T/AoE and dummy evaluator.",
+  "main_promoted": false,
+  "frozen_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
