@@ -20,6 +20,8 @@ on:
       - tools/research/general_rotation_time_scoped_priority_ir_v1.py
       - tools/research/general_rotation_root_actor_pre_producer_v1.py
       - tools/research/general_rotation_root_actor_pre_replay_v1.py
+      - tools/research/general_rotation_root_resource_pre_producer_v1.py
+      - tools/research/general_rotation_root_resource_pre_replay_v1.py
       - tools/research/general_rotation_original_root_if_bridge_v1.py
       - tools/research/general_rotation_select_pre_passive_replay_v1.py
       - tools/research/general_rotation_original_pre_capture_engine_v1.py
@@ -100,6 +102,19 @@ jobs:
               assert r['WCL_API_calls']==0
           print('GENERIC_ORIGINAL_ROOT_ACTOR_PRE_SOURCE_ORDER_SYNTHETIC_PASS')
           PY
+          python -m py_compile tools/research/general_rotation_root_resource_pre_producer_v1.py tools/research/general_rotation_root_resource_pre_replay_v1.py
+          python -B tools/research/general_rotation_root_resource_pre_producer_v1.py > /tmp/zrot-root-mana-source-selftest.json
+          python -B tools/research/general_rotation_root_resource_pre_replay_v1.py > /tmp/zrot-root-mana-replay-selftest.json
+          python - <<'PY'
+          import json
+          for name,contract in (
+              ('/tmp/zrot-root-mana-source-selftest.json','ZrotOriginalRootRawResourcePreProducerV1'),
+              ('/tmp/zrot-root-mana-replay-selftest.json','ZrotOriginalRootManaPRESourceOrderReplayV1')):
+              x=json.load(open(name))
+              assert x['schema']==contract and x['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert x['full_READY_proven']==0
+          print('GENERIC_ORIGINAL_ROOT_MANA_RAW_PRE_SYNTHETIC_PASS')
+          PY
           python -m py_compile tools/research/general_rotation_original_root_if_bridge_v1.py
           python -B tools/research/general_rotation_original_root_if_bridge_v1.py > /tmp/zrot-original-native-if-bridge-selftest.json
           python - <<'PY'
@@ -108,6 +123,8 @@ jobs:
           assert r['schema']=='ZrotOriginalRootNativeIFComparatorProducerV1'
           assert r['status']=='PASS_OFFLINE_SYNTHETIC'
           assert r['independent_AST_native_IF_match_synthetic']==1
+          assert r['independent_mana_pct_native_IF_match_synthetic']==1
+          assert r['mana_zero_max_unknown_synthetic'] is True
           assert r['full_READY_proven']==0
           print('ORIGINAL_ROOT_PRE_NATIVE_IF_LINKAGE_SYNTHETIC_PASS')
           PY
@@ -487,6 +504,24 @@ jobs:
           assert r['WCL_latest_transition_before_t_claim'] is False
           assert r['full_READY_proven']==0
           print('SOURCE_PINNED_PRE_CALL_ROOT_ACTIVE_ENEMIES_CAPTURE_PASS')
+          PY
+      - name: Capture original raw mana numerator/max at the exact before-action-ready root
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_root_resource_pre_producer_v1.py \
+            --simc-root simc-upstream \
+            --root-actor-pre-receipt /tmp/zrot-original-root-actor-pre-producer.json \
+            --receipt /tmp/zrot-original-root-mana-pre-producer.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-original-root-mana-pre-producer.json'))
+          assert r['schema']=='ZrotOriginalRootRawResourcePreProducerV1'
+          assert r['original_ready_calls_added']==0
+          assert r['new_rng_or_resource_mutation_calls']==0
+          assert r['source_mana_fields']==['mana_current','mana_max']
+          assert r['full_READY_proven']==0
+          print('SOURCE_PINNED_GENERIC_ROOT_RAW_MANA_PRE_PATCH_PASS')
           PY
       - name: Observe original Native IF once per source root without new evaluations
         shell: bash
@@ -1051,6 +1086,7 @@ jobs:
           from general_rotation_original_root_if_bridge_v1 import corroborate
           source=json.load(open('/tmp/zrot-original-root-actor-pre-producer.json'))
           native=json.load(open('/tmp/zrot-original-native-if-bridge-producer.json'))
+          mana=json.load(open('/tmp/zrot-original-root-mana-pre-producer.json'))
           report={}
           for spec,prof in (
               ('fury','MID2_Warrior_Fury.simc'),
@@ -1063,7 +1099,10 @@ jobs:
                       '/simc_native_log.txt').read_text(encoding='utf8')
                   temporal=json.load(open(
                       '/tmp/zrot-source-temporal-frontier-'+name+'.json'))
-                  proof=corroborate(trace,profile,temporal,source,native)
+                  proof=corroborate(trace,profile,temporal,source,native,mana)
+                  assert proof['source_root_mana_direct_PRE_evidence'] is True
+                  assert (proof['status_counts']['mana_pct_source_original_pre_positive']+
+                          proof['status_counts']['mana_pct_zero_max_unknown'])==temporal['original_ready_calls']
                   assert proof['exact_original_action_ready_roots']==temporal['original_ready_calls']
                   assert proof['independent_full_action_ready_proven']==0
                   assert proof['source_order_complete'] is False
@@ -1105,6 +1144,7 @@ jobs:
             /tmp/zrot-generic-select-sweep-patch.json
             /tmp/zrot-original-root-actor-pre-producer.json
             /tmp/zrot-original-native-if-bridge-producer.json
+            /tmp/zrot-original-root-mana-pre-producer.json
             /tmp/zrot-native-root-if-proof-summary.json
             /tmp/zrot-native-root-if-proof-fury-st.json
             /tmp/zrot-native-root-if-proof-fury-2t.json
