@@ -249,7 +249,8 @@
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SIMC_APL_MODEL_COMPLETION_CONTRACT_20261103.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_ARCHITECTURE_REFERENCE_20261106.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/RETAIL_ADDON_POLICY_CAPABILITY_GATE_20261106.md",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md"
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md",
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_CORE_STATE_INTEGRATION_AUDIT_20261106.md"
   ],
   "blocked_by": [
     "No independently proven positive full virtual action_ready on actually selected executable candidate",
@@ -381,7 +382,7 @@
       "run_id": 42140591685,
       "source_commit": "ba0d490c18bf663b5972e9ea21db402c8446750f"
     },
-    "present_status": "HEKILI_AND_POLICY_REFERENCES_PINNED; BOUNDED_SOURCE_DECISION_REASON_LEDGER_IMPLEMENTED_ACTUAL_NATIVE_REPLAY_PASS; FULL_READY_AND_USER_TRAINER_NOT_IMPLEMENTED",
+    "present_status": "HISTORICAL_ARCHITECTURE_POLICY_REFERENCE_PLUS_EXECUTABLE_BOUND_OPENING_SOURCE_INTEGRATION_RECORDED",
     "short_term_exact_next": "Completed bounded SourceDecisionReasonLedgerV1 for 64 original source returned root samples: 8 independently corroborated IF false on Fury2T run_action_list control, 298 native post false-only, 198 unsampled root returns. Next expand complete source return rows/child paths and prove real executable source ability READY/prior choice before WCL cross-check and dummy scoring.",
     "medium_long_term_product_exact_next": "Extend validated Generic Rotation opener/conditional ST/2T/cleave/AoE across builds, WCL blind candidate lock and independent holdout, then evidence-bounded post-session dummy evaluation and minimal nonsecret opt-in recorder; any live behavior requires 12.1.5 client proof and current official API.",
     "protected_runtime_no_go": [
@@ -427,5 +428,60 @@
     "main_promoted": false,
     "shared_frozen_modified": false,
     "status": "BOUNDED_EXPLANATION_ONLY_NOT_COMPLETE_GENERAL_ROTATION"
+  },
+  "branch_local_execution_successor_20261106_hekili_integrated_opener": {
+    "kind": "NON_SCOPE_CHANGING_BRANCH_LOCAL_IMPLEMENTATION_AND_VALIDATION",
+    "date": "2026-11-06",
+    "design_basis": "HEKILI_PINNED_CORE_SCRIPTS_STATE_CLASSES_SOURCE_ARCHITECTURE_ONLY_NOT_LIVE_ADDON_PORT",
+    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+    "source_audit": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_CORE_STATE_INTEGRATION_AUDIT_20261106.md",
+    "implemented_file": "tools/research/general_rotation_integrated_opener_research_v1.py",
+    "actual_implementation_commit": "cce19deb3ba40ebaa08fda1875e2f671d6d543c6",
+    "actual_final_workflow_code_commit": "854e40c4a68aac109b62182c7c5589907d91cd78",
+    "CI": {
+      "run_id": 42149094904,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42149094904",
+      "Python_312": "SUCCESS",
+      "Python_314": "SUCCESS",
+      "original_native_receipt_four_case_integration": "SUCCESS",
+      "actual_provenance_mutations_rejected": 5,
+      "native_CPP_recompiled": false,
+      "WCL_API_called": false,
+      "WoW_game_client_run": false
+    },
+    "original_cpp_verification": {
+      "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+      "source_native_run_id": 42140591685,
+      "reason_ledger_run_id": 42146818557,
+      "source_select_sweeps_reused": 2121,
+      "source_root_choice_total": 262,
+      "detailed_root_early_source_returns": 64,
+      "source_root_returns_not_retained": 198,
+      "source_potential_executable_actions_not_proven_casts": 38,
+      "full_independent_READY_proven": 0,
+      "WCL_independent_holdout_for_this_integrated_IR": false
+    },
+    "output": {
+      "artifact_id": 13472195231,
+      "sha256_zip": "b6a243cc5c2f724b346dbf814367e58e5db97ee6ef6c25ddf5dbd74782327553",
+      "sha256_research_json": "fd55601886e10e6ffb73d3e2638b6df6c44b38626a15ce2d1fb0d7761eadda92",
+      "expires_at": "2026-11-13T02:15:15Z",
+      "evidence_receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/INTEGRATED_HEKILI_INSPIRED_NATIVE_OPENER_ST2T_20261106.json"
+    },
+    "status": "HEKILI_CORE_STATE_SCRIPTS_INTEGRATION_BOUNDED_ACTUAL_NATIVE_SOURCE_OPENER_PASS_NOT_FULL_DECISION_PARITY",
+    "product_exact_next": "Finish faithful SimC-first General Rotation opener and conditional priority ST/2T/cleave/AoE from source-derived state/SpecAdapter/READY closure, independently WCL blind validation, then safe evidence-backed target dummy feedback.",
+    "session_exact_next": "Attach exact selected-root original C++ before-call state snapshots (not per-row aggregate), source-pinned generic mechanic/effect SpecAdapter and full physical READY; validate one executable opener action plus earlier source exclusions; expand beyond 64 retained source returns using compact native source row receipts only where needed; then WCL post-lock and dummy.",
+    "gaps": [
+      "The 64 current source-return samples are not 64 performed player spells",
+      "State projection is synthetic-only because actual buff/resources/cooldown transitions missing",
+      "Original source IF is stored as row aggregate, not proven at selected root",
+      "full READY=0",
+      "actual WoW Retail 12.1.5 addon behavior not tested",
+      "Blizzard addon compliance cannot be inferred from old Hekili code"
+    ],
+    "main_promoted": false,
+    "shared_frozen_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
   }
 }
