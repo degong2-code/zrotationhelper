@@ -1,0 +1,89 @@
+{
+  "schema": "ZrotBranchOriginalRootManaAndNativeIFReceiptV1",
+  "product_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "status": "OBSERVED_SOURCE_NATIVE_IF_MATCH_NOT_FULL_READY",
+  "branch_only": true,
+  "main_promoted": false,
+  "official_simc_source_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "evidence_source_code_commit": "34307948b0924a1371293f4a7893026cac3d21fc",
+  "github_actions_run_id": 42136432768,
+  "github_actions_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42136432768",
+  "jobs": {
+    "generic_source_offline_py312": "SUCCESS",
+    "generic_source_offline_py314": "SUCCESS",
+    "actual_two_spec_original_vs_instrumented": "SUCCESS"
+  },
+  "artifact_id": 13465802291,
+  "artifact_zip_sha256": "6a9c929375cddbf164787fe3ac9130d1083f175ebc0bc382b6340ff8ebe35e03",
+  "artifact_expires_at": "2026-11-13T00:24:54Z",
+  "individual_receipt_sha256": {
+    "native_IF_summary": "5dcd474f0ba880e83da5090c65c5d376516b5b318b5a5bc517d62aaf8fea6b38",
+    "fury_2t": "bc1e66e285fa7f35ac97068b358f2fac5736134976907bfdff5303178acdd2f3",
+    "arcane_st": "57b19b27a4c9d2292f306dd34a1ee161a001db6c569a07d4caf34b1584f0d7d7",
+    "arcane_2t": "5fa83d93b85496dd66648f24eb24f860c558b905dfb6db97b8b1df0b02636b32",
+    "mana_root_producer": "a06bac0aef38bdfb3c3a4d53fa91efd073302649b7eba1953f72888a5304c83b"
+  },
+  "cases": {
+    "fury-st": {
+      "original_root_pre": 1542,
+      "mana_valid_pct": 0,
+      "mana_max_zero_unknown": 1542,
+      "if_ast_native_match": 0,
+      "if_ast_native_conflict": 0,
+      "comparison_status": "UNKNOWN_NO_ORIGINAL_NATIVE_IF_OVERLAP"
+    },
+    "fury-2t": {
+      "original_root_pre": 1030,
+      "mana_valid_pct": 0,
+      "mana_max_zero_unknown": 1030,
+      "if_ast_native_match": 46,
+      "if_ast_native_conflict": 0,
+      "comparison_status": "SOURCE_AST_NATIVE_IF_NONZERO_MATCH_OBSERVED"
+    },
+    "arcane-st": {
+      "original_root_pre": 1106,
+      "mana_valid_pct": 1106,
+      "mana_max_zero_unknown": 0,
+      "if_ast_native_match": 89,
+      "if_ast_native_conflict": 0,
+      "comparison_status": "SOURCE_AST_NATIVE_IF_NONZERO_MATCH_OBSERVED"
+    },
+    "arcane-2t": {
+      "original_root_pre": 1004,
+      "mana_valid_pct": 1004,
+      "mana_max_zero_unknown": 0,
+      "if_ast_native_match": 74,
+      "if_ast_native_conflict": 0,
+      "comparison_status": "SOURCE_AST_NATIVE_IF_NONZERO_MATCH_OBSERVED"
+    }
+  },
+  "aggregates": {
+    "original_root_pre": 4682,
+    "source_ast_native_match": 209,
+    "source_ast_native_conflict": 0,
+    "previous_verified_match": 46,
+    "new_validated_mana_condition_matches": 163
+  },
+  "bounded_source_match_example": {
+    "profile": "MID2_Mage_Arcane.simc",
+    "source_list": "cooldowns",
+    "ordinal_one_based": 4,
+    "action": "cancel_action",
+    "source_expression": "action.evocation.channeling&mana.pct>=95",
+    "source_row_sha256": "8c49f6ec7255685e5c5727ef41705e03fb5b7e48ce495d23d7f7b5a47c7492d5",
+    "sample_AST_value": false,
+    "sample_original_native_IF_value": false,
+    "sample_type": "SOURCE_BOUNDED_EXAMPLE_NOT_PROOF_OF_ALL_163"
+  },
+  "limits": {
+    "independent_full_ready_proven": 0,
+    "complete_opener_model": false,
+    "source_order_complete": false,
+    "target_count_breakpoint_proven": false,
+    "wcl_blind_holdout_current_ir": false,
+    "practice_error_feedback_permitted": false,
+    "wcl_api_calls": 0,
+    "SimC_cpp_source_before_call_witness_not_WCL_timestamp_transition_pre": true
+  }
+}
