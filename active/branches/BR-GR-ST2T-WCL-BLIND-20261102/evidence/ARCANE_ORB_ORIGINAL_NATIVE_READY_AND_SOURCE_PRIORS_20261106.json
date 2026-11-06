@@ -1,0 +1,175 @@
+{
+  "schema": "ZrotBranchArcaneOrbOriginalNativeReadyStageAndSourcePriorityEvidenceV1",
+  "product_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "date": "2026-11-06",
+  "stage": "SOURCE_OBSERVED_NATIVE_READY_BRANCH_AND_EARLIER_CANDIDATE_CONTEXT_PARTIAL_NOT_COMPLETE_GENERAL_ROTATION",
+  "source_revision": "simulationcraft/simc@b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_cpp_action_blob_sha1": "399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4",
+  "source_cpp_arcane_class_blob_sha1": "306d835f2db5f7418da221ce155d32e81c53f45c",
+  "source_apl_profile_git_blob_sha1": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+  "source_apl_line_58": "actions.cooldowns=arcane_orb,if=talent.splintering_sorcery,line_cd=999",
+  "new_files": {
+    "producer": "tools/research/general_rotation_arcane_orb_native_ready_stage_producer_v1.py",
+    "replay": "tools/research/general_rotation_arcane_orb_native_ready_stage_replay_v1.py",
+    "selected_prior_context": "tools/research/general_rotation_arcane_orb_selected_priority_context_v1.py",
+    "prior_CXX_source_and_state": "tools/research/general_rotation_full_root_state_join_v1.py",
+    "actual_CPP_workflow": ".github/workflows/zrot-general-rotation-generic-select-pre-producer-v1.yml",
+    "actual_competitor_workflow": ".github/workflows/zrot-general-rotation-arcane-orb-source-priority-context-v1.yml"
+  },
+  "actual_native_cpp_e2e": {
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42174427587",
+    "run_id": 42174427587,
+    "python312": "SUCCESS",
+    "python314": "SUCCESS",
+    "official_original_CPP_vs_instrumented_Fury_Arcane_ST_2T": "SUCCESS",
+    "producer_capture_scope": "original Arcane Orb ready() and action_ready() returned gate stage, root-ID-bound raw mana and cooldown/charge fields",
+    "additional_ready_calls": 0,
+    "additional_cost_evaluations": 0,
+    "additional_RNG_calls": 0,
+    "original_CPP_actor_PRE_totals_same_as_prior": 4682,
+    "original_CPP_returned_source_choice_totals_same_as_prior": 262,
+    "artifact_id": 13483450540,
+    "artifact_name": "zrot-general-rotation-generic-select-pre-two-spec-receipts",
+    "artifact_sha256_zip": "260895d8cecbb6684ac911b0fbe2e5b3f1163685928bcc3345a81068a70ab264",
+    "artifact_expiry": "2026-11-13T06:28:02Z",
+    "source_output_SHA256": {
+      "zrot-original-arcane-ready-stage-st.json": "79bb76801c49d6280d97f34e16e94fdf6312b101f17e629f27b2b933999b8863",
+      "zrot-original-arcane-ready-stage-2t.json": "af62e1f62e280dfaa4ada5f618a824d0c5f67bba5e939a73aa23150766d3823a",
+      "zrot-original-arcane-ready-stage-summary.json": "1c5a62b1eafc836c2077068767ae9800a43afb521e33f260cd5f08ff20997ed8"
+    }
+  },
+  "actual_original_CPP_ready_branch_counts": {
+    "arcane_ST": {
+      "ready_root_calls": 80,
+      "original_action_return_true": 1,
+      "original_action_return_false": 79,
+      "native_action_APL_IF_false": 35,
+      "native_action_line_cooldown_down": 41,
+      "native_base_resource_unaffordable": 3,
+      "base_ready_true": 77
+    },
+    "arcane_2_target": {
+      "ready_root_calls": 78,
+      "original_action_return_true": 3,
+      "original_action_return_false": 75,
+      "native_action_APL_IF_false": 34,
+      "native_action_line_cooldown_down": 38,
+      "native_base_resource_unaffordable": 3,
+      "base_ready_true": 75
+    },
+    "aggregate": {
+      "ready_root_calls": 158,
+      "original_true": 4,
+      "original_false": 154,
+      "observed_APL_IF_false": 69,
+      "observed_line_cooldown_down": 79,
+      "observed_resource_unaffordable": 6,
+      "independent_FULL_READY_proven": 0,
+      "independent_earlier_skill_NOT_READY_proven": 0
+    }
+  },
+  "mechanic_interpretation": {
+    "source_row_line_cooldown_seconds": 999,
+    "original_CPP_line_cooldown_ready_ms_when_line_down": 999000,
+    "meaning": "APL ROW LINE COOLDOWN NOT SPELL GLOBAL COOLDOWN/CHARGE INSUFFICIENCY",
+    "source_if_from_original_native_branch_not_independent_opaque_state": true,
+    "source_actual_provenance": "REAL PINNED SIMC C++ SOURCE EXECUTION RETURN_PATH",
+    "player_training_error_allowed": false
+  },
+  "observed_original_resource_gate_failures": [
+    {
+      "case": "arcane-st",
+      "simc_ms": 2414,
+      "mana_current": 112.28517391304348,
+      "mana_max": 407791.23478260875,
+      "root_fail_count": 3,
+      "reason": "ORIGINAL_CPP_BASE_RESOURCE_UNAFFORDABLE"
+    },
+    {
+      "case": "arcane-2t",
+      "simc_ms": 2417,
+      "mana_current": 224.57034782608696,
+      "mana_max": 407791.23478260875,
+      "root_fail_count": 3,
+      "reason": "ORIGINAL_CPP_BASE_RESOURCE_UNAFFORDABLE"
+    }
+  ],
+  "actual_original_native_prior_candidates": {
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42175299671",
+    "run_id": 42175299671,
+    "python312": "SUCCESS",
+    "python314": "SUCCESS",
+    "reused_actual_CXX_artifact_id": 13483450540,
+    "new_CPP_builds_for_competitor_replay": 0,
+    "source_candidate_forgery_tests_rejected": [
+      "EARLIER_SOURCE_POST_WAS_TRUE",
+      "FORGED_SELECTED_CPP_ROOT",
+      "FALSE_SELECTED_ACTION_STAGE"
+    ],
+    "original_arcane_orb_source_selected_actions": 4,
+    "selected_cases": [
+      {
+        "case": "arcane-st",
+        "ms": 0,
+        "source_list": "cooldowns",
+        "ordinal": 1,
+        "original_cpp_ready_root": 27,
+        "earlier_same_leaf_candidates": 0
+      },
+      {
+        "case": "arcane-2t",
+        "ms": 0,
+        "source_list": "cooldowns",
+        "ordinal": 1,
+        "original_cpp_ready_root": 27,
+        "earlier_same_leaf_candidates": 0
+      },
+      {
+        "case": "arcane-2t",
+        "ms": 7667,
+        "source_list": "spellslinger",
+        "ordinal": 6,
+        "original_cpp_ready_root": 908,
+        "earlier_same_leaf_candidates": 5,
+        "earlier_orb_row2_original_action_branch": "ACTION_APL_IF_FALSE"
+      },
+      {
+        "case": "arcane-2t",
+        "ms": 14950,
+        "source_list": "spellslinger",
+        "ordinal": 6,
+        "original_cpp_ready_root": 1617,
+        "earlier_same_leaf_candidates": 5,
+        "earlier_orb_row2_original_action_branch": "ACTION_APL_IF_FALSE"
+      }
+    ],
+    "earlier_same_leaf_native_POST_false_total": 10,
+    "earlier_same_leaf_orb_original_CPP_if_false": 2,
+    "other_earlier_physical_source_candidate_native_POST_false_not_proven_full_not_ready": 8,
+    "prior_candidate_sequence_for_two_2t_successes": [
+      "prismatic_bolt ordinal 1",
+      "arcane_orb ordinal 2 original CPP IF_FALSE",
+      "arcane_barrage ordinal 3",
+      "arcane_missiles ordinal 4",
+      "prismatic_bolt ordinal 5",
+      "arcane_orb ordinal 6 chosen"
+    ],
+    "artifact_id": 13483236957,
+    "artifact_zip_sha256": "98213fffb15acc5829fe38c50791bd6113cbe5202a31c9166d8032a14a8b6eb9",
+    "artifact_expiry": "2026-11-13T06:34:41Z"
+  },
+  "strict_limits": [
+    "Actual SimC C++ action_t::ready and action_ready return path are observed, not independently recomputed from all initial state and source virtual gates.",
+    "Source-level APL line_cd is distinct from ability cooldown and charge readiness; no fabricated user feedback that 999s restriction means spell not globally ready.",
+    "Prior candidate Native false does not prove the entire ability was unusable or optimality of choosing Arcane Orb.",
+    "Same-SimC-clock source PRE ordering is not independent WCL Strict PRE evidence; WCL rule must use transitions timestamp < cast time.",
+    "SimC profile is initial hypothesis, WCL independent blind discovery and locked holdout still needed.",
+    "Observability in actual WoW 12.1.5 addon is not validated by these offline SimC results; no Hekili in-client combat decision port."
+  ],
+  "next_exact": "For ST and 2T Arcane Orb, source-pin high-impact missing talent/variable/buff/cooldown operands per exact ready root and prove earlier physical candidate failure routes without rerunning same-source stage logs. Integrate with General Rotation IF/ELSE and independent WCL blind validation, later policy-safe offline dummy.",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
