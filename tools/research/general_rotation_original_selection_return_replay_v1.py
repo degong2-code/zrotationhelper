@@ -36,7 +36,7 @@ class SourceChoiceError(ValueError):
 
 
 def replay(log:str,profile:bytes,temporal:dict,producer:dict,
-           prior_mana_producer:dict)->dict:
+           prior_mana_producer:dict,*,retain_all:bool=False)->dict:
     if (producer.get("schema")!=PRODUCER_SCHEMA or
         producer.get("source_revision")!=REVISION or
         producer.get("source_return_marker")!=RETURN_MARK or
@@ -73,6 +73,7 @@ def replay(log:str,profile:bytes,temporal:dict,producer:dict,
     counts=Counter()
     chosen_rows=Counter()
     examples=[]
+    all_root_return_examples=[]
     for line in log.splitlines():
         if SWEEP_MARK in line:
             if line.count(SWEEP_MARK)!=1:
@@ -183,23 +184,33 @@ def replay(log:str,profile:bytes,temporal:dict,producer:dict,
             counts["root_sweep_returned"]+=1
             if row is not None:
                 counts["root_sweep_returned_action_source_row"]+=1
+                entry={
+                    "sweep_call_id":sid,
+                    "at_simc_ms":sw["at_simc_ms"],
+                    "return_kind":kind,
+                    "source_list":origin,
+                    "source_ordinal":ordinal,
+                    "source_row_sha256":row["source_sha256"],
+                    "source_action":row["action"],
+                    "prior_native_false_observed":prior_native_false,
+                    "prior_background_skips_observed":prior_background,
+                    "full_READY":"UNKNOWN",
+                }
                 if len(examples)<16:
-                    examples.append({
-                        "sweep_call_id":sid,
-                        "at_simc_ms":sw["at_simc_ms"],
-                        "return_kind":kind,
-                        "source_list":origin,
-                        "source_ordinal":ordinal,
-                        "source_row_sha256":row["source_sha256"],
-                        "source_action":row["action"],
-                        "prior_native_false_observed":prior_native_false,
-                        "prior_background_skips_observed":prior_background,
-                        "full_READY":"UNKNOWN",
+                    examples.append(entry)
+                if retain_all:
+                    all_root_return_examples.append({
+                        **entry,
+                        "source_if":(
+                            row.get("expression_fields",{}).get("if",{}).get("source")
+                            if isinstance(row.get("expression_fields",{}).get("if"),dict)
+                            else None),
+                        "native_source_return_not_executed_cast":True,
                     })
     if (open_stack or active or len(completed)!=len(expected) or
         len(returned)!=len(expected)):
         raise SourceChoiceError("INCOMPLETE_NATIVE_RETURN_SWEEP_COHORT")
-    return {
+    result={
         "schema":SCHEMA,"product_policy_id":POLICY,
         "source_profile_git_blob_sha1":git_blob(profile),
         "source_sweeps_exact_cxx_return":len(expected),
@@ -213,6 +224,12 @@ def replay(log:str,profile:bytes,temporal:dict,producer:dict,
         "practice_error_feedback_permitted":False,
         "WCL_API_calls":0,
     }
+    if retain_all:
+        if len(all_root_return_examples)!=counts["root_sweep_returned_action_source_row"]:
+            raise SourceChoiceError("ALL_NATIVE_SOURCE_RETURN_ROWS_INCOMPLETE")
+        result["all_original_root_source_return_rows"]=all_root_return_examples
+        result["all_original_root_return_count"]=len(all_root_return_examples)
+    return result
 
 
 def selftest()->dict:
