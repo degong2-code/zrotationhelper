@@ -108,7 +108,7 @@ def patch(original:bytes,prior:bytes)->bytes:
     injected=_insert_ready(chunk)
     out=source[:start]+injected+source[end:]
     need(out.count(MARK)==1 and
-         out.count("arcane_mage_spell_t::ready()")==1 and
+         out.count("arcane_mage_spell_t::ready()")==source.count("arcane_mage_spell_t::ready()")+1 and
          out.count("rng().roll(")==source.count("rng().roll(") and
          out.count("action_ready()")==source.count("action_ready()") and
          out.count("cost_affordable()")==source.count("cost_affordable()"),
