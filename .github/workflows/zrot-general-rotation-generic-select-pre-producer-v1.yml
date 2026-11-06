@@ -22,6 +22,8 @@ on:
       - tools/research/general_rotation_root_actor_pre_replay_v1.py
       - tools/research/general_rotation_root_resource_pre_producer_v1.py
       - tools/research/general_rotation_root_resource_pre_replay_v1.py
+      - tools/research/general_rotation_original_selection_return_producer_v1.py
+      - tools/research/general_rotation_original_selection_return_replay_v1.py
       - tools/research/general_rotation_original_root_if_bridge_v1.py
       - tools/research/general_rotation_select_pre_passive_replay_v1.py
       - tools/research/general_rotation_original_pre_capture_engine_v1.py
@@ -114,6 +116,21 @@ jobs:
               assert x['schema']==contract and x['status']=='PASS_OFFLINE_SYNTHETIC'
               assert x['full_READY_proven']==0
           print('GENERIC_ORIGINAL_ROOT_MANA_RAW_PRE_SYNTHETIC_PASS')
+          PY
+          python -m py_compile tools/research/general_rotation_original_selection_return_producer_v1.py tools/research/general_rotation_original_selection_return_replay_v1.py
+          python -B tools/research/general_rotation_original_selection_return_producer_v1.py > /tmp/zrot-native-selection-return-source-selftest.json
+          python -B tools/research/general_rotation_original_selection_return_replay_v1.py > /tmp/zrot-native-selection-return-replay-selftest.json
+          python - <<'PY'
+          import json
+          for path,schema in (
+              ('/tmp/zrot-native-selection-return-source-selftest.json',
+               'ZrotOriginalNativeSourceSelectedReturnProducerV1'),
+              ('/tmp/zrot-native-selection-return-replay-selftest.json',
+               'ZrotOriginalSourceReturnedActionFrontierV1')):
+              v=json.load(open(path))
+              assert v['schema']==schema and v['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert v['independent_FULL_READY_proven']==0
+          print('ORIGINAL_SOURCE_SELECTED_RETURN_SYNTHETIC_CAUSAL_PASS')
           PY
           python -m py_compile tools/research/general_rotation_original_root_if_bridge_v1.py
           python -B tools/research/general_rotation_original_root_if_bridge_v1.py > /tmp/zrot-original-native-if-bridge-selftest.json
@@ -539,6 +556,24 @@ jobs:
           assert v['new_IF_ready_rng_target_calls']==0
           assert v['full_READY_proven']==0
           print('PINNED_NATIVE_ORIGINAL_IF_SINGLE_EVALUATION_CAPTURE_PASS')
+          PY
+      - name: Instrument exact original select_action source return paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_original_selection_return_producer_v1.py \
+            --simc-root simc-upstream \
+            --prior-mana-pre-receipt /tmp/zrot-original-root-mana-pre-producer.json \
+            --receipt /tmp/zrot-native-select-source-return-producer.json
+          python - <<'PY'
+          import json
+          v=json.load(open('/tmp/zrot-native-select-source-return-producer.json'))
+          assert v['schema']=='ZrotOriginalNativeSourceSelectedReturnProducerV1'
+          assert v['original_return_paths_preserved'] is True
+          assert v['original_action_ready_call_count']==1
+          assert v['additional_action_ready_RNG_resource_calls']==0
+          assert v['independent_FULL_READY_proven']==0
+          print('ORIGINAL_SOURCE_SELECTED_RETURN_BRANCH_PATCH_PASS')
           PY
       - name: Rebuild patched Native SimC and capture same two independent specs
         shell: bash
@@ -1129,6 +1164,53 @@ jobs:
                   'WCL_API_calls':0},sort_keys=True,separators=(',',':'))+'\n')
           PY
           sha256sum /tmp/zrot-native-root-if-proof-summary.json
+      - name: Independently verify exact original selected returns through nested APL calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_original_selection_return_replay_v1 import replay
+          patch=json.load(open('/tmp/zrot-native-select-source-return-producer.json'))
+          mana=json.load(open('/tmp/zrot-original-root-mana-pre-producer.json'))
+          report={}
+          for spec,prof in (
+              ('fury','MID2_Warrior_Fury.simc'),
+              ('arcane','MID2_Mage_Arcane.simc')):
+              source=Path('simc-upstream/profiles/MID2/'+prof).read_bytes()
+              for mode in ('st','2t'):
+                  key=spec+'-'+mode
+                  directory=spec if mode=='st' else spec+'-2t'
+                  log=Path('/tmp/zrot-instrumented-'+directory+
+                           '/simc_native_log.txt').read_text(encoding='utf8')
+                  temporal=json.load(open(
+                      '/tmp/zrot-source-temporal-frontier-'+key+'.json'))
+                  out=replay(log,source,temporal,patch,mana)
+                  assert out['source_sweeps_exact_cxx_return']==temporal['source_sweep_count']
+                  assert out['counts'].get('root_sweep_returned',0)>0
+                  assert out['independent_FULL_READY_proven']==0
+                  assert out['complete_source_order_proven'] is False
+                  path=Path('/tmp/zrot-native-source-selected-return-'+key+'.json')
+                  path.write_text(json.dumps(out,sort_keys=True,separators=(',',':'))+'\n')
+                  report[key]={
+                      'source_sweeps':out['source_sweeps_exact_cxx_return'],
+                      'root_returned':out['counts'].get('root_sweep_returned',0),
+                      'returned_action_row':out['counts'].get('root_sweep_returned_action_source_row',0),
+                      'direct_return':out['counts'].get('DIRECT',0),
+                      'child_propagated_return':out['counts'].get('CHILD_PROPAGATED',0),
+                      'null_context':out['counts'].get('NULL_CONTEXT',0),
+                      'null_exhausted':out['counts'].get('NULL_EXHAUSTED',0),
+                      'full_READY':0}
+                  print('ACTUAL_NATIVE_RETURN_SOURCE_FRONTIER',key,report[key],flush=True)
+          result={'schema':'ZrotOriginalNativeSelectedSourceReturn4CaseSummaryV1',
+                  'cases':report,'source_selected_action_is_NATIVE_observation_only':True,
+                  'positive_independent_FULL_READY':0,'WCL_API_calls':0}
+          Path('/tmp/zrot-native-source-selected-return-summary.json').write_text(
+              json.dumps(result,sort_keys=True,separators=(',',':'))+'\n')
+          PY
+          sha256sum /tmp/zrot-native-source-selected-return-summary.json
       - name: Preserve compact safe receipts only (never raw actor logs)
         uses: actions/upload-artifact@v4
         if: success()
@@ -1145,6 +1227,12 @@ jobs:
             /tmp/zrot-original-root-actor-pre-producer.json
             /tmp/zrot-original-native-if-bridge-producer.json
             /tmp/zrot-original-root-mana-pre-producer.json
+            /tmp/zrot-native-select-source-return-producer.json
+            /tmp/zrot-native-source-selected-return-summary.json
+            /tmp/zrot-native-source-selected-return-fury-st.json
+            /tmp/zrot-native-source-selected-return-fury-2t.json
+            /tmp/zrot-native-source-selected-return-arcane-st.json
+            /tmp/zrot-native-source-selected-return-arcane-2t.json
             /tmp/zrot-native-root-if-proof-summary.json
             /tmp/zrot-native-root-if-proof-fury-st.json
             /tmp/zrot-native-root-if-proof-fury-2t.json
