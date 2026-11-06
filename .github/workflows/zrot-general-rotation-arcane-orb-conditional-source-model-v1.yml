@@ -1,0 +1,116 @@
+name: ZRot Arcane Orb Conditional Source Model Actual Receipts
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/research/general_rotation_source_if_minimal_witness_v1.py
+      - tools/research/general_rotation_arcane_orb_conditional_source_model_v1.py
+      - .github/workflows/zrot-general-rotation-arcane-orb-conditional-source-model-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline-and-existing-native-proof:
+    name: original-source-conditional-if-py${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python }}"
+      - name: Compile generic source IF explanations and Arcane source model
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_source_if_minimal_witness_v1.py tools/research/general_rotation_arcane_orb_conditional_source_model_v1.py
+          python -B tools/research/general_rotation_source_if_minimal_witness_v1.py >/tmp/zrot-witness-selftest.json
+          python -B tools/research/general_rotation_arcane_orb_conditional_source_model_v1.py >/tmp/zrot-source-model-selftest.json
+          python - <<'PY'
+          import json
+          for file,schema in (
+            ('/tmp/zrot-witness-selftest.json','ZrotGeneralRotationMinimalSourceIFWitnessV1'),
+            ('/tmp/zrot-source-model-selftest.json','ZrotArcaneOrbSourceConditionalOpenerHypothesisV1')):
+              record=json.load(open(file))
+              assert record['schema']==schema
+              assert record['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert record['WCL_API_calls']==0
+          print('GENERIC_MINIMAL_SOURCE_IF_SYNTHETIC_PASS')
+          PY
+      - name: Reuse verified original C++ class-specific exact-root PRE artifact
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42181561000
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: zrot-general-rotation-generic-select-pre-two-spec-receipts
+          path: /tmp/zrot-source
+      - name: Reuse actual previously locked original Native candidate order
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42175299671
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: zrot-arcane-orb-source-chosen-prior-candidates
+          path: /tmp/zrot-prior
+      - name: Produce source TRUE/FALSE IF witness and explicit unknown competitors
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_arcane_orb_conditional_source_model_v1.py \
+            --spec-evidence-dir /tmp/zrot-source \
+            --earlier-source-priority-json /tmp/zrot-prior/zrot-arcane-orb-chosen-vs-earlier-source.json \
+            --out /tmp/zrot-arcane-conditional-source-model.json
+          python - <<'PY'
+          import copy,json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_arcane_orb_conditional_source_model_v1 import (
+            read_pinned,compose,ConditionalSourceRuleError)
+          raw=Path('/tmp/zrot-source')
+          pri=Path('/tmp/zrot-prior/zrot-arcane-orb-chosen-vs-earlier-source.json')
+          result=json.loads(Path('/tmp/zrot-arcane-conditional-source-model.json').read_text())
+          agg=result['aggregate_counts']
+          assert agg['selected_orb_same_root_IF_true_explained']==4
+          assert agg['earlier_same_spell_source_if_false_explained']==2
+          assert agg['earlier_other_spell_ready_unknown']==8
+          assert result['safe_dummy_feedback_permitted'] is False
+          assert result['WCL_source_blind_holdout_performed'] is False
+          for case,rows in result['case_results'].items():
+            for chosen in rows['conditional_source_rule_hypotheses']:
+              w=chosen['selected_source_APL_IF_TRUE']
+              assert w['source_IF_independently_replayed_value'] is True
+              assert chosen['independently_proven_positive_FULL_READY'] is False
+              assert chosen['gameplay_user_error_feedback']=='UNKNOWN'
+              for earlier in chosen['earlier_same_list_candidate_decisions']:
+                if earlier['source_action']=='arcane_orb':
+                  ast=earlier['source_IF_FALSE_witness']
+                  assert ast['source_IF_independently_replayed_value'] is False
+                  print('SOURCE_PRIOR_ORB_FALSE_MIN_WITNESS',case,chosen['simc_ms'],
+                        ast['minimal_sufficient_facts'],flush=True)
+              print('SOURCE_CHOOSER_ORB_TRUE_MIN_WITNESS',case,chosen['simc_ms'],
+                    w['minimal_sufficient_facts'],w['fact_provenance'],flush=True)
+          pri_data=json.loads(pri.read_bytes())
+          source=json.loads((raw/'zrot-arcane-orb-exact-spec-pre-2t.json').read_bytes())
+          earlier=next(x for x in pri_data['cases']['2t']['selected_actions']
+            if x['simc_ms']==7667)
+          forged=copy.deepcopy(pri_data['cases']['2t'])
+          next(x for x in forged['selected_actions'] if x['simc_ms']==7667
+            )['selected_root_CPP_ready_id']=-1
+          try:compose(source,forged,case='2t')
+          except ConditionalSourceRuleError:
+            print('SOURCE_CONDITIONAL_IDENTITY_FORGERY_REJECTED')
+          else:raise AssertionError('SOURCE_CANDIDATE_ROOT_FORGERY_ACCEPTED')
+          print('ACTUAL_ARCANE_SOURCE_CONDITIONAL_IF_ELSE_PASS',agg)
+          PY
+          sha256sum /tmp/zrot-arcane-conditional-source-model.json
+      - uses: actions/upload-artifact@v4
+        if: matrix.python == '3.12'
+        with:
+          name: zrot-arcane-conditional-source-if-else-replay
+          path: /tmp/zrot-arcane-conditional-source-model.json
+          retention-days: 7
+          if-no-files-found: error
