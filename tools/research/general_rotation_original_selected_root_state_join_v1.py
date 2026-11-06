@@ -82,7 +82,8 @@ def _load(source:zipfile.ZipFile|Path, member:str)->dict:
     return json.loads(raw)
 
 def _unique_leaf(sweeps:dict[int,dict], children:dict[int,list[int]],
-                 top_id:int, choice:dict, source:dict)->dict:
+                 top_id:int, choice:dict, source:dict,
+                 *, require_foreground_init:bool=True)->dict:
     root=sweeps.get(top_id)
     check(root is not None and root.get("parent_sweep_call_id")==0,
           "ROOT_RETURN_SWEEP_UNMAPPED")
@@ -134,15 +135,27 @@ def _unique_leaf(sweeps:dict[int,dict], children:dict[int,list[int]],
               last.get("simc_NATIVE_return_post_comparator") is True,
               "NESTED_SOURCE_NOT_PROPAGATED_FROM_CALL")
     check(type(ev.get("original_action_ready_root_id")) is int and
-          ev["original_action_ready_root_id"]>0 and
-          ev.get("source_init_stage")=="FOREGROUND_MEMBER_AT_INIT",
+          ev["original_action_ready_root_id"]>0,
           "CPP_LEAF_READY_ROOT_UNRELIABLE")
+    # The original C++ root existence and Native selection may be proven
+    # independently of a separately reconstructed initial membership.
+    # Default remains STRICT for existing 64-choice evidence/receipts.
+    init_stage=ev.get("source_init_stage")
+    if require_foreground_init:
+        check(init_stage=="FOREGROUND_MEMBER_AT_INIT",
+              "CPP_LEAF_INITIALIZATION_PROVENANCE_NOT_FOREGROUND")
+    elif init_stage is not None:
+        check(isinstance(init_stage,str) and bool(init_stage),
+              "CPP_LEAF_INITIALIZATION_PROVENANCE_MALFORMED")
     return {
         "source_cpp_select_path_sweep_ids":chain,
         "leaf_select_sweep_id":leaf_id,
         "source_cpp_ready_root_id":ev["original_action_ready_root_id"],
         "leaf_cxx_action_ready_post":True,
         "leaf_identical_source_row_proven":True,
+        "source_init_stage_observed":init_stage or "UNKNOWN_NOT_RETAINED",
+        "foreground_init_member_proven":
+            init_stage=="FOREGROUND_MEMBER_AT_INIT",
         "was_child_propagated":k=="CHILD_PROPAGATED",
     }
 
