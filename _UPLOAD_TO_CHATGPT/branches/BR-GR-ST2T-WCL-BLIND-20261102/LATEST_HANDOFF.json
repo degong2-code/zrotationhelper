@@ -125,7 +125,7 @@
   },
   "product_exact_next": "Complete a reusable Generic General Rotation opener and stateful conditional ST/2-target/cleave/AoE decision engine by proving actual positive source-pinned skill readiness and source-order selection, then independently reconcile locked WCL behavior and Blizzard mechanics and reuse the verified IR for evidence-bounded target-dummy feedback.",
   "chat_exact_next": "READ_ONLY_RESTORE_REPORT_THEN_STOP. Requery GitHub actual HEAD and MAIN, policy SHA256/blob and full snapshot, archive parent SHA256, latest source join CI and raw JSON, compare 953 source IF and earlier distinct 477 cohort, confirm 0 full READY, report roadmap. Wait for fresh user '진행'. No code/docs changes, tests, API collection, Actions, commit, PR or promotion.",
-  "session_exact_next_after_explicit_progress": "Choose the highest-impact next physical source state: (a) narrowly capture Arcane Barrage's exact two prior-root original APL IF operands and independent AST negative if material, while (b) move independent WCL blind discovery toward a locked candidate/threshold and independent holdout without using SimC or Hekili answers before lock. Reuse 262 chosen PRE, 158 Orb READY, 137 rival READY, 8/10 independent 2T prior-row rejections and generic source AST witness; then only evidence-backed ST/2T General Rotation IF/ELSE and policy-gated offline dummy feedback. No full READY or optimality claim where unproven.",
+  "session_exact_next_after_explicit_progress": "Generic source→conditional research IR+real SimC source-choice E2E now PASS (172 Fury/Arcane rows, 262 exact native source returns, 4 ST/2T cases); do not repeat per-spell Arcane Orb diagnostic as main product. NEXT: turn generic IF/ELSE source topology into evidence-backed STATE-CONDITIONED executable action priority across two classes using full readiness contracts, variable timing, CALL/RUN control, proc/cd/charges, opener termination and target-switch rules; UNKNOWN for missing. Then WCL blind independent discovery/lock/holdout after candidate lock, add AoE/build variants, policy-safe dummy evaluator. No MAIN/FROZEN changes.",
   "entry_gate": {
     "mode": "READ_ONLY_RESTORE_REPORT_THEN_STOP",
     "requires_user_explicit_progress": "진행",
@@ -793,6 +793,72 @@
     "WCL_API_calls": 0,
     "previous_session_exact_next": "Use real Arcane Orb exact-root PRE and generic minimal source IF witnesses to explain earlier competing spells in both 2T chosen Orb decisions (prismatic_bolt, arcane_barrage, arcane_missiles) using source-pinned original C++ ready branch/skill PRE only where gating differs. Verify full action readiness independent from native POST before claiming skill priority. Build ST/2T conditional General Rotation IR; run independent WCL blind discovery candidate/threshold lock and holdout before any trainer mistake verdict. Keep additional AoE/build, game addon policy-gated; unknown remains UNKNOWN.",
     "session_exact_next": "Choose the highest-impact next physical source state: (a) narrowly capture Arcane Barrage's exact two prior-root original APL IF operands and independent AST negative if material, while (b) move independent WCL blind discovery toward a locked candidate/threshold and independent holdout without using SimC or Hekili answers before lock. Reuse 262 chosen PRE, 158 Orb READY, 137 rival READY, 8/10 independent 2T prior-row rejections and generic source AST witness; then only evidence-backed ST/2T General Rotation IF/ELSE and policy-gated offline dummy feedback. No full READY or optimality claim where unproven.",
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "branch_local_execution_successor_20261106_generic_simc_source_e2e": {
+    "schema": "ZrotBranchGenericSimCSourceToConditionalOpenerE2EHandoffSuccessorV1",
+    "date": "2026-11-06",
+    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+    "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+    "product_priority_override": "USER_REFOCUS_FROM_PER_SPELL_ARCANE_TO_GENERIC_SIMC_ROTATION_EXTRACTION_ENGINE",
+    "existing_generic_components_reused": [
+      "tools/research/simc_apl_semantic_ir_v2.py",
+      "tools/research/general_rotation_simc_multi_spec_cold_start_v1.py",
+      "tools/research/general_rotation_source_hypothesis_ir_v1.py"
+    ],
+    "new_code": [
+      "tools/research/general_rotation_simc_e2e_research_engine_v1.py",
+      "tools/research/general_rotation_simc_single_profile_v1.py",
+      "tools/research/fixtures/general_rotation_e2e_original_native_st_2t_v1.json",
+      ".github/workflows/zrot-general-rotation-simc-e2e-source-priority-v1.yml"
+    ],
+    "verified_actual_CI": {
+      "run_id": 42195342553,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42195342553",
+      "Python312": "SUCCESS",
+      "Python314": "SUCCESS",
+      "official_simc_source_and_old_native_artifact_E2E": "SUCCESS",
+      "source_only_mode": "SUCCESS",
+      "one_spec_profile_Mage_and_Warrior": "SUCCESS",
+      "source_action_rows": 172,
+      "native_selected_root_PRE_reconciled": 262,
+      "distinct_classes": 2,
+      "target_contexts": 4,
+      "native_simc_cpp_builds_this_step": 0,
+      "WCL_API_calls": 0,
+      "WoW_client_calls": 0
+    },
+    "source_pins": {
+      "official_simc_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+      "fury_profile_git_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+      "arcane_profile_git_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+      "actual_original_cpp_receipt_run_id": 42155157024
+    },
+    "source_hypothesis_and_runtime_proof_boundary": {
+      "source_APL_parsing_and_conditioned_list_graph": "ACTUAL_E2E_PASS_FOR_TWO_PINNED_CLASSES",
+      "source_returned_30s_selection_sample": "EXACT_ORIGINAL_CPP_SOURCE_ROW_AND_BEFORE_CALL_PRE_262_OF_262",
+      "physical_opener_end": "UNKNOWN",
+      "simultaneous_physical_ready_and_priority_optimality": "UNKNOWN",
+      "missing_ready_variables_procs_cooldown_talents": "UNKNOWN",
+      "WCL_blind_candidate_lock_and_independent_holdout": "NOT_RUN",
+      "dummy_error_verdict": "UNKNOWN",
+      "generic_aoe_scenario_manifest_support": "IMPLEMENTED_NOT_LIVE_VALIDATED",
+      "single_profile_input": "IMPLEMENTED_SOURCE_ONLY_ARBITRARY_CLASS_LOCAL_UNVERIFIED_UNLESS_PIN"
+    },
+    "evidence_path": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_SOURCE_TO_CONDITIONAL_OPENER_E2E_20261106.json",
+    "artifact_id": 13491917041,
+    "artifact_zip_sha256": "99d07807098245ca32ec01afb8955bbd2062f05264282b83e4ab4bb81e6cfbbe",
+    "artifact_expiry_utc": "2026-11-13T09:29:08Z",
+    "actual_full_IR_json_sha256": "bd391e15e9cc7828c6b50714cfe64852dbdb8e42985355f0f24b9f748911a6b2",
+    "trial_failures_corrected": [
+      "42194430940: synthetic negative timestamp missing lower bound, fixed",
+      "42195217086: new scenario regex wrongly rejected digit-leading 2t, fixed"
+    ],
+    "prior_session_exact_next": "Choose the highest-impact next physical source state: (a) narrowly capture Arcane Barrage's exact two prior-root original APL IF operands and independent AST negative if material, while (b) move independent WCL blind discovery toward a locked candidate/threshold and independent holdout without using SimC or Hekili answers before lock. Reuse 262 chosen PRE, 158 Orb READY, 137 rival READY, 8/10 independent 2T prior-row rejections and generic source AST witness; then only evidence-backed ST/2T General Rotation IF/ELSE and policy-gated offline dummy feedback. No full READY or optimality claim where unproven.",
+    "product_exact_next": "Generic source→conditional research IR+real SimC source-choice E2E now PASS (172 Fury/Arcane rows, 262 exact native source returns, 4 ST/2T cases); do not repeat per-spell Arcane Orb diagnostic as main product. NEXT: turn generic IF/ELSE source topology into evidence-backed STATE-CONDITIONED executable action priority across two classes using full readiness contracts, variable timing, CALL/RUN control, proc/cd/charges, opener termination and target-switch rules; UNKNOWN for missing. Then WCL blind independent discovery/lock/holdout after candidate lock, add AoE/build variants, policy-safe dummy evaluator. No MAIN/FROZEN changes.",
     "MAIN_promoted": false,
     "FROZEN_modified": false,
     "Seq578": "FAILED_QUARANTINED",
