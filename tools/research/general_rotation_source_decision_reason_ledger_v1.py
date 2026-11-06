@@ -309,7 +309,7 @@ def replay_original_artifact(archive:Path,expected_sha256:str|None=None)->dict:
                 "prior_evidence_reason_counts"].get("NATIVE_READY_FALSE_POST_ONLY",0)
     return {
         "schema":SUMMARY,"product_policy_id":PRODUCT,
-        "source_artifact_zip_sha256":digest,
+        "input_receipt_zip_sha256":digest,
         "original_cases":list(CASES),
         "aggregate":dict(sorted(total.items())),
         "cases":per_case,
