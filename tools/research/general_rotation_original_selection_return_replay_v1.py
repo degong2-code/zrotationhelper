@@ -90,8 +90,8 @@ def replay(log:str,profile:bytes,temporal:dict,producer:dict,
                 (direction=="BEGIN" and int(clock)!=sw["at_simc_ms"])):
                 raise SourceChoiceError("CALL_ID_SOURCE_SWEEP_IDENTITY_MISMATCH")
             if direction=="BEGIN":
-                if sid in active or sid in completed or
-                    (parent!=open_stack[-1] if open_stack else parent!=0):
+                if (sid in active or sid in completed or
+                    (parent!=open_stack[-1] if open_stack else parent!=0)):
                     raise SourceChoiceError("NONCAUSAL_NESTED_SOURCE_SWEEP")
                 open_stack.append(sid)
                 active.add(sid)
