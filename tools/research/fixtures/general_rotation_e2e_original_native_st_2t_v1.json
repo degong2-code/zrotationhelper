@@ -1,0 +1,41 @@
+{
+  "schema": "ZrotOriginalNativeSourceRootTraceInputManifestV1",
+  "origin": "Original official pinned SimC C++ source choice and actor PRE receipts, Actions 42155157024; actual source file member SHA256",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "profiles": [
+    {
+      "spec_key": "warrior_fury",
+      "cases": [
+        {
+          "name": "st",
+          "target_count": 1,
+          "file": "zrot-all-original-source-chosen-state-fury-st.json",
+          "sha256": "ef0e22ef7254e93ead1acdeaf78177fdef0186656e3f6f538674a90604dfff9a"
+        },
+        {
+          "name": "2t",
+          "target_count": 2,
+          "file": "zrot-all-original-source-chosen-state-fury-2t.json",
+          "sha256": "007c04eebaf421a1d5c8aa4fbf81febf264cae838b573d3fbd03b2198b3827bd"
+        }
+      ]
+    },
+    {
+      "spec_key": "mage_arcane",
+      "cases": [
+        {
+          "name": "st",
+          "target_count": 1,
+          "file": "zrot-all-original-source-chosen-state-arcane-st.json",
+          "sha256": "f736766ae310f3665fbcd492ab05ff4704d453ab03720d2e2e5d9166de39494d"
+        },
+        {
+          "name": "2t",
+          "target_count": 2,
+          "file": "zrot-all-original-source-chosen-state-arcane-2t.json",
+          "sha256": "ed908c85fab7d6a7dd834c9769528a9b7f97bbf6fe122505de98cdec5acfd14e"
+        }
+      ]
+    }
+  ]
+}
