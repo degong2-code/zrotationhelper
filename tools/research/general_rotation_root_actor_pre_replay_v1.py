@@ -214,7 +214,7 @@ def replay(log:str,profile:bytes,temporal:dict,producer:dict,*,retain_all:bool=F
         counts["if_recomputed_from_original_actor_PRE"]+
         counts["if_unknown_after_active_enemies_source_PRE"]):
         raise SourceRootPREReplayError("SOURCE_IF_ROW_AGGREGATES_NOT_RECONCILED")
-    return {
+    result={
         "schema":SCHEMA,
         "product_policy_id":POLICY,
         "source_profile_git_blob_sha1":git_blob(profile),
@@ -284,7 +284,7 @@ def selftest():
         try:replay("\n".join(bad),p,temporal,producer)
         except SourceRootPREReplayError:pass
         else:raise AssertionError("BAD_ROOT_ACTOR_PRE_SOURCE_EVENT_ACCEPTED")
-    result={
+    return {
         "schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
         "checks":10,"physical_simc_cpp_executed":False,
         "WCL_latest_transition_before_t_claim":False,
