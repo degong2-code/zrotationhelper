@@ -238,10 +238,11 @@ def corroborate(log: str, profile: bytes, temporal: dict,
             if (rid not in roots or at != roots[rid][0] or rid not in active
                 or rid not in pre or rid in returned):
                 raise RootIFBridgeError("NATIVE_IF_OUTSIDE_ORIGINAL_PRE_CALL")
-            # Unmapped virtual/base method call is explicitly UNKNOWN.
+            # A real marker with an explicit but unbound method ID is
+            # malformed evidence, not an ordinary unobserved IF condition.
+            # Only the ABSENCE of a marker can remain UNKNOWN.
             if base_frames.get(mid) != rid:
-                counts["unlinked_original_method_if_unknown"] += 1
-                continue
+                raise RootIFBridgeError("NATIVE_IF_METHOD_CALL_ID_NOT_SOURCE_LINKED")
             native.setdefault(rid, []).append(parts[3] == "1")
     if active or base_frames or len(pre) != len(roots) or len(returned) != len(roots):
         raise RootIFBridgeError("INCOMPLETE_NATIVE_SOURCE_ROOT_REPLAY")
