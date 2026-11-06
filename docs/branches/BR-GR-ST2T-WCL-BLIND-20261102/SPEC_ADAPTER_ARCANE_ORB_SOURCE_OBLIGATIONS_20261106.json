@@ -1,0 +1,110 @@
+{
+  "schema": "ZrotSpecAdapterSourceMechanicObligationsV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "status": "SOURCE_PINNED_PARTIAL_MECHANICS_NOT_FULL_READY_NOT_LIVE_GAME_TRUTH",
+  "spec": "mage_arcane",
+  "source_profile_git_blob_sha1": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+  "source_simc_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_cpp_path": "engine/class_modules/sc_mage.cpp",
+  "source_cpp_blob_sha1": "306d835f2db5f7418da221ce155d32e81c53f45c",
+  "source_action": "arcane_orb",
+  "source_class": "arcane_orb_t final : public arcane_mage_spell_t",
+  "class_definition_lines": [
+    2602,
+    2678
+  ],
+  "constructor_lines": [
+    2607,
+    2649
+  ],
+  "execute_lines": [
+    2651,
+    2663
+  ],
+  "impact_lines": [
+    2665,
+    2678
+  ],
+  "source_observations": [
+    {
+      "phase": "INIT",
+      "source_cpp_line": 2608,
+      "observation": "Normal Arcane Orb action uses p->talents.arcane_orb; other enum branches use find_spell(153626).",
+      "meaning": "TALENT_AND_ACTION_VARIANT_MUST_BE_SOURCE_MATCHED"
+    },
+    {
+      "phase": "INIT",
+      "source_cpp_line": 2613,
+      "observation": "aoe=-1",
+      "meaning": "AOE_ACTION_DECLARATION_NOT_TARGET_COUNT_PRIORITY"
+    },
+    {
+      "phase": "INIT",
+      "source_cpp_line": 2638,
+      "observation": "Non-normal Arcane Orb variant is background/proc, cooldown duration 0, base mana cost 0.",
+      "meaning": "NOT_THE_NORMAL_FOREGROUND_SPELL"
+    },
+    {
+      "phase": "INIT",
+      "source_cpp_line": 2644,
+      "observation": "Orb Mastery talent optionally installs an additional child action.",
+      "meaning": "CHILD_ACTION_VARIANT_CONDITIONAL"
+    },
+    {
+      "phase": "EXECUTE",
+      "source_cpp_line": 2659,
+      "observation": "arcane_mage_spell_t::execute() runs before trigger_arcane_charge and trigger_arcane_salvo.",
+      "meaning": "ORIGINAL_EFFECT_ORDER_BUT_AMOUNT_AND_TIMING_NOT_RECONSTRUCTED"
+    },
+    {
+      "phase": "EXECUTE",
+      "source_cpp_line": 2661,
+      "observation": "trigger_arcane_charge()",
+      "meaning": "ARCANE_CHARGE_EFFECT_EVENT_EXISTS_VALUE_NOT_CALIBRATED"
+    },
+    {
+      "phase": "EXECUTE",
+      "source_cpp_line": 2662,
+      "observation": "trigger_arcane_salvo(salvo_source, talent.expanded_mind effect)",
+      "meaning": "SALVO_EFFECT_TALENT_DEPENDENT"
+    },
+    {
+      "phase": "IMPACT",
+      "source_cpp_line": 2669,
+      "observation": "splintering_orbs talent conditionally triggers splinters by chain_target",
+      "meaning": "IMPACT_TIME_PROC_AND_TARGET_DEPENDENT"
+    }
+  ],
+  "readiness_route": {
+    "arcane_orb_t_local_ready_override": "NOT_DECLARED_IN_INSPECTED_CLASS_BODY",
+    "inherited_arcane_mage_spell_ready": "NOT_FULLY_SOURCE_WALKED",
+    "inherited_mage_spell_ready": "NOT_FULLY_SOURCE_WALKED",
+    "base_action_t_ready": "NOT_FULLY_SOURCE_WALKED",
+    "talent_known_at_original_selected_root": false,
+    "gcd_and_cast_state_known_at_original_selected_root": false,
+    "cooldown_and_charge_state_known_at_original_selected_root": false,
+    "mana_cost_and_resources_exact_original_selected_root": false,
+    "target_viability_original_selected_root": false,
+    "all_required_gates_closed": false,
+    "independent_FULL_READY_proven": false,
+    "earlier_candidate_independent_NOT_READY_proven": false
+  },
+  "effect_projection": {
+    "phase_accurate_types_only": true,
+    "numeric_resource_change": "UNKNOWN",
+    "buff_stack_delta": "UNKNOWN",
+    "cooldown_reset_and_charge_recovery": "UNKNOWN",
+    "application_or_hit_time": "UNKNOWN",
+    "buff_and_proc_roll": "UNKNOWN",
+    "simulate_with_unverified_data": false
+  },
+  "governance": {
+    "research_engine_only": true,
+    "blizzard_2026_addon_secret_bypass": false,
+    "reused_historical_Hekili_code": false,
+    "original_current_profile_Hekili_recommendation_imported_into_WCL_blind": false,
+    "main_promoted": false,
+    "frozen_modified": false
+  },
+  "next": "Walk full inherited virtual ready chain for the same original action and bind actual PRE talent/resource/cooldown/gcd/target state, using source-root identity rather than pre aggregate; keep UNKNOWN until all gates closed."
+}
