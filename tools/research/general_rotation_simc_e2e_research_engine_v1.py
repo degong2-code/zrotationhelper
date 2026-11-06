@@ -36,7 +36,7 @@ from general_rotation_full_root_state_join_v1 import SCHEMA as NATIVE_SCHEMA
 SCHEMA="ZrotGenericSimCSourceToConditionalPriorityOpenerResearchE2EV1"
 POLICY="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
 TRACE_MANIFEST_SCHEMA="ZrotOriginalNativeSourceRootTraceInputManifestV1"
-CASE_NAME_RE=re.compile(r"[a-z][a-z0-9_]{0,31}\Z")
+CASE_NAME_RE=re.compile(r"[a-z0-9][a-z0-9_]{0,31}\Z")
 HEX64=set("0123456789abcdef")
 DEFAULT_OPENER_SAMPLE_MS=10000
 
