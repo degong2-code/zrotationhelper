@@ -22,6 +22,7 @@ on:
       - tools/research/general_rotation_root_actor_pre_replay_v1.py
       - tools/research/general_rotation_root_resource_pre_producer_v1.py
       - tools/research/general_rotation_root_resource_pre_replay_v1.py
+      - tools/research/general_rotation_full_root_state_join_v1.py
       - tools/research/general_rotation_original_selection_return_producer_v1.py
       - tools/research/general_rotation_original_selection_return_replay_v1.py
       - tools/research/general_rotation_original_root_if_bridge_v1.py
@@ -131,6 +132,17 @@ jobs:
               assert v['schema']==schema and v['status']=='PASS_OFFLINE_SYNTHETIC'
               assert v['independent_FULL_READY_proven']==0
           print('ORIGINAL_SOURCE_SELECTED_RETURN_SYNTHETIC_CAUSAL_PASS')
+          PY
+          python -m py_compile tools/research/general_rotation_full_root_state_join_v1.py
+          python -B tools/research/general_rotation_full_root_state_join_v1.py > /tmp/zrot-all-source-root-pre-synthetic.json
+          python - <<'PY'
+          import json
+          j=json.load(open('/tmp/zrot-all-source-root-pre-synthetic.json'))
+          assert j['schema']=='ZrotOriginalSourceAllRootSelectedStateV1'
+          assert j['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert j['independent_full_READY_proven']==0
+          assert j['WCL_API_calls']==0
+          print('ALL_SOURCE_ROOT_PRE_SYNTHETIC_PASS',j['checks'])
           PY
           python -m py_compile tools/research/general_rotation_original_root_if_bridge_v1.py
           python -B tools/research/general_rotation_original_root_if_bridge_v1.py > /tmp/zrot-original-native-if-bridge-selftest.json
@@ -1211,6 +1223,64 @@ jobs:
               json.dumps(result,sort_keys=True,separators=(',',':'))+'\n')
           PY
           sha256sum /tmp/zrot-native-source-selected-return-summary.json
+      - name: Reuse original C++ calls to retain ALL selected-return roots and exact before-call actor/mana PRE
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_root_actor_pre_replay_v1 import replay as replay_actor
+          from general_rotation_root_resource_pre_replay_v1 import replay as replay_mana
+          from general_rotation_original_selection_return_replay_v1 import replay as replay_selected
+          from general_rotation_full_root_state_join_v1 import join
+          actor_producer=json.load(open('/tmp/zrot-original-root-actor-pre-producer.json'))
+          mana_producer=json.load(open('/tmp/zrot-original-root-mana-pre-producer.json'))
+          selected_producer=json.load(open('/tmp/zrot-native-select-source-return-producer.json'))
+          agg={'schema':'ZrotOriginalAllNativeSourceSelectedStateFourCaseV1',
+               'total_root_pre':0,'total_original_source_selections':0,
+               'source_IF_from_exact_root':{},'cases':{},
+               'full_READY':0,'WCL_API_calls':0}
+          for spec,filename in (('fury','MID2_Warrior_Fury.simc'),('arcane','MID2_Mage_Arcane.simc')):
+              profile=Path('simc-upstream/profiles/MID2/'+filename).read_bytes()
+              for mode in ('st','2t'):
+                  case=spec+'-'+mode
+                  directory=spec if mode=='st' else spec+'-2t'
+                  log=Path('/tmp/zrot-instrumented-'+directory+
+                           '/simc_native_log.txt').read_text(encoding='utf8')
+                  temporal=json.load(open('/tmp/zrot-source-temporal-frontier-'+case+'.json'))
+                  actor=replay_actor(log,profile,temporal,actor_producer,retain_all=True)
+                  mana=replay_mana(log,temporal,actor_producer,mana_producer)
+                  selected=replay_selected(log,profile,temporal,selected_producer,
+                                           mana_producer,retain_all=True)
+                  state=join(temporal,selected,actor,mana,profile,1 if mode=='st' else 2)
+                  assert actor['all_exact_root_PRE_retained_count']==temporal['original_ready_calls']
+                  assert selected['all_original_root_return_count']==selected[
+                    'counts']['root_sweep_returned_action_source_row']
+                  assert state['all_returned_leaf_same_root_PRE_reconciled']==selected[
+                    'all_original_root_return_count']
+                  assert state['complete_independent_full_READY_proven']==0
+                  assert state['gameplay_feedback_permitted'] is False
+                  Path('/tmp/zrot-all-original-source-chosen-state-'+case+'.json').write_text(
+                     json.dumps(state,sort_keys=True,separators=(',',':'))+'\n')
+                  agg['cases'][case]={
+                     'ready_roots':state['all_original_READY_root_PRE_count'],
+                     'selected_source_rows':state['all_returned_leaf_same_root_PRE_reconciled'],
+                     'source_if_counts':state['source_if_independent_PRE_truth_counts']}
+                  agg['total_root_pre']+=state['all_original_READY_root_PRE_count']
+                  agg['total_original_source_selections']+=state[
+                     'all_returned_leaf_same_root_PRE_reconciled']
+                  for key,n in state['source_if_independent_PRE_truth_counts'].items():
+                     agg['source_IF_from_exact_root'][key]=agg['source_IF_from_exact_root'].get(key,0)+n
+                  print('ORIGINAL_CPP_ALL_SELECTED_READY_ROOT_FACTS',case,agg['cases'][case],flush=True)
+          assert agg['total_root_pre']==4682
+          assert agg['total_original_source_selections']==262
+          Path('/tmp/zrot-all-original-source-chosen-state-summary.json').write_text(
+              json.dumps(agg,sort_keys=True,separators=(',',':'))+'\n')
+          print('ORIGINAL_CPP_ALL_SELECTED_PRE_SOURCE_MODEL_PASS',agg,flush=True)
+          PY
+          sha256sum /tmp/zrot-all-original-source-chosen-state-*.json
       - name: Preserve compact safe receipts only (never raw actor logs)
         uses: actions/upload-artifact@v4
         if: success()
@@ -1228,6 +1298,11 @@ jobs:
             /tmp/zrot-original-native-if-bridge-producer.json
             /tmp/zrot-original-root-mana-pre-producer.json
             /tmp/zrot-native-select-source-return-producer.json
+            /tmp/zrot-all-original-source-chosen-state-summary.json
+            /tmp/zrot-all-original-source-chosen-state-fury-st.json
+            /tmp/zrot-all-original-source-chosen-state-fury-2t.json
+            /tmp/zrot-all-original-source-chosen-state-arcane-st.json
+            /tmp/zrot-all-original-source-chosen-state-arcane-2t.json
             /tmp/zrot-native-source-selected-return-summary.json
             /tmp/zrot-native-source-selected-return-fury-st.json
             /tmp/zrot-native-source-selected-return-fury-2t.json
