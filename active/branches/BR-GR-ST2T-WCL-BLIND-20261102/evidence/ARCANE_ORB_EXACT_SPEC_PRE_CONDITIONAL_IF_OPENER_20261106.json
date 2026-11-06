@@ -1,0 +1,182 @@
+{
+  "schema": "ZrotBranchArcaneOrbSourceSpecPREIndependentIFAndConditionalDecisionV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-06",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "product_goal": "Verified General Rotation opener IF/ELSE priorities ST/2T/cleave/AoE and policy-safe target dummy practice feedback",
+  "status": "BOUNDED_ACTUAL_CPP_SPEC_PRE_SOURCE_IF_EXPLANATION_PASS_NOT_FULL_READY_NOT_WCL_VALIDATED",
+  "simc_source": {
+    "official_rev": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "mage_cpp_blob_sha1": "306d835f2db5f7418da221ce155d32e81c53f45c",
+    "mage_profile_blob_sha1": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+    "original_prof_precombat_aoe_definition": "actions.precombat+=/variable,name=aoe_count,op=set,value=2+(3*talent.spellfire_spheres)",
+    "original_apl_cooldowns_orb_definition": "actions.cooldowns=arcane_orb,if=talent.splintering_sorcery,line_cd=999",
+    "original_apl_spellslinger_first_orb": "actions.spellslinger+=/arcane_orb,if=cooldown.arcane_orb.charges_fractional>=1+(0.95*talent.charged_orb)&talent.orb_mastery&active_enemies>=variable.aoe_count",
+    "original_apl_spellslinger_later_orb": "actions.spellslinger+=/arcane_orb,if=buff.arcane_charge.stack<(3+(active_enemies>=variable.aoe_count))|(talent.orb_mastery|active_enemies>=(variable.aoe_count+2))&cooldown.arcane_orb.charges_fractional>=(1+0.5*(talent.orb_mastery&active_enemies<variable.aoe_count&buff.arcane_surge.down))"
+  },
+  "implementation": {
+    "source_SPEC_PRE_producer": "tools/research/general_rotation_arcane_orb_spec_state_pre_producer_v1.py",
+    "source_SPEC_PRE_replay": "tools/research/general_rotation_arcane_orb_spec_state_pre_replay_v1.py",
+    "generic_minimal_IF_witness": "tools/research/general_rotation_source_if_minimal_witness_v1.py",
+    "source_choice_explanation": "tools/research/general_rotation_arcane_orb_conditional_source_model_v1.py",
+    "actual_native_workflow": ".github/workflows/zrot-general-rotation-generic-select-pre-producer-v1.yml",
+    "actual_explanation_workflow": ".github/workflows/zrot-general-rotation-arcane-orb-conditional-source-model-v1.yml",
+    "original_action_t_READY_stage_predecessor": "tools/research/general_rotation_arcane_orb_native_ready_stage_replay_v1.py",
+    "source_spec_adapter_architecture": "Dedicated spec-local original SimC instrumentation, generic SimC typed AST/witness core, external source facts and UNKNOWN; no live in-game solver."
+  },
+  "actual_cpp_e2e": {
+    "run_id": 42181561000,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42181561000",
+    "py312": "SUCCESS",
+    "py314": "SUCCESS",
+    "actual_original_vs_instrumented_cpp": "SUCCESS",
+    "source_cpp_profile_pairing": "Fury/Arcane 30-second ST+2T original vs patched exact action sequence parity",
+    "additional_ACTION_READY_calls": 0,
+    "additional_cost_calls": 0,
+    "additional_RNG_calls": 0,
+    "per_arcane_orb_ready_root_new_const_reads": {
+      "buff_t_check_calls": 3,
+      "cooldown_t_charges_fractional_calls": 1
+    },
+    "full_exact_root_SPEC_PRE_records": 158,
+    "actual_native_APL_IF_evaluated_and_independent_ast_match": 73,
+    "original_CPP_shortcircuited_before_IF_and_independent_ast_computed": 85,
+    "all_independent_source_ast_results": {
+      "ST": {
+        "true": 43,
+        "false": 37
+      },
+      "two_target": {
+        "true": 42,
+        "false": 36
+      }
+    },
+    "native_IF_checked_matched": {
+      "ST": {
+        "native_APL_IF_false": 35,
+        "native_READY_true": 1
+      },
+      "two_target": {
+        "native_APL_IF_false": 34,
+        "native_READY_true": 3
+      }
+    },
+    "independent_original_full_READY_proven": 0,
+    "source_artifact_id": 13485134937,
+    "source_artifact_name": "zrot-general-rotation-generic-select-pre-two-spec-receipts",
+    "source_artifact_zip_sha256": "033da6dd09cd255bd83af5a8dfa9c72d65af14d2ae54d0fc2d2b52b1edff8756",
+    "source_artifact_expires_at_utc": "2026-11-13T07:34:24Z",
+    "source_case_json_sha256": {
+      "ST": "36bae18a1a635a4955c5a10797a8c2762f8163423450556b1dcc956b64ba0482",
+      "two_target": "389e8fc4d5a95da1851feb1ac302f8b9e225885afbc46a041003d5ba19380417"
+    },
+    "source_summary_json_sha256": "a276c22af6a6839d578ad673d916ee87dfcf9501d053c5fbeb94e919ecd425d6"
+  },
+  "source_actual_class_spec_selected": {
+    "ST": [
+      {
+        "simc_ms": 0,
+        "source_list": "cooldowns",
+        "ordinal": 1,
+        "source_root": 27,
+        "talent_splintering_sorcery": 1,
+        "talent_spellfire_spheres": 0,
+        "source_derived_aoe_count": 2,
+        "arcane_charge_stack": 1,
+        "orb_mastery": 0,
+        "charged_orb": 1,
+        "cooldown_charges_fractional": 2
+      }
+    ],
+    "two_target": [
+      {
+        "simc_ms": 0,
+        "source_list": "cooldowns",
+        "ordinal": 1,
+        "source_root": 27,
+        "source_if_true_witness": {
+          "talent.splintering_sorcery": 1
+        }
+      },
+      {
+        "simc_ms": 7667,
+        "source_list": "spellslinger",
+        "ordinal": 6,
+        "source_root": 908,
+        "source_if_true_witness": {
+          "active_enemies": 2,
+          "buff.arcane_charge.stack": 2,
+          "variable.aoe_count": 2
+        },
+        "source_derived_aoe_count": 2,
+        "orb_mastery_talent": 0,
+        "charged_orb_talent": 1,
+        "cooldown_fractional_charge": 2
+      },
+      {
+        "simc_ms": 14950,
+        "source_list": "spellslinger",
+        "ordinal": 6,
+        "source_root": 1617,
+        "source_if_true_witness": {
+          "active_enemies": 2,
+          "buff.arcane_charge.stack": 3,
+          "variable.aoe_count": 2
+        },
+        "source_derived_aoe_count": 2,
+        "orb_mastery_talent": 0,
+        "charged_orb_talent": 1,
+        "cooldown_fractional_charge": 2
+      }
+    ]
+  },
+  "earlier_competing_same_ability": {
+    "two_target_ms": [
+      7667,
+      14950
+    ],
+    "source_list": "spellslinger",
+    "earlier_ordinal": 2,
+    "actual_original_CPP_RETURN": "ACTION_APL_IF_FALSE",
+    "independent_minimal_FALSE_witness": {
+      "talent.orb_mastery": 0
+    },
+    "earlier_cpp_ready_roots": [
+      898,
+      1607
+    ],
+    "other_earlier_source_candidate_native_false_only": 8,
+    "prior_entire_ability_NOT_READY_independently_proven": 0
+  },
+  "actual_conditional_explanation_replay": {
+    "run_id": 42182635460,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42182635460",
+    "py312": "SUCCESS",
+    "py314": "SUCCESS",
+    "new_SimC_CPP_builds": 0,
+    "original_selected_arcane_orb_IF_true_explained": 4,
+    "earlier_same_ability_IF_false_explained": 2,
+    "earlier_other_skills_native_POST_false_only_UNKNOWN": 8,
+    "real_original_source_prior_candidate_count": 10,
+    "source_identity_forgery_rejected": true,
+    "artifact_id": 13486511411,
+    "artifact_zip_sha256": "f341a2ea9a801037d1a6fb7bc36e43a54be5d6b427c29681c8ef0cfd48ffdd35",
+    "artifact_inner_json_sha256": "b92946feacc6fd3d17b5aa280e91370842fdc85c6c7a41fd10ab7b1330ec08c6",
+    "artifact_expires_at_utc": "2026-11-13T07:42:41Z"
+  },
+  "limits": [
+    "PRE extracted in a forwarding arcane_orb_t::ready override immediately before inherited base.ready; the modification calls the inherited ready once and is verified through original/patched action-sequence parity, but is not an unmodified WoW client observation.",
+    "buff_t::check() is const/no-benefit-update; cooldown_t::charges_fractional() is const, both read-only extra data reads. Never claim the probe made no extra method calls at all.",
+    "The precombat variable.aoe_count=2 is derived from source-pinned precombat APL and observed Spellfire Spheres talent=0; live mutable variable store was NOT read at selected root and precombat assignment execution was NOT independently observed here.",
+    "73 original C++ IF evaluations were independently recomputed from PRE; 85 other roots were evaluated OFFLINE but original native shortcircuited before IF, so they do not count as original IF match observations.",
+    "Source original AP L IF TRUE is a necessary APL criterion, not independent positive entire physical READY. Native selected action is not a logged WoW player cast.",
+    "Earlier source competitor prismatic_bolt/arcane_barrage/arcane_missiles Native false remains UNKNOWN as to complete independent reason; no validated optimality or fight-remains/2T thresholds across builds.",
+    "No WCL blind discovery candidate lock/holdout or live WoW 12.1.5 addon API policy capability test was executed in this branch step.",
+    "Hekili inspiration is only offline State/Scripts/Core/Classes separation; no historical Hekili in-client combat decision solver was copied."
+  ],
+  "next_exact": "Extend exact-root state and passive original C++ short-circuit reason trace for earlier 2T physical candidates (prismatic_bolt, arcane_barrage, arcane_missiles), source-pin source APL variable.precombat execution and multi-build effects, complete independent source readiness closure for one chosen action, then WCL blind lock & holdout, General Rotation IR and offline target-dummy correction. Do not prioritize extra diagnostic PASS counts.",
+  "main_promoted": false,
+  "frozen_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
