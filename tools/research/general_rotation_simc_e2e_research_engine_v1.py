@@ -23,6 +23,7 @@ from collections import Counter
 import copy
 from hashlib import sha256
 import json
+import re
 from pathlib import Path
 import subprocess
 from typing import Any
@@ -35,7 +36,7 @@ from general_rotation_full_root_state_join_v1 import SCHEMA as NATIVE_SCHEMA
 SCHEMA="ZrotGenericSimCSourceToConditionalPriorityOpenerResearchE2EV1"
 POLICY="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
 TRACE_MANIFEST_SCHEMA="ZrotOriginalNativeSourceRootTraceInputManifestV1"
-CASE_NAMES=("st","2t")
+CASE_NAME_RE=re.compile(r"[a-z][a-z0-9_]{0,31}\Z")
 HEX64=set("0123456789abcdef")
 DEFAULT_OPENER_SAMPLE_MS=10000
 
@@ -64,9 +65,10 @@ def _case_manifest(obj:dict,source_specs:set[str])->dict[str,list[dict]]:
         for case in entry["cases"]:
             require(isinstance(case,dict) and
                     set(case)=={"name","target_count","file","sha256"} and
-                    case["name"] in CASE_NAMES and
+                    isinstance(case["name"],str) and
+                    CASE_NAME_RE.fullmatch(case["name"]) is not None and
                     type(case["target_count"]) is int and
-                    case["target_count"]==(1 if case["name"]=="st" else 2) and
+                    1<=case["target_count"]<=40 and
                     case["name"] not in seen and
                     isinstance(case["sha256"],str) and
                     len(case["sha256"])==64 and
@@ -485,7 +487,7 @@ def selftest()->dict:
     for wrong in (
        {"schema":TRACE_MANIFEST_SCHEMA,"profiles":[]},
        {"schema":TRACE_MANIFEST_SCHEMA,"profiles":[{
-         "spec_key":"probe","cases":[{"name":"2t","target_count":1,
+         "spec_key":"probe","cases":[{"name":"2t","target_count":0,
            "file":"a.json","sha256":"b"*64}]}]},
     ):
         try:_case_manifest(wrong,{"probe"})
