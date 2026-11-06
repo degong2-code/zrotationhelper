@@ -381,8 +381,8 @@
       "run_id": 42140591685,
       "source_commit": "ba0d490c18bf663b5972e9ea21db402c8446750f"
     },
-    "present_status": "HEKILI_AND_POLICY_REFERENCE_DOCUMENTS_REGISTERED; NEW_REASON_LEDGER_NOT_IMPLEMENTED; WCL_AND_DUMMY_NOT_NEWLY_EXECUTED",
-    "short_term_exact_next": "From actual original C++ selected-row and per-root PRE evidence implement generic SourceDecisionReasonLedgerV1 with same-sweep prior-candidate reasons, strict native post vs independently proven readiness, then source-walk one executable damage skill and ST/2T opener.",
+    "present_status": "HEKILI_AND_POLICY_REFERENCES_PINNED; BOUNDED_SOURCE_DECISION_REASON_LEDGER_IMPLEMENTED_ACTUAL_NATIVE_REPLAY_PASS; FULL_READY_AND_USER_TRAINER_NOT_IMPLEMENTED",
+    "short_term_exact_next": "Completed bounded SourceDecisionReasonLedgerV1 for 64 original source returned root samples: 8 independently corroborated IF false on Fury2T run_action_list control, 298 native post false-only, 198 unsampled root returns. Next expand complete source return rows/child paths and prove real executable source ability READY/prior choice before WCL cross-check and dummy scoring.",
     "medium_long_term_product_exact_next": "Extend validated Generic Rotation opener/conditional ST/2T/cleave/AoE across builds, WCL blind candidate lock and independent holdout, then evidence-bounded post-session dummy evaluation and minimal nonsecret opt-in recorder; any live behavior requires 12.1.5 client proof and current official API.",
     "protected_runtime_no_go": [
       "No in-client independent realtime combat decision automation",
@@ -397,5 +397,35 @@
     "previous_history_FROZEN_modified": false,
     "Seq578": "FAILED_QUARANTINED",
     "Seq637": "UNKNOWN"
+  },
+  "branch_local_execution_successor_20261106_source_reason": {
+    "kind": "POST_REFERENCE_IMPLEMENTATION_AND_VERIFICATION_BRANCH_ONLY",
+    "implementation": "tools/research/general_rotation_source_decision_reason_ledger_v1.py",
+    "code_commit": "8c241c39a9ba7694db10dc9441b977787eccf473",
+    "ci_workflow": ".github/workflows/zrot-source-decision-reason-ledger-v1.yml",
+    "ci_run_id": 42146818557,
+    "ci_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42146818557",
+    "ci_offline_python_312": "SUCCESS",
+    "ci_offline_python_314": "SUCCESS",
+    "ci_actual_prior_native_receipt_replay": "SUCCESS",
+    "original_cpp_rebuild_this_session": false,
+    "original_native_sweeps_replayed": 2121,
+    "original_root_returns": 262,
+    "root_return_replay_detail_bounded": 64,
+    "root_return_unsampled": 198,
+    "independently_proven_source_IF_false": 8,
+    "independently_proven_source_IF_false_are_control_only": "FURY_2T_RUN_ACTION_LIST",
+    "native_ready_false_post_only": 298,
+    "independent_full_action_ready_proven": 0,
+    "dummy_error_verdict_permitted": false,
+    "previous_CI_actual_native_run_id": 42140591685,
+    "current_artifact_id": 13470272367,
+    "current_artifact_zip_sha256": "c7d52afbce6ed190b7daf25332da6fcc86ad39e8870654d1d3f790e1b0873c05",
+    "evidence_path": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ORIGINAL_SOURCE_DECISION_REASON_LEDGER_20261106.json",
+    "roadmap_path": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md",
+    "exact_next": "Persist full per-source-return evidence with exact nested call chain and independently verify one real executable opener action READY/prior exclusion, then separate WCL blind candidate lock and user dummy evaluation.",
+    "main_promoted": false,
+    "shared_frozen_modified": false,
+    "status": "BOUNDED_EXPLANATION_ONLY_NOT_COMPLETE_GENERAL_ROTATION"
   }
 }
