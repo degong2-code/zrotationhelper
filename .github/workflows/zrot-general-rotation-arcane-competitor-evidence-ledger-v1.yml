@@ -1,0 +1,116 @@
+name: ZRot Arcane 2T Source Competitor Reason Ledger
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/research/general_rotation_arcane_competitor_decision_ledger_v1.py
+      - .github/workflows/zrot-general-rotation-arcane-competitor-evidence-ledger-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-simc-source-reason-ledger:
+    name: source-provenance-py${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12","3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Offline generic source model compile and case synthetic
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_arcane_competitor_decision_ledger_v1.py
+          python -B tools/research/general_rotation_arcane_competitor_decision_ledger_v1.py >/tmp/zrot-arcane-competitor-reason-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/zrot-arcane-competitor-reason-synthetic.json'))
+          assert x['schema']=='ZrotArcane2TFullSourceRowDecisionReasonLedgerV1'
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert x['positive_full_ready_proven']==0
+          print('COMPETITOR_SOURCE_DECISION_LEDGER_SYNTHETIC_PASS')
+          PY
+      - name: Download actual original CPP competitor branch artifact
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42186013774
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: zrot-general-rotation-generic-select-pre-two-spec-receipts
+          path: /tmp/source-competitor
+      - name: Download locked prior Arcane Orb selected original source model
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42182635460
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: zrot-arcane-conditional-source-if-else-replay
+          path: /tmp/source-orb
+      - name: Join all ten original prior source rows with independent local guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_arcane_competitor_decision_ledger_v1.py \
+            --competitor-ready-evidence /tmp/source-competitor/zrot-arcane-rival-2t-original-ready-branches.json \
+            --selected-orb-source-model /tmp/source-orb/zrot-arcane-conditional-source-model.json \
+            --out /tmp/zrot-arcane-2t-competitor-reason-ledger.json
+          python - <<'PY'
+          import copy,json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_arcane_competitor_decision_ledger_v1 import (
+              merge,read_pinned,RivalReasonLedgerError)
+          comp=Path('/tmp/source-competitor/zrot-arcane-rival-2t-original-ready-branches.json')
+          orb=Path('/tmp/source-orb/zrot-arcane-conditional-source-model.json')
+          result=json.loads(Path('/tmp/zrot-arcane-2t-competitor-reason-ledger.json').read_bytes())
+          n=result['counts']
+          assert len(result['two_target_winner_decisions'])==2
+          assert n['source_row_exclusion_independently_supported']==8
+          assert n['earlier_independent_local_READY_false']==6
+          assert n['earlier_independent_source_IF_false']==2
+          assert n['earlier_original_cpp_if_false_not_independently_replayed']==2
+          assert result['dummy_training_feedback_permitted'] is False
+          assert result['general_rotation_priority_optimality_proven'] is False
+          print('REAL_2T_ARCANE_ALL_PRIOR_REASON_LEDGER_PASS',n,flush=True)
+          for decision in result['two_target_winner_decisions']:
+            print('REAL_ORIGINAL_SOURCE_CANDIDATE_CHOICE',decision['original_cpp_at_simc_ms'],
+                [(p['source_action'],p['original_source_ordinal'],
+                  p['decision_evidence_class'],p['source_independent_local_pre_witness'])
+                 for p in decision['earlier_source_rows']],flush=True)
+          rawc=json.loads(comp.read_bytes());rawo=json.loads(orb.read_bytes())
+          cases=[
+             ('FORGED_PHYSICAL_ROOT',lambda c,o:c[
+               'two_target_arcane_orb_source_prior_competitors'][0][
+               'source_prior_4_non_orb_candidate_original_CPP_root_evidence'][0].__setitem__(
+                  'source_root_id',-1)),
+             ('BARRAGE_FAKE_INDEPENDENT_READY',lambda c,o:c[
+               'two_target_arcane_orb_source_prior_competitors'][0][
+               'source_prior_4_non_orb_candidate_original_CPP_root_evidence'][1].__setitem__(
+                  'local_derived_ready_guard_FALSE_proven_independently',True)),
+             ('EARLIER_ORB_IF_FAKE_TRUE',lambda c,o:next(x for x in o[
+               'case_results']['2t']['conditional_source_rule_hypotheses']
+               if x['simc_ms']==7667)['earlier_same_list_candidate_decisions'][1][
+               'source_IF_FALSE_witness'].__setitem__(
+                  'source_IF_independently_replayed_value',True)),
+          ]
+          for label,mutate in cases:
+             c,o=copy.deepcopy((rawc,rawo))
+             mutate(c,o)
+             try:merge(c,o)
+             except RivalReasonLedgerError: print('RIVAL_SOURCE_PROVENANCE_TAMPER_REJECTED',label)
+             else:raise AssertionError('FORGED_NATIVE_COMPETITOR_REASON_ACCEPTED:'+label)
+          print('ACTUAL_ORIGINAL_CPP_EIGHT_INDEPENDENT_SOURCE_PRIORS_PASS')
+          PY
+          sha256sum /tmp/zrot-arcane-2t-competitor-reason-ledger.json
+      - uses: actions/upload-artifact@v4
+        if: matrix.python == '3.12'
+        with:
+          name: zrot-arcane-2t-competitor-reason-ledger
+          path: /tmp/zrot-arcane-2t-competitor-reason-ledger.json
+          retention-days: 7
+          if-no-files-found: error
