@@ -30,7 +30,7 @@ from general_rotation_decision_proof_engine_v1 import (
     Identity, Fact, GateContract, decide_candidate,
 )
 from general_rotation_source_decision_reason_ledger_v1 import (
-    CASES, POLICY, SELECTED as SELECTED_SCHEMA, TEMPORAL as TIME_SCHEMA,
+    CASES, PRODUCT as POLICY, SELECTED as SELECTED_SCHEMA, TEMPORAL as TIME_SCHEMA,
 )
 from general_rotation_integrated_opener_research_v1 import (
     SCHEMA as INTEGRATED_SCHEMA,
