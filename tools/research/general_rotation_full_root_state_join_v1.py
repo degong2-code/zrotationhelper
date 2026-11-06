@@ -69,7 +69,9 @@ def _cpp_leaf(sweeps:dict, children:dict, event:dict)->dict:
         "simc_ms":event["at_simc_ms"],
     }
     try:
-        return _unique_leaf(sweeps,children,event["sweep_call_id"],item,item)
+        return _unique_leaf(
+            sweeps,children,event["sweep_call_id"],item,item,
+            require_foreground_init=False)
     except (ExactLeafSourceError,KeyError) as e:
         raise FullRootStateError("UNVERIFIED_NATIVE_SOURCE_LEAF_OR_ANCESTRY") from e
 
@@ -210,6 +212,10 @@ def join(temporal:dict, selected:dict, actor:dict, mana:dict,
             aggregates["direct_source_leaf"]=aggregates["direct_source_leaf"]+1
         if mana_pct is not None:
             aggregates["original_mana_PRE_observable"]+=1
+        if leaf["foreground_init_member_proven"]:
+            aggregates["source_initial_foreground_proven"]+=1
+        else:
+            aggregates["source_initial_foreground_UNKNOWN_OR_OTHER_STAGE"]+=1
         record={
             "choice_index":index,
             "at_simc_ms":entry["at_simc_ms"],
@@ -218,6 +224,12 @@ def join(temporal:dict, selected:dict, actor:dict, mana:dict,
             "selected_CPP_ready_root_id":rid,
             "original_CPP_source_select_path":leaf["source_cpp_select_path_sweep_ids"],
             "return_kind":entry["return_kind"],
+            "source_init_stage":{
+                "stage":leaf["source_init_stage_observed"],
+                "foreground_membership_independently_proven":
+                    leaf["foreground_init_member_proven"],
+                "not_used_to_override_observed_CPP_source_return":True,
+            },
             "source_list":owner,
             "source_ordinal":ordinal,
             "source_row_sha256":entry["source_row_sha256"],
@@ -283,6 +295,15 @@ def selftest()->dict:
     leaf=_cpp_leaf({12:sw},{},sample)
     assert leaf["source_cpp_ready_root_id"]==13
     assert leaf["was_child_propagated"] is False
+    assert leaf["foreground_init_member_proven"] is True
+    # A native return with unavailable init evidence remains OBSERVED, not a
+    # fabricated independent foreground membership claim.
+    missing_init=__import__("copy").deepcopy(sw)
+    missing_init["observed_candidate_event_stream"][0]["source_init_stage"] = (
+        "NOT_OBSERVED_IN_SOURCE_MAPPED_INIT_UNKNOWN")
+    unresolved=_cpp_leaf({12:missing_init},{},sample)
+    assert unresolved["source_cpp_ready_root_id"]==13
+    assert unresolved["foreground_init_member_proven"] is False
     assert _canonical_root_keys({13:{"t":0}})=={"13":{"t":0}}
     assert _canonical_root_keys({"13":95.0})=={"13":95.0}
     try:_canonical_root_keys({13:95.0,"13":95.0})
@@ -296,7 +317,7 @@ def selftest()->dict:
         except FullRootStateError:pass
         else:raise AssertionError("SOURCE_ROOT_LEAF_TAMPER_NOT_REJECTED")
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":8,"native_CPP_rebuilt":False,
+            "checks":10,"native_CPP_rebuilt":False,
             "independent_full_READY_proven":0,"WCL_API_calls":0}
 
 
