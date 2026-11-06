@@ -43,7 +43,7 @@ STARTS={
  "prismatic_bolt":("struct prismatic_bolt_t final : public arcane_mage_spell_t",
                    "struct arcane_explosion_t final : public arcane_mage_spell_t"),
  "arcane_missiles":("struct arcane_missiles_t final : public custom_state_spell_t<arcane_mage_spell_t, am_data_t>",
-                   "struct arcane_blast_t final"),
+                   "struct arcane_surge_t final : public arcane_mage_spell_t"),
 }
 
 class RivalRouteProducerError(ValueError):pass
