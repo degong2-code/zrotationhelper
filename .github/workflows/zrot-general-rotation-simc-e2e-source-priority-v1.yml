@@ -1,0 +1,146 @@
+name: ZRot Generic SimC Source-to-Opener Conditional Rotation E2E
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/research/general_rotation_simc_e2e_research_engine_v1.py
+      - tools/research/fixtures/general_rotation_e2e_original_native_st_2t_v1.json
+      - .github/workflows/zrot-general-rotation-simc-e2e-source-priority-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-source-e2e-synthetic:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12","3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile and synthetic safety plus generic conditional E2E
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_simc_e2e_research_engine_v1.py \
+            tools/research/general_rotation_source_hypothesis_ir_v1.py \
+            tools/research/simc_apl_semantic_ir_v2.py
+          python -B tools/research/general_rotation_simc_e2e_research_engine_v1.py >/tmp/zrot-generic-e2e-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/zrot-generic-e2e-synthetic.json'))
+          assert x['schema']=='ZrotGenericSimCSourceToConditionalPriorityOpenerResearchE2EV1'
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert x['checks']>=13
+          assert x['no_FULL_READY_promoted'] is True
+          assert x['WCL_API_calls']==0
+          print('SIMC_SOURCE_TO_GENERAL_ROTATION_GENERIC_SYNTHETIC_PASS',x['checks'])
+          PY
+
+  two-spec-real-simc-source-to-native:
+    needs: [generic-source-e2e-synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          submodules: false
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reuse already verified actual original Native 30-second traces
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42155157024
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: zrot-general-rotation-generic-select-pre-two-spec-receipts
+          path: /tmp/zrot-original-source-evidence
+      - name: Build full hierarchical source IF/ELSE and actual opener research references
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_simc_e2e_research_engine_v1.py \
+            --source-root simc-upstream \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
+            --evidence-dir /tmp/zrot-original-source-evidence \
+            --trace-manifest tools/research/fixtures/general_rotation_e2e_original_native_st_2t_v1.json \
+            --out /tmp/zrot-generic-simc-source-to-opener-ir.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/zrot-generic-simc-source-to-opener-ir.json').read_bytes())
+          assert r['schema']=='ZrotGenericSimCSourceToConditionalPriorityOpenerResearchE2EV1'
+          assert r['distinct_class_count']==2
+          assert r['source_APL_rows_compiled']==172
+          assert r['native_reference_cases']==4
+          assert r['original_cpp_selected_source_actions_bound']==262
+          assert r['WCL_blind_candidate_semantics_injected'] is False
+          assert r['full_dynamic_ready_state_and_global_optimality']=='UNKNOWN'
+          assert r['trainer_mistake_verdict']=='UNKNOWN'
+          actual={"warrior_fury":{"st":100,"2t":90},"mage_arcane":{"st":35,"2t":37}}
+          for model in r['models']:
+              spec=model['source_spec_key']
+              rows=sum(len(l) for l in model['conditioned_opener_and_priority']['all_ordered_source_IF_ELSE_lists'].values())
+              assert rows==model['source_APL_row_count']
+              assert model['conditioned_opener_and_priority']['no_flattening_of_RUN_or_CALL'] is True
+              assert model['simultaneously_available_physical_priority_proven'] is False
+              assert model['opener_first_actual_player_cast']=='UNKNOWN'
+              for case,n in actual[spec].items():
+                  trace=model['simc_native_observed_source_selection_cases'][case]
+                  assert trace['original_CPP_source_returned_actions_all']==n
+                  assert trace['opener_termination_rule']=='UNKNOWN'
+                  assert trace['practical_dummy_error_feedback_permitted'] is False
+                  assert len(trace['all_original_CPP_source_return_actions'])==n
+                  print('GENERIC_SIMC_SOURCE_CANDIDATE_IR',spec,case,
+                        'source_rows',rows,'native_chosen',n,
+                        'opener_sampled',len(trace['opener_window_original_CPP_returns']),
+                        'top_missing_if',list(trace['missing_source_IF_operand_frequency'].items())[:5],
+                        flush=True)
+          print('GENERIC_SIMC_SOURCE_TO_OPENER_CONDITIONAL_E2E_PASS',
+                r['source_APL_rows_compiled'],r['original_cpp_selected_source_actions_bound'])
+          PY
+          sha256sum /tmp/zrot-generic-simc-source-to-opener-ir.json
+      - name: Produce source-only portable IR from same two profiles (no Native input)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_simc_e2e_research_engine_v1.py \
+            --source-root simc-upstream \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
+            --out /tmp/zrot-generic-simc-source-only-ir.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/zrot-generic-simc-source-only-ir.json'))
+          assert p['source_APL_rows_compiled']==172
+          assert p['native_reference_cases']==0
+          assert p['original_cpp_selected_source_actions_bound']==0
+          assert all(not m['simc_native_observed_source_selection_cases'] for m in p['models'])
+          assert p['full_dynamic_ready_state_and_global_optimality']=='UNKNOWN'
+          print('GENERIC_SOURCE_ONLY_NEW_SPEC_COLD_START_PATH_PASS')
+          PY
+          sha256sum /tmp/zrot-generic-simc-source-only-ir.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-generic-simc-source-to-conditional-opener-ir-v1
+          path: |
+            /tmp/zrot-generic-simc-source-to-opener-ir.json
+            /tmp/zrot-generic-simc-source-only-ir.json
+          retention-days: 7
+          if-no-files-found: error
