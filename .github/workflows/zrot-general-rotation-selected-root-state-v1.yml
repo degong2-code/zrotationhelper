@@ -1,0 +1,140 @@
+name: ZRot Original Selected Root PRE and Arcane Orb Source Adapter
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/research/general_rotation_original_selected_root_state_join_v1.py
+      - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SPEC_ADAPTER_ARCANE_ORB_SOURCE_OBLIGATIONS_20261106.json
+      - .github/workflows/zrot-general-rotation-selected-root-state-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline-synthetic:
+    name: isolated-original-leaf-PRE-py${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile and tamper-safe synthetic source-leaf PRE
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_original_selected_root_state_join_v1.py
+          python -B tools/research/general_rotation_original_selected_root_state_join_v1.py > /tmp/zrot-leaf-PRE-synthetic.json
+          python - <<'PY'
+          import json
+          value=json.load(open('/tmp/zrot-leaf-PRE-synthetic.json'))
+          assert value['schema']=='ZrotOriginalSelectedLeafExactRootStateSnapshotV1'
+          assert value['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert value['full_READY_proven']==0 and value['WCL_API_calls']==0
+          print('EXACT_ROOT_PRE_SYNTHETIC_PASS',value['checks'])
+          PY
+  actual-reuse:
+    name: original-native-64-leaf-exact-PRE-and-SpecAdapter
+    runs-on: ubuntu-latest
+    needs: offline-synthetic
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read exact original official C++ Native evidence members
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42140591685
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: zrot-general-rotation-generic-select-pre-two-spec-receipts
+          path: /tmp/zrot-original-cpp
+      - name: Read already verified integrated Hekili-informed source opener
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42149094904
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: zrot-general-rotation-integrated-source-opener-st-2t
+          path: /tmp/zrot-integrated
+      - name: Strict native leaf ancestry and original source-root PRE join
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_original_selected_root_state_join_v1.py \
+            --original-native-dir /tmp/zrot-original-cpp \
+            --integrated-opener-json /tmp/zrot-integrated/zrot-integrated-general-opener-research.json \
+            --spec-adapter docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SPEC_ADAPTER_ARCANE_ORB_SOURCE_OBLIGATIONS_20261106.json \
+            --out /tmp/zrot-actual-selected-root-PRE.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/zrot-actual-selected-root-PRE.json'))
+          a=d['counts']
+          assert a['original_source_sweeps_reused']==2121
+          assert a['exact_original_cpp_selected_leaf_root_resolved']==64
+          assert a['unsampled_original_top_level_choices']==198
+          assert a['exact_same_cpp_root_active_enemies_PRE']==9
+          assert a['source_pinned_arcane_orb_adapter_attached']>=2
+          assert d['all_twelve_source_member_sha256_verified'] is True
+          assert d['original_zip_bytes_directly_verified'] is False
+          assert d['source_virtual_READY_route_independently_closed'] is False
+          assert d['safe_dummy_feedback_permitted'] is False
+          for case,value in d['cases'].items():
+              assert len(value['early_source_choice_details'])==16
+              assert all(x['source_leaf_cpp']['source_cpp_ready_root_id']>0 for x in value['early_source_choice_details'])
+              observed=[(x['source_action'],x['exact_original_selected_root_PRE']['active_enemies'])
+                        for x in value['early_source_choice_details']
+                        if x['exact_original_selected_root_PRE']['active_enemies'] is not None]
+              print('SELECTED_NATIVE_LEAF_PRE',case,'exact_source_pre',observed,flush=True)
+          print('ACTUAL_SIMC_SELECTED_ROOT_JOIN_PASS',a)
+          PY
+          sha256sum /tmp/zrot-actual-selected-root-PRE.json
+      - name: Reject mutated original source and fabricated full READY
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,copy,sys,tempfile
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_original_selected_root_state_join_v1 import (
+              compose, ExactLeafSourceError)
+          integrated=json.load(open('/tmp/zrot-integrated/zrot-integrated-general-opener-research.json'))
+          adapter=json.load(open('docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SPEC_ADAPTER_ARCANE_ORB_SOURCE_OBLIGATIONS_20261106.json'))
+          root=Path('/tmp/zrot-original-cpp')
+          edits=[
+              ('FORGED_NATIVE_SOURCE_RETURN',lambda a,b:a['cases']['arcane-st']['timeline'][1].__setitem__('source_action','FORGED')),
+              ('FALSE_READY_PROMOTION',lambda a,b:a['cases']['arcane-st']['timeline'][1].__setitem__('full_action_READY_proven',True)),
+              ('UNVERIFIED_SPEC_CLOSURE',lambda a,b:b['readiness_route'].__setitem__('all_required_gates_closed',True)),
+              ('CPP_REVISION_DRIFT',lambda a,b:b.__setitem__('source_simc_revision','unverified')),
+          ]
+          for name,fn in edits:
+              ai,bi=copy.deepcopy((integrated,adapter))
+              fn(ai,bi)
+              try:compose(root,ai,bi)
+              except ExactLeafSourceError:print('STRICT_SELECTED_SOURCE_TAMPER_REJECTED',name)
+              else:raise AssertionError('SOURCE_TAMPER_UNDETECTED:'+name)
+          # The original Native artifact member bytes are independently pinned.
+          # Do not silently permit a different root actor PRE summary.
+          with tempfile.TemporaryDirectory() as tmp:
+              src=root/'zrot-original-root-actor-pre-arcane-st.json'
+              target=Path(tmp)
+              (target/src.name).write_bytes(src.read_bytes()+b' ')
+              try:
+                  from general_rotation_original_selected_root_state_join_v1 import _load
+                  _load(target,src.name)
+              except ExactLeafSourceError:print('STRICT_SELECTED_SOURCE_TAMPER_REJECTED PRE_RECEIPT_BYTES')
+              else:raise AssertionError('PRE_RECEIPT_BYTES_CHANGED')
+          print('STRICT_SELECTED_SOURCE_TAMPER_PASS',len(edits)+1)
+          PY
+      - name: Preserve non-secret compact source/state evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-original-native-selected-leaf-root-state-arcane-orb
+          path: /tmp/zrot-actual-selected-root-PRE.json
+          if-no-files-found: error
+          retention-days: 7
