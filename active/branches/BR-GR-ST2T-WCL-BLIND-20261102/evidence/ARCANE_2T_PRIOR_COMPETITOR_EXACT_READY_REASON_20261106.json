@@ -1,0 +1,187 @@
+{
+  "schema": "ZrotBranchArcane2TPriorCompetingSkillReadyDecisionEvidenceV1",
+  "date": "2026-11-06",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "product_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "evidence_status": "ACTUAL_NATIVE_SOURCE_READY_BRANCH_AND_SPEC_GUARD_OBSERVED; 8_OF_10_SOURCE_ROW_REJECTIONS_INDEPENDENTLY_EXPLAINED",
+  "scope": "GENERAL_ROTATION_ST_AND_2T_SOURCE_HYPOTHESIS_RESEARCH_NOT_ENCOUNTER_SPECIFIC",
+  "source": {
+    "official_simc_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "pristine_sc_mage_cpp_blob_sha1": "306d835f2db5f7418da221ce155d32e81c53f45c",
+    "pristine_action_cpp_blob_sha1": "399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4",
+    "profile_git_blob_sha1": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+    "original_source_prismatic_ready": "prismatic_bolt_t::ready() returns false if !p()->buffs.prismatic_bolt->check(), else inherits arcane_mage_spell_t::ready().",
+    "original_source_missiles_ready": "arcane_missiles_t::ready() returns false if !clearcasting->check(), else false if gained_initial_clearcasting without allowed delay, otherwise inherits custom_state_spell_t::ready().",
+    "original_source_barrage_ready": "arcane_barrage_t does not override ready(); can still be excluded by common action_t::action_ready APL IF."
+  },
+  "implementation": {
+    "producer": "tools/research/general_rotation_arcane_competitor_native_route_producer_v1.py",
+    "replay": "tools/research/general_rotation_arcane_competitor_native_route_replay_v1.py",
+    "source_candidate_decision_ledger": "tools/research/general_rotation_arcane_competitor_decision_ledger_v1.py",
+    "native_CI": ".github/workflows/zrot-general-rotation-generic-select-pre-producer-v1.yml",
+    "cheap_source_CI": ".github/workflows/zrot-general-rotation-arcane-competitor-evidence-ledger-v1.yml",
+    "generic_original_ast_witness": "tools/research/general_rotation_source_if_minimal_witness_v1.py",
+    "original_arcane_orb_source_model": "tools/research/general_rotation_arcane_orb_conditional_source_model_v1.py"
+  },
+  "actual_native_cpp_validation": {
+    "run_id": 42186013774,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42186013774",
+    "python312": "SUCCESS",
+    "python314": "SUCCESS",
+    "pristine_vs_instrumented_CPP_Fury_Arcane_ST_2T": "SUCCESS",
+    "original_return_method_path_captured": true,
+    "original_CPP_action_ready_calls_added": 0,
+    "original_CPP_cost_calls_added": 0,
+    "original_CPP_RNG_calls_added": 0,
+    "extra_const_read_only_buff_check_per_derived_ready": 1,
+    "source_ready_root_competitor_cohort": 137,
+    "source_stage_counts": {
+      "base_READY_false": 43,
+      "APL_IF_false": 66,
+      "native_action_READY_true": 28,
+      "prismatic_buff_missing": 38,
+      "missiles_clearcasting_missing": 3,
+      "missiles_initial_clearcasting_delay": 2,
+      "class_base_ready_delegated": 13
+    },
+    "original_two_target_prior_competitor_native_false": 8,
+    "original_two_target_prior_competitor_local_guard_independently_proven_false": 6,
+    "original_two_target_prior_competitor_APL_IF_FALSE_native_only": 2,
+    "actual_artifact_id": 13487497851,
+    "zip_sha256": "7d2ae89075d64bc39aa9c62eaf98c16e6bf806724293281cce584467c809ab50",
+    "evidence_member": "zrot-arcane-rival-2t-original-ready-branches.json",
+    "evidence_member_sha256": "1f95b9acbea26421cb29e0a6e8252276ce404c8580a8d9fa276a029e93cccfbe",
+    "artifact_expires_at_utc": "2026-11-13T08:14:25Z"
+  },
+  "source_original_executable_priority_examples": [
+    {
+      "case": "Arcane Spellslinger two-target",
+      "at_simc_ms": 7667,
+      "chosen": "spellslinger[6] arcane_orb",
+      "chosen_original_root_id": 908,
+      "prior_source_row_reasons": [
+        {
+          "ordinal": 1,
+          "name": "prismatic_bolt",
+          "root": 896,
+          "original_cpp_return": "ACTION_BASE_READY_FALSE",
+          "independent_local_check": "prismatic_bolt buff_t::check()==0",
+          "evidence": "INDEPENDENT_LOCAL_READY_FALSE"
+        },
+        {
+          "ordinal": 2,
+          "name": "arcane_orb",
+          "root": 898,
+          "original_cpp_return": "ACTION_APL_IF_FALSE",
+          "independent_local_check": "talent.orb_mastery==0",
+          "evidence": "INDEPENDENT_SOURCE_IF_FALSE"
+        },
+        {
+          "ordinal": 3,
+          "name": "arcane_barrage",
+          "root": 901,
+          "original_cpp_return": "ACTION_APL_IF_FALSE",
+          "independent_local_check": null,
+          "evidence": "NATIVE_FALSE_ONLY_INDEPENDENT_CONDITION_UNKNOWN"
+        },
+        {
+          "ordinal": 4,
+          "name": "arcane_missiles",
+          "root": 904,
+          "original_cpp_return": "ACTION_BASE_READY_FALSE",
+          "independent_local_check": "clearcasting buff_t::check()==0",
+          "evidence": "INDEPENDENT_LOCAL_READY_FALSE"
+        },
+        {
+          "ordinal": 5,
+          "name": "prismatic_bolt",
+          "root": 906,
+          "original_cpp_return": "ACTION_BASE_READY_FALSE",
+          "independent_local_check": "prismatic_bolt buff_t::check()==0",
+          "evidence": "INDEPENDENT_LOCAL_READY_FALSE"
+        }
+      ]
+    },
+    {
+      "case": "Arcane Spellslinger two-target",
+      "at_simc_ms": 14950,
+      "chosen": "spellslinger[6] arcane_orb",
+      "chosen_original_root_id": 1617,
+      "prior_source_row_reasons": [
+        {
+          "ordinal": 1,
+          "name": "prismatic_bolt",
+          "root": 1605,
+          "original_cpp_return": "ACTION_BASE_READY_FALSE",
+          "independent_local_check": "prismatic_bolt buff_t::check()==0",
+          "evidence": "INDEPENDENT_LOCAL_READY_FALSE"
+        },
+        {
+          "ordinal": 2,
+          "name": "arcane_orb",
+          "root": 1607,
+          "original_cpp_return": "ACTION_APL_IF_FALSE",
+          "independent_local_check": "talent.orb_mastery==0",
+          "evidence": "INDEPENDENT_SOURCE_IF_FALSE"
+        },
+        {
+          "ordinal": 3,
+          "name": "arcane_barrage",
+          "root": 1610,
+          "original_cpp_return": "ACTION_APL_IF_FALSE",
+          "independent_local_check": null,
+          "evidence": "NATIVE_FALSE_ONLY_INDEPENDENT_CONDITION_UNKNOWN"
+        },
+        {
+          "ordinal": 4,
+          "name": "arcane_missiles",
+          "root": 1613,
+          "original_cpp_return": "ACTION_BASE_READY_FALSE",
+          "independent_local_check": "clearcasting buff_t::check()==0",
+          "evidence": "INDEPENDENT_LOCAL_READY_FALSE"
+        },
+        {
+          "ordinal": 5,
+          "name": "prismatic_bolt",
+          "root": 1615,
+          "original_cpp_return": "ACTION_BASE_READY_FALSE",
+          "independent_local_check": "prismatic_bolt buff_t::check()==0",
+          "evidence": "INDEPENDENT_LOCAL_READY_FALSE"
+        }
+      ]
+    }
+  ],
+  "actual_independent_source_decision_ledger_validation": {
+    "run_id": 42186794065,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42186794065",
+    "python312": "SUCCESS",
+    "python314": "SUCCESS",
+    "additional_SIMC_CPP_builds": 0,
+    "earlier_source_rows_total": 10,
+    "earlier_source_rows_independent_original_root_condition_proven_false": 8,
+    "earlier_source_rows_native_CPP_IF_FALSE_not_independently_recomputed": 2,
+    "earlier_local_class_ready_false": 6,
+    "earlier_same_orb_source_APL_IF_false": 2,
+    "source_identity_forgery_rejected": 3,
+    "original_CPP_post_false_not_global_spell_NOT_READY": true,
+    "artifact_id": 13487477840,
+    "artifact_zip_sha256": "3e1bc6b910da04cee4e080bdeeb4f2579c731a444321e0a87b577652cd0e04d5",
+    "artifact_member": "zrot-arcane-2t-competitor-reason-ledger.json",
+    "artifact_member_sha256": "323939228eddea328e1d74eb38c293caf3c866a1dbbfa95c946d59a4ce8a9c7e",
+    "artifact_expires_at_utc": "2026-11-13T08:19:07Z"
+  },
+  "evidence_claim_limits": [
+    "Each original Native false return applies to this APL source row at this specific root, NOT proof an ability is never usable or lower priority everywhere.",
+    "Six class-local false guards are independently reconstructed from original read-only Mage PRE and code; other four source rows: two earlier Orb IF false independently proven, two Barrage C++ APL IF false observed but original IF operands not independently reconstructed.",
+    "Actual chosen Orb root and its APL source IF TRUE are independently established from prior full source PRE; full positive physical READY independently proven count is still zero.",
+    "Missing source PRE for Barrage IF (Arcane Salvo react, Arcane Charge stack, talent orb_barrage, prev_gcd.1.arcane_surge and source-derived aoe_count) must remain UNKNOWN; don't impute from later same-time Orb root.",
+    "WCL Strict PRE uses only timestamp < action timestamp, unlike SimC C++ call-ordered same-clock roots; independent WCL blind candidate lock and holdout not executed.",
+    "No current WoW retail game client observations, unofficial addon API, secret combat-state reads or live combat decision engine are authorized.",
+    "No raid encounter plan/NSRT output, no MAIN baseline promotion, no FROZEN modification."
+  ],
+  "next_exact": "Source-pin a minimal Barrage-original-ready-root PRE witness for the two actual 2T APL IF false calls, including react/prev_gcd and original APL variable provenance, then decide whether the material benefit warrants Native work versus independent WCL blind candidate lock/holdout. Convert only source-proven outcomes to General Rotation IR with UNKNOWN missing truth, then lightweight offline dummy trainer.",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
