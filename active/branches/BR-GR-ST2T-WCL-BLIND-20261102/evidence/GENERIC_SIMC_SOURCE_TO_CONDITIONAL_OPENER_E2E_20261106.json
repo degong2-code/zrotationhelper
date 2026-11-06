@@ -1,0 +1,112 @@
+{
+  "schema": "ZrotBranchGenericSimCSourceToOpenerConditionalPriorityE2EReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-06",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "change_type": "ENGINE_FIRST_PRODUCT_VERTICAL_GAP_CLOSURE_BRANCH_ONLY",
+  "source_implementation": {
+    "generic_program": "tools/research/general_rotation_simc_e2e_research_engine_v1.py",
+    "direct_new_spec_entrypoint": "tools/research/general_rotation_simc_single_profile_v1.py",
+    "reused_parser": "tools/research/simc_apl_semantic_ir_v2.py",
+    "reused_multi_spec_manifest": "tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json",
+    "reused_source_hypothesis_ir": "tools/research/general_rotation_source_hypothesis_ir_v1.py",
+    "new_native_evidence_manifest": "tools/research/fixtures/general_rotation_e2e_original_native_st_2t_v1.json",
+    "new_CI": ".github/workflows/zrot-general-rotation-simc-e2e-source-priority-v1.yml",
+    "no_new_SimC_compiler_or_semantic_parser": true,
+    "no_class_spell_name_hardcoded_in_generic_engine": true,
+    "target_scenario_input_not_ST_2T_hardcoded": true,
+    "single_profile_any_new_class_supported_source_only": true,
+    "default_PyCharm_without_script_parameters": "OFFLINE_SYNTHETIC_SELFTEST_ONLY"
+  },
+  "actual_validation": {
+    "workflow_run": 42195342553,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42195342553",
+    "python_312_synthetic": "SUCCESS",
+    "python_314_synthetic": "SUCCESS",
+    "real_official_pinned_simc_two_classes_four_cases": "SUCCESS",
+    "source_only_no_native_mode": "SUCCESS",
+    "direct_single_profile_mage": "SUCCESS",
+    "direct_single_profile_warrior": "SUCCESS",
+    "prior_original_native_receipt_run_reused": 42155157024,
+    "prior_CPP_rebuilt_this_step": false,
+    "WCL_API_calls": 0,
+    "WoW_client_API_calls": 0,
+    "official_SIMC_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "profile_git_blob_fury": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+    "profile_git_blob_arcane": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f"
+  },
+  "acceptance_counts": {
+    "distinct_classes": 2,
+    "real_source_action_rows": 172,
+    "source_action_rows_by_spec": {
+      "warrior_fury": 121,
+      "mage_arcane": 51
+    },
+    "real_source_selected_original_simc_actions_reconciled": 262,
+    "reference_cases": 4,
+    "all_actual_native_choices_by_case": {
+      "warrior_fury.st": 100,
+      "warrior_fury.2t": 90,
+      "mage_arcane.st": 35,
+      "mage_arcane.2t": 37
+    },
+    "research_only_arbitrary_10000ms_opener_sample_by_case": {
+      "warrior_fury.st": 38,
+      "warrior_fury.2t": 38,
+      "mage_arcane.st": 13,
+      "mage_arcane.2t": 15
+    },
+    "source_only_without_native_selections": 0,
+    "single_profile_direct_entrypoint_source_rows": {
+      "mage_arcane": 51,
+      "warrior_fury": 121
+    },
+    "physical_READY_independently_proven": 0,
+    "real_player_casts_proven": 0,
+    "WCL_blind_locked_holdout_executed": false,
+    "gameplay_error_verdict_authorized": false
+  },
+  "outputs": {
+    "github_artifact_id": 13491917041,
+    "github_artifact_name": "zrot-generic-simc-source-to-conditional-opener-ir-v1",
+    "github_artifact_expiration_utc": "2026-11-13T09:29:08Z",
+    "artifact_zip_filename": "zrot-simc-generic-source-to-opener-e2e-20261106.zip",
+    "artifact_zip_sha256": "99d07807098245ca32ec01afb8955bbd2062f05264282b83e4ab4bb81e6cfbbe",
+    "member_sha256": {
+      "zrot-generic-simc-source-to-opener-ir.json": "bd391e15e9cc7828c6b50714cfe64852dbdb8e42985355f0f24b9f748911a6b2",
+      "zrot-generic-simc-source-only-ir.json": "065764af9542c207336c373e817d0428c3608b9397f7578d65778b0a17f0363f",
+      "zrot-direct-single-mage-arcane.json": "ae645da76e06dc728f53d1d8e1f7691e3ebf6cdbb39e7ec38737d0f64a6725d7",
+      "zrot-direct-single-warrior-fury.json": "c9b3b08a5d7a9a296cc6acb9066650d438d42fc8015967b2bb10e3bba1ddfe8e"
+    },
+    "returned_order_claim": "ALL original C++ selected APL rows and before-call same-root PRE attributed to exact SHA/list/rank; includes utility and queued run_action_list control, NOT an actual cast sequence.",
+    "evidence_integrity": "Four source JSON SHA256s in read-only manifest, official input git blob, selected action/source row SHA and chronological/ready-root PRE identity fail closed",
+    "source_only_entrypoint": "--profile <file.simc> [--expected-git-blob <40-hex>] --out <path.json>",
+    "e2e_real_entrypoint": "--source-root <pinned SimC checkout> --manifest <pinned profiles manifest> --evidence-dir <original receipts> --trace-manifest <pinned receipts manifest> --out <path.json>"
+  },
+  "verification_history": {
+    "first_trial_run": 42194430940,
+    "first_trial_result": "FAILED_SYNTHETIC_NEGATIVE_TIMESTAMP_GUARD",
+    "second_trial_run": 42194513220,
+    "second_trial_result": "PASS_ALL_THREE_JOBS",
+    "third_trial_run": 42195217086,
+    "third_trial_result": "FAILED_NEW_ARBITRARY_TARGET_SCENARIO_REGEX_REJECTED_NAMED_2T",
+    "final_trial_run": 42195342553,
+    "final_trial_result": "PASS_ALL_THREE_JOBS",
+    "root_causes": "New wrapper defects, not evidence of SimC semantic conflict; no prior frozen evidence mutated."
+  },
+  "limits": [
+    "Full typed SimC source APL parsing and source IF/ELSE graph is an executable research hypothesis, not a complete ready-state simulator or optimal rotation.",
+    "Original C++ selected source action may be queued run_action_list or potion/use_item; it is not necessarily performed physical cast or user input.",
+    "Opener sampled <=10000ms is a configurable research window, NOT a proven opener end or combat semantics.",
+    "Single direct profile source header is detected but unpinned local file is explicitly LOCAL_FILE, not certified current retail official source.",
+    "Generic target mode names/counts are supplied by declarative manifest and can extend to cleave/AoE without class-specific engine edits, but actual AoE independent validation NOT performed.",
+    "ST/2T actual source choice references are from official pinned SimC original, not WCL blind; external WCL blind discovery MUST NOT import this source hypothesis before candidate lock.",
+    "Missing resource, cooldown, talent, proc and full independent physical skill readiness are UNKNOWN; user dummy mistake verdict disabled.",
+    "Retail addon in-combat observational policy and API capability were NOT tested in this step, and no Hekili-like live solver was implemented."
+  ],
+  "next_product_exact": "Source- and readiness-complete state-driven generic IF/ELSE selection (not only source topology): prove native CALL/RUN semantics, skill-ready gates, variable timing and target threshold across multiple independent classes/builds while keeping UNKNOWN. Then independently discover WCL PRE/readiness candidates blind, lock thresholds, compare with SimC source hypotheses, validate with holdout, and produce policy-safe offline target-dummy practice evaluator.",
+  "main_promoted": false,
+  "frozen_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
