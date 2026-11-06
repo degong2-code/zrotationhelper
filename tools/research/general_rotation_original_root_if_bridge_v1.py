@@ -292,6 +292,8 @@ def corroborate(log: str, profile: bytes, temporal: dict,
             conflicts.append(sample)
     counts["original_if_ast_determinate_from_active_enemies_only"] = (
         base["counts"].get("if_recomputed_from_original_actor_PRE", 0))
+    counts["original_if_ast_determinate_before_native_comparison"] = (
+        base["counts"].get("if_recomputed_from_original_actor_PRE", 0))
     if mana is not None:
         counts["mana_pct_source_original_pre_positive"] = mana["positive_mana_pct_count"]
         counts["mana_pct_zero_max_unknown"] = mana["zero_max_unknown"]
@@ -416,9 +418,48 @@ def selftest() -> dict:
             pass
         else:
             raise AssertionError("UNSCOPED_NATIVE_IF_COMPARATOR_ACCEPTED")
+    # Separate source-AST regression for the new real C++ mana source plan.
+    # Resource values remain raw before-call observations; the original IF
+    # comparator is still not a resource operand or a full READY verdict.
+    import copy
+    from general_rotation_root_resource_pre_producer_v1 import (
+        SCHEMA as MANA_SCHEMA, MARK as MANA_MARK
+    )
+    mana_profile = b'warrior="Synthetic"\nspec=fury\nactions=/foo,if=mana.pct>=95\n'
+    mana_row=parse_profile(mana_profile,require_source=False)["action_lists"]["default"][0]
+    temporal_mana=copy.deepcopy(temporal)
+    temporal_mana["source_profile_git_blob_sha1"]=git_blob(mana_profile)
+    temporal_mana["observed_time_scoped_selection_frontiers"][0][
+        "observed_candidate_event_stream"][0]["source_row_sha256"]=mana_row["source_sha256"]
+    raw_root=dict(root_receipt,source_after_sha256="0"*64,
+                  official_source_blob_sha1="0"*40)
+    native_root=dict(bridge_receipt,
+                     root_PRE_producer_receipt_sha256=digest(canonical(raw_root)))
+    raw_mana={
+        "schema":MANA_SCHEMA,"source_revision":REVISION,
+        "root_PRE_marker":MANA_MARK,
+        "source_mana_fields":["mana_current","mana_max"],
+        "raw_value_format":"IEEE754_DOUBLE_17_SIGNIFICANT_DIGITS",
+        "original_ready_calls_added":0,"new_rng_or_resource_mutation_calls":0,
+        "previous_root_actor_pre_receipt_sha256":digest(canonical(raw_root)),
+        "source_before_sha256":"0"*64,
+        "original_git_blob_sha1":"0"*40}
+    mana_events=[begin,pre,MANA_MARK+"100|7|95|100",
+                 method_begin,observed,method_end,comparator,end]
+    mana_proven=corroborate("\n".join(mana_events),
+                           mana_profile,temporal_mana,raw_root,native_root,raw_mana)
+    assert mana_proven["status_counts"]["independent_ast_vs_original_native_if_match"]==1
+    assert mana_proven["source_root_mana_direct_PRE_evidence"] is True
+    unknown_resource=corroborate(
+        "\n".join([begin,pre,MANA_MARK+"100|7|0|0",
+                   method_begin,observed,method_end,comparator,end]),
+        mana_profile,temporal_mana,raw_root,native_root,raw_mana)
+    assert unknown_resource["native_if_parity_status"]=="UNKNOWN_NO_ORIGINAL_NATIVE_IF_OVERLAP"
     return {"schema": SCHEMA, "status": "PASS_OFFLINE_SYNTHETIC",
-            "checks": 11, "Native_CXX_executed": False,
+            "checks": 13, "Native_CXX_executed": False,
             "independent_AST_native_IF_match_synthetic": 1,
+            "independent_mana_pct_native_IF_match_synthetic":1,
+            "mana_zero_max_unknown_synthetic":True,
             "full_READY_proven": 0, "WCL_API_calls": 0}
 
 
