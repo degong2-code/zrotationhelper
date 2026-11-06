@@ -87,13 +87,19 @@ def patch(pristine:bytes, previous:bytes)->bytes:
         official.count("a->action_ready()")!=1):
         raise SourceReturnError("PINNED_ORIGINAL_SOURCE_SELECT_METHOD_REQUIRED")
     for kind, original in RETURN_SITES.items():
-        if official.count(original)!=1 or body.count(original)!=1:
+        # Inspect complete original source lines: two independent null
+        # statements differ only by indentation and one contains the
+        # other's text as a suffix.
+        if official.splitlines().count(original)!=1 or body.splitlines().count(original)!=1:
             raise SourceReturnError("ORIGINAL_RETURN_SOURCE_ANCHOR_DRIFT:"+kind)
         insertion=(_log_action(kind,"a" if kind=="DIRECT" else "real_a")
                    if kind in ("DIRECT","CHILD_PROPAGATED") else _log_null(kind))
-        body=body.replace(original,insertion+original,1)
+        literal="\n"+original+"\n"
+        if body.count(literal)!=1:
+            raise SourceReturnError("SOURCE_RETURN_ANCHOR_NOT_LINE_EXACT:"+kind)
+        body=body.replace(literal,"\n"+insertion+original+"\n",1)
     if (body.count(MARK)!=4 or body.count("a->action_ready()")!=1 or
-        any(body.count(site)!=1 for site in RETURN_SITES.values())):
+        any(body.splitlines().count(site)!=1 for site in RETURN_SITES.values())):
         raise SourceReturnError("RETURN_PATCH_CHANGED_SELECT_SEMANTICS")
     return (updated[:start]+body+updated[start+len(_method(updated)[0]):]).encode("utf8")
 
