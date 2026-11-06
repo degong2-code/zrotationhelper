@@ -125,7 +125,7 @@
   },
   "product_exact_next": "Complete a reusable Generic General Rotation opener and stateful conditional ST/2-target/cleave/AoE decision engine by proving actual positive source-pinned skill readiness and source-order selection, then independently reconcile locked WCL behavior and Blizzard mechanics and reuse the verified IR for evidence-bounded target-dummy feedback.",
   "chat_exact_next": "READ_ONLY_RESTORE_REPORT_THEN_STOP. Requery GitHub actual HEAD and MAIN, policy SHA256/blob and full snapshot, archive parent SHA256, latest source join CI and raw JSON, compare 953 source IF and earlier distinct 477 cohort, confirm 0 full READY, report roadmap. Wait for fresh user '진행'. No code/docs changes, tests, API collection, Actions, commit, PR or promotion.",
-  "session_exact_next_after_explicit_progress": "Use verified original Arcane Orb ST/2T 158 action_t::ready/action_ready branch witnesses and 4 chosen source priority contexts, not more identical Native E2E. In source-pinned SpecAdapter capture exact talent.splintering_sorcery, arcane_charge/arcane_salvo buffs, variable.aoe_count, cooldown fractional charges and prior candidate physical gate reasons at the same original root. Reconstruct independent full READY only when all original gates and PRE operands close; then derive conditional ST/2T physical opener decisions and compare with independently locked WCL blind holdout. Respect WoW addon policy, no in-game combat state solver; UNKNOWN remains UNKNOWN.",
+  "session_exact_next_after_explicit_progress": "Use real Arcane Orb exact-root PRE and generic minimal source IF witnesses to explain earlier competing spells in both 2T chosen Orb decisions (prismatic_bolt, arcane_barrage, arcane_missiles) using source-pinned original C++ ready branch/skill PRE only where gating differs. Verify full action readiness independent from native POST before claiming skill priority. Build ST/2T conditional General Rotation IR; run independent WCL blind discovery candidate/threshold lock and holdout before any trainer mistake verdict. Keep additional AoE/build, game addon policy-gated; unknown remains UNKNOWN.",
   "entry_gate": {
     "mode": "READ_ONLY_RESTORE_REPORT_THEN_STOP",
     "requires_user_explicit_progress": "진행",
@@ -649,5 +649,84 @@
     "FROZEN_modified": false,
     "Seq578": "FAILED_QUARANTINED",
     "Seq637": "UNKNOWN"
+  },
+  "branch_local_execution_successor_20261106_spec_pre_conditional_orb": {
+    "schema": "ZrotBranchActualSourceSpecPREAndConditionalIFOpenerHandoff20261106V1",
+    "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+    "date": "2026-11-06",
+    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+    "source_architecture": "HEKILI_INSPIRED_CORE_SCRIPTS_STATE_CLASSES_OFFLINE_ONLY",
+    "official_simc_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "input_mage_profile_git_blob_sha1": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+    "native_current_run": {
+      "id": 42181561000,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42181561000",
+      "python_312": "SUCCESS",
+      "python_314": "SUCCESS",
+      "original_vs_instrumented_native_Fury_Arcane_ST_2T": "SUCCESS",
+      "original_ready_source_roots": 158,
+      "actual_native_IF_evaluations_independently_checked_and_matched": 73,
+      "actual_source_short_circuits_before_IF": 85,
+      "added_action_ready_cost_rng_calls": 0,
+      "added_pure_buff_t_check_per_orb_root": 3,
+      "added_const_charges_fractional_per_orb_root": 1,
+      "artifact_id": 13485134937,
+      "artifact_zip_sha256": "033da6dd09cd255bd83af5a8dfa9c72d65af14d2ae54d0fc2d2b52b1edff8756"
+    },
+    "conditional_model_run": {
+      "id": 42182635460,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42182635460",
+      "Python_312": "SUCCESS",
+      "Python_314": "SUCCESS",
+      "new_native_CPP_builds": 0,
+      "actual_cpp_selected_orb_if_true_witness": 4,
+      "earlier_same_spell_orb_if_false_witness": 2,
+      "earlier_other_skill_NATIVE_POST_false_ONLY_unknown": 8,
+      "original_prior_candidates_total": 10,
+      "artifact_id": 13486511411,
+      "artifact_zip_sha256": "f341a2ea9a801037d1a6fb7bc36e43a54be5d6b427c29681c8ef0cfd48ffdd35",
+      "artifact_model_json_sha256": "b92946feacc6fd3d17b5aa280e91370842fdc85c6c7a41fd10ab7b1330ec08c6"
+    },
+    "first_2T_actual_IF_ELSE_source_evidence": {
+      "at_ms": [
+        7667,
+        14950
+      ],
+      "selected": "spellslinger[6] arcane_orb",
+      "selected_IF_true_minimal_facts": [
+        {
+          "active_enemies": 2,
+          "arcane_charge_stack": 2,
+          "source_derived_aoe_count": 2
+        },
+        {
+          "active_enemies": 2,
+          "arcane_charge_stack": 3,
+          "source_derived_aoe_count": 2
+        }
+      ],
+      "earlier": "spellslinger[2] arcane_orb",
+      "earlier_IF_false_minimal_fact": "talent.orb_mastery=0",
+      "source_aoe_count_derived_not_direct_runtime_variable": true
+    },
+    "code": [
+      "tools/research/general_rotation_arcane_orb_spec_state_pre_producer_v1.py",
+      "tools/research/general_rotation_arcane_orb_spec_state_pre_replay_v1.py",
+      "tools/research/general_rotation_source_if_minimal_witness_v1.py",
+      "tools/research/general_rotation_arcane_orb_conditional_source_model_v1.py"
+    ],
+    "branch_evidence": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ARCANE_ORB_EXACT_SPEC_PRE_CONDITIONAL_IF_OPENER_20261106.json",
+    "WCL_independent_candidate_discovery_or_holdout_performed": false,
+    "independent_entire_action_READY_proven": 0,
+    "dummy_mistake_verdict_permitted": false,
+    "game_client_executed": false,
+    "WCL_API_calls": 0,
+    "previous_session_exact_next": "Use verified original Arcane Orb ST/2T 158 action_t::ready/action_ready branch witnesses and 4 chosen source priority contexts, not more identical Native E2E. In source-pinned SpecAdapter capture exact talent.splintering_sorcery, arcane_charge/arcane_salvo buffs, variable.aoe_count, cooldown fractional charges and prior candidate physical gate reasons at the same original root. Reconstruct independent full READY only when all original gates and PRE operands close; then derive conditional ST/2T physical opener decisions and compare with independently locked WCL blind holdout. Respect WoW addon policy, no in-game combat state solver; UNKNOWN remains UNKNOWN.",
+    "session_exact_next": "Use real Arcane Orb exact-root PRE and generic minimal source IF witnesses to explain earlier competing spells in both 2T chosen Orb decisions (prismatic_bolt, arcane_barrage, arcane_missiles) using source-pinned original C++ ready branch/skill PRE only where gating differs. Verify full action readiness independent from native POST before claiming skill priority. Build ST/2T conditional General Rotation IR; run independent WCL blind discovery candidate/threshold lock and holdout before any trainer mistake verdict. Keep additional AoE/build, game addon policy-gated; unknown remains UNKNOWN.",
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN",
+    "read_evidence": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ARCANE_ORB_EXACT_SPEC_PRE_CONDITIONAL_IF_OPENER_20261106.json"
   }
 }
