@@ -171,7 +171,7 @@ Branch evidence `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ORIGINAL
 
 **Follow-up high leverage:** capture original source-root PRE for chosen physical action(s) with resource, talent, cooldown/charge and buff/proc, and source-walk the full native virtual `ready()` path and execution effects. Avoid re-evaluating readiness to log it. Do not infer missing PRE from ST/2T scenario value. Favor one single Native E2E with sufficiently complete narrow state over 10 repeated narrow partial-run CI passes. Branch evidence `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SELECTED_CPP_LEAF_EXACT_PRE_SPEC_ADAPTER_20261106.json`; artifact `13473415672`. MAIN/FROZEN untouched, Seq578=FAILED_QUARANTINED, Seq637=UNKNOWN.
 
-## 2026-11-06 successor: source full chosen root PRE, all 262 physical C++ returned rows
+## 2026-11-06 successor: source full chosen root PRE, all 262 original C++ returned APL rows
 
 **Latest actual official original C++ execution verified PASS** [Actions #42155157024](https://github.com/degong2-code/zrotationhelper/actions/runs/42155157024), Py3.12+3.14+Native Fury/Arcane ST/2T parity all SUCCESS. Source-reuse code `general_rotation_full_root_state_join_v1.py`, actor and root-return replays with **optional retain_all** output, no new C++ readiness, RNG or resource mutation; this is a **data-retention and exact-source attribution improvement**, not a new readiness oracle.
 
