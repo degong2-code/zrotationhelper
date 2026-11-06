@@ -92,8 +92,8 @@ def replay(log:str,temporal:dict,producer:dict)->dict:
     expected={}
     for sw in temporal["observed_time_scoped_selection_frontiers"]:
         for item in sw["observed_candidate_event_stream"]:
-            if item.get("stage")!="ACTION_READY_CALLED" or
-               item.get("source_action")!="arcane_orb":
+            if (item.get("stage")!="ACTION_READY_CALLED" or
+                item.get("source_action")!="arcane_orb"):
                 continue
             rid=item.get("original_action_ready_root_id")
             require(type(rid) is int and rid>0 and rid not in expected,
