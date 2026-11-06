@@ -250,7 +250,8 @@
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_ARCHITECTURE_REFERENCE_20261106.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/RETAIL_ADDON_POLICY_CAPABILITY_GATE_20261106.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_CORE_STATE_INTEGRATION_AUDIT_20261106.md"
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_CORE_STATE_INTEGRATION_AUDIT_20261106.md",
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SPEC_ADAPTER_ARCANE_ORB_SOURCE_OBLIGATIONS_20261106.json"
   ],
   "blocked_by": [
     "No independently proven positive full virtual action_ready on actually selected executable candidate",
@@ -481,6 +482,46 @@
     ],
     "main_promoted": false,
     "shared_frozen_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "branch_local_execution_successor_20261106_exact_leaf_state": {
+    "schema": "Zrot20261106BranchSelectedLeafPREStateHandoffSuccessorV1",
+    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+    "status": "VERIFIED_ACTUAL_SIMC_SOURCE_LEAF_64_AND_SAME_ROOT_PRE_9; FULL_READINESS_UNPROVEN",
+    "new_engine": "tools/research/general_rotation_original_selected_root_state_join_v1.py",
+    "per_spec_semantic_adapter": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SPEC_ADAPTER_ARCANE_ORB_SOURCE_OBLIGATIONS_20261106.json",
+    "actual_CI_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42152415986",
+    "actual_CI_id": 42152415986,
+    "Python312": "SUCCESS",
+    "Python314": "SUCCESS",
+    "actual_prior_CPP_receipt_replay": "SUCCESS",
+    "provenance_tamper_rejected": 5,
+    "original_native_sweeps_reused": 2121,
+    "original_top_level_source_returns": 262,
+    "early_selected_leaf_exact_ready_roots": 64,
+    "child_propagated_leaf_count": 30,
+    "direct_leaf_count": 34,
+    "exact_original_READY_root_active_enemies_PRE": 9,
+    "same_ready_root_PRE_not_retained": 55,
+    "unsampled_source_return_rows": 198,
+    "arcane_orb_source_mechanics_attached": 3,
+    "independent_FULL_ready": 0,
+    "prior_full_NOT_ready": 0,
+    "WCL_CLI_calls_this_step": 0,
+    "new_native_CPP_builds": 0,
+    "retail_game_client_tested": false,
+    "artifact_id": 13473415672,
+    "artifact_sha256": "aa1318314a8a2041b2abf9c9bab261263c5bc9d6f08718a1b985a30bd631f6c1",
+    "evidence_path": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SELECTED_CPP_LEAF_EXACT_PRE_SPEC_ADAPTER_20261106.json",
+    "read_first_additional": [
+      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md",
+      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md",
+      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SPEC_ADAPTER_ARCANE_ORB_SOURCE_OBLIGATIONS_20261106.json"
+    ],
+    "exact_next": "Narrow one-time original Native source PRE producer capturing all exact chosen executable leaf gates, buffs, cooldown/charges, talents and resources, plus verified full inherited Arcane Orb READY source route and per-phase transition. Keep no inferred unseen state; then source-proven IF/ELSE ST/2T and independent WCL blind holdout.",
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
     "Seq578": "FAILED_QUARANTINED",
     "Seq637": "UNKNOWN"
   }
