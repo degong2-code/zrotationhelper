@@ -25,6 +25,8 @@ on:
       - tools/research/general_rotation_full_root_state_join_v1.py
       - tools/research/general_rotation_arcane_orb_native_ready_stage_producer_v1.py
       - tools/research/general_rotation_arcane_orb_native_ready_stage_replay_v1.py
+      - tools/research/general_rotation_arcane_orb_spec_state_pre_producer_v1.py
+      - tools/research/general_rotation_arcane_orb_spec_state_pre_replay_v1.py
       - tools/research/general_rotation_original_selection_return_producer_v1.py
       - tools/research/general_rotation_original_selection_return_replay_v1.py
       - tools/research/general_rotation_original_root_if_bridge_v1.py
@@ -136,6 +138,22 @@ jobs:
           print('ORIGINAL_SOURCE_SELECTED_RETURN_SYNTHETIC_CAUSAL_PASS')
           PY
           python -m py_compile tools/research/general_rotation_arcane_orb_native_ready_stage_producer_v1.py tools/research/general_rotation_arcane_orb_native_ready_stage_replay_v1.py
+          python -m py_compile tools/research/general_rotation_arcane_orb_spec_state_pre_producer_v1.py tools/research/general_rotation_arcane_orb_spec_state_pre_replay_v1.py
+          python -B tools/research/general_rotation_arcane_orb_spec_state_pre_producer_v1.py >/tmp/zrot-orb-spec-pre-synthetic.json
+          python -B tools/research/general_rotation_arcane_orb_spec_state_pre_replay_v1.py >/tmp/zrot-orb-spec-ast-synthetic.json
+          python - <<'PY'
+          import json
+          for file,schema in [
+              ('/tmp/zrot-orb-spec-pre-synthetic.json',
+               'ZrotOriginalArcaneOrbSpecExactReadyRootPREProducerV1'),
+              ('/tmp/zrot-orb-spec-ast-synthetic.json',
+               'ZrotOriginalArcaneOrbExactSourceIFSpecPREDecisionV1')]:
+              data=json.load(open(file))
+              assert data['schema']==schema
+              assert data['status']=='PASS_OFFLINE_SYNTHETIC'
+              assert data['WCL_API_calls']==0
+          print('ORIGINAL_ARCANE_ORB_SOURCED_SPEC_STATE_AND_AST_SYNTHETIC_PASS')
+          PY
           python -B tools/research/general_rotation_arcane_orb_native_ready_stage_producer_v1.py > /tmp/zrot-arcane-ready-stage-synthetic.json
           python -B tools/research/general_rotation_arcane_orb_native_ready_stage_replay_v1.py > /tmp/zrot-arcane-ready-replay-synthetic.json
           python - <<'PY'
@@ -603,6 +621,26 @@ jobs:
           assert p['original_base_READY_return_branches']==7
           assert p['original_ACTION_READY_return_branches']==12
           print('ORIGINAL_ARCANE_ORB_PASSIVE_BRANCH_CXX_PATCH_PASS')
+          PY
+      - name: Capture actual Arcane Orb talent buff and fractional charge before original inherited READY
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_arcane_orb_spec_state_pre_producer_v1.py \
+            --simc-root simc-upstream \
+            --prior-method-receipt /tmp/zrot-generic-method-pre-patch.json \
+            --receipt /tmp/zrot-arcane-spec-state-pre-producer.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/zrot-arcane-spec-state-pre-producer.json'))
+          assert p['schema']=='ZrotOriginalArcaneOrbSpecExactReadyRootPREProducerV1'
+          assert p['original_CPP_base_ready_calls_per_virtual_ORB_invocation']==1
+          assert p['added_direct_action_ready_calls']==0
+          assert p['added_direct_rng_calls']==0 and p['added_direct_cost_calls']==0
+          assert p['additional_read_only_buff_check_calls_per_orb_root']==3
+          assert p['additional_const_charges_fractional_calls_per_orb_root']==1
+          assert len(p['source_pre_field_names'])==11
+          print('ORIGINAL_ARCANE_ORB_CLASS_SPEC_PRE_SOURCE_PATCH_PASS')
           PY
       - name: Instrument exact original select_action source return paths
         shell: bash
@@ -1350,6 +1388,45 @@ jobs:
           print('ACTUAL_ORIGINAL_ARCANE_ORB_SOURCE_RETURN_GATE_PASS',flush=True)
           PY
           sha256sum /tmp/zrot-original-arcane-ready-stage-*.json
+      - name: Independently replay Arcane Orb original APL IF from exact class PRE plus source precombat variable
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_arcane_orb_spec_state_pre_replay_v1 import replay
+          producer=json.load(open('/tmp/zrot-arcane-spec-state-pre-producer.json'))
+          profile=Path('simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc').read_bytes()
+          summary={
+            'schema':'ZrotOriginalArcaneOrbExactSpecPREAndIndependentSourceIFST2TV1',
+            'cases':{},'original_SIMC_CPP_A_B_parity':True,
+            'original_spec_class_pre_root_coverage_complete':True,
+            'independent_entire_action_READY_proven':0,
+            'WoW_client_API_tested':False,'WCL_API_calls':0}
+          for mode in ('st','2t'):
+              folder='arcane' if mode=='st' else 'arcane-2t'
+              log=Path('/tmp/zrot-instrumented-'+folder+
+                       '/simc_native_log.txt').read_text(encoding='utf8')
+              gates=json.load(open('/tmp/zrot-original-arcane-ready-stage-'+mode+'.json'))
+              outcome=replay(log,gates,profile,producer,1 if mode=='st' else 2)
+              assert outcome['independent_complete_action_READY'] is False
+              assert outcome['captured_same_original_CPP_root_ready_PRE'] is True
+              assert outcome['source_derived_variable_is_not_direct_CPP_PRE'] is True
+              assert outcome['counts']['ready_root_spec_PRE_captured']==(80 if mode=='st' else 78)
+              selected=outcome['selected_original_cpp_arcane_orb_source_actions']
+              assert len(selected)==(1 if mode=='st' else 3)
+              Path('/tmp/zrot-arcane-orb-exact-spec-pre-'+mode+'.json').write_text(
+                json.dumps(outcome,sort_keys=True,separators=(',',':'))+'\n')
+              summary['cases'][mode]={
+                 'counts':outcome['counts'],'selected_orb_source_actions':selected}
+              print('ACTUAL_ORIGINAL_ORB_SPEC_AST_IF',mode,summary['cases'][mode],flush=True)
+          Path('/tmp/zrot-arcane-orb-spec-pre-ST2T-summary.json').write_text(
+            json.dumps(summary,sort_keys=True,separators=(',',':'))+'\n')
+          print('ACTUAL_ARCANE_ORB_SOURCED_SPEC_STATE_IF_PASS',flush=True)
+          PY
+          sha256sum /tmp/zrot-arcane-orb-spec-pre-*.json
       - name: Preserve compact safe receipts only (never raw actor logs)
         uses: actions/upload-artifact@v4
         if: success()
@@ -1369,6 +1446,10 @@ jobs:
             /tmp/zrot-native-select-source-return-producer.json
             /tmp/zrot-all-original-source-chosen-state-summary.json
             /tmp/zrot-arcane-orb-ready-stage-producer.json
+            /tmp/zrot-arcane-spec-state-pre-producer.json
+            /tmp/zrot-arcane-orb-exact-spec-pre-st.json
+            /tmp/zrot-arcane-orb-exact-spec-pre-2t.json
+            /tmp/zrot-arcane-orb-spec-pre-ST2T-summary.json
             /tmp/zrot-original-arcane-ready-stage-summary.json
             /tmp/zrot-original-arcane-ready-stage-st.json
             /tmp/zrot-original-arcane-ready-stage-2t.json
