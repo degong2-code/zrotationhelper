@@ -34,7 +34,7 @@ SCHEMA="ZrotGeneralRotationOriginalRootActorPRESourceOrderReplayV1"
 class SourceRootPREReplayError(ValueError):pass
 
 
-def replay(log:str,profile:bytes,temporal:dict,producer:dict)->dict:
+def replay(log:str,profile:bytes,temporal:dict,producer:dict,*,retain_all:bool=False)->dict:
     if (producer.get("schema")!=PRODUCER_SCHEMA or
         producer.get("operand_symbol")!="active_enemies" or
         producer.get("operand_source_cpp")!="sim->active_enemies" or
@@ -155,8 +155,23 @@ def replay(log:str,profile:bytes,temporal:dict,producer:dict)->dict:
         counts["actual_original_simc_root_actor_PRE_observed"]!=len(complete)):
         raise SourceRootPREReplayError("INCOMPLETE_SOURCE_NATIVE_ROOT_PRE_COVERAGE")
     by_row={}
+    all_original_root_pre={}
     for frame in complete:
         rid=frame["root_id"];root=temporal_roots[rid]
+        if retain_all:
+            all_original_root_pre[str(rid)]={
+                "root_call_id":rid,
+                "source_row_sha256":root["source_hash"],
+                "source_action":root["source_action"],
+                "source_list":root["owner"],
+                "source_ordinal":root["ordinal"],
+                "at_simc_ms":frame["at_ms"],
+                "observed_before_call_active_enemies":frame["captured"],
+                "native_action_ready_POST":frame["returned"],
+                "original_cpp_pre_before_native_result_proven":
+                    frame["pre_before_native_return"],
+                "not_WCL_transition_PRE":True,
+            }
         expr=root["source_if"]
         if expr is None:
             counts["source_action_without_if"]+=1
@@ -220,6 +235,13 @@ def replay(log:str,profile:bytes,temporal:dict,producer:dict)->dict:
         "dummy_error_permitted":False,
         "WCL_API_calls":0
     }
+    if retain_all:
+        if len(all_original_root_pre)!=len(complete):
+            raise SourceRootPREReplayError("ALL_SOURCE_ROOT_PRE_NOT_RETAINED")
+        result["all_exact_source_root_PRE_by_id"]=dict(
+            sorted(all_original_root_pre.items(),key=lambda kv:int(kv[0])))
+        result["all_exact_root_PRE_retained_count"]=len(complete)
+    return result
 
 
 def selftest():
@@ -262,7 +284,7 @@ def selftest():
         try:replay("\n".join(bad),p,temporal,producer)
         except SourceRootPREReplayError:pass
         else:raise AssertionError("BAD_ROOT_ACTOR_PRE_SOURCE_EVENT_ACCEPTED")
-    return {
+    result={
         "schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
         "checks":10,"physical_simc_cpp_executed":False,
         "WCL_latest_transition_before_t_claim":False,
