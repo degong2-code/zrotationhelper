@@ -5,6 +5,7 @@ on:
       - work/gr-simc-st-2t-wcl-blind-20261102
     paths:
       - tools/research/general_rotation_simc_e2e_research_engine_v1.py
+      - tools/research/general_rotation_simc_single_profile_v1.py
       - tools/research/fixtures/general_rotation_e2e_original_native_st_2t_v1.json
       - .github/workflows/zrot-general-rotation-simc-e2e-source-priority-v1.yml
   workflow_dispatch:
@@ -33,9 +34,19 @@ jobs:
           set -euo pipefail
           python -m py_compile \
             tools/research/general_rotation_simc_e2e_research_engine_v1.py \
+            tools/research/general_rotation_simc_single_profile_v1.py \
             tools/research/general_rotation_source_hypothesis_ir_v1.py \
             tools/research/simc_apl_semantic_ir_v2.py
           python -B tools/research/general_rotation_simc_e2e_research_engine_v1.py >/tmp/zrot-generic-e2e-synthetic.json
+          python -B tools/research/general_rotation_simc_single_profile_v1.py >/tmp/zrot-generic-one-spec-synthetic.json
+          python - <<'PY'
+          import json
+          j=json.load(open('/tmp/zrot-generic-one-spec-synthetic.json'))
+          assert j['schema']=='ZrotGenericSimCSingleInputSourceConditionalModelV1'
+          assert j['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert j['independent_FULL_READY_proven']==0
+          print('GENERIC_SINGLE_INPUT_PROFILE_SAFE_SYNTHETIC_PASS')
+          PY
           python - <<'PY'
           import json
           x=json.load(open('/tmp/zrot-generic-e2e-synthetic.json'))
@@ -136,11 +147,40 @@ jobs:
           print('GENERIC_SOURCE_ONLY_NEW_SPEC_COLD_START_PATH_PASS')
           PY
           sha256sum /tmp/zrot-generic-simc-source-only-ir.json
+      - name: Prove direct arbitrary single profile input without multi-class manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_simc_single_profile_v1.py \
+            --profile simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc \
+            --expected-git-blob 8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f \
+            --out /tmp/zrot-direct-single-mage-arcane.json
+          python -B tools/research/general_rotation_simc_single_profile_v1.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --expected-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
+            --out /tmp/zrot-direct-single-warrior-fury.json
+          python - <<'PY'
+          import json
+          for f,slug,n in (
+              ('/tmp/zrot-direct-single-mage-arcane.json','mage_arcane',51),
+              ('/tmp/zrot-direct-single-warrior-fury.json','warrior_fury',121)):
+              obj=json.load(open(f))
+              assert obj['schema']=='ZrotGenericSimCSingleInputSourceConditionalModelV1'
+              assert obj['source_origin']=='USER_PINNED_CONTENT_NOT_OFFICIAL_REVISION_VERIFIED'
+              assert obj['spec_key']==slug
+              assert obj['source_model']['source_APL_row_count']==n
+              assert obj['native_opener_selected_source_trace']=='NOT_SUPPLIED'
+              assert obj['physical_ready_and_optimality']=='UNKNOWN'
+              print('DIRECT_SINGLE_PROFILE_SOURCE_CONDITIONAL_MODEL_PASS',slug,n)
+          PY
+          sha256sum /tmp/zrot-direct-single-*.json
       - uses: actions/upload-artifact@v4
         with:
           name: zrot-generic-simc-source-to-conditional-opener-ir-v1
           path: |
             /tmp/zrot-generic-simc-source-to-opener-ir.json
             /tmp/zrot-generic-simc-source-only-ir.json
+            /tmp/zrot-direct-single-mage-arcane.json
+            /tmp/zrot-direct-single-warrior-fury.json
           retention-days: 7
           if-no-files-found: error
