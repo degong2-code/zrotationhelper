@@ -125,7 +125,7 @@
   },
   "product_exact_next": "Complete a reusable Generic General Rotation opener and stateful conditional ST/2-target/cleave/AoE decision engine by proving actual positive source-pinned skill readiness and source-order selection, then independently reconcile locked WCL behavior and Blizzard mechanics and reuse the verified IR for evidence-bounded target-dummy feedback.",
   "chat_exact_next": "READ_ONLY_RESTORE_REPORT_THEN_STOP. Requery GitHub actual HEAD and MAIN, policy SHA256/blob and full snapshot, archive parent SHA256, latest source join CI and raw JSON, compare 953 source IF and earlier distinct 477 cohort, confirm 0 full READY, report roadmap. Wait for fresh user '진행'. No code/docs changes, tests, API collection, Actions, commit, PR or promotion.",
-  "session_exact_next_after_explicit_progress": "From 262/262 exact Native returned rows and 4682 original ready-root PRE, source-pin one passive Arcane Orb and preceding physical candidate action_t::ready()/action_ready() stage trace without extra READY, cost, cooldown or RNG calls; source-capture missing talents/procs/buffs/cooldowns/charges using semantic SpecAdapter. Close only proven gates, compare ST/2T opener, independently validate WCL blind after candidate lock, then safe post-session dummy feedback. Unknown remains UNKNOWN.",
+  "session_exact_next_after_explicit_progress": "Use verified original Arcane Orb ST/2T 158 action_t::ready/action_ready branch witnesses and 4 chosen source priority contexts, not more identical Native E2E. In source-pinned SpecAdapter capture exact talent.splintering_sorcery, arcane_charge/arcane_salvo buffs, variable.aoe_count, cooldown fractional charges and prior candidate physical gate reasons at the same original root. Reconstruct independent full READY only when all original gates and PRE operands close; then derive conditional ST/2T physical opener decisions and compare with independently locked WCL blind holdout. Respect WoW addon policy, no in-game combat state solver; UNKNOWN remains UNKNOWN.",
   "entry_gate": {
     "mode": "READ_ONLY_RESTORE_REPORT_THEN_STOP",
     "requires_user_explicit_progress": "진행",
@@ -565,6 +565,86 @@
     "session_exact_next": "From 262/262 exact Native returned rows and 4682 original ready-root PRE, source-pin one passive Arcane Orb and preceding physical candidate action_t::ready()/action_ready() stage trace without extra READY, cost, cooldown or RNG calls; source-capture missing talents/procs/buffs/cooldowns/charges using semantic SpecAdapter. Close only proven gates, compare ST/2T opener, independently validate WCL blind after candidate lock, then safe post-session dummy feedback. Unknown remains UNKNOWN.",
     "WCL_API_calls": 0,
     "WoW_client_calls": 0,
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "branch_local_execution_successor_20261106_orb_ready_prior": {
+    "schema": "ZrotBranchOriginalArcaneOrbReadyGateAndEarlierSourceCandidateHandoffV1",
+    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+    "date": "2026-11-06",
+    "actual_native_CI": {
+      "id": 42174427587,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42174427587",
+      "offline_python_312": "SUCCESS",
+      "offline_python_314": "SUCCESS",
+      "actual_CPP_original_modified_Fury_Arcane_ST_2T": "SUCCESS",
+      "additional_ready_rng_cost_evaluations": 0,
+      "artifact_id": 13483450540,
+      "artifact_zip_sha256": "260895d8cecbb6684ac911b0fbe2e5b3f1163685928bcc3345a81068a70ab264"
+    },
+    "actual_original_CPP_arcane_orb_READY_call_counts": {
+      "ST": {
+        "total": 80,
+        "native_true": 1,
+        "native_false": 79,
+        "original_APL_IF_false": 35,
+        "line_cooldown_down": 41,
+        "resource_unaffordable": 3
+      },
+      "two_target": {
+        "total": 78,
+        "native_true": 3,
+        "native_false": 75,
+        "original_APL_IF_false": 34,
+        "line_cooldown_down": 38,
+        "resource_unaffordable": 3
+      }
+    },
+    "source_apl_line_cd_fact": "Pinned profiles/MID2/MID2_Mage_Arcane.simc:58 action cooldowns=arcane_orb if talent.splintering_sorcery line_cd=999; 999000ms in SimC original line_cooldown ready PRE is an APL row restriction not spell GCD/cooldown.",
+    "actual_source_prior_replay_CI": {
+      "id": 42175299671,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42175299671",
+      "Python_312": "SUCCESS",
+      "Python_314": "SUCCESS",
+      "new_CPP_compilation": false,
+      "adversarial_source_priority_mutations_rejected": 3,
+      "artifact_id": 13483236957,
+      "artifact_zip_sha256": "98213fffb15acc5829fe38c50791bd6113cbe5202a31c9166d8032a14a8b6eb9"
+    },
+    "actual_arcane_orb_source_selected": 4,
+    "actual_2T_source_orb_chosen_times_ms": [
+      0,
+      7667,
+      14950
+    ],
+    "two_target_after_earlier_same_list_native_FALSE": {
+      "at_ms": [
+        7667,
+        14950
+      ],
+      "chosen_source_list": "spellslinger",
+      "chosen_ordinal": 6,
+      "source_earlier_ordinal2_arcane_orb_CPP_APL_IF_FALSE": 2,
+      "all_earlier_source_candidate_native_FALSE": 10,
+      "physical_unavailability_independently_proven": 0
+    },
+    "new_code": [
+      "tools/research/general_rotation_arcane_orb_native_ready_stage_producer_v1.py",
+      "tools/research/general_rotation_arcane_orb_native_ready_stage_replay_v1.py",
+      "tools/research/general_rotation_arcane_orb_selected_priority_context_v1.py"
+    ],
+    "evidence_receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ARCANE_ORB_ORIGINAL_NATIVE_READY_AND_SOURCE_PRIORS_20261106.json",
+    "historical_frozen_unmodified": true,
+    "source_observed_CXX_return_branch_not_independent_FULL_READY": true,
+    "independent_positive_full_READY": 0,
+    "WCL_independent_candidate_lock_and_holdout": false,
+    "real_WoW_client_observability_tested": false,
+    "gameplay_user_error_verdict_permitted": false,
+    "WCL_API_calls": 0,
+    "last_session_exact_next": "From 262/262 exact Native returned rows and 4682 original ready-root PRE, source-pin one passive Arcane Orb and preceding physical candidate action_t::ready()/action_ready() stage trace without extra READY, cost, cooldown or RNG calls; source-capture missing talents/procs/buffs/cooldowns/charges using semantic SpecAdapter. Close only proven gates, compare ST/2T opener, independently validate WCL blind after candidate lock, then safe post-session dummy feedback. Unknown remains UNKNOWN.",
+    "session_exact_next": "Use verified original Arcane Orb ST/2T 158 action_t::ready/action_ready branch witnesses and 4 chosen source priority contexts, not more identical Native E2E. In source-pinned SpecAdapter capture exact talent.splintering_sorcery, arcane_charge/arcane_salvo buffs, variable.aoe_count, cooldown fractional charges and prior candidate physical gate reasons at the same original root. Reconstruct independent full READY only when all original gates and PRE operands close; then derive conditional ST/2T physical opener decisions and compare with independently locked WCL blind holdout. Respect WoW addon policy, no in-game combat state solver; UNKNOWN remains UNKNOWN.",
     "MAIN_promoted": false,
     "FROZEN_modified": false,
     "Seq578": "FAILED_QUARANTINED",
