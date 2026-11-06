@@ -44,6 +44,23 @@ ADAPTER_SCHEMA="ZrotSpecAdapterSourceMechanicObligationsV1"
 ORIGINAL_ARTIFACT_SHA256="b347132dd935d4b9c5a9b5aea7357cda588deed92f222d418c6407eb3235b901"
 HEX64=re.compile(r"[0-9a-f]{64}\Z")
 HEX40=re.compile(r"[0-9a-f]{40}\Z")
+# Actual inner JSON bytes pinned independently of ZIP container metadata.
+# Allows CI to reuse GitHub's downloaded artifact directory (same original
+# content) without mistakenly claiming a repacked ZIP has the same digest.
+SOURCE_MEMBER_SHA256={
+"zrot-native-source-selected-return-fury-st.json":"a967cbe904e1819d9543c4b58adf425823bbd75a6d068217bc6ece26d72c2bdb",
+"zrot-native-source-selected-return-fury-2t.json":"20eb2f4a396323effbae630d2c4c0106b8cc2993fa4c1502ac370e97c0b6e65c",
+"zrot-native-source-selected-return-arcane-st.json":"2b8c0cd49e9082e82b984924e1c034e7f6878f9fd6f2cad511b3058e2fbd3998",
+"zrot-native-source-selected-return-arcane-2t.json":"ef0501246ced05edc4e45c01f39cf3cb40e35a30402db9b89ea74b17227a62ca",
+"zrot-original-root-actor-pre-fury-st.json":"737cd621e984ea12af1f6e767d077898e24d2128d5b6667ef2a5e298969e9924",
+"zrot-original-root-actor-pre-fury-2t.json":"9509b93e266a41f59f678e766904fba50a6373433d3b7c449e5511a7cd71baef",
+"zrot-original-root-actor-pre-arcane-st.json":"657838aa81e02d14ad6b64e21b39e15e5cda342b80d3efc167d7681a7bcef33a",
+"zrot-original-root-actor-pre-arcane-2t.json":"fcdd710143bd4c35adf077220f8d4d014830edbaef2da59b735a362e2e4d40fa",
+"zrot-source-temporal-frontier-fury-st.json":"75d64af753a24fff07e2aacd6c9716c1dc39e892efa214503d624c97fb180f4f",
+"zrot-source-temporal-frontier-fury-2t.json":"291ac4fd804f7652446a5c04eff98de9d20919928315f39d2c121601d914cbf9",
+"zrot-source-temporal-frontier-arcane-st.json":"1b8e60e3e32fe987df7d1322fda571520c20dccda586edc093a273e6e6803032",
+"zrot-source-temporal-frontier-arcane-2t.json":"e3691f55a9a1fcea2b4abd6cbfb89fb778fb622e714df064875affd53692a5c6",
+}
 
 class ExactLeafSourceError(ValueError):
     pass
@@ -51,9 +68,18 @@ class ExactLeafSourceError(ValueError):
 def check(ok:bool,label:str)->None:
     if not ok:raise ExactLeafSourceError(label)
 
-def _load(zipper:zipfile.ZipFile, member:str)->dict:
-    check(member in zipper.namelist(),"MISSING_ORIGINAL_CPP_RECEIPT_"+member)
-    return json.loads(zipper.read(member))
+def _load(source:zipfile.ZipFile|Path, member:str)->dict:
+    check(member in SOURCE_MEMBER_SHA256,"UNPINNED_CPP_RECEIPT_MEMBER")
+    if isinstance(source,Path):
+        file=source/member
+        check(file.is_file(),"MISSING_ORIGINAL_CPP_RECEIPT_"+member)
+        raw=file.read_bytes()
+    else:
+        check(member in source.namelist(),"MISSING_ORIGINAL_CPP_RECEIPT_"+member)
+        raw=source.read(member)
+    check(sha256(raw).hexdigest()==SOURCE_MEMBER_SHA256[member],
+          "ORIGINAL_NATIVE_MEMBER_BYTES_NOT_PINNED_"+member)
+    return json.loads(raw)
 
 def _unique_leaf(sweeps:dict[int,dict], children:dict[int,list[int]],
                  top_id:int, choice:dict, source:dict)->dict:
@@ -256,10 +282,15 @@ def _source_adapter(choice:dict,adapter:dict,leaf:dict,
         "trained_dummy_error_permitted":False,
     }
 
-def compose(original_native_zip:bytes, integrated:dict,
+def compose(original_native_zip:bytes|Path, integrated:dict,
             adapter:dict)->dict:
-    check(sha256(original_native_zip).hexdigest()==ORIGINAL_ARTIFACT_SHA256,
-          "ORIGINAL_ACTUAL_NATIVE_CPP_ZIP_SHA256_REQUIRED")
+    original_reconstructed_dir=isinstance(original_native_zip,Path)
+    if original_reconstructed_dir:
+        check(original_native_zip.is_dir(),"ORIGINAL_NATIVE_ARTIFACT_DIRECTORY_REQUIRED")
+    else:
+        check(type(original_native_zip) is bytes and
+              sha256(original_native_zip).hexdigest()==ORIGINAL_ARTIFACT_SHA256,
+              "ORIGINAL_ACTUAL_NATIVE_CPP_ZIP_SHA256_REQUIRED")
     check(integrated.get("schema")==INTEGRATED_SCHEMA and
           integrated.get("product_policy_id")==POLICY and
           integrated.get("authoritative_cast_sequence") is False and
@@ -281,11 +312,16 @@ def compose(original_native_zip:bytes, integrated:dict,
           "SPEC_ADAPTER_SOURCE_PIN_OR_SCOPE_FAILED")
     results={}
     totals=Counter()
-    with zipfile.ZipFile(__import__("io").BytesIO(original_native_zip)) as zipper:
+    # SOURCE_MEMBER_SHA256 is an exact byte pin for the extracted GitHub
+    # artifact members. ZIP digest is asserted only for the original ZIP mode.
+    import io
+    source=(original_native_zip if original_reconstructed_dir else
+            zipfile.ZipFile(io.BytesIO(original_native_zip)))
+    try:
         for case in CASES:
-            temporal=_load(zipper,"zrot-source-temporal-frontier-"+case+".json")
-            selected=_load(zipper,"zrot-native-source-selected-return-"+case+".json")
-            pre=_load(zipper,"zrot-original-root-actor-pre-"+case+".json")
+            temporal=_load(source,"zrot-source-temporal-frontier-"+case+".json")
+            selected=_load(source,"zrot-native-source-selected-return-"+case+".json")
+            pre=_load(source,"zrot-original-root-actor-pre-"+case+".json")
             ctx=integrated["cases"][case]
             target=1 if case.endswith("-st") else 2
             check(temporal.get("schema")==TIME_SCHEMA and
@@ -376,13 +412,18 @@ def compose(original_native_zip:bytes, integrated:dict,
             totals["original_source_sweeps_reused"]+=len(sweeps)
             totals["exact_original_cpp_selected_leaf_root_resolved"]+=len(aligned)
             totals["unsampled_original_top_level_choices"]+=ctx["unretained_root_source_returns"]
+    finally:
+        if not original_reconstructed_dir:
+            source.close()
     check(totals["original_source_sweeps_reused"]==2121 and
           totals["exact_original_cpp_selected_leaf_root_resolved"]==64 and
           totals["unsampled_original_top_level_choices"]==198,
           "FOUR_CASE_NATIVE_COHORT_TOTAL_DRIFT")
     return {
         "schema":SCHEMA,"product_policy_id":POLICY,
-        "source_native_original_zip_sha256":ORIGINAL_ARTIFACT_SHA256,
+        "source_native_original_zip_sha256_recorded":ORIGINAL_ARTIFACT_SHA256,
+        "original_zip_bytes_directly_verified":not original_reconstructed_dir,
+        "all_twelve_source_member_sha256_verified":True,
         "cases":results,"counts":dict(sorted(totals.items())),
         "source_selected_leaf_root_identity_exact":True,
         "selected_root_PRE_subset_only":True,
@@ -448,18 +489,21 @@ def selftest()->dict:
 def main()->None:
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--original-native-zip",type=Path)
+    p.add_argument("--original-native-dir",type=Path)
     p.add_argument("--integrated-opener-json",type=Path)
     p.add_argument("--spec-adapter",type=Path)
     p.add_argument("--out",type=Path)
     a=p.parse_args()
-    selections=(a.original_native_zip,a.integrated_opener_json,a.spec_adapter)
-    if all(x is None for x in selections):
+    native_sources=[a.original_native_zip is not None,a.original_native_dir is not None]
+    if not any(native_sources) and a.integrated_opener_json is None and a.spec_adapter is None:
         output=selftest()
-    elif all(x is not None for x in selections):
-        output=compose(a.original_native_zip.read_bytes(),
+    elif sum(native_sources)==1 and a.integrated_opener_json is not None and a.spec_adapter is not None:
+        original=(a.original_native_zip.read_bytes() if a.original_native_zip else
+                  a.original_native_dir)
+        output=compose(original,
                        json.loads(a.integrated_opener_json.read_bytes()),
                        json.loads(a.spec_adapter.read_bytes()))
-    else:p.error("all exact Native ZIP, integrated opener and pinned SpecAdapter required")
+    else:p.error("choose one original Native ZIP or pinned artifact directory, plus integrated opener and SpecAdapter")
     raw=(json.dumps(output,sort_keys=True,separators=(",",":"),
                     ensure_ascii=False,allow_nan=False)+"\n").encode()
     if a.out:
