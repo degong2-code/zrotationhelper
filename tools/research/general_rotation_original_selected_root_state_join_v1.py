@@ -455,7 +455,7 @@ def selftest()->dict:
     example={"return_kind":"CHILD_PROPAGATED","source_action":"arcane_orb",
              "source_row_sha256":row,"source_ordinal":1,
              "source_list":"cooldowns"}
-    source=dict(example,simc_ms=0)
+    source=dict(example,simc_ms=0,source_row_ordinal=1)
     evidence=_unique_leaf({1:top,2:child},{1:[2]},1,example,source)
     assert evidence["source_cpp_select_path_sweep_ids"]==[1,2]
     assert evidence["source_cpp_ready_root_id"]==8
