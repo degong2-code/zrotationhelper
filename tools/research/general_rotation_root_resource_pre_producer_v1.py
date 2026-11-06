@@ -20,6 +20,7 @@ from general_rotation_root_actor_pre_producer_v1 import (
     SCHEMA as ROOT_SCHEMA, MARK as ACTOR_MARK, ORIGINAL_CALL, _method
 )
 from general_rotation_select_pre_passive_producer_v1 import REVISION, PLAYER
+from general_rotation_select_sweep_instrument_v1 import SIGNATURE
 from general_rotation_source_route_audit_v1 import git_blob
 
 SCHEMA = "ZrotOriginalRootRawResourcePreProducerV1"
@@ -119,18 +120,12 @@ def generate(root:Path,root_receipt_path:Path)->dict:
     }
 
 def selftest()->dict:
-    official=(
-        "action_t* player_t::select_action("+
-        "const action_priority_list_t* list,\\n execute_type et,const action_t* context )\\n"+
-        "{\\n if ( a->action_ready() ) {}\\n}\\n"
-    ).replace("\\n","\n").encode()
-    prior=(
-        "action_t* player_t::select_action("+
-        "const action_priority_list_t* list,\\n execute_type et,const action_t* context )\\n"+
-        "{\\n // ZROT_GENERIC_ROOT_ACTOR_PRE_V1|\\n"+
-        " auto root=zrot_generic_call_scope_v1::current_root();\\n"+
-        "      const bool zrot_native_comparator = a->action_ready();\\n}\\n"
-    ).replace("\\n","\n").encode()
+    official=(SIGNATURE+'\n execute_type et,const action_t* context )\n'
+              '{\n if ( a->action_ready() ) {}\n}\n').encode()
+    prior=(SIGNATURE+'\n execute_type et,const action_t* context )\n'
+           '{\n // ZROT_GENERIC_ROOT_ACTOR_PRE_V1|\n'
+           ' auto root=zrot_generic_call_scope_v1::current_root();\n'
+           '      const bool zrot_native_comparator = a->action_ready();\n}\n').encode()
     out=patch(official,prior).decode()
     assert out.count(MARK)==1
     assert out.count("a->action_ready()")==1
