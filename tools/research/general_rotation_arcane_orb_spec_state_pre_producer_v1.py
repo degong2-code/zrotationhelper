@@ -52,7 +52,8 @@ def _class_chunk(text:str)->tuple[str,int,int]:
     return text[i:j],i,j
 
 def _insert_ready(chunk:str)->str:
-    need(chunk.count(METHOD_ANCHOR)==1 and
+    need(chunk.startswith(CLASS_ANCHOR) and
+         chunk.count(METHOD_ANCHOR)==1 and
          "bool ready() override" not in chunk and
          MARK not in chunk and "arcane_mage_spell_t::ready()" not in chunk,
          "ORIGINAL_MAGE_ORB_VIRTUAL_READY_SHAPE_DRIFT")
