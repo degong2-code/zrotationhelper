@@ -1,0 +1,101 @@
+{
+  "schema": "ZrotBranchOriginalNativeSelectedReturnEvidenceV1",
+  "product_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "evidence_status": "ORIGINAL_NATIVE_SOURCE_SELECTION_RETURN_OBSERVED_NOT_INDEPENDENT_READY",
+  "source_simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "producer_commit": "ba0d490c18bf663b5972e9ea21db402c8446750f",
+  "github_actions": {
+    "run_id": 42140591685,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42140591685",
+    "py312": "SUCCESS",
+    "py314": "SUCCESS",
+    "actual_fury_arcane_original_vs_instrumented_st_2t": "SUCCESS"
+  },
+  "artifact": {
+    "id": 13467582601,
+    "zip_name": "zrot-original-source-selected-return-20261106.zip",
+    "sha256": "b347132dd935d4b9c5a9b5aea7357cda588deed92f222d418c6407eb3235b901",
+    "expires_at": "2026-11-13T00:59:57Z",
+    "file_count": 38,
+    "raw_native_actor_log_exported": false,
+    "selected_source_summary_sha256": "48a8570d517ccb20892cc8eaeee86f1d196f2a840c22ef72eb56fa3172193037",
+    "producer_receipt_sha256": "c429f323be8b78704e26efd9c724b91b4b76ea6a8e72da59d1bd1dcb8a58803a"
+  },
+  "cases": {
+    "fury-st": {
+      "sweeps": 509,
+      "root_sweeps": 394,
+      "top_level_source_action_returned": 100,
+      "direct_return": 100,
+      "child_propagated": 1,
+      "null_context": 0,
+      "null_exhausted": 408,
+      "source_control_run_action_list_observed": 57,
+      "receipt_sha256": "a967cbe904e1819d9543c4b58adf425823bbd75a6d068217bc6ece26d72c2bdb"
+    },
+    "fury-2t": {
+      "sweeps": 477,
+      "root_sweeps": 384,
+      "top_level_source_action_returned": 90,
+      "direct_return": 90,
+      "child_propagated": 1,
+      "null_context": 0,
+      "null_exhausted": 386,
+      "source_control_run_action_list_observed": 46,
+      "receipt_sha256": "20eb2f4a396323effbae630d2c4c0106b8cc2993fa4c1502ac370e97c0b6e65c"
+    },
+    "arcane-st": {
+      "sweeps": 600,
+      "root_sweeps": 281,
+      "top_level_source_action_returned": 35,
+      "direct_return": 35,
+      "child_propagated": 32,
+      "null_context": 11,
+      "null_exhausted": 522,
+      "source_control_run_action_list_observed": 0,
+      "receipt_sha256": "2b8c0cd49e9082e82b984924e1c034e7f6878f9fd6f2cad511b3058e2fbd3998"
+    },
+    "arcane-2t": {
+      "sweeps": 535,
+      "root_sweeps": 250,
+      "top_level_source_action_returned": 37,
+      "direct_return": 37,
+      "child_propagated": 34,
+      "null_context": 6,
+      "null_exhausted": 458,
+      "source_control_run_action_list_observed": 0,
+      "receipt_sha256": "ef0501246ced05edc4e45c01f39cf3cb40e35a30402db9b89ea74b17227a62ca"
+    }
+  },
+  "aggregates": {
+    "all_original_source_sweeps_exited": 2121,
+    "root_sweeps": 1309,
+    "top_level_source_action_returned": 262,
+    "direct_return": 262,
+    "child_propagated": 68,
+    "null_context": 17,
+    "null_exhausted": 1774,
+    "previous_original_root_PRE_total": 4682,
+    "previous_AST_Native_IF_matches_preserved": 209,
+    "previous_AST_Native_IF_conflicts": 0
+  },
+  "findings": [
+    "Native C++ source return may be directly from a current action row, propagated from a child call_action_list, or NULL. Positive original action_ready result is not itself proof of final action choice.",
+    "Fury root returned APL rows include run_action_list control transitions; they must not be equated with 262 damage spell casts.",
+    "Native choice and prior C++ return post-comparator are observed; complete independent action readiness, prior ability availability and optimality are not independently proved.",
+    "ROOT and nested sweep calls have independently identified C++ RAII IDs. Same timestamp alone was never used to merge actions."
+  ],
+  "limits": {
+    "actual_original_native_selection_source_rows_proven": true,
+    "independent_full_ready_proven": 0,
+    "source_order_complete": false,
+    "source_prior_not_ready_independently_proven": false,
+    "first_user_opener_model_complete": false,
+    "actual_dummy_mistake_feedback_permitted": false,
+    "wcl_blind_holdout_current_IR_not_run": true,
+    "WCL_API_calls": 0,
+    "MAIN_shared_registry_FROZEN_unchanged": true
+  }
+}
