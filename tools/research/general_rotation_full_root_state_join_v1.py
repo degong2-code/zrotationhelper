@@ -44,6 +44,21 @@ def need(ok:bool,label:str)->None:
     if not ok:raise FullRootStateError(label)
 
 
+def _canonical_root_keys(mapping:dict)->dict:
+    """Unify verified integer ID keys from direct replay and JSON string keys."""
+    need(isinstance(mapping,dict),"SOURCE_ROOT_MAP_REQUIRED")
+    fixed={}
+    for raw,val in mapping.items():
+        need((type(raw) is int and raw>0) or
+             (type(raw) is str and raw.isdecimal() and
+              str(int(raw))==raw and int(raw)>0),
+             "INVALID_CPP_READY_ROOT_KEY")
+        key=str(raw)
+        need(key not in fixed,"ALIAS_OR_DUPLICATED_CPP_ROOT_ID")
+        fixed[key]=val
+    return fixed
+
+
 def _cpp_leaf(sweeps:dict, children:dict, event:dict)->dict:
     item={
         "source_original_return_kind":event["return_kind"],
@@ -107,8 +122,9 @@ def join(temporal:dict, selected:dict, actor:dict, mana:dict,
     need(len(roots)==ready_count==actor.get("original_native_root_pre_total")==
          actor.get("all_exact_root_PRE_retained_count")==mana.get("root_count"),
          "SOURCE_ROOT_COHORT_NOT_FULLY_PRESERVED")
-    original_actor=actor.get("all_exact_source_root_PRE_by_id")
-    original_mana=mana.get("root_mana_pct")
+    original_actor=_canonical_root_keys(
+        actor.get("all_exact_source_root_PRE_by_id"))
+    original_mana=_canonical_root_keys(mana.get("root_mana_pct"))
     need(isinstance(original_actor,dict) and isinstance(original_mana,dict) and
          set(original_actor)==set(original_mana)==
              set(str(n) for n in roots),
@@ -267,6 +283,11 @@ def selftest()->dict:
     leaf=_cpp_leaf({12:sw},{},sample)
     assert leaf["source_cpp_ready_root_id"]==13
     assert leaf["was_child_propagated"] is False
+    assert _canonical_root_keys({13:{"t":0}})=={"13":{"t":0}}
+    assert _canonical_root_keys({"13":95.0})=={"13":95.0}
+    try:_canonical_root_keys({13:95.0,"13":95.0})
+    except FullRootStateError:pass
+    else:raise AssertionError("ALIAS_ROOT_ID_ACCEPTED")
     import copy
     for bad in ("source_action","source_row_sha256","return_kind"):
         wrong=copy.deepcopy(sample)
@@ -275,7 +296,7 @@ def selftest()->dict:
         except FullRootStateError:pass
         else:raise AssertionError("SOURCE_ROOT_LEAF_TAMPER_NOT_REJECTED")
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":5,"native_CPP_rebuilt":False,
+            "checks":8,"native_CPP_rebuilt":False,
             "independent_full_READY_proven":0,"WCL_API_calls":0}
 
 
