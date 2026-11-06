@@ -453,7 +453,7 @@ def selftest()->dict:
                "source_init_stage":"FOREGROUND_MEMBER_AT_INIT",
                "simc_NATIVE_return_post_comparator":True}]}
     example={"return_kind":"CHILD_PROPAGATED","source_action":"arcane_orb",
-             "source_row_sha256":row,"source_ordinal":1,
+             "source_row_sha256":row,"source_ordinal":1,"source_row_ordinal":1,
              "source_list":"cooldowns"}
     source=dict(example,simc_ms=0,source_row_ordinal=1)
     evidence=_unique_leaf({1:top,2:child},{1:[2]},1,example,source)
