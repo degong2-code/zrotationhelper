@@ -1,0 +1,109 @@
+name: ZRot Original Arcane Orb Chosen vs Prior Source Candidates
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/research/general_rotation_arcane_orb_selected_priority_context_v1.py
+      - .github/workflows/zrot-general-rotation-arcane-orb-source-priority-context-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-competitor-proof:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python }}"
+      - name: Source-only synthetic code and rejected provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_arcane_orb_selected_priority_context_v1.py
+          python -B tools/research/general_rotation_arcane_orb_selected_priority_context_v1.py > /tmp/orb-priority-synthetic.json
+          python - <<'PY'
+          import json
+          s=json.load(open('/tmp/orb-priority-synthetic.json'))
+          assert s['schema']=='ZrotArcaneOrbOriginalNativeSelectedPriorityContextV1'
+          assert s['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert s['independent_FULL_READY_proven']==0
+          assert s['WCL_API_calls']==0
+          print('SOURCE_PRIORITY_ORB_SYNTHETIC_PASS')
+          PY
+      - name: Retrieve only verified existing original Native C++ evidence
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42174427587
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          name: zrot-general-rotation-generic-select-pre-two-spec-receipts
+          path: /tmp/zrot-original
+      - name: Compose chosen Orb vs prior original C++ candidate reasons
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_arcane_orb_selected_priority_context_v1.py \
+            --original-native-artifact-directory /tmp/zrot-original \
+            --out /tmp/zrot-arcane-orb-chosen-vs-earlier-source.json
+          python - <<'PY'
+          import copy,json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_arcane_orb_selected_priority_context_v1 import (
+            compose,_read_verified,ArcanePriorityContextError)
+          res=json.load(open('/tmp/zrot-arcane-orb-chosen-vs-earlier-source.json'))
+          assert res['totals']['original_source_selected_arcane_orb']==4
+          assert res['totals']['earlier_arcane_orb_original_APL_IF_FALSE']==2
+          assert res['totals']['earlier_physical_candidates_native_false']==10
+          assert res['full_competitor_READY_proven']==0
+          for case in ('st','2t'):
+              x=res['cases'][case]
+              assert x['source_order_is_observed_not_optimality'] is True
+              assert x['native_POST_false_not_independent_full_NOT_READY'] is True
+              for selection in x['selected_actions']:
+                  assert selection['original_ready_selected_causal_order_proven']
+                  assert selection['independent_prior_physical_NOT_READY_proven'] is False
+                  print('NATIVE_ORB_SOURCE_COMPETITOR',case,
+                    selection['simc_ms'],selection['selected_source_list'],
+                    selection['selected_source_row_ordinal'],
+                    [(p['earlier_source_action'],p['earlier_source_ordinal'],
+                      p['earlier_source_branch_actual'])
+                      for p in selection['source_earlier_candidates']],flush=True)
+          # A forged earlier POST=true must not be silently certified as
+          # unavailable, even if the source ordinal is lower.
+          original=Path('/tmp/zrot-original')
+          temporal,chosen,gates=_read_verified(original,'2t')
+          for name,modifier in (
+              ('TRUE_INSTEAD_OF_EARLIER_FALSE',lambda t,c,g: t[
+                'observed_time_scoped_selection_frontiers'][0].__setitem__(
+                 'source_list','FORGED')),
+              ('FORGED_SELECTED_CPP_ROOT',lambda t,c,g:c[
+                'source_selected_rows'][0].__setitem__('selected_CPP_ready_root_id',-1)),
+              ('FALSE_SELECTED_ACTION_STAGE',lambda t,c,g:g[
+                'original_arcane_orb_ready_roots'][0].__setitem__(
+                  'original_CXX_action_ready_return_stage','ACTION_APL_IF_FALSE')),
+          ):
+              t,c,g=copy.deepcopy((temporal,chosen,gates))
+              modifier(t,c,g)
+              try:compose(t,c,g)
+              except ArcanePriorityContextError:print('SOURCE_PRIORITY_NEGATIVE_REJECTED',name)
+              else:
+                  # Modified data might affect a different source event; a
+                  # mutation test must target an observed causal constraint.
+                  raise AssertionError('TAMPER_ACCEPTED:'+name)
+          print('ORIGINAL_CPP_OBSERVED_PRIOR_CHOICE_REASON_PASS')
+          PY
+          sha256sum /tmp/zrot-arcane-orb-chosen-vs-earlier-source.json
+      - uses: actions/upload-artifact@v4
+        if: matrix.python == '3.12'
+        with:
+          name: zrot-arcane-orb-source-chosen-prior-candidates
+          path: /tmp/zrot-arcane-orb-chosen-vs-earlier-source.json
+          retention-days: 7
+          if-no-files-found: error
