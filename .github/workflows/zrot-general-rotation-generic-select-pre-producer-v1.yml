@@ -27,6 +27,8 @@ on:
       - tools/research/general_rotation_arcane_orb_native_ready_stage_replay_v1.py
       - tools/research/general_rotation_arcane_orb_spec_state_pre_producer_v1.py
       - tools/research/general_rotation_arcane_orb_spec_state_pre_replay_v1.py
+      - tools/research/general_rotation_arcane_competitor_native_route_producer_v1.py
+      - tools/research/general_rotation_arcane_competitor_native_route_replay_v1.py
       - tools/research/general_rotation_original_selection_return_producer_v1.py
       - tools/research/general_rotation_original_selection_return_replay_v1.py
       - tools/research/general_rotation_original_root_if_bridge_v1.py
@@ -139,6 +141,19 @@ jobs:
           PY
           python -m py_compile tools/research/general_rotation_arcane_orb_native_ready_stage_producer_v1.py tools/research/general_rotation_arcane_orb_native_ready_stage_replay_v1.py
           python -m py_compile tools/research/general_rotation_arcane_orb_spec_state_pre_producer_v1.py tools/research/general_rotation_arcane_orb_spec_state_pre_replay_v1.py
+          python -m py_compile tools/research/general_rotation_arcane_competitor_native_route_producer_v1.py tools/research/general_rotation_arcane_competitor_native_route_replay_v1.py
+          python -B tools/research/general_rotation_arcane_competitor_native_route_producer_v1.py >/tmp/zrot-comp-producer-selftest.json
+          python -B tools/research/general_rotation_arcane_competitor_native_route_replay_v1.py >/tmp/zrot-comp-replay-selftest.json
+          python - <<'PY'
+          import json
+          for f,schem in [
+            ('/tmp/zrot-comp-producer-selftest.json','ZrotOriginalArcaneRivalNativeCXXReturnSourceProducerV1'),
+            ('/tmp/zrot-comp-replay-selftest.json','ZrotOriginalArcaneThreeCompetitorNativeExactReadyRouteV1')]:
+            s=json.load(open(f))
+            assert s['schema']==schem and s['status']=='PASS_OFFLINE_SYNTHETIC'
+            assert s['WCL_API_calls']==0
+          print('ORIGINAL_ARCANE_COMPETITORS_NATIVE_STAGE_SYNTHETIC_PASS')
+          PY
           python -B tools/research/general_rotation_arcane_orb_spec_state_pre_producer_v1.py >/tmp/zrot-orb-spec-pre-synthetic.json
           python -B tools/research/general_rotation_arcane_orb_spec_state_pre_replay_v1.py >/tmp/zrot-orb-spec-ast-synthetic.json
           python - <<'PY'
@@ -641,6 +656,25 @@ jobs:
           assert p['additional_const_charges_fractional_calls_per_orb_root']==1
           assert len(p['source_pre_field_names'])==11
           print('ORIGINAL_ARCANE_ORB_CLASS_SPEC_PRE_SOURCE_PATCH_PASS')
+          PY
+      - name: Trace original Arcane rival READY branch source and passive specialization guard PRE
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_arcane_competitor_native_route_producer_v1.py \
+            --simc-root simc-upstream \
+            --prior-native-orb-stage-receipt /tmp/zrot-arcane-orb-ready-stage-producer.json \
+            --prior-native-orb-spec-receipt /tmp/zrot-arcane-spec-state-pre-producer.json \
+            --out /tmp/zrot-arcane-rivals-native-stage-producer.json
+          python - <<'PY'
+          import json
+          v=json.load(open('/tmp/zrot-arcane-rivals-native-stage-producer.json'))
+          assert v['schema']=='ZrotOriginalArcaneRivalNativeCXXReturnSourceProducerV1'
+          assert v['added_action_READY_calls']==0 and v['added_RNG_calls']==0
+          assert v['added_cost_affordable_calls']==0 and v['added_target_selection_calls']==0
+          assert v['extra_read_only_buff_check_PER_derived_READY']==1
+          assert v['sources']==['prismatic_bolt','arcane_barrage','arcane_missiles']
+          print('ORIGINAL_RIVAL_CPP_READY_AND_SPEC_SOURCE_PATCH_PASS')
           PY
       - name: Instrument exact original select_action source return paths
         shell: bash
@@ -1427,6 +1461,35 @@ jobs:
           print('ACTUAL_ARCANE_ORB_SOURCED_SPEC_STATE_IF_PASS',flush=True)
           PY
           sha256sum /tmp/zrot-arcane-orb-spec-pre-*.json
+      - name: Replay actual prior 2T Arcane physical competitor C++ READY and specialization guard failures
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_arcane_competitor_native_route_replay_v1.py \
+            --native-log /tmp/zrot-instrumented-arcane-2t/simc_native_log.txt \
+            --temporal /tmp/zrot-source-temporal-frontier-arcane-2t.json \
+            --producer /tmp/zrot-arcane-rivals-native-stage-producer.json \
+            --out /tmp/zrot-arcane-rival-2t-original-ready-branches.json
+          python - <<'PY'
+          import json
+          j=json.load(open('/tmp/zrot-arcane-rival-2t-original-ready-branches.json'))
+          assert j['schema']=='ZrotOriginalArcaneThreeCompetitorNativeExactReadyRouteV1'
+          assert j['source_original_CPP_actual_branch_return_executed']
+          assert j['entire_general_rotation_priority_optimality_proven'] is False
+          assert j['WCL_independent_blind_holdout_executed'] is False
+          assert j['original_CPP_NEW_READY_COST_RNG_calls']==0
+          assert len(j['two_target_arcane_orb_source_prior_competitors'])==2
+          for decision in j['two_target_arcane_orb_source_prior_competitors']:
+             print('NATIVE_CXX_PRIOR_PHYSICAL_READY',decision['at_simc_ms'],
+               [(r['source_action'],r['source_root_id'],
+                 r['original_class_ready_return_stage'],
+                 r['original_action_ready_return_stage'],
+                 r['exact_original_cpp_class_PRE'],
+                 r['local_derived_ready_guard_FALSE_proven_independently'])
+                for r in decision['source_prior_4_non_orb_candidate_original_CPP_root_evidence']],flush=True)
+          print('ACTUAL_CPP_PRIOR_COMPETITOR_READY_RETURN_PROVEN',j['counts'],flush=True)
+          PY
+          sha256sum /tmp/zrot-arcane-rival-2t-original-ready-branches.json
       - name: Preserve compact safe receipts only (never raw actor logs)
         uses: actions/upload-artifact@v4
         if: success()
@@ -1450,6 +1513,8 @@ jobs:
             /tmp/zrot-arcane-orb-exact-spec-pre-st.json
             /tmp/zrot-arcane-orb-exact-spec-pre-2t.json
             /tmp/zrot-arcane-orb-spec-pre-ST2T-summary.json
+            /tmp/zrot-arcane-rivals-native-stage-producer.json
+            /tmp/zrot-arcane-rival-2t-original-ready-branches.json
             /tmp/zrot-original-arcane-ready-stage-summary.json
             /tmp/zrot-original-arcane-ready-stage-st.json
             /tmp/zrot-original-arcane-ready-stage-2t.json
