@@ -1,0 +1,112 @@
+{
+  "schema": "ZrotBranchSelectedLeafPREStateSourceAdapterReceiptV1",
+  "date": "2026-11-06",
+  "scope_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "branch_only": true,
+  "verified_actual_workflow": {
+    "run_id": 42152415986,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42152415986",
+    "python_312_compile_and_synthetic": "PASS",
+    "python_314_compile_and_synthetic": "PASS",
+    "reused_original_cpp_nested_source_and_exact_PRE": "PASS",
+    "tamper_scenarios_rejected": 5,
+    "SimC_CXX_recompiled_this_run": false,
+    "WoW_client_executed": false,
+    "WCL_API_calls": 0
+  },
+  "implementation": {
+    "generic_engine": "tools/research/general_rotation_original_selected_root_state_join_v1.py",
+    "generic_final_verified_commit": "7ff090df7ae5c243d97563bf9445c23ec92c2c05",
+    "source_mechanic_SpecAdapter": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SPEC_ADAPTER_ARCANE_ORB_SOURCE_OBLIGATIONS_20261106.json",
+    "adapter_source_cpp": "engine/class_modules/sc_mage.cpp",
+    "adapter_source_CPP_blob_sha1": "306d835f2db5f7418da221ce155d32e81c53f45c",
+    "adapter_source_CPP_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "retained_pristine_selection_artifact_id": 13467582601,
+    "retained_pristine_selection_zip_sha256": "b347132dd935d4b9c5a9b5aea7357cda588deed92f222d418c6407eb3235b901",
+    "individual_original_JSON_member_pins": 12,
+    "original_native_artifact_run_id": 42140591685,
+    "integrated_opener_source_run_id": 42149094904,
+    "client_policy_contract": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/RETAIL_ADDON_POLICY_CAPABILITY_GATE_20261106.md"
+  },
+  "verified_counts": {
+    "original_abl_select_sweeps_reused": 2121,
+    "original_top_level_returned_actions": 262,
+    "early_original_source_returns_with_exhaustive_nested_to_leaf_resolution": 64,
+    "direct_leaf_returns": 34,
+    "nested_leaf_returns": 30,
+    "earlier_root_source_return_rows_not_retained": 198,
+    "same_cpp_ready_root_exact_source_active_enemies_PRE": 9,
+    "same_cpp_ready_root_PRE_distribution": {
+      "fury-st": [
+        [
+          "charge",
+          1
+        ],
+        [
+          "run_action_list",
+          1
+        ],
+        [
+          "potion",
+          1
+        ]
+      ],
+      "fury-2t": [
+        [
+          "charge",
+          2
+        ],
+        [
+          "run_action_list",
+          2
+        ]
+      ],
+      "arcane-st": [
+        [
+          "potion",
+          1
+        ],
+        [
+          "arcane_orb",
+          1
+        ]
+      ],
+      "arcane-2t": [
+        [
+          "potion",
+          2
+        ],
+        [
+          "arcane_orb",
+          2
+        ]
+      ]
+    },
+    "pinned_arcane_orb_mechanic_source_adapter_records": 3,
+    "source_complete_selected_physical_READY_proven": 0,
+    "source_complete_earlier_physical_NOT_READY_proven": 0,
+    "user_dummy_mistake_verdict_permitted": false
+  },
+  "latest_compact_artifact": {
+    "id": 13473415672,
+    "name": "zrot-original-native-selected-leaf-root-state-arcane-orb",
+    "sha256_zip": "aa1318314a8a2041b2abf9c9bab261263c5bc9d6f08718a1b985a30bd631f6c1",
+    "expires_at_utc": "2026-11-13T02:46:36Z"
+  },
+  "evidence_interpretation": [
+    "All 64 bounded original SimC source-return examples were matched to one exact original ready root, including 30 nested CALL-propagated leaf branches; source row hash/list/ordinal/time and parent sweep chain are verified.",
+    "Only 9/64 selected exact-ready roots had retained PRE active_enemies samples. For remaining 55, same-root active_enemies is UNKNOWN despite target scenario being 1 or 2.",
+    "Source-matched arcane_orb execute/impact code provides event and possible effect types, not numerical, timing, cooldown, resource or talent-state validity. Generic engine stores no mage-specific readiness values or rules.",
+    "Existing general_rotation_decision_proof_engine_v1 uses an open GateContract. Inherited arcane_orb_t -> arcane_mage_spell_t -> mage_spell_t -> action_t ready route still not exhaustive; no positive skill READY proven.",
+    "Selected source action is not necessarily a performed player cast or keypress. Historical Hekili code or disallowed WoW Secret Values are not used.",
+    "SimC original same-clock PRE is based on C++ call order; WCL Strict PRE still requires transitions with timestamps < t and is never inferred from same-time markers."
+  ],
+  "next_exact": "Expand original CPP ready-root PRE to all 64 or selected high-impact executable leaf actions using a source-driven compact producer and pin complete native effect/readiness virtual call route for Arcane Orb, then integrate generic SpecAdapter StateSnapshot transition; no optimism if unavailable. Keep independent WCL blind discovery separate before causal priority claims.",
+  "current_user_product_goal": "ST/2-target/cleave/AoE General Rotation opener/IF-ELSE priority verified with WCL, then source-bounded own target-dummy practice feedback.",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
