@@ -32,7 +32,7 @@ NEXT_ANCHOR="struct arcane_barrage_t final : public arcane_mage_spell_t"
 METHOD_ANCHOR="\n  void execute() override\n"
 MARK="ZROT_ORIGINAL_ARCANE_ORB_SPEC_PRE_V1|"
 SYMBOLS=(
- "at_simc_ms","ready_root_id","talent.splintering_sorcery",
+ "at_simc_ms","ready_root_id","active_enemies","talent.splintering_sorcery",
  "talent.spellfire_spheres","talent.orb_mastery","talent.charged_orb",
  "buff.arcane_charge.stack","buff.arcane_surge.stack",
  "buff.arcane_salvo.stack","cooldown.arcane_orb.charges_fractional"
@@ -57,9 +57,9 @@ def _insert_ready(chunk:str)->str:
          "bool ready() override" not in chunk and
          MARK not in chunk and "arcane_mage_spell_t::ready()" not in chunk,
          "ORIGINAL_MAGE_ORB_VIRTUAL_READY_SHAPE_DRIFT")
-    # 10 source-PRE fields: 2 identities, 4 class talents, 3 buffs,
+    # 11 source-PRE fields: 2 identities, 1 target-count, 4 class talents, 3 buffs,
     # and 1 *const* cooldown fractional-charge getter.
-    fmt="|".join(["{}"]*9+["{:.17g}"])
+    fmt="|".join(["{}"]*10+["{:.17g}"])
     meth=(
         "\n  // zRotationHelper: source-pinned offline original-readiness PRE probe.\n"
         "  bool ready() override\n"
@@ -70,6 +70,7 @@ def _insert_ready(chunk:str)->str:
         '      sim->print_log( "'+MARK+fmt+'",\n'
         "        sim->current_time().total_millis(),\n"
         "        zrot_generic_call_scope_v1::current_root(),\n"
+        "        sim->active_enemies,\n"
         "        p()->talents.splintering_sorcery.ok() ? 1 : 0,\n"
         "        p()->talents.spellfire_spheres.ok() ? 1 : 0,\n"
         "        p()->talents.orb_mastery.ok() ? 1 : 0,\n"
