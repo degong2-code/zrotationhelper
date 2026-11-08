@@ -1,0 +1,23 @@
+# zRotationHelper — Branch-local continuation instructions (2026-11-09)
+
+This is a branch-local operational successor. **Do not edit or supersede** canonical `AGENTS.md`, shared architecture/semantic contract, MAIN pointers or immutable FROZEN. The latest user-approved policy remains `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`, policy SHA256 `157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295`. If any older roadmaps differ, latest user policy wins. Product is GENERAL ROTATION opener+IF/ELSE and target-dummy trainer, not encounter/raid/NSRT.
+
+## Every new chat: immutable first-response READ_ONLY gate
+
+1. Read `docs/PRODUCT_SCOPE_LOCK_V1.json`, `docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md`, `AGENTS.md`, `docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md`, `docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md` **in that order**.
+2. Read historical Gen3 and parent archive before accepting the current successor's chronology when necessary, then branch-local `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json`. Confirm complete `scope_continuity.policy_snapshot`, policy SHA256, generation + parent link, `read_first`, and branch owner.
+3. Directly query `degong2-code/zrotationhelper` branch `work/gr-simc-st-2t-wcl-blind-20261102` and `main` HEAD separately. Verify evidence/CI status in independent GitHub calls. Read `HANDOFF_STATUS_20261109.md`, index, developer notes and current worklog. Expired artifacts = EXTERNAL EVIDENCE AVAILABILITY, not a license to invent new success.
+4. In the **first response only** report the exact objective, actual HEAD/main, key evidence/limits, completed/incomplete, blockers, REUSE/EXTEND/REPLACE/UNKNOWN, short/medium/long roadmap, Product Exact Next, Session Exact Next, local user action.
+5. **STOP until the user explicitly sends a new '진행'.** Prior chat progress approvals are not inherited. Do NOT implement, edit code/docs, run tests, SimC/WCL/API, GitHub Actions, commit, PR, merge/promotion or collect new evidence until that message. Read-only restoration/inspection is allowed. First response final sentence exactly: `복원 보고를 완료했습니다. 사용자의 '진행' 지시를 기다립니다.`
+
+## After a new explicit '진행'
+
+- Before EVERY task search historical work records, feature-index, original code, real receipts; classify **REUSE / EXTEND / REPLACE / UNKNOWN** and **evidence shortfall / implementation gap / product-integration gap**. Prefer a new source-data E2E over restoration loops; reuse completion tests for identical contracts; batch truly independent work. Source parity and strict authentication matter more than PASS count.
+- Product self-check: Does this change make a cross-spec **Generic** opener/priority more accurate, or improve supported dummy practice error diagnosis? If it only adds another isolated Arcane Orb fact, require a high-impact reason; Generic engine must not hardcode spell/spec/boss semantics.
+- SimC-first overall, WCL numeric/structural blind discovery separately. Lock WCL candidate/threshold BEFORE injecting SimC meaning, then replay and reconcile. `state_at_action(t)` uses a latest valid transition timestamp strictly **< t**, never same-time/future. Missing READY/proc/resources → UNKNOWN. A source selected action is not proof of a player cast or globally optimal action.
+- Keep Hekili's `Core/Scripts/State/Classes` separation as **offline architectural inspiration** only; current Retail Blizzard policy forbids secret combat data tricks or unauthorized in-client combat solving. Real addon live API use requires official/current proof; otherwise use legitimate own-action recording and post-session analysis.
+- Only MAIN promotes canonical registries, CURRENT_STATE, shared architecture, active manifests, global `LATEST_HANDOFF.json`, FROZEN or production pointers. This branch may implement, validate, and propose merge. Preserve Seq578=FAILED_QUARANTINED, Seq637=UNKNOWN.
+- If producing executable `.py` deliverables: verify actual final file exists/nonempty, correct code/path, `py_compile`, self-test where applicable, focused regression, SHA256, delivered-byte equality, and actual file link. Distinguish synthetic/static/offline versus live SimC/WCL/client.
+- New chat tasks may update **branch-local** handoff and evidence only after explicit progress. Do not inflate source/hypothesis completion to validated gameplay output.
+
+See `HANDOFF_STATUS_20261109.md` for measured scope and Product/Session Exact Next.
