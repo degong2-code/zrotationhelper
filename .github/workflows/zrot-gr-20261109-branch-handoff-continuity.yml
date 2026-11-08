@@ -1,0 +1,61 @@
+name: ZRot General Rotation Branch Handoff Continuity (Scope Gen4)
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json
+      - _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN3_BEFORE_20261109.json
+      - .github/workflows/zrot-gr-20261109-branch-handoff-continuity.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reuse-existing-scope-validator:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Reuse product scope and five-hop continuity gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/governance/validate_scope_continuity_v1.py
+          python -B tools/governance/validate_scope_continuity_v1.py \
+            --validate --self-test \
+            --handoff _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json \
+            > /tmp/gr-handoff-scope-validation.json
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102')
+          child=json.loads((root/'LATEST_HANDOFF.json').read_bytes())
+          parent=(root/'archive/LATEST_HANDOFF_SCOPEGEN3_BEFORE_20261109.json').read_bytes()
+          old=json.loads(parent)
+          receipt=json.loads(Path('/tmp/gr-handoff-scope-validation.json').read_bytes())
+          assert receipt['result']=='PASS_SCOPE_CONTINUITY'
+          assert receipt['active_real_generation']==4
+          assert receipt['negative_cases_passed']==14
+          assert len(receipt['five_hop_simulation']['simulated_successor_hops'])==5
+          assert receipt['five_hop_simulation']['actual_handoffs_created']==0
+          assert old['scope_continuity']['generation']==3
+          assert child['scope_continuity']['generation']==4
+          assert hashlib.sha256(parent).hexdigest()==child['scope_continuity']['parent_handoff_sha256']
+          assert hashlib.sha256(parent).hexdigest()=='acfe285053e6ee9b4662cef9a475a7b321a4e281c8c65f67539acde84d45816f'
+          assert child['scope_continuity']['policy_snapshot']==old['scope_continuity']['policy_snapshot']
+          assert child['product_exact_next'].find('General Rotation')>=0
+          assert child['shared_authoritative_state_mutated'] is False
+          assert child['project_wide_FROZEN_changed'] is False
+          assert child['entry_gate']['user_explicit_progress_needed']=='진행'
+          assert child['entry_gate']['previous_chat_progress_approval_inherited'] is False
+          assert child['Seq578']=='FAILED_QUARANTINED' and child['Seq637']=='UNKNOWN'
+          print('GEN4_SCOPE_POLICY_PARENT_BYTE_SHA256_FIVE_HOP_READONLY_NEXT_CHAT_PASS')
+          PY
