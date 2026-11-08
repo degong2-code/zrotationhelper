@@ -642,7 +642,8 @@ def selftest():
     # This only replays synthetic source facts; not new original SimC proof.
     from simc_apl_semantic_ir_v2 import parse_profile,git_blob
     from general_rotation_simc_state_conditioned_evaluator_v1 import (
-        ADAPTER_GATE_BUNDLE_SCHEMA,POLICY,evaluate as evaluate_source_scan)
+        ADAPTER_GATE_BUNDLE_SCHEMA,POLICY,decode_adapter_gate_bundle,
+        evaluate as evaluate_source_scan)
     synthetic_profile=b"actions=alpha\n"
     profile_blob=git_blob(synthetic_profile)
     parsed=parse_profile(
@@ -662,11 +663,26 @@ def selftest():
                 "source_git_blob_sha1":profile_blob,
                 "decision_at_ms":20,"source_occurrence":0,
                 "candidates":[candidate]}
+    # Upstream verified raw-source replay can independently adjudicate
+    # necessary gates against a pinned APL row. The plain JSON API has no
+    # such producer authentication and MUST NOT use either false or true
+    # claims to select/skip an action.
+    mapping=decode_adapter_gate_bundle(
+        full_bundle(claim),parsed["action_lists"],
+        source_blob=profile_blob,at_ms=20,occurrence=0)
+    verified=next(iter(mapping.values()))
+    independently_replayed=decide_candidate(
+        verified.identity,verified.contract,verified.facts,
+        is_physical_action=True)
+    assert independently_replayed["decision"]==NOT_READY
     negative_replay=evaluate_source_scan(
         synthetic_profile,profile_blob,at_ms=20,
         external_strict_pre={},adapter_gate_bundle=full_bundle(claim))
+    assert negative_replay["result"]["status"]=="UNKNOWN"
     assert negative_replay["source_reason_ledger"][0][
-        "reason"]=="INDEPENDENT_NECESSARY_GATE_FALSE"
+        "ready_gate_blockers"]==[
+        "UNAUTHENTICATED_EXTERNAL_GATE_CLAIM_NOT_DECISION"]
+    assert negative_replay["reason_counts"].get("READY_FALSE",0)==0
     assert negative_replay["dummy_trainer_error_permitted"] is False
     positive_producer=NativeProofBridge(export_source_gate_claims=True)
     scoped_unknown=dict(nxt,source_sha256=source_row["source_sha256"])
@@ -717,7 +733,7 @@ def selftest():
     # not even expose Native ready as an accepted input.
     assert "native_ready" not in bridge.summary()["counts"]
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":33,"portable_adapter_round_trip":True,
+            "checks":36,"portable_adapter_round_trip":True,
              "portable_gates_positive_READY":0,
              "real_native":"NOT_RUN","WCL_API_calls":0}
 
