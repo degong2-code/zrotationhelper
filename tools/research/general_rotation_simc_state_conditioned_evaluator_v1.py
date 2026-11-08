@@ -55,7 +55,7 @@ def evaluate(raw:bytes,expected_git_blob:str, *,
              occurrence:int=0,
              max_rows:int=400)->dict:
     """One bounded original APL source selection scan; no future state prediction."""
-    must(type(at_ms) is int and at_ms>0 and
+    must(type(at_ms) is int and at_ms>=0 and
          type(occurrence) is int and occurrence>=0 and
          type(max_rows) is int and 0<max_rows<=10000,
          "SOURCE_EVALUATION_TIME_OR_BUDGET_INVALID")
@@ -152,7 +152,7 @@ def evaluate(raw:bytes,expected_git_blob:str, *,
                 "source_missing_operand_names":missing,
                 "readiness":None,
                 "reason":None,
-                "readiness_independently_verified":False,
+                "ready_gate_contract_result_not_global_native_verification":False,
                 "user_cast_or_rotation_optimality_proven":False,
             }
             ledger.append(record)
@@ -230,7 +230,7 @@ def evaluate(raw:bytes,expected_git_blob:str, *,
             status,why=ready_for(name,row)
             record["readiness"]=status
             record["ready_gate_blockers"]=why
-            record["readiness_independently_verified"]=status!=UNKNOWN
+            record["ready_gate_contract_result_not_global_native_verification"]=status!=UNKNOWN
             if status==NOT_READY:
                 record["reason"]="INDEPENDENT_NECESSARY_GATE_FALSE"
                 counts["READY_FALSE"]+=1
@@ -334,6 +334,20 @@ def selftest()->dict:
     assert run["result"]["status"]=="SYNTHETIC_QUEUED_RUN_CONTROL_NOT_SPELL"
     assert run["result"]["target_list_executed_now"] is False
     assert run["result"]["actual_native_execute_event_proven"] is False
+    # Opener action at t=0: only PRE from t<0 is admissible.
+    opener=evaluate(source,blob,at_ms=0,
+        external_strict_pre={
+            "active_enemies":{"value":2,"timestamp":-1,
+             "provenance":"STRICT_PRE_OBSERVATION","receipt":"SYNTHETIC_NEGATIVE_PRE"}})
+    assert opener["result"]["status"]=="UNKNOWN"
+    assert opener["decision_at_ms"]==0
+    try:
+        evaluate(source,blob,at_ms=0,
+            external_strict_pre={
+              "active_enemies":{"value":2,"timestamp":0,
+               "provenance":"STRICT_PRE_OBSERVATION","receipt":"SYNTHETIC_SAME_T"}})
+    except StateConditionedError:pass
+    else:raise AssertionError("OPENER_SAME_TIMESTAMP_STATE_LEAKAGE")
     for fake in (
        {"rage":{"value":40,"timestamp":100,
                 "provenance":"STRICT_PRE_OBSERVATION","receipt":"x"}},
@@ -357,7 +371,7 @@ def selftest()->dict:
     else:raise AssertionError("PHYSICAL_ACTION_LAUNDERED_AS_CONTROL")
     return {
         "schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-        "checks":12,"source_variables_work_after_STRICT_PRE_projection":True,
+        "checks":14,"source_variables_work_after_STRICT_PRE_projection":True,
         "source_CALL_RUN_distinct_without_native_promotion":True,
         "actual_CPP_or_WCL_executed":False,"WCL_API_calls":0
     }
