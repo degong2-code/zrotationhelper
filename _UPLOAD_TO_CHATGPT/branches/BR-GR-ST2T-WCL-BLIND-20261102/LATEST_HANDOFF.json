@@ -1,17 +1,11 @@
 {
-  "schema": "ZrotGeneralRotationEngineFirstHandoffV4",
-  "version": 4,
+  "schema": "ZrotGeneralRotationEngineFirstHandoffV5",
+  "version": 5,
+  "date": "2026-11-09",
+  "actual_new_chat_handoff": true,
   "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
   "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
-  "date": "2026-11-05",
-  "actual_new_chat_handoff": true,
-  "upstream_branch": "work/gr-native-simc-smoke-20261102",
-  "research_head_before_handoff_commit": "5e883b990248cc4a4eb15e481990316ad951620a",
-  "verified_code_head": "d4358213e451194e1a78d3d29292857e8f7125e2",
-  "main_head_observed_read_only": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
-  "actual_head_after_handoff": "MUST_REQUERY_LIVE_GITHUB_REF",
-  "previous_latest_handoff_archived_at": "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_GEN2_20261104.json",
-  "previous_latest_handoff_sha256": "27de47a8490df2cff98398536527973fc156857602f06db652b9715caf7c2f77",
+  "repository": "degong2-code/zrotationhelper",
   "scope_continuity": {
     "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
     "policy_git_blob_sha1": "14b9f5174a9d1652a56dcca03af1f2302b78c22d",
@@ -117,213 +111,202 @@
         "FROZEN_EVIDENCE_NOT_REWRITTEN"
       ]
     },
-    "generation": 3,
-    "parent_handoff_sha256": "27de47a8490df2cff98398536527973fc156857602f06db652b9715caf7c2f77",
-    "carried_forward_at": "2026-11-05",
+    "generation": 4,
+    "parent_handoff_sha256": "acfe285053e6ee9b4662cef9a475a7b321a4e281c8c65f67539acde84d45816f",
+    "carried_forward_at": "2026-11-09",
     "scope_override": false,
     "new_user_scope_override_evidence": null
   },
-  "product_exact_next": "Complete a reusable Generic General Rotation opener and stateful conditional ST/2-target/cleave/AoE decision engine by proving actual positive source-pinned skill readiness and source-order selection, then independently reconcile locked WCL behavior and Blizzard mechanics and reuse the verified IR for evidence-bounded target-dummy feedback.",
-  "chat_exact_next": "READ_ONLY_RESTORE_REPORT_THEN_STOP. Requery GitHub actual HEAD and MAIN, policy SHA256/blob and full snapshot, archive parent SHA256, latest source join CI and raw JSON, compare 953 source IF and earlier distinct 477 cohort, confirm 0 full READY, report roadmap. Wait for fresh user '진행'. No code/docs changes, tests, API collection, Actions, commit, PR or promotion.",
-  "session_exact_next_after_explicit_progress": "Use the new generic state-conditioned evaluator for evidence-backed virtual method READY and source variable lifetime across scans (not another per-spell-only tool): implement class-neutral SpecAdapter source-fact/gate contract integration from pinned original SimC method PRE and actual execute transitions, trace CALL/RUN control with source scheduling truth, reproduce at least one real positive original CPP selection per Fury and Arcane without using Native selected POST as READY input. Keep missing facts UNKNOWN. Then independent WCL blind candidate lock and holdout, General Rotation opener IF/ELSE model ST/2T/cleave/AoE and policy-safe dummy evaluator. Do not promote MAIN or FROZEN.",
-  "entry_gate": {
-    "mode": "READ_ONLY_RESTORE_REPORT_THEN_STOP",
-    "requires_user_explicit_progress": "진행",
-    "until_progress_forbidden": [
-      "code and document modifications",
-      "commit, push, PR or promotion",
-      "Python/native SimC/tests",
-      "new WCL/API data collection",
-      "GitHub Actions dispatch or rerun",
-      "WoW addon execution"
-    ],
-    "allowed": [
-      "read-only GitHub/source/CI/artifact inspection",
-      "independently verified state and roadmap report"
-    ],
-    "first_reply_must_end": "복원 보고를 완료했습니다. 사용자의 '진행' 지시를 기다립니다."
+  "product_exact_next": "Finish reusable General Rotation opener and state-conditioned IF/ELSE priority engine for ST, 2-target, cleave, AoE and builds: source-complete independent READY and transition truth across two distinct specs, independent WCL blind candidate-lock/holdout and mechanic reconciliation, then lightweight evidence-bounded target-dummy practice corrections. UNKNOWN remains UNKNOWN.",
+  "chat_exact_next": "READ_ONLY_RESTORE_REPORT_THEN_STOP. Independently requery GitHub branch and main HEAD, policy bytes and full snapshot, parent handoff SHA256, current Status/Index/notes/code/CI. Report verified completed vs incomplete, blockers, REUSE/EXTEND/REPLACE/UNKNOWN, short/medium/long roadmap, Product and Session Exact Next. DO NOT develop, run tests, SimC/WCL/API, Actions, commit, PR or promote until the new chat receives fresh user '진행'.",
+  "session_exact_next_after_explicit_progress": "AFTER a NEW explicit user '진행': FIRST REUSE existing parser/172 rows/262 Native source-root returns, generic one-scan Strict PRE evaluator and GateContract; extend a class-neutral SpecAdapter and original source-gate/effect evidence so it independently predicts one positive physical READY and preceding priority exclusions for EACH of Fury and Arcane without feeding Native POST result as truth. Prove actual CALL/RUN and APL variable carry across scans; use focused source-pinned E2E, then independent WCL blind lock/holdout. Never revive per-spell-only critical path.",
+  "branch_head_before_handoff_commits": "8964eca590390ee93427fc41523b12a0b7f120c8",
+  "verified_last_engine_code_commit": "18ee1f4c475a0da6dbe23ea41c4777f94816ee37",
+  "main_head_observed_read_only": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
+  "actual_branch_head_after_latest_handoff": "MUST_REQUERY_LIVE_GITHUB_REF",
+  "previous_handoff_original_blob_sha1": "05a9c5d65a1120e82d052dc07c3f5bf6c844059b",
+  "previous_handoff_byte_sha256": "acfe285053e6ee9b4662cef9a475a7b321a4e281c8c65f67539acde84d45816f",
+  "previous_handoff_archive": "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN3_BEFORE_20261109.json",
+  "previous_handoff_generation": 3,
+  "previous_handoff_schema": "ZrotGeneralRotationEngineFirstHandoffV4",
+  "previous_handoff_version": 4,
+  "archived_historical_parent_references": {
+    "prior_scope_generation2_archive": "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_GEN2_20261104.json",
+    "prior_scope_generation2_SHA256": "27de47a8490df2cff98398536527973fc156857602f06db652b9715caf7c2f77",
+    "original_gen4_user_portable": "zRotationHelper_Gen4_Handoff_20261105.zip (historical user-uploaded; not authoritative against live GitHub)"
   },
-  "engine_first_contract": {
-    "objective": "REUSABLE_GENERAL_ROTATION_RESEARCH_AND_VALIDATION_ENGINE_NOT_INDIVIDUAL_SPEC_FEATURE",
-    "pre_task_search": "historical dev logs -> latest feature index -> source/real code -> actual receipts FIRST",
-    "reuse_policy": "REUSE/EXTEND/REPLACE/UNKNOWN classify and preserve original evidence",
-    "efficiency": "batch independent work, reuse identical test criteria and prior receipts; Native rerun only when new source facts or different spec needs it",
-    "truth": "no CI pass count as scientific completion; UNKNOWN is not FAIL; no Native comparator as independent proof; separate insufficient evidence and integration gap",
-    "strict_pre": "state_at_action(t)=latest valid event with timestamp < t; no same/future leakage",
-    "blind": "separate WCL discovery before candidate lock, SimC overall first",
-    "no_generic_spec_hardcode": true
-  },
-  "current_state": {
-    "latest_real_github_head": "5e883b990248cc4a4eb15e481990316ad951620a",
-    "verified_code_head": "d4358213e451194e1a78d3d29292857e8f7125e2",
-    "main_head_observed_read_only": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
-    "source_compiler": {
-      "status": "REAL_OFFICIAL_TWO_CLASS_SOURCE_ONLY",
-      "fury_action_rows": 121,
-      "mage_arcane_action_rows": 51,
-      "validated_scenario": "SOURCE_IR_AST_NOT_NATIVE_MAGE_READY",
-      "runs": [
-        41799789205,
-        41935516360
-      ]
-    },
-    "general_rotation_source_ir": {
-      "status": "SOURCE_HYPOTHESIS_WITH_BOUNDED_EVALUATOR_REUSE",
-      "action_rows": 172,
-      "positive_native_ready": 0,
-      "actual_opener_cast_sequence": "UNKNOWN",
-      "validated_priority": "NOT_VALIDATED"
-    },
-    "native_source_if_to_ir_join": {
-      "status": "ACTUAL_PORTABLE_SOURCE_PRE_IF_PARTIAL_INDEPENDENT",
-      "actual_simc_ready_attempts": 5408,
-      "source_if_evaluations": 953,
-      "independently_true": 282,
-      "independently_false": 657,
-      "unknown": 14,
-      "independently_decidable": 939,
-      "run": 41938527598,
-      "receipt_sha256": "ac18255a0570e53968d97007f75a3d16333d64df1d66036c656b7d52070ae93c",
-      "full_ready_claim": false
-    },
-    "native_ready_and_priority": {
-      "status": "NECESSARY_NEGATIVES_ONLY",
-      "attempts": 5408,
-      "independent_not_ready": 2313,
-      "unknown": 3095,
-      "full_ready": 0,
-      "source_returned_roots": 387,
-      "apl_controls": 213,
-      "executable_source_returns": 174,
-      "fully_excluded_prior_but_winner_unknown": 79,
-      "run": 41794691821
-    },
-    "historical_native_if_477": {
-      "status": "DISTINCT_EARLIER_COHORT",
-      "decidable": 66,
-      "unknown": 411,
-      "run": 41584822737,
-      "never_combine_with_953_cohort": true
-    },
-    "source_fixture": {
-      "raw_bytes": 8432350,
-      "compressed_bytes": 470328,
-      "semantic_replay_parity": "BASE_AND_POSTGUARD_EQUAL_ONLY",
-      "run": 41797208028,
-      "manifest_sha256": "44ac4316dcd718a42057832b45f6b6c746f8487462589a4513d177a38d16878a"
-    },
-    "strict_PRE_state": {
-      "status": "SYNTHETIC_GATE_PASS_ONLY",
-      "run": 41796021165,
-      "live_WCL_source_producer": "NOT_VALIDATED"
-    },
-    "existing_WCL": {
-      "status": "DISCOVERY_AND_DISJOINT_HOLDOUT_COLLECTED_BUT_NOT_ROTATION_VALIDATED",
-      "discovery_casts": 54,
-      "holdout_casts": 51,
-      "run_discovery": 41463589665,
-      "run_holdout": 41473060401
-    },
-    "actual_Mage_native_ready": "NOT_RUN",
-    "validated_general_rotation_opener_and_conditional_model": false,
-    "validated_dummy_error_feedback": false,
-    "actual_Retail_addon_client_test": "NOT_RUN"
-  },
-  "evidence_index": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md",
-  "current_compact_status": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_STATUS_20261105.md",
-  "active_engine_completion_contract": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SIMC_APL_MODEL_COMPLETION_CONTRACT_20261103.md",
-  "developer_notes": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/DEVELOPER_NOTES_20261105.md",
-  "worklog": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_PREPARATION_WORKLOG_20261105.md",
-  "new_chat_prompt": "handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_20261105.md",
   "read_first": [
     "docs/PRODUCT_SCOPE_LOCK_V1.json",
     "docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md",
     "AGENTS.md",
     "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md",
     "docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md",
+    "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_GEN2_20261104.json",
+    "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN3_BEFORE_20261109.json",
     "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_STATUS_20261105.md",
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_STATUS_20261109.md",
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_INSTRUCTIONS_20261109.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/DEVELOPER_NOTES_20261105.md",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_PREPARATION_WORKLOG_20261105.md",
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_PREPARATION_WORKLOG_20261109.md",
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SIMC_APL_MODEL_COMPLETION_CONTRACT_20261103.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_ARCHITECTURE_REFERENCE_20261106.md",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/RETAIL_ADDON_POLICY_CAPABILITY_GATE_20261106.md",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_CORE_STATE_INTEGRATION_AUDIT_20261106.md",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SPEC_ADAPTER_ARCANE_ORB_SOURCE_OBLIGATIONS_20261106.json",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/ARCANE_ORB_READY_SOURCE_WALK_20261106.md"
+    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/RETAIL_ADDON_POLICY_CAPABILITY_GATE_20261106.md"
   ],
-  "blocked_by": [
-    "No independently proven positive full virtual action_ready on actually selected executable candidate",
-    "Resource/proc/buff/replacement/target/execute/GCD complete gate producer for actual selected state remains UNKNOWN",
-    "Arcane Mage actual Native behavior and target-count/AoE thresholds not independently validated",
-    "Current IR not independently WCL-discovery-candidate locked and mechanic reconciled",
-    "Actual target dummy Retail API observation and feedback remains NOT_RUN"
-  ],
-  "evidence_vs_product_gap": {
+  "concise_current_status": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_STATUS_20261109.md",
+  "branch_operational_instructions": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_INSTRUCTIONS_20261109.md",
+  "feature_evidence_index": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md",
+  "developer_notes": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/DEVELOPER_NOTES_20261105.md",
+  "handoff_worklog": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_PREPARATION_WORKLOG_20261109.md",
+  "new_chat_prompt": "handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_20261109.md",
+  "evidence": {
+    "official_simc_source_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "source_hypothesis": {
+      "existing_components": [
+        "tools/research/simc_apl_semantic_ir_v2.py",
+        "tools/research/general_rotation_source_hypothesis_ir_v1.py",
+        "tools/research/general_rotation_simc_multi_spec_cold_start_v1.py"
+      ],
+      "newer_E2E": "tools/research/general_rotation_simc_e2e_research_engine_v1.py",
+      "one_profile_input": "tools/research/general_rotation_simc_single_profile_v1.py",
+      "run_id": 42195342553,
+      "run_result": "SUCCESS_CONFIRMED_BY_DIRECT_GITHUB_QUERY",
+      "source_APL_rows_total": 172,
+      "original_native_source_returns_reconciled": 262,
+      "class_count": 2,
+      "target_contexts": [
+        "Fury ST",
+        "Fury 2T",
+        "Arcane ST",
+        "Arcane 2T"
+      ],
+      "source_APL_to_native_exact_root_PRE": "BOUND_TO_PINNED_SOURCE_ROW",
+      "evidence_file": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_SOURCE_TO_CONDITIONAL_OPENER_E2E_20261106.json",
+      "full_ready_independent": false,
+      "real_player_casts_verified": false
+    },
+    "generic_state_conditioned": {
+      "code": "tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py",
+      "code_verified_commit": "18ee1f4c475a0da6dbe23ea41c4777f94816ee37",
+      "run_id": 42444206139,
+      "run_result": "SUCCESS_CONFIRMED_BY_DIRECT_GITHUB_QUERY",
+      "python_312_synthetic_15_checks": "SUCCESS",
+      "python_314_synthetic_15_checks": "SUCCESS",
+      "two_real_source_profiles": "FAIL_CLOSED_UNKNOWN_AS_EXPECTED",
+      "strict_PRE": "ONLY_EXTERNAL_TRANSITION_TIMESTAMP_LT_DECISION_TIME",
+      "source_local_variable_updates": "SINGLE_SCAN_SYNTHETIC_ONLY",
+      "gate_contract_independent_positive_full_ready": "NOT_PROVEN_ON_ACTUAL_NATIVE",
+      "CALL_RUN_real_native_semantics": "UNKNOWN_SYNTHETIC_ONLY",
+      "artifact_id": 13603106491,
+      "artifact_sha256": "1af8cec0847108765732410649739414e108b3d8a3cf6dabe9bd0a4d4c6f291e",
+      "artifact_expiry_utc": "2026-11-15T03:48:29Z",
+      "receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_STATE_CONDITIONED_EVALUATOR_20261108.json"
+    },
+    "previous_spec_proof_fixture": {
+      "mage_arcane_orb_native_ready_roots": 158,
+      "original_CPP_IF_AST_matched_when_CXX_evaluated": "73_OF_73",
+      "earlier_2t_source_rows_with_independent_local_or_IF_exclusion": "8_OF_10",
+      "earlier_barrage_remaining_independent_UNKNOWN": 2,
+      "source_priority_is_not_validated_gameplay": true
+    },
+    "WCL": {
+      "previous_discovery_casts": 54,
+      "previous_disjoint_holdout_casts": 51,
+      "discovery_run_id": 41463589665,
+      "holdout_run_id": 41473060401,
+      "prior_runs_success_directly_rechecked": true,
+      "WCL_candidate_lock_for_current_rotation_IR": "NOT_PROVEN",
+      "source_to_WCL_post_lock_reconciliation": "NOT_RUN",
+      "actual_live_WCL_calls_during_handoff": 0
+    },
+    "addon": {
+      "real_Retail_Client_API_capability_test": "NOT_RUN",
+      "actual_user_dummy_error_feedback": "NOT_READY",
+      "safe_behavior": "PERMITTED_OWN_ACTION_TELEMETRY_IF_OBSERVABLE_ELSE_POST_SESSION_OFFLINE_ANALYSIS",
+      "Hekili_source_influence": "OFFLINE_STATE_SCRIPTS_CORE_CLASSES_ARCHITECTURE_ONLY"
+    }
+  },
+  "blockers": {
     "missing_evidence": [
-      "full actual positive selected skill READY source path",
-      "real second-spec Native E2E",
-      "actual WCL independent state and candidate-lock/holdout for this IR",
-      "real target dummy addon observable state"
+      "True original independent positive virtual READY and preceding action exclusion for Fury and Arcane",
+      "Actual original source effects, APL variables across scans, CALL/RUN schedule and opener end",
+      "Multi-build and AoE target breakpoints",
+      "Independent WCL blind lock/holdout and Blizzard mechanic reconciliation",
+      "Actual Retail dummy own-cast/available state capability test"
     ],
-    "implementation_or_semantic_gap": [
-      "exhaustively audited virtual method gate registry with external review, no arbitrary closed=true",
-      "real source-opener and selected-action sequence equivalence across state",
-      "source target count and context behavioral model not complete"
+    "missing_implementation": [
+      "Generic external SpecAdapter with full ready hierarchy contract and verified source fact provenance",
+      "Deterministic source-state/variable/control transition replay across multiple action decisions",
+      "Evidence-tagged IR including alternatives, confidence and UNKNOWN for target transitions",
+      "Offline dummy actual-vs-expected evaluator + simple practice UI"
     ],
-    "missing_product_integration": [
-      "validated General Rotation opener+IF/ELSE priorities and reasons",
-      "post-lock WCL/Blizzard reconciliation",
-      "user own-action target dummy mistake reasoning and UI"
+    "missing_product_connection": [
+      "Valid General Rotation physical opener/conditional priorities",
+      "Source-to-WCL post-lock validation",
+      "Dummy actual action corrective feedback"
     ]
   },
-  "validation": {
-    "audit_mode": "READ_ONLY_GITHUB_AND_ARTIFACT_INSPECTION; NO_NEW_SIMC_OR_WCL_TESTS",
-    "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
-    "policy_git_blob_sha1": "14b9f5174a9d1652a56dcca03af1f2302b78c22d",
-    "prior_handoff_exact_bytes_sha256": "27de47a8490df2cff98398536527973fc156857602f06db652b9715caf7c2f77",
-    "latest_tested_commit": "d4358213e451194e1a78d3d29292857e8f7125e2",
-    "latest_successful_actions": [
-      41938527598,
-      41935516360,
-      41797208028,
-      41794691821,
-      41796021165,
-      41799789205
+  "reuse_decisions": {
+    "REUSE": [
+      "Existing generic SimC AST/parser and source graph",
+      "172 source APL rows, 262 exact original C++ source-return PRE",
+      "Strict PRE, Identity and GateContract proof evaluator and 15 synthetic tests",
+      "Previous Hekili module audit and addon policy gate",
+      "Previous 54+51 WCL cohorts as raw independent evidence"
     ],
-    "historical_independent_WCL_runs": [
-      41463589665,
-      41473060401
+    "EXTEND": [
+      "Source-pinned Generic SpecAdapter complete physical READY and execute transitions",
+      "CALL/RUN and local variable lifetime beyond one scan",
+      "Target count/build and multi-source validated General Rotation IR"
     ],
-    "prior_failures_retained": [
-      41938411129,
-      41935436081
-    ],
-    "latest_json_sha256": "ac18255a0570e53968d97007f75a3d16333d64df1d66036c656b7d52070ae93c",
-    "latest_artifact_id": 13374384181,
-    "latest_artifact_expires_utc": "2026-11-12T00:04:45Z",
-    "portable_input_artifact_id": 13306210922,
-    "portable_input_expires_utc": "2026-11-11T08:10:09Z",
-    "official_simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
-    "official_fury_profile_git_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
-    "official_mage_arcane_profile_git_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
-    "new_handoff_commit_scope_CI": "NOT_RUN_AT_FILE_CREATION; REQUERY_AFTER_COMMIT",
-    "five_hop_scope_simulation_new_handoff": "NOT_RUN_UNTIL_VERIFIED",
-    "standalone_new_handoff_parent_integrity": "GEN2_BYTES_ARCHIVED_AS_IS",
-    "no_live_WCL_or_SimC_during_handoff": true
+    "REPLACE": "Only an independently demonstrated blocking adapter or redundant source collector, never FROZEN proofs",
+    "UNKNOWN": [
+      "actual source-complete positive READY",
+      "opener end and optional simultaneous ability priority",
+      "independent WCL-confirmed rotation optimality",
+      "retail live in-combat state observability"
+    ]
   },
-  "previous_historical_statuses": [
-    "Seq578=FAILED_QUARANTINED",
-    "Seq637=UNKNOWN"
-  ],
-  "shared_authoritative_state_mutated": false,
-  "project_wide_FROZEN_changed": false,
-  "MAIN_promoted": false,
-  "Seq578": "FAILED_QUARANTINED",
-  "Seq637": "UNKNOWN",
-  "branch_status": "BRANCH_VALIDATED_SOURCE_PRE_IF_AND_HYPOTHESIS_IR_ONLY_NOT_GENERAL_ROTATION_PRODUCT_COMPLETE",
+  "execution_invariants": {
+    "source_research_overall": "SimC-first APL hypothesis; independent WCL blind discovery no SimC leakage until lock",
+    "Strict_PRE": "state_at_action(t)=latest valid transition with timestamp < t",
+    "native_CPP_source_return_not_independent_READY": true,
+    "no_generic_spec_hardcoding": true,
+    "cross_task_REUSE_EXTEND_REPLACE_UNKNOWN_first": true,
+    "determine_evidence_vs_implementation_vs_product_gap_first": true,
+    "independent_tasks_batch_and_identical_receipts_reused": true,
+    "code_delivery_py_compile_selftest_SHA_and_byte_identity_required": true,
+    "no_old_raid_or_encounter_product": true
+  },
+  "entry_gate": {
+    "mode": "READ_ONLY_RESTORE_REPORT_THEN_STOP",
+    "user_explicit_progress_needed": "진행",
+    "previous_chat_progress_approval_inherited": false,
+    "first_report_must_include": [
+      "policy",
+      "actual HEAD and MAIN",
+      "scope generation and parent archive",
+      "evidence strength and limits",
+      "completion vs gaps",
+      "engine efficiency and re-use",
+      "short medium long roadmap",
+      "Product Exact Next",
+      "Session Exact Next",
+      "current user action"
+    ],
+    "forbidden_until_explicit_progress": [
+      "code/docs modifications",
+      "tests",
+      "SimC/WCL/API collection or execution",
+      "GitHub Actions",
+      "commits",
+      "PR or merge",
+      "canonical promotion",
+      "WoW client execution"
+    ],
+    "exact_final_sentence": "복원 보고를 완료했습니다. 사용자의 '진행' 지시를 기다립니다."
+  },
   "out_of_scope": [
     "ENCOUNTER_SPECIFIC_ROTATION_PLAN",
     "RAID_EXECUTION_ASSISTANT",
@@ -331,589 +314,26 @@
     "RAID_TIMELINE_OR_BOSS_GUIDE_EXPORT",
     "PRODUCTION_READY_GAMEPLAY_CLAIM_WITHOUT_VALIDATION"
   ],
-  "unpromoted": [
-    "General Rotation opener and all-context conditional priority",
-    "independent full positive skill READY",
-    "WCL-verified source ordered priority",
-    "user target dummy mistake scoring",
-    "MAIN shared canonical registry, product pointers, global handoff and FROZEN"
-  ],
-  "no_simc_wcl_gameplay_source_calls_during_this_handoff": true,
-  "branch_local_addendum_20261106_heki_policy": {
-    "date": "2026-11-06",
-    "type": "NON_SCOPE_CHANGING_BRANCH_LOCAL_RESEARCH_ARCHITECTURE_AND_POLICY_REFERENCE",
-    "confirmed_user_request": "Persist Hekili architecture design and verified Blizzard addon constraints in the current short/long General Rotation and Dummy Trainer roadmap; reuse on subsequent handoffs.",
-    "product_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
-    "authority": "BRANCH_LOCAL_ONLY_MAIN_PROMOTION_REQUIRED",
-    "previous_handoff_version_and_chain_unchanged": true,
-    "mandatory_original_scope_read_first_unchanged": true,
-    "reference_documents": [
-      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_ARCHITECTURE_REFERENCE_20261106.md",
-      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/RETAIL_ADDON_POLICY_CAPABILITY_GATE_20261106.md",
-      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md"
-    ],
-    "hekili_source": {
-      "repo": "Hekili/hekili",
-      "branch": "thewarwithin",
-      "commit": "36daec382e6557fd57a263bbfb060856ef9fe9d8",
-      "usage": "OFFLINE_ARCHITECTURAL_REFERENCE_ONLY; OLD_WOW_11X_NOT_LIVE_COMPATIBLE",
-      "license_verification": "UNVERIFIED_IN_CURRENT_PINNED_TREE; NO_CODE_COPY"
-    },
-    "hekilight_user_zip": {
-      "file_name": "HekiLight-v0.7.0(1).zip",
-      "sha256": "d0c8af119de9d0ebd34b50bda11a24cbe4a8c4cbafd8b1e1f4c6de320315fc0d",
-      "usage": "BLIZZARD_ASSISTED_COMBAT_UI_REFERENCE_NOT_OWN_ROTATION",
-      "secret_exception_side_channel": "REJECTED"
-    },
-    "blizzard_source_tiers": {
-      "official_intent": [
-        "https://news.blizzard.com/en-us/article/24244638/how-midnights-upcoming-game-changes-will-impact-combat-addons",
-        "https://news.blizzard.com/en-us/article/24246290/combat-philosophy-and-addon-disarmament-in-midnight"
-      ],
-      "developer_notes_mirrored": [
-        "https://warcraft.wiki.gg/wiki/Patch_12.1.0/API_changes/notes",
-        "https://warcraft.wiki.gg/wiki/Patch_12.1.5/API_changes/notes"
-      ],
-      "historical_eight_point_addon_policy_mirrored_not_fresh_official_verified": "https://www.bluetracker.gg/wow/topic/us-en/24534-ui-add-on-development-policy/"
-    },
-    "actual_native_evidence_reused": {
-      "original_select_sweeps": 2121,
-      "top_level_source_row_returns": 262,
-      "original_IF_ast_native_matches": 209,
-      "independent_FULL_READY_proven": 0,
-      "run_id": 42140591685,
-      "source_commit": "ba0d490c18bf663b5972e9ea21db402c8446750f"
-    },
-    "present_status": "HISTORICAL_ARCHITECTURE_POLICY_REFERENCE_PLUS_EXECUTABLE_BOUND_OPENING_SOURCE_INTEGRATION_RECORDED",
-    "short_term_exact_next": "Completed bounded SourceDecisionReasonLedgerV1 for 64 original source returned root samples: 8 independently corroborated IF false on Fury2T run_action_list control, 298 native post false-only, 198 unsampled root returns. Next expand complete source return rows/child paths and prove real executable source ability READY/prior choice before WCL cross-check and dummy scoring.",
-    "medium_long_term_product_exact_next": "Extend validated Generic Rotation opener/conditional ST/2T/cleave/AoE across builds, WCL blind candidate lock and independent holdout, then evidence-bounded post-session dummy evaluation and minimal nonsecret opt-in recorder; any live behavior requires 12.1.5 client proof and current official API.",
-    "protected_runtime_no_go": [
-      "No in-client independent realtime combat decision automation",
-      "No protected actions or auto-target/cast",
-      "No secret-value inference via errors, visual state, timing, pcall or forbidden objects",
-      "No raw client memory or arbitrary file access",
-      "No unverified positive practice-error verdict"
-    ],
-    "validation": "SOURCE_RESEARCH_AND_GITHUB_DOCUMENT_UPDATE_ONLY; NO_NEW_LIVE_WOW_CLIENT_OR_WCL_PRODUCTION_VALIDATION",
-    "MAIN_promoted": false,
-    "product_scope_changed": false,
-    "previous_history_FROZEN_modified": false,
-    "Seq578": "FAILED_QUARANTINED",
-    "Seq637": "UNKNOWN"
-  },
-  "branch_local_execution_successor_20261106_source_reason": {
-    "kind": "POST_REFERENCE_IMPLEMENTATION_AND_VERIFICATION_BRANCH_ONLY",
-    "implementation": "tools/research/general_rotation_source_decision_reason_ledger_v1.py",
-    "code_commit": "8c241c39a9ba7694db10dc9441b977787eccf473",
-    "ci_workflow": ".github/workflows/zrot-source-decision-reason-ledger-v1.yml",
-    "ci_run_id": 42146818557,
-    "ci_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42146818557",
-    "ci_offline_python_312": "SUCCESS",
-    "ci_offline_python_314": "SUCCESS",
-    "ci_actual_prior_native_receipt_replay": "SUCCESS",
-    "original_cpp_rebuild_this_session": false,
-    "original_native_sweeps_replayed": 2121,
-    "original_root_returns": 262,
-    "root_return_replay_detail_bounded": 64,
-    "root_return_unsampled": 198,
-    "independently_proven_source_IF_false": 8,
-    "independently_proven_source_IF_false_are_control_only": "FURY_2T_RUN_ACTION_LIST",
-    "native_ready_false_post_only": 298,
-    "independent_full_action_ready_proven": 0,
-    "dummy_error_verdict_permitted": false,
-    "previous_CI_actual_native_run_id": 42140591685,
-    "current_artifact_id": 13470272367,
-    "current_artifact_zip_sha256": "c7d52afbce6ed190b7daf25332da6fcc86ad39e8870654d1d3f790e1b0873c05",
-    "evidence_path": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ORIGINAL_SOURCE_DECISION_REASON_LEDGER_20261106.json",
-    "roadmap_path": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md",
-    "exact_next": "Persist full per-source-return evidence with exact nested call chain and independently verify one real executable opener action READY/prior exclusion, then separate WCL blind candidate lock and user dummy evaluation.",
-    "main_promoted": false,
-    "shared_frozen_modified": false,
-    "status": "BOUNDED_EXPLANATION_ONLY_NOT_COMPLETE_GENERAL_ROTATION"
-  },
-  "branch_local_execution_successor_20261106_hekili_integrated_opener": {
-    "kind": "NON_SCOPE_CHANGING_BRANCH_LOCAL_IMPLEMENTATION_AND_VALIDATION",
-    "date": "2026-11-06",
-    "design_basis": "HEKILI_PINNED_CORE_SCRIPTS_STATE_CLASSES_SOURCE_ARCHITECTURE_ONLY_NOT_LIVE_ADDON_PORT",
-    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
-    "source_audit": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HEKILI_CORE_STATE_INTEGRATION_AUDIT_20261106.md",
-    "implemented_file": "tools/research/general_rotation_integrated_opener_research_v1.py",
-    "actual_implementation_commit": "cce19deb3ba40ebaa08fda1875e2f671d6d543c6",
-    "actual_final_workflow_code_commit": "854e40c4a68aac109b62182c7c5589907d91cd78",
-    "CI": {
-      "run_id": 42149094904,
-      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42149094904",
-      "Python_312": "SUCCESS",
-      "Python_314": "SUCCESS",
-      "original_native_receipt_four_case_integration": "SUCCESS",
-      "actual_provenance_mutations_rejected": 5,
-      "native_CPP_recompiled": false,
-      "WCL_API_called": false,
-      "WoW_game_client_run": false
-    },
-    "original_cpp_verification": {
-      "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
-      "source_native_run_id": 42140591685,
-      "reason_ledger_run_id": 42146818557,
-      "source_select_sweeps_reused": 2121,
-      "source_root_choice_total": 262,
-      "detailed_root_early_source_returns": 64,
-      "source_root_returns_not_retained": 198,
-      "source_potential_executable_actions_not_proven_casts": 38,
-      "full_independent_READY_proven": 0,
-      "WCL_independent_holdout_for_this_integrated_IR": false
-    },
-    "output": {
-      "artifact_id": 13472195231,
-      "sha256_zip": "b6a243cc5c2f724b346dbf814367e58e5db97ee6ef6c25ddf5dbd74782327553",
-      "sha256_research_json": "fd55601886e10e6ffb73d3e2638b6df6c44b38626a15ce2d1fb0d7761eadda92",
-      "expires_at": "2026-11-13T02:15:15Z",
-      "evidence_receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/INTEGRATED_HEKILI_INSPIRED_NATIVE_OPENER_ST2T_20261106.json"
-    },
-    "status": "HEKILI_CORE_STATE_SCRIPTS_INTEGRATION_BOUNDED_ACTUAL_NATIVE_SOURCE_OPENER_PASS_NOT_FULL_DECISION_PARITY",
-    "product_exact_next": "Finish faithful SimC-first General Rotation opener and conditional priority ST/2T/cleave/AoE from source-derived state/SpecAdapter/READY closure, independently WCL blind validation, then safe evidence-backed target dummy feedback.",
-    "session_exact_next": "Attach exact selected-root original C++ before-call state snapshots (not per-row aggregate), source-pinned generic mechanic/effect SpecAdapter and full physical READY; validate one executable opener action plus earlier source exclusions; expand beyond 64 retained source returns using compact native source row receipts only where needed; then WCL post-lock and dummy.",
-    "gaps": [
-      "The 64 current source-return samples are not 64 performed player spells",
-      "State projection is synthetic-only because actual buff/resources/cooldown transitions missing",
-      "Original source IF is stored as row aggregate, not proven at selected root",
-      "full READY=0",
-      "actual WoW Retail 12.1.5 addon behavior not tested",
-      "Blizzard addon compliance cannot be inferred from old Hekili code"
-    ],
-    "main_promoted": false,
-    "shared_frozen_modified": false,
-    "Seq578": "FAILED_QUARANTINED",
-    "Seq637": "UNKNOWN"
-  },
-  "branch_local_execution_successor_20261106_exact_leaf_state": {
-    "schema": "Zrot20261106BranchSelectedLeafPREStateHandoffSuccessorV1",
-    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
-    "status": "VERIFIED_ACTUAL_SIMC_SOURCE_LEAF_64_AND_SAME_ROOT_PRE_9; FULL_READINESS_UNPROVEN",
-    "new_engine": "tools/research/general_rotation_original_selected_root_state_join_v1.py",
-    "per_spec_semantic_adapter": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SPEC_ADAPTER_ARCANE_ORB_SOURCE_OBLIGATIONS_20261106.json",
-    "actual_CI_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42152415986",
-    "actual_CI_id": 42152415986,
-    "Python312": "SUCCESS",
-    "Python314": "SUCCESS",
-    "actual_prior_CPP_receipt_replay": "SUCCESS",
-    "provenance_tamper_rejected": 5,
-    "original_native_sweeps_reused": 2121,
-    "original_top_level_source_returns": 262,
-    "early_selected_leaf_exact_ready_roots": 64,
-    "child_propagated_leaf_count": 30,
-    "direct_leaf_count": 34,
-    "exact_original_READY_root_active_enemies_PRE": 9,
-    "same_ready_root_PRE_not_retained": 55,
-    "unsampled_source_return_rows": 198,
-    "arcane_orb_source_mechanics_attached": 3,
-    "independent_FULL_ready": 0,
-    "prior_full_NOT_ready": 0,
-    "WCL_CLI_calls_this_step": 0,
-    "new_native_CPP_builds": 0,
-    "retail_game_client_tested": false,
-    "artifact_id": 13473415672,
-    "artifact_sha256": "aa1318314a8a2041b2abf9c9bab261263c5bc9d6f08718a1b985a30bd631f6c1",
-    "evidence_path": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SELECTED_CPP_LEAF_EXACT_PRE_SPEC_ADAPTER_20261106.json",
-    "read_first_additional": [
-      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md",
-      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md",
-      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/SPEC_ADAPTER_ARCANE_ORB_SOURCE_OBLIGATIONS_20261106.json"
-    ],
-    "exact_next": "Narrow one-time original Native source PRE producer capturing all exact chosen executable leaf gates, buffs, cooldown/charges, talents and resources, plus verified full inherited Arcane Orb READY source route and per-phase transition. Keep no inferred unseen state; then source-proven IF/ELSE ST/2T and independent WCL blind holdout.",
-    "MAIN_promoted": false,
-    "FROZEN_modified": false,
-    "Seq578": "FAILED_QUARANTINED",
-    "Seq637": "UNKNOWN"
-  },
-  "branch_local_execution_successor_20261106_all_root_pre": {
-    "schema": "ZrotBranchAllOriginalNativeReadyRootPREHandoffSuccessorV1",
-    "date": "2026-11-06",
-    "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
-    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
-    "actual_run_id": 42155157024,
-    "actual_run_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42155157024",
-    "actual_offline_python312": "SUCCESS",
-    "actual_offline_python314": "SUCCESS",
-    "actual_official_original_vs_instrumented_cpp": "SUCCESS",
-    "source_simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
-    "original_native_select_sweeps": 2121,
-    "original_ready_root_PRE_full": 4682,
-    "original_CPP_returned_source_rows": 262,
-    "actual_returned_rows_precise_same_root_PRE": 262,
-    "nested_leaf_paths": 68,
-    "source_selected_no_explicit_IF": 54,
-    "source_selected_missing_additional_IF_operands": 208,
-    "source_initial_foreground_proven": 259,
-    "source_initial_foreground_unknown_duplicate_identity": 3,
-    "arcane_source_selected_mana_pct_present": 72,
-    "fury_rage_observed": false,
-    "independent_full_physical_ready_proven": 0,
-    "WCL_independent_holdout": false,
-    "dummy_mistake_verdict_permitted": false,
-    "actual_source_replay": [
-      "tools/research/general_rotation_root_actor_pre_replay_v1.py",
-      "tools/research/general_rotation_original_selection_return_replay_v1.py",
-      "tools/research/general_rotation_full_root_state_join_v1.py"
-    ],
-    "read_source_walk": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/ARCANE_ORB_READY_SOURCE_WALK_20261106.md",
-    "branch_evidence_path": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ALL_ORIGINAL_SELECTED_CPP_ROOT_PRE_ST2T_20261106.json",
-    "actual_artifact_id": 13472989884,
-    "actual_artifact_zip_sha256": "c47a3eb6486be268fce8540acf3703af80c67cba01c4dc9f41ea8478e52e3a79",
-    "actual_artifact_expiry_utc": "2026-11-13T03:14:13Z",
-    "previous_session_exact_next": "Precheck existing feature index/actual source/receipts; select one real executable returned row with earlier candidates independently ruled out; source-audit full virtual action_ready, target and override path through SpecAdapter without touching generic parser/engine; produce complete positive gate certificate from real Strict PRE and integrate with existing bounded_decision. Reuse portable fixtures and focused CI; second-spec Mage Native E2E only when needed.",
-    "session_exact_next": "From 262/262 exact Native returned rows and 4682 original ready-root PRE, source-pin one passive Arcane Orb and preceding physical candidate action_t::ready()/action_ready() stage trace without extra READY, cost, cooldown or RNG calls; source-capture missing talents/procs/buffs/cooldowns/charges using semantic SpecAdapter. Close only proven gates, compare ST/2T opener, independently validate WCL blind after candidate lock, then safe post-session dummy feedback. Unknown remains UNKNOWN.",
-    "WCL_API_calls": 0,
-    "WoW_client_calls": 0,
-    "MAIN_promoted": false,
-    "FROZEN_modified": false,
-    "Seq578": "FAILED_QUARANTINED",
-    "Seq637": "UNKNOWN"
-  },
-  "branch_local_execution_successor_20261106_orb_ready_prior": {
-    "schema": "ZrotBranchOriginalArcaneOrbReadyGateAndEarlierSourceCandidateHandoffV1",
-    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
-    "date": "2026-11-06",
-    "actual_native_CI": {
-      "id": 42174427587,
-      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42174427587",
-      "offline_python_312": "SUCCESS",
-      "offline_python_314": "SUCCESS",
-      "actual_CPP_original_modified_Fury_Arcane_ST_2T": "SUCCESS",
-      "additional_ready_rng_cost_evaluations": 0,
-      "artifact_id": 13483450540,
-      "artifact_zip_sha256": "260895d8cecbb6684ac911b0fbe2e5b3f1163685928bcc3345a81068a70ab264"
-    },
-    "actual_original_CPP_arcane_orb_READY_call_counts": {
-      "ST": {
-        "total": 80,
-        "native_true": 1,
-        "native_false": 79,
-        "original_APL_IF_false": 35,
-        "line_cooldown_down": 41,
-        "resource_unaffordable": 3
-      },
-      "two_target": {
-        "total": 78,
-        "native_true": 3,
-        "native_false": 75,
-        "original_APL_IF_false": 34,
-        "line_cooldown_down": 38,
-        "resource_unaffordable": 3
-      }
-    },
-    "source_apl_line_cd_fact": "Pinned profiles/MID2/MID2_Mage_Arcane.simc:58 action cooldowns=arcane_orb if talent.splintering_sorcery line_cd=999; 999000ms in SimC original line_cooldown ready PRE is an APL row restriction not spell GCD/cooldown.",
-    "actual_source_prior_replay_CI": {
-      "id": 42175299671,
-      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42175299671",
-      "Python_312": "SUCCESS",
-      "Python_314": "SUCCESS",
-      "new_CPP_compilation": false,
-      "adversarial_source_priority_mutations_rejected": 3,
-      "artifact_id": 13483236957,
-      "artifact_zip_sha256": "98213fffb15acc5829fe38c50791bd6113cbe5202a31c9166d8032a14a8b6eb9"
-    },
-    "actual_arcane_orb_source_selected": 4,
-    "actual_2T_source_orb_chosen_times_ms": [
-      0,
-      7667,
-      14950
-    ],
-    "two_target_after_earlier_same_list_native_FALSE": {
-      "at_ms": [
-        7667,
-        14950
-      ],
-      "chosen_source_list": "spellslinger",
-      "chosen_ordinal": 6,
-      "source_earlier_ordinal2_arcane_orb_CPP_APL_IF_FALSE": 2,
-      "all_earlier_source_candidate_native_FALSE": 10,
-      "physical_unavailability_independently_proven": 0
-    },
-    "new_code": [
-      "tools/research/general_rotation_arcane_orb_native_ready_stage_producer_v1.py",
-      "tools/research/general_rotation_arcane_orb_native_ready_stage_replay_v1.py",
-      "tools/research/general_rotation_arcane_orb_selected_priority_context_v1.py"
-    ],
-    "evidence_receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ARCANE_ORB_ORIGINAL_NATIVE_READY_AND_SOURCE_PRIORS_20261106.json",
-    "historical_frozen_unmodified": true,
-    "source_observed_CXX_return_branch_not_independent_FULL_READY": true,
-    "independent_positive_full_READY": 0,
-    "WCL_independent_candidate_lock_and_holdout": false,
-    "real_WoW_client_observability_tested": false,
-    "gameplay_user_error_verdict_permitted": false,
-    "WCL_API_calls": 0,
-    "last_session_exact_next": "From 262/262 exact Native returned rows and 4682 original ready-root PRE, source-pin one passive Arcane Orb and preceding physical candidate action_t::ready()/action_ready() stage trace without extra READY, cost, cooldown or RNG calls; source-capture missing talents/procs/buffs/cooldowns/charges using semantic SpecAdapter. Close only proven gates, compare ST/2T opener, independently validate WCL blind after candidate lock, then safe post-session dummy feedback. Unknown remains UNKNOWN.",
-    "session_exact_next": "Use verified original Arcane Orb ST/2T 158 action_t::ready/action_ready branch witnesses and 4 chosen source priority contexts, not more identical Native E2E. In source-pinned SpecAdapter capture exact talent.splintering_sorcery, arcane_charge/arcane_salvo buffs, variable.aoe_count, cooldown fractional charges and prior candidate physical gate reasons at the same original root. Reconstruct independent full READY only when all original gates and PRE operands close; then derive conditional ST/2T physical opener decisions and compare with independently locked WCL blind holdout. Respect WoW addon policy, no in-game combat state solver; UNKNOWN remains UNKNOWN.",
-    "MAIN_promoted": false,
-    "FROZEN_modified": false,
-    "Seq578": "FAILED_QUARANTINED",
-    "Seq637": "UNKNOWN"
-  },
-  "branch_local_execution_successor_20261106_spec_pre_conditional_orb": {
-    "schema": "ZrotBranchActualSourceSpecPREAndConditionalIFOpenerHandoff20261106V1",
-    "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
-    "date": "2026-11-06",
-    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
-    "source_architecture": "HEKILI_INSPIRED_CORE_SCRIPTS_STATE_CLASSES_OFFLINE_ONLY",
-    "official_simc_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
-    "input_mage_profile_git_blob_sha1": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
-    "native_current_run": {
-      "id": 42181561000,
-      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42181561000",
-      "python_312": "SUCCESS",
-      "python_314": "SUCCESS",
-      "original_vs_instrumented_native_Fury_Arcane_ST_2T": "SUCCESS",
-      "original_ready_source_roots": 158,
-      "actual_native_IF_evaluations_independently_checked_and_matched": 73,
-      "actual_source_short_circuits_before_IF": 85,
-      "added_action_ready_cost_rng_calls": 0,
-      "added_pure_buff_t_check_per_orb_root": 3,
-      "added_const_charges_fractional_per_orb_root": 1,
-      "artifact_id": 13485134937,
-      "artifact_zip_sha256": "033da6dd09cd255bd83af5a8dfa9c72d65af14d2ae54d0fc2d2b52b1edff8756"
-    },
-    "conditional_model_run": {
-      "id": 42182635460,
-      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42182635460",
-      "Python_312": "SUCCESS",
-      "Python_314": "SUCCESS",
-      "new_native_CPP_builds": 0,
-      "actual_cpp_selected_orb_if_true_witness": 4,
-      "earlier_same_spell_orb_if_false_witness": 2,
-      "earlier_other_skill_NATIVE_POST_false_ONLY_unknown": 8,
-      "original_prior_candidates_total": 10,
-      "artifact_id": 13486511411,
-      "artifact_zip_sha256": "f341a2ea9a801037d1a6fb7bc36e43a54be5d6b427c29681c8ef0cfd48ffdd35",
-      "artifact_model_json_sha256": "b92946feacc6fd3d17b5aa280e91370842fdc85c6c7a41fd10ab7b1330ec08c6"
-    },
-    "first_2T_actual_IF_ELSE_source_evidence": {
-      "at_ms": [
-        7667,
-        14950
-      ],
-      "selected": "spellslinger[6] arcane_orb",
-      "selected_IF_true_minimal_facts": [
-        {
-          "active_enemies": 2,
-          "arcane_charge_stack": 2,
-          "source_derived_aoe_count": 2
-        },
-        {
-          "active_enemies": 2,
-          "arcane_charge_stack": 3,
-          "source_derived_aoe_count": 2
-        }
-      ],
-      "earlier": "spellslinger[2] arcane_orb",
-      "earlier_IF_false_minimal_fact": "talent.orb_mastery=0",
-      "source_aoe_count_derived_not_direct_runtime_variable": true
-    },
-    "code": [
-      "tools/research/general_rotation_arcane_orb_spec_state_pre_producer_v1.py",
-      "tools/research/general_rotation_arcane_orb_spec_state_pre_replay_v1.py",
-      "tools/research/general_rotation_source_if_minimal_witness_v1.py",
-      "tools/research/general_rotation_arcane_orb_conditional_source_model_v1.py"
-    ],
-    "branch_evidence": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ARCANE_ORB_EXACT_SPEC_PRE_CONDITIONAL_IF_OPENER_20261106.json",
-    "WCL_independent_candidate_discovery_or_holdout_performed": false,
-    "independent_entire_action_READY_proven": 0,
-    "dummy_mistake_verdict_permitted": false,
-    "game_client_executed": false,
-    "WCL_API_calls": 0,
-    "previous_session_exact_next": "Use verified original Arcane Orb ST/2T 158 action_t::ready/action_ready branch witnesses and 4 chosen source priority contexts, not more identical Native E2E. In source-pinned SpecAdapter capture exact talent.splintering_sorcery, arcane_charge/arcane_salvo buffs, variable.aoe_count, cooldown fractional charges and prior candidate physical gate reasons at the same original root. Reconstruct independent full READY only when all original gates and PRE operands close; then derive conditional ST/2T physical opener decisions and compare with independently locked WCL blind holdout. Respect WoW addon policy, no in-game combat state solver; UNKNOWN remains UNKNOWN.",
-    "session_exact_next": "Use real Arcane Orb exact-root PRE and generic minimal source IF witnesses to explain earlier competing spells in both 2T chosen Orb decisions (prismatic_bolt, arcane_barrage, arcane_missiles) using source-pinned original C++ ready branch/skill PRE only where gating differs. Verify full action readiness independent from native POST before claiming skill priority. Build ST/2T conditional General Rotation IR; run independent WCL blind discovery candidate/threshold lock and holdout before any trainer mistake verdict. Keep additional AoE/build, game addon policy-gated; unknown remains UNKNOWN.",
-    "MAIN_promoted": false,
-    "FROZEN_modified": false,
-    "Seq578": "FAILED_QUARANTINED",
-    "Seq637": "UNKNOWN",
-    "read_evidence": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ARCANE_ORB_EXACT_SPEC_PRE_CONDITIONAL_IF_OPENER_20261106.json"
-  },
-  "branch_local_execution_successor_20261106_competitor_ready": {
-    "schema": "ZrotBranchOriginalArcane2TPriorCompetingAbilityReadyAndDecisionReasonHandoffV1",
-    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
-    "date": "2026-11-06",
-    "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
-    "source_commit": "simulationcraft/simc@b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
-    "native_actual_validation": {
-      "run_id": 42186013774,
-      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42186013774",
-      "python_312": "SUCCESS",
-      "python_314": "SUCCESS",
-      "original_vs_patched_CPP_two_specs_ST_2T": "SUCCESS",
-      "original_ready_competitor_roots_replayed": 137,
-      "source_local_missing_prismatic_buff": 38,
-      "source_local_missing_clearcasting": 3,
-      "source_local_missiles_initial_proc_delay": 2,
-      "original_CXX_total_action_READY_extra_calls": 0,
-      "original_CXX_total_COST_extra_calls": 0,
-      "original_CXX_total_RNG_extra_calls": 0,
-      "extra_read_only_buff_check_PER_derived_ready": 1,
-      "artifact_id": 13487497851,
-      "zip_sha256": "7d2ae89075d64bc39aa9c62eaf98c16e6bf806724293281cce584467c809ab50",
-      "artifact_expires_utc": "2026-11-13T08:14:25Z"
-    },
-    "decision_ledger_actual_validation": {
-      "run_id": 42186794065,
-      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42186794065",
-      "python_312": "SUCCESS",
-      "python_314": "SUCCESS",
-      "new_cpp_compilation": false,
-      "tamper_source_root_and_claim_rejected": 3,
-      "original_CPP_two_target_chosen_orb_timings_ms": [
-        7667,
-        14950
-      ],
-      "preceding_APL_rows_total": 10,
-      "independent_original_ROOT_local_ready_false": 6,
-      "independent_original_ROOT_source_apl_if_false": 2,
-      "native_original_APL_IF_FALSE_only_independent_PRE_UNKNOWN": 2,
-      "real_independent_source_row_rejection_count": 8,
-      "independent_entire_physical_priority_proven": false,
-      "artifact_id": 13487477840,
-      "zip_sha256": "3e1bc6b910da04cee4e080bdeeb4f2579c731a444321e0a87b577652cd0e04d5",
-      "artifact_expires_utc": "2026-11-13T08:19:07Z"
-    },
-    "new_code_paths": [
-      "tools/research/general_rotation_arcane_competitor_native_route_producer_v1.py",
-      "tools/research/general_rotation_arcane_competitor_native_route_replay_v1.py",
-      "tools/research/general_rotation_arcane_competitor_decision_ledger_v1.py"
-    ],
-    "branch_evidence": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ARCANE_2T_PRIOR_COMPETITOR_EXACT_READY_REASON_20261106.json",
-    "read_further": [
-      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md",
-      "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/GENERAL_ROTATION_HEKILI_POLICY_ROADMAP_20261106.md"
-    ],
-    "history_note": "Earlier source-patch attempt run 42185787114 FAIL due exact prismatic ready source whitespace template mismatch; final successor run 42186013774 PASS. Do not promote failed attempt or count as rotation hypothesis failure.",
-    "remaining_source_unknown": "Arcane Barrage 2T @7667/14950ms original CXX APL_IF_FALSE; independent exact-root source IF reconstruction requires Salvo react/Charge/talent/prev_gcd source values.",
-    "full_positive_READY_independently_proven": 0,
-    "WCL_blind_candidate_lock_and_holdout_executed": false,
-    "game_client_API_capability_tested": false,
-    "WoW_dummy_mistake_feedback_permitted": false,
-    "WCL_API_calls": 0,
-    "previous_session_exact_next": "Use real Arcane Orb exact-root PRE and generic minimal source IF witnesses to explain earlier competing spells in both 2T chosen Orb decisions (prismatic_bolt, arcane_barrage, arcane_missiles) using source-pinned original C++ ready branch/skill PRE only where gating differs. Verify full action readiness independent from native POST before claiming skill priority. Build ST/2T conditional General Rotation IR; run independent WCL blind discovery candidate/threshold lock and holdout before any trainer mistake verdict. Keep additional AoE/build, game addon policy-gated; unknown remains UNKNOWN.",
-    "session_exact_next": "Choose the highest-impact next physical source state: (a) narrowly capture Arcane Barrage's exact two prior-root original APL IF operands and independent AST negative if material, while (b) move independent WCL blind discovery toward a locked candidate/threshold and independent holdout without using SimC or Hekili answers before lock. Reuse 262 chosen PRE, 158 Orb READY, 137 rival READY, 8/10 independent 2T prior-row rejections and generic source AST witness; then only evidence-backed ST/2T General Rotation IF/ELSE and policy-gated offline dummy feedback. No full READY or optimality claim where unproven.",
-    "MAIN_promoted": false,
-    "FROZEN_modified": false,
-    "Seq578": "FAILED_QUARANTINED",
-    "Seq637": "UNKNOWN"
-  },
-  "branch_local_execution_successor_20261106_generic_simc_source_e2e": {
-    "schema": "ZrotBranchGenericSimCSourceToConditionalOpenerE2EHandoffSuccessorV1",
-    "date": "2026-11-06",
-    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
-    "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
-    "product_priority_override": "USER_REFOCUS_FROM_PER_SPELL_ARCANE_TO_GENERIC_SIMC_ROTATION_EXTRACTION_ENGINE",
-    "existing_generic_components_reused": [
-      "tools/research/simc_apl_semantic_ir_v2.py",
-      "tools/research/general_rotation_simc_multi_spec_cold_start_v1.py",
-      "tools/research/general_rotation_source_hypothesis_ir_v1.py"
-    ],
-    "new_code": [
-      "tools/research/general_rotation_simc_e2e_research_engine_v1.py",
-      "tools/research/general_rotation_simc_single_profile_v1.py",
-      "tools/research/fixtures/general_rotation_e2e_original_native_st_2t_v1.json",
-      ".github/workflows/zrot-general-rotation-simc-e2e-source-priority-v1.yml"
-    ],
-    "verified_actual_CI": {
-      "run_id": 42195342553,
-      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42195342553",
-      "Python312": "SUCCESS",
-      "Python314": "SUCCESS",
-      "official_simc_source_and_old_native_artifact_E2E": "SUCCESS",
-      "source_only_mode": "SUCCESS",
-      "one_spec_profile_Mage_and_Warrior": "SUCCESS",
-      "source_action_rows": 172,
-      "native_selected_root_PRE_reconciled": 262,
-      "distinct_classes": 2,
-      "target_contexts": 4,
-      "native_simc_cpp_builds_this_step": 0,
-      "WCL_API_calls": 0,
-      "WoW_client_calls": 0
-    },
-    "source_pins": {
-      "official_simc_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
-      "fury_profile_git_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
-      "arcane_profile_git_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
-      "actual_original_cpp_receipt_run_id": 42155157024
-    },
-    "source_hypothesis_and_runtime_proof_boundary": {
-      "source_APL_parsing_and_conditioned_list_graph": "ACTUAL_E2E_PASS_FOR_TWO_PINNED_CLASSES",
-      "source_returned_30s_selection_sample": "EXACT_ORIGINAL_CPP_SOURCE_ROW_AND_BEFORE_CALL_PRE_262_OF_262",
-      "physical_opener_end": "UNKNOWN",
-      "simultaneous_physical_ready_and_priority_optimality": "UNKNOWN",
-      "missing_ready_variables_procs_cooldown_talents": "UNKNOWN",
-      "WCL_blind_candidate_lock_and_independent_holdout": "NOT_RUN",
-      "dummy_error_verdict": "UNKNOWN",
-      "generic_aoe_scenario_manifest_support": "IMPLEMENTED_NOT_LIVE_VALIDATED",
-      "single_profile_input": "IMPLEMENTED_SOURCE_ONLY_ARBITRARY_CLASS_LOCAL_UNVERIFIED_UNLESS_PIN"
-    },
-    "evidence_path": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_SOURCE_TO_CONDITIONAL_OPENER_E2E_20261106.json",
-    "artifact_id": 13491917041,
-    "artifact_zip_sha256": "99d07807098245ca32ec01afb8955bbd2062f05264282b83e4ab4bb81e6cfbbe",
-    "artifact_expiry_utc": "2026-11-13T09:29:08Z",
-    "actual_full_IR_json_sha256": "bd391e15e9cc7828c6b50714cfe64852dbdb8e42985355f0f24b9f748911a6b2",
-    "trial_failures_corrected": [
-      "42194430940: synthetic negative timestamp missing lower bound, fixed",
-      "42195217086: new scenario regex wrongly rejected digit-leading 2t, fixed"
-    ],
-    "prior_session_exact_next": "Choose the highest-impact next physical source state: (a) narrowly capture Arcane Barrage's exact two prior-root original APL IF operands and independent AST negative if material, while (b) move independent WCL blind discovery toward a locked candidate/threshold and independent holdout without using SimC or Hekili answers before lock. Reuse 262 chosen PRE, 158 Orb READY, 137 rival READY, 8/10 independent 2T prior-row rejections and generic source AST witness; then only evidence-backed ST/2T General Rotation IF/ELSE and policy-gated offline dummy feedback. No full READY or optimality claim where unproven.",
-    "product_exact_next": "Generic source→conditional research IR+real SimC source-choice E2E now PASS (172 Fury/Arcane rows, 262 exact native source returns, 4 ST/2T cases); do not repeat per-spell Arcane Orb diagnostic as main product. NEXT: turn generic IF/ELSE source topology into evidence-backed STATE-CONDITIONED executable action priority across two classes using full readiness contracts, variable timing, CALL/RUN control, proc/cd/charges, opener termination and target-switch rules; UNKNOWN for missing. Then WCL blind independent discovery/lock/holdout after candidate lock, add AoE/build variants, policy-safe dummy evaluator. No MAIN/FROZEN changes.",
-    "MAIN_promoted": false,
-    "FROZEN_modified": false,
-    "Seq578": "FAILED_QUARANTINED",
-    "Seq637": "UNKNOWN"
-  },
-  "branch_local_execution_successor_20261108_state_conditioned": {
-    "schema": "ZrotBranchGenericSimCStateConditionedEvaluatorHandoffSuccessor20261108V1",
-    "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
-    "date": "2026-11-08",
-    "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
-    "source_scope": "GENERAL_ROTATION_OPENER_AND_IF_ELSE_TARGET_DUMMY_ONLY",
-    "prior_session_exact_next": "Generic source→conditional research IR+real SimC source-choice E2E now PASS (172 Fury/Arcane rows, 262 exact native source returns, 4 ST/2T cases); do not repeat per-spell Arcane Orb diagnostic as main product. NEXT: turn generic IF/ELSE source topology into evidence-backed STATE-CONDITIONED executable action priority across two classes using full readiness contracts, variable timing, CALL/RUN control, proc/cd/charges, opener termination and target-switch rules; UNKNOWN for missing. Then WCL blind independent discovery/lock/holdout after candidate lock, add AoE/build variants, policy-safe dummy evaluator. No MAIN/FROZEN changes.",
-    "new_executable": "tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py",
-    "new_workflow": ".github/workflows/zrot-general-rotation-simc-state-conditioned-v1.yml",
-    "branch_evidence": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_STATE_CONDITIONED_EVALUATOR_20261108.json",
-    "verified_real_ci": {
-      "run_id": 42444206139,
-      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42444206139",
-      "python_312": "SUCCESS",
-      "python_314": "SUCCESS",
-      "synthetic_regression_per_python": 15,
-      "two_real_official_pinned_SimC_profiles": "SUCCESS_FAIL_CLOSED_UNKNOWN",
-      "real_native_SIMC_CPP_selected_spell_equivalence": "NOT_TESTED",
-      "actual_independent_FULL_READY_proven": 0,
-      "WCL_API_calls": 0,
-      "actual_WoW_client_test": "NOT_RUN",
-      "script_sha256": "8523617ff70fc51da5a1b80cfe54834c5146d7cbb06db9533311df16b2415dde",
-      "artifact_id": 13603106491,
-      "artifact_zip_sha256": "1af8cec0847108765732410649739414e108b3d8a3cf6dabe9bd0a4d4c6f291e",
-      "artifact_expires_utc": "2026-11-15T03:48:29Z"
-    },
-    "engine_contract": {
-      "reused_generic_APL_parser": true,
-      "reused_strict_PRE_validator": true,
-      "reused_Identity_GateContract_Fact_engine": true,
-      "SimC_APL_runtime_variable_this_scan_distinct_from_WCL_PRE": true,
-      "t_zero_opener_allowed_same_time_PRE_rejected": true,
-      "conditional_prior_IF_FALSE_ready_false_unknown_ledger": true,
-      "synthetic_CALL_child_false_fallback": true,
-      "synthetic_RUN_queued_not_nested_cast": true,
-      "control_positive_assumption_ONLY_synthetic": true,
-      "all_positive_native_ready_unknown": true,
-      "independent_WCL_blind_holdout_done": false,
-      "dummy_error_verdict_permitted": false
-    },
-    "source_real_smoke": {
-      "mage_arcane": "UNKNOWN_FULL_READY_SOURCE_PROOF_UNKNOWN",
-      "warrior_fury": "UNKNOWN_SOURCE_NON_PHYSICAL_EFFECT_UNVERIFIED",
-      "explanation": "Strict PRE and ready provider deliberately empty; these results show fail-closed real source usage, not original Native parity or actual proper cast.",
-      "native_receipts_from_prior_step_reused_for_source_IR": "172 APL rows, 262 original SimC chosen root PRE, verified in run 42195342553"
-    },
-    "next_exact": "Use the new generic state-conditioned evaluator for evidence-backed virtual method READY and source variable lifetime across scans (not another per-spell-only tool): implement class-neutral SpecAdapter source-fact/gate contract integration from pinned original SimC method PRE and actual execute transitions, trace CALL/RUN control with source scheduling truth, reproduce at least one real positive original CPP selection per Fury and Arcane without using Native selected POST as READY input. Keep missing facts UNKNOWN. Then independent WCL blind candidate lock and holdout, General Rotation opener IF/ELSE model ST/2T/cleave/AoE and policy-safe dummy evaluator. Do not promote MAIN or FROZEN.",
-    "MAIN_promoted": false,
-    "FROZEN_modified": false,
-    "Seq578": "FAILED_QUARANTINED",
-    "Seq637": "UNKNOWN"
+  "shared_authoritative_state_mutated": false,
+  "project_wide_FROZEN_changed": false,
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "historical_source_artifacts_immutable": true,
+  "no_live_SIMC_WCL_WoW_execution_in_handoff": true,
+  "handoff_validation": {
+    "policy_source_blob_sha1": "14b9f5174a9d1652a56dcca03af1f2302b78c22d",
+    "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+    "parent_scope_generation": 3,
+    "current_scope_generation": 4,
+    "parent_sha256": "acfe285053e6ee9b4662cef9a475a7b321a4e281c8c65f67539acde84d45816f",
+    "archive_byte_equal_git_blob_confirmed": true,
+    "newest_engine_run_checked": 42444206139,
+    "newest_engine_run_status": "SUCCESS",
+    "generic_source_E2E_run_checked": 42195342553,
+    "generic_source_E2E_status": "SUCCESS",
+    "five_hop_simulation": "NOT_RUN_IN_GITHUB_WORKFLOW_AT_COMMIT_TIME",
+    "full_governance_validator_in_GitHub_Actions": "NOT_RUN_AT_COMMIT_TIME"
   }
 }
