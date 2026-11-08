@@ -43,7 +43,8 @@ class NativeProofBridgeError(ValueError):
 
 
 class NativeProofBridge:
-    def __init__(self):
+    def __init__(self,*,export_source_gate_claims:bool=False):
+        self.export_source_gate_claims=export_source_gate_claims
         self.counters=Counter()
         self.occurrences=Counter()
         # Bounded, source-pinned gap witnesses, not positive READY certificates.
@@ -285,7 +286,10 @@ class NativeProofBridge:
             insert("BASE_VIRTUAL_COMPLETE",True,"NATIVE_SOURCE_OBSERVED",
                    "OBSERVED_POST_COMPARATOR",
                    "original_native_base_action_ready_exit_NOT_PROOF")
-        verdict=decide_candidate(identity,contract,facts.values(),
+        # Preserve adjudicated facts for portable export. A negative gate
+        # withheld for independent soundness review must not reappear later.
+        effective_facts=list(facts.values())
+        verdict=decide_candidate(identity,contract,effective_facts,
                                 row["source_action"] not in (
                                     "variable","call_action_list","run_action_list",
                                     "swap_action_list","sequence","strict_sequence",
@@ -297,9 +301,9 @@ class NativeProofBridge:
             # candidate negative evidence; don't change settled old
             # results based on new raw target/CD data silently.
             self.counters["additional_numeric_negative_pending_review"]+=1
+            effective_facts=[f for f in effective_facts if f.value is not False]
             verdict=decide_candidate(
-                identity,contract,
-                [f for f in facts.values() if f.value is not False],
+                identity,contract,effective_facts,
                 row["source_action"] not in (
                     "variable","call_action_list","run_action_list",
                     "swap_action_list","sequence","strict_sequence",
@@ -313,6 +317,31 @@ class NativeProofBridge:
         for field in verdict["blockers"]:
             if verdict["decision"]==UNKNOWN:
                 self.counters["UNKNOWN_"+field]+=1
+        # Opt-in transfer; legacy portable source receipts remain unchanged.
+        # Only source-exact physical actions and independently replayed
+        # method-PRE facts are eligible. No Native post comparator is exported
+        # as a gate. Full virtual route remains open and hence not READY.
+        portable_candidate=None
+        if self.export_source_gate_claims:
+            if (row["source_action"] not in CONTROL_COMMANDS and
+                row["source_action"]==k[3]):
+                trusted=[f for f in effective_facts
+                         if f.basis=="INDEPENDENT_SOURCE_REPLAY" and
+                         f.captured=="SIMC_ORIGINAL_METHOD_PRE"]
+                portable_candidate={
+                    "source_list":k[1],"source_index":k[2]-1,
+                    "action":row["source_action"],
+                    "source_row_sha256":row["source_sha256"],
+                    "route":{"source":contract.source,
+                             "required":list(contract.required),
+                             "closed":False,"closure_receipt":None},
+                    "facts":[{
+                        "gate":f.gate,"value":f.value,"basis":f.basis,
+                        "captured":f.captured,"event_t_ms":f.event_t_ms,
+                        "receipt":f.receipt} for f in trusted]
+                }
+            else:
+                self.counters["portable_claim_control_or_alias_skipped"]+=1
         return {
             "identity":{
                 "scope":identity.scope,"source_sha256":identity.source_sha256,
@@ -330,6 +359,8 @@ class NativeProofBridge:
             "source_only_positive_gates":verdict["source_only"],
             "full_ready_positive_closed":False,
             "Native_ready_comparator_NOT_USED":True,
+            "portable_source_claim_optional":portable_candidate,
+            "portable_claim_positive_ROUTE_CLOSURE":False,
             "dummy_error_permitted":False
         }
 
@@ -587,11 +618,60 @@ def selftest():
     assert preflight["bounded_source_candidates"][0]["physical_skill_READY"]==UNKNOWN
     assert "BASE_VIRTUAL_COMPLETE" in preflight["bounded_source_candidates"][0]["native_observed_post_only_gates"]
     assert preflight["complete_source_virtual_route_closure"] is False
+    # Producer -> pinned APL decoder -> generic evaluator round-trip.
+    # This only replays synthetic source facts; not new original SimC proof.
+    from simc_apl_semantic_ir_v2 import parse_profile,git_blob
+    from general_rotation_simc_state_conditioned_evaluator_v1 import (
+        ADAPTER_GATE_BUNDLE_SCHEMA,POLICY,evaluate as evaluate_source_scan)
+    synthetic_profile=b"actions=alpha\n"
+    profile_blob=git_blob(synthetic_profile)
+    parsed=parse_profile(
+        synthetic_profile,require_source=True,
+        expected_git_blob=profile_blob)
+    source_row=parsed["action_lists"]["default"][0]
+    scoped=dict(row,source_sha256=source_row["source_sha256"])
+    producer=NativeProofBridge(export_source_gate_claims=True)
+    scoped_negative=producer.evaluate_attempt(dict(pending),scoped)
+    claim=scoped_negative["portable_source_claim_optional"]
+    assert claim is not None
+    assert claim["route"]["closed"] is False
+    assert claim["facts"][0]["gate"]=="NECESSARY_ELIGIBILITY"
+    assert claim["facts"][0]["value"] is False
+    def full_bundle(candidate):
+        return {"schema":ADAPTER_GATE_BUNDLE_SCHEMA,"policy_id":POLICY,
+                "source_git_blob_sha1":profile_blob,
+                "decision_at_ms":20,"source_occurrence":0,
+                "candidates":[candidate]}
+    negative_replay=evaluate_source_scan(
+        synthetic_profile,profile_blob,at_ms=20,
+        external_strict_pre={},adapter_gate_bundle=full_bundle(claim))
+    assert negative_replay["source_reason_ledger"][0][
+        "reason"]=="INDEPENDENT_NECESSARY_GATE_FALSE"
+    assert negative_replay["dummy_trainer_error_permitted"] is False
+    positive_producer=NativeProofBridge(export_source_gate_claims=True)
+    scoped_unknown=dict(nxt,source_sha256=source_row["source_sha256"])
+    scoped_positive=positive_producer.evaluate_attempt(
+        dict(pending),scoped_unknown)
+    positive_claim=scoped_positive["portable_source_claim_optional"]
+    assert positive_claim is not None
+    assert all(f["basis"]=="INDEPENDENT_SOURCE_REPLAY"
+               for f in positive_claim["facts"])
+    assert "BASE_VIRTUAL_COMPLETE" not in {
+        f["gate"] for f in positive_claim["facts"]}
+    incomplete_replay=evaluate_source_scan(
+        synthetic_profile,profile_blob,at_ms=20,
+        external_strict_pre={},adapter_gate_bundle=full_bundle(positive_claim))
+    assert incomplete_replay["result"]["status"]=="UNKNOWN"
+    assert incomplete_replay["external_gate_bundle_claims"]==1
+    assert incomplete_replay[
+        "external_gate_bundle_provenance_authenticity_verified_here"] is False
     # Fake native positive bit cannot certify a skill: this adapter does
     # not even expose Native ready as an accepted input.
     assert "native_ready" not in bridge.summary()["counts"]
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":29,"real_native":"NOT_RUN","WCL_API_calls":0}
+            "checks":29,"portable_adapter_round_trip":True,
+             "portable_gates_positive_READY":0,
+             "real_native":"NOT_RUN","WCL_API_calls":0}
 
 if __name__=="__main__":
     import json
