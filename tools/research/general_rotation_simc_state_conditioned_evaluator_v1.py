@@ -29,7 +29,8 @@ from general_rotation_ir_proof_replay_v1 import (
     CandidateEvidence, source_pre_facts, ProofReplayError
 )
 from general_rotation_decision_proof_engine_v1 import (
-    Identity, decide_candidate, READY, NOT_READY, UNKNOWN,
+    Identity, Fact, GateContract, DecisionProofError,
+    decide_candidate, READY, NOT_READY, UNKNOWN,
 )
 from general_rotation_source_hypothesis_ir_v1 import compile_profile
 
@@ -46,6 +47,94 @@ class StateConditionedError(ValueError): pass
 def must(value:bool,code:str)->None:
     if not value:raise StateConditionedError(code)
 
+ADAPTER_GATE_BUNDLE_SCHEMA="ZrotSpecAdapterGateClaimsV1"
+
+def decode_adapter_gate_bundle(bundle:dict,lists:dict, *,
+                               source_blob:str,at_ms:int,
+                               occurrence:int)->dict:
+    """Deserialize source-scoped SpecAdapter claims, not authenticate them.
+
+    Source row identity is REBUILT from the actual pinned APL. Supplied Native
+    winners, WCL casts and bare READY booleans cannot become independent facts.
+    Gate/closure receipts are declarations: an independent upstream source
+    validator must verify their authenticity before any real-gameplay claim.
+    """
+    outer={"schema","policy_id","source_git_blob_sha1",
+           "decision_at_ms","source_occurrence","candidates"}
+    must(isinstance(bundle,dict) and set(bundle)==outer and
+         bundle["schema"]==ADAPTER_GATE_BUNDLE_SCHEMA and
+         bundle["policy_id"]==POLICY and
+         bundle["source_git_blob_sha1"]==source_blob and
+         type(bundle["decision_at_ms"]) is int and
+         bundle["decision_at_ms"]==at_ms and
+         type(bundle["source_occurrence"]) is int and
+         bundle["source_occurrence"]==occurrence and
+         isinstance(bundle["candidates"],list) and
+         len(bundle["candidates"])<=10000,
+         "ADAPTER_BUNDLE_SCOPE_OR_SCHEMA_MISMATCH")
+    claims={}
+    row_keys={"source_list","source_index","action",
+              "source_row_sha256","route","facts"}
+    route_keys={"source","required","closed","closure_receipt"}
+    fact_keys={"gate","value","basis","captured","event_t_ms","receipt"}
+    for item in bundle["candidates"]:
+        must(isinstance(item,dict) and set(item)==row_keys,
+             "ADAPTER_CANDIDATE_FIELDS_INVALID")
+        name=item["source_list"]
+        idx=item["source_index"]
+        must(isinstance(name,str) and name in lists and
+             type(idx) is int and 0<=idx<len(lists[name]),
+             "ADAPTER_CANDIDATE_ROW_NOT_FOUND")
+        row=lists[name][idx]
+        key=(name,idx)
+        must(key not in claims and row["behavior"]=="ACTION" and
+             item["action"]==row["action"] and
+             item["source_row_sha256"]==row["source_sha256"],
+             "ADAPTER_CANDIDATE_ROW_IDENTITY_INVALID")
+        spec=item["route"]
+        facts=item["facts"]
+        must(isinstance(spec,dict) and set(spec)==route_keys and
+             isinstance(spec["source"],str) and bool(spec["source"]) and
+             isinstance(spec["required"],list) and
+             all(isinstance(g,str) and g for g in spec["required"]) and
+             type(spec["closed"]) is bool and
+             (spec["closure_receipt"] is None or
+              isinstance(spec["closure_receipt"],str)) and
+             isinstance(facts,list),
+             "ADAPTER_GATE_CONTRACT_FIELDS_INVALID")
+        identity=Identity(scope=name+"::"+row["action"],
+                          source_sha256=row["source_sha256"],
+                          t_ms=at_ms,ordinal=idx,occurrence=occurrence)
+        try:
+            contract=GateContract(
+                source=spec["source"],
+                required=tuple(spec["required"]),
+                source_sha256=row["source_sha256"],
+                closed=spec["closed"],
+                closure_receipt=spec["closure_receipt"])
+            values=[]
+            for entry in facts:
+                must(isinstance(entry,dict) and set(entry)==fact_keys and
+                     type(entry["event_t_ms"]) is int and
+                     (entry["value"] is None or
+                      type(entry["value"]) is bool),
+                     "ADAPTER_FACT_FIELDS_INVALID")
+                values.append(Fact(
+                    identity=identity,gate=entry["gate"],
+                    value=entry["value"],basis=entry["basis"],
+                    captured=entry["captured"],
+                    event_t_ms=entry["event_t_ms"],
+                    receipt=entry["receipt"]))
+            # Validate duplicates and undeclared gates even if the APL IF
+            # short-circuits and ready_for() is never called for this row.
+            decide_candidate(identity,contract,values,is_physical_action=True)
+        except (DecisionProofError,TypeError,KeyError) as exc:
+            raise StateConditionedError(
+                "ADAPTER_GATE_PROOF_FAILED_CLOSED") from exc
+        claims[key]=CandidateEvidence(identity,contract,tuple(values))
+    return claims
+
+
 def evaluate(raw:bytes,expected_git_blob:str, *,
              at_ms:int,
              external_strict_pre:dict,
@@ -53,7 +142,8 @@ def evaluate(raw:bytes,expected_git_blob:str, *,
              synthetic_control_ready:set[tuple[str,int]]|None=None,
              start_list:str="default",
              occurrence:int=0,
-             max_rows:int=400)->dict:
+             max_rows:int=400,
+             adapter_gate_bundle:dict|None=None)->dict:
     """One bounded original APL source selection scan; no future state prediction."""
     must(type(at_ms) is int and at_ms>=0 and
          type(occurrence) is int and occurrence>=0 and
@@ -78,6 +168,12 @@ def evaluate(raw:bytes,expected_git_blob:str, *,
     env={k:v["value"] for k,v in clean.items()}
     source_external_keys=set(env)
     derived={}
+    must(not (proofs is not None and adapter_gate_bundle is not None),
+         "TWO_INDEPENDENT_GATE_INPUT_CHANNELS_CONFLICT")
+    if adapter_gate_bundle is not None:
+        proofs=decode_adapter_gate_bundle(
+            adapter_gate_bundle,lists,source_blob=expected_git_blob,
+            at_ms=at_ms,occurrence=occurrence)
     evidence=proofs if proofs is not None else {}
     ctrl=synthetic_control_ready if synthetic_control_ready is not None else set()
     must(isinstance(evidence,dict) and isinstance(ctrl,set),
@@ -272,6 +368,8 @@ def evaluate(raw:bytes,expected_git_blob:str, *,
         "WoW_combat_addon_state_observed":False,
         "WCL_blind_independent_holdout_done":False,
         "dummy_trainer_error_permitted":False,
+        "external_gate_bundle_claims":len(evidence) if adapter_gate_bundle is not None else 0,
+        "external_gate_bundle_provenance_authenticity_verified_here":False,
         "WCL_API_calls":0,
     }
 
@@ -377,9 +475,113 @@ def selftest()->dict:
                  synthetic_control_ready={("default",2)})
     except StateConditionedError:pass
     else:raise AssertionError("PHYSICAL_ACTION_LAUNDERED_AS_CONTROL")
+    # Portable independent SpecAdapter input is tied to the *parsed* row,
+    # source blob, occurrence and time. It is an evidence CLAIM, never a
+    # substitute for authenticating the original method and raw producer.
+    from copy import deepcopy
+    def bundle_for(profile_blob:str,source_row:dict, *,
+                   at:int=100,occ:int=0,name:str="default")->dict:
+        return {
+            "schema":ADAPTER_GATE_BUNDLE_SCHEMA,
+            "policy_id":POLICY,
+            "source_git_blob_sha1":profile_blob,
+            "decision_at_ms":at,"source_occurrence":occ,
+            "candidates":[{
+                "source_list":name,"source_index":source_row["index"],
+                "action":source_row["action"],
+                "source_row_sha256":source_row["source_sha256"],
+                "route":{"source":"SYNTHETIC_SPEC_ADAPTER",
+                         "required":["test_ready"],"closed":True,
+                         "closure_receipt":"SYNTHETIC_ONLY"},
+                "facts":[{"gate":"test_ready","value":True,
+                          "basis":"INDEPENDENT_SOURCE_REPLAY",
+                          "captured":"SIMC_ORIGINAL_METHOD_PRE",
+                          "event_t_ms":at,"receipt":"SYNTHETIC_ONLY"}]
+            }]
+        }
+    portable=bundle_for(blob,blast)
+    portable_result=evaluate(
+        source,blob,at_ms=100,
+        external_strict_pre=pre(rage=40,active_enemies=2),
+        adapter_gate_bundle=portable)
+    assert portable_result["result"]["action"]=="blast"
+    assert portable_result["external_gate_bundle_claims"]==1
+    assert portable_result[
+        "external_gate_bundle_provenance_authenticity_verified_here"] is False
+    assert portable_result["dummy_trainer_error_permitted"] is False
+    # A positive Native comparator can never be laundered into READY.
+    native=deepcopy(portable)
+    native_fact=native["candidates"][0]["facts"][0]
+    native_fact["basis"]="NATIVE_READY_COMPARATOR"
+    native_fact["captured"]="OBSERVED_POST_COMPARATOR"
+    native_result=evaluate(
+        source,blob,at_ms=100,
+        external_strict_pre=pre(rage=40,active_enemies=2),
+        adapter_gate_bundle=native)
+    assert native_result["result"]["status"]=="UNKNOWN"
+    # Incomplete route closure is still UNKNOWN even with true gates.
+    open_route=deepcopy(portable)
+    open_route["candidates"][0]["route"]["closed"]=False
+    open_route["candidates"][0]["route"]["closure_receipt"]=None
+    assert evaluate(source,blob,at_ms=100,
+        external_strict_pre=pre(rage=40,active_enemies=2),
+        adapter_gate_bundle=open_route)["result"]["status"]=="UNKNOWN"
+    # Independent schema works with an unrelated source profile without
+    # class-specific evaluator code. This is synthetic, not Native parity.
+    other_source=b"actions=other,if=energy>10\\n"
+    other_blob=git_blob(other_source)
+    other_row=parse_profile(
+        other_source,require_source=True,
+        expected_git_blob=other_blob)["action_lists"]["default"][0]
+    other=bundle_for(other_blob,other_row,at=200)
+    assert evaluate(other_source,other_blob,at_ms=200,
+        external_strict_pre={
+            "energy":{"value":20,"timestamp":199,
+                      "provenance":"STRICT_PRE_OBSERVATION",
+                      "receipt":"SYNTHETIC_ONLY"}},
+        adapter_gate_bundle=other)["result"]["action"]=="other"
+    invalid_cases=[]
+    def altered(change):
+        value=deepcopy(portable)
+        change(value)
+        return value
+    invalid_cases.extend((
+        altered(lambda x:x.update(decision_at_ms=101)),
+        altered(lambda x:x.update(source_occurrence=1)),
+        altered(lambda x:x.update(source_git_blob_sha1="0"*40)),
+        altered(lambda x:x["candidates"][0].update(action="forged")),
+        altered(lambda x:x["candidates"][0].update(source_row_sha256="f"*64)),
+        altered(lambda x:x["candidates"].append(
+            deepcopy(x["candidates"][0]))),
+        altered(lambda x:x["candidates"][0]["facts"][0].update(
+            captured="WCL_STRICT_PRE",basis="INDEPENDENT_WCL_PRE",
+            event_t_ms=100)),
+        altered(lambda x:x["candidates"][0]["facts"][0].update(value=1)),
+        altered(lambda x:x["candidates"][0]["route"].update(
+            required=["test_ready","test_ready"])),
+        altered(lambda x:x["candidates"][0]["route"].update(
+            closure_receipt=None)),
+    ))
+    for forged in invalid_cases:
+        try:
+            evaluate(source,blob,at_ms=100,
+                     external_strict_pre=pre(rage=40,active_enemies=2),
+                     adapter_gate_bundle=forged)
+        except (StateConditionedError,DecisionProofError):
+            pass
+        else:
+            raise AssertionError("FORGED_SPEC_ADAPTER_GATE_BUNDLE_ACCEPTED")
+    try:
+        evaluate(source,blob,at_ms=100,
+                 external_strict_pre=pre(rage=40,active_enemies=2),
+                 proofs=proof,adapter_gate_bundle=portable)
+    except StateConditionedError:
+        pass
+    else:
+        raise AssertionError("MULTI_CHANNEL_READY_BYPASS_ACCEPTED")
     return {
         "schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-        "checks":15,"source_variables_work_after_STRICT_PRE_projection":True,
+        "checks":29,"source_variables_work_after_STRICT_PRE_projection":True,
         "source_CALL_RUN_distinct_without_native_promotion":True,
         "actual_CPP_or_WCL_executed":False,"WCL_API_calls":0
     }
@@ -392,9 +594,11 @@ def main()->None:
                    help="Strict PRE numeric JSON dictionary with receipts")
     p.add_argument("--at-ms",type=int)
     p.add_argument("--start-list",default="default")
+    p.add_argument("--adapter-gates",type=Path,
+                   help="Source-scoped SpecAdapter evidence CLAIMS, not Native parity")
     p.add_argument("--out",type=Path)
     a=p.parse_args()
-    if a.profile is None and a.snapshot is None and a.at_ms is None:
+    if a.profile is None and a.snapshot is None and a.at_ms is None and a.adapter_gates is None:
         result=selftest()
     elif a.profile is not None and a.snapshot is not None and a.at_ms is not None:
         must(a.profile.suffix==".simc","PROFILE_EXTENSION_INVALID")
@@ -403,6 +607,8 @@ def main()->None:
             raw,a.expected_git_blob or git_blob(raw),
             at_ms=a.at_ms,
             external_strict_pre=json.loads(a.snapshot.read_bytes()),
+            adapter_gate_bundle=(json.loads(a.adapter_gates.read_bytes())
+                                 if a.adapter_gates else None),
             start_list=a.start_list)
     else:p.error("--profile, --snapshot and --at-ms are required together")
     encoded=canonical(result)
