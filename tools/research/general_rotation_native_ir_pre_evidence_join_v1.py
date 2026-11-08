@@ -33,6 +33,12 @@ from simc_native_if_false_priority_frontier_v1 import (
     source_if_samples,analyze_trace as priority_frontier
 )
 from simc_native_decision_proof_bridge_v1 import NativeProofBridge
+from general_rotation_simc_state_conditioned_evaluator_v1 import (
+    ADAPTER_GATE_BUNDLE_SCHEMA,decode_adapter_gate_bundle
+)
+from general_rotation_decision_proof_engine_v1 import (
+    decide_candidate,READY,NOT_READY,UNKNOWN
+)
 
 SCHEMA="ZrotGeneralRotationNativeSourcePreIrEvidenceJoinV1"
 POLICY="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
@@ -149,7 +155,12 @@ def load_adapter_factory(source:str|None):
     return cls
 
 def run(profile:Path,meta:dict,fixture_dir:Path,expect_manifest:str,
-        adapter_factory=None)->dict:
+        adapter_factory=None, *, export_gate_case:str|None=None,
+        export_gate_at_ms:int|None=None)->dict:
+    if ((export_gate_case is None)!=(export_gate_at_ms is None) or
+        (export_gate_at_ms is not None and
+         (type(export_gate_at_ms) is not int or export_gate_at_ms<0))):
+        raise NativeIREvidenceError("SOURCE_GATE_EXPORT_REQUIRES_EXACT_CASE_AND_TIME")
     if (not SHA_PATTERN.fullmatch(expect_manifest) or
         not GIT_BLOB_PATTERN.fullmatch(meta.get("git_blob",""))):
         raise NativeIREvidenceError("SOURCE_PROFILE_AND_MANIFEST_PIN_REQUIRED")
@@ -172,6 +183,9 @@ def run(profile:Path,meta:dict,fixture_dir:Path,expect_manifest:str,
         raise NativeIREvidenceError("PORTABLE_SOURCE_MANIFEST_CONTRACT_DRIFT")
     if not manifest["cases"]:
         raise NativeIREvidenceError("PORTABLE_SOURCE_NO_CASES")
+    if export_gate_case is not None and export_gate_case not in manifest["cases"]:
+        raise NativeIREvidenceError("SOURCE_GATE_EXPORT_CASE_NOT_IN_MANIFEST")
+    selected_export=None
     combined=Counter()
     totals=Counter()
     front_totals=Counter()
@@ -185,9 +199,67 @@ def run(profile:Path,meta:dict,fixture_dir:Path,expect_manifest:str,
             or len(samples)!=source_marker_counts["source_if_fact"]):
             raise NativeIREvidenceError("SAMPLE_OR_NATIVE_SOURCE_ATTEMPT_COUNTS_CHANGED")
         adapter=adapter_factory() if adapter_factory else None
-        proof=NativeProofBridge()
+        capturing=export_gate_case==name
+        proof=NativeProofBridge(
+            export_source_gate_claims=capturing,
+            export_focus_at_ms=export_gate_at_ms if capturing else None)
         frontier=priority_frontier(trace,ir,samples,spec_adapter=adapter,
                                    proof_bridge=proof)
+        if capturing:
+            validated=[]
+            counts_by_gate=Counter()
+            for item in proof.portable_source_gate_claims:
+                bundle={
+                    "schema":ADAPTER_GATE_BUNDLE_SCHEMA,
+                    "policy_id":POLICY,
+                    "source_git_blob_sha1":meta["git_blob"],
+                    "decision_at_ms":item["decision_at_ms"],
+                    "source_occurrence":item["source_occurrence"],
+                    "candidates":[item["candidate"]],
+                }
+                # Re-parse the *same pinned original profile* source row,
+                # never silently accept a simulated native-name alias.
+                claim=decode_adapter_gate_bundle(
+                    bundle,ir["action_lists"],source_blob=meta["git_blob"],
+                    at_ms=item["decision_at_ms"],
+                    occurrence=item["source_occurrence"])
+                if len(claim)!=1:
+                    raise NativeIREvidenceError("SOURCE_GATE_BUNDLE_SCOPE_CHANGED")
+                proof_one=next(iter(claim.values()))
+                independent=decide_candidate(
+                    proof_one.identity,proof_one.contract,proof_one.facts,
+                    is_physical_action=True)
+                if (independent["decision"]!=item["source_gate_decision"] or
+                    independent["decision"]==READY or
+                    proof_one.contract.closed or
+                    item["complete_positive_route_proven"] or
+                    item["native_ready_or_selected_used_as_gate"]):
+                    raise NativeIREvidenceError(
+                        "ORIGINAL_PRE_ADAPTER_CLAIM_INDEPENDENCE_CONFLICT")
+                counts_by_gate[independent["decision"]]+=1
+                validated.append({
+                    "bundle":bundle,
+                    "independent_local_ready_decision":independent["decision"],
+                    "missing_or_unverified":independent["missing_or_unverified"],
+                    "positive_route_closed":False,
+                    "native_choice_only_comparator":True,
+                })
+            if not validated:
+                raise NativeIREvidenceError("NO_MATCHING_ORIGINAL_SOURCE_GATE_CLAIMS")
+            selected_export={
+                "schema":"ZrotOriginalPortableSourceGateBundleAuditV1",
+                "case":name,"decision_at_ms":export_gate_at_ms,
+                "source_git_blob_sha1":meta["git_blob"],
+                "claim_count":len(validated),
+                "ready_status_counts":dict(sorted(counts_by_gate.items())),
+                "claims":validated,
+                "all_claims_source_row_and_occurrence_validated":True,
+                "source_gate_provenance_upstream_raw_fixture_verified":True,
+                "source_virtual_ready_closed":False,
+                "actual_original_native_action_selection_reproduced":False,
+                "WCL_blind_validation_completed":False,
+                "dummy_error_permitted":False,
+            }
         counts=frontier["counts"]
         if (counts["Native_action_ready_attempts"]!=source_marker_counts["native_attempt"]
             or counts["real_source_IF_samples"]!=len(samples)):
@@ -249,6 +321,7 @@ def run(profile:Path,meta:dict,fixture_dir:Path,expect_manifest:str,
         "totals":dict(sorted(totals.items())),
         "source_frontier_partial_prefix":dict(sorted(front_totals.items())),
         "source_generic_proof_counts":dict(sorted(generic_totals.items())),
+        "source_gate_claim_export":selected_export,
         "source_positive_ready_preflight":{
             "schema":"ZrotSourcePinnedPositiveReadyGapPreflightV1",
             "candidate_count":selected_count,
@@ -323,17 +396,23 @@ def main():
     p.add_argument("--fixture-dir",type=Path)
     p.add_argument("--expected-manifest-sha256")
     p.add_argument("--spec-adapter")
+    p.add_argument("--export-gate-case",
+                   help="Restrict optional actual gate receipt to one native case")
+    p.add_argument("--export-gate-at-ms",type=int,
+                   help="Require exact original Native method PRE timestamp")
     p.add_argument("--out",type=Path)
     a=p.parse_args()
     fields=(a.official_profile,a.profile_key,a.class_key,a.expected_profile_git_blob,
             a.fixture_dir,a.expected_manifest_sha256)
-    if not any(fields):
+    if not any(fields) and a.export_gate_case is None and a.export_gate_at_ms is None:
         result=selftest()
     elif all(fields):
         factory=load_adapter_factory(a.spec_adapter)
         result=run(a.official_profile,{"key":a.profile_key,"class_key":a.class_key,
                    "git_blob":a.expected_profile_git_blob},a.fixture_dir,
-                   a.expected_manifest_sha256,adapter_factory=factory)
+                   a.expected_manifest_sha256,adapter_factory=factory,
+                   export_gate_case=a.export_gate_case,
+                   export_gate_at_ms=a.export_gate_at_ms)
     else:p.error("all source / case / pin options required")
     raw=canonical(result)
     if a.out:
