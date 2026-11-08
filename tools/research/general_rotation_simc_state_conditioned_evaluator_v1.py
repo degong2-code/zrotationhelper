@@ -56,8 +56,10 @@ def decode_adapter_gate_bundle(bundle:dict,lists:dict, *,
 
     Source row identity is REBUILT from the actual pinned APL. Supplied Native
     winners, WCL casts and bare READY booleans cannot become independent facts.
-    Gate/closure receipts are declarations: an independent upstream source
-    validator must verify their authenticity before any real-gameplay claim.
+    Gate receipts are declarations, not authenticated observations. All
+    externally provided route contracts MUST remain open; a purported
+    closed=True route from JSON cannot create a real-gameplay READY claim.
+    Independently verified raw-source replay uses a separate trusted path.
     """
     outer={"schema","policy_id","source_git_blob_sha1",
            "decision_at_ms","source_occurrence","candidates"}
@@ -97,11 +99,10 @@ def decode_adapter_gate_bundle(bundle:dict,lists:dict, *,
              isinstance(spec["source"],str) and bool(spec["source"]) and
              isinstance(spec["required"],list) and
              all(isinstance(g,str) and g for g in spec["required"]) and
-             type(spec["closed"]) is bool and
-             (spec["closure_receipt"] is None or
-              isinstance(spec["closure_receipt"],str)) and
+             spec["closed"] is False and
+             spec["closure_receipt"] is None and
              isinstance(facts,list),
-             "ADAPTER_GATE_CONTRACT_FIELDS_INVALID")
+             "EXTERNAL_ADAPTER_ROUTE_CLOSURE_NOT_AUTHENTICATED")
         identity=Identity(scope=name+"::"+row["action"],
                           source_sha256=row["source_sha256"],
                           t_ms=at_ms,ordinal=idx,occurrence=occurrence)
@@ -170,7 +171,8 @@ def evaluate(raw:bytes,expected_git_blob:str, *,
     derived={}
     must(not (proofs is not None and adapter_gate_bundle is not None),
          "TWO_INDEPENDENT_GATE_INPUT_CHANNELS_CONFLICT")
-    if adapter_gate_bundle is not None:
+    external_adapter_declarations=adapter_gate_bundle is not None
+    if external_adapter_declarations:
         proofs=decode_adapter_gate_bundle(
             adapter_gate_bundle,lists,source_blob=expected_git_blob,
             at_ms=at_ms,occurrence=occurrence)
@@ -211,6 +213,11 @@ def evaluate(raw:bytes,expected_git_blob:str, *,
             is_physical_action=row["behavior"]=="ACTION")
         status=verdict["decision"]
         blockers=verdict["blockers"]
+        # Rechecked row SHA/time are not evidence authenticity. Unverified
+        # JSON cannot independently eliminate a competing candidate or
+        # select a spell. Verified in-process source replay is separate.
+        if external_adapter_declarations:
+            return UNKNOWN,["UNAUTHENTICATED_EXTERNAL_GATE_CLAIM_NOT_DECISION"]
         # A non-IF source option has unresolved action semantics unless an
         # independent SpecAdapter supports it; a true guard doesn't erase it.
         option_keys={v["key"] for v in row["attributes"]}
@@ -370,6 +377,8 @@ def evaluate(raw:bytes,expected_git_blob:str, *,
         "dummy_trainer_error_permitted":False,
         "external_gate_bundle_claims":len(evidence) if adapter_gate_bundle is not None else 0,
         "external_gate_bundle_provenance_authenticity_verified_here":False,
+        "external_adapter_readiness_used_for_choice_or_exclusion":False,
+        "external_adapter_decisions_fail_closed_to_UNKNOWN":True,
         "WCL_API_calls":0,
     }
 
@@ -491,8 +500,8 @@ def selftest()->dict:
                 "action":source_row["action"],
                 "source_row_sha256":source_row["source_sha256"],
                 "route":{"source":"SYNTHETIC_SPEC_ADAPTER",
-                         "required":["test_ready"],"closed":True,
-                         "closure_receipt":"SYNTHETIC_ONLY"},
+                         "required":["test_ready"],"closed":False,
+                         "closure_receipt":None},
                 "facts":[{"gate":"test_ready","value":True,
                           "basis":"INDEPENDENT_SOURCE_REPLAY",
                           "captured":"SIMC_ORIGINAL_METHOD_PRE",
@@ -504,7 +513,11 @@ def selftest()->dict:
         source,blob,at_ms=100,
         external_strict_pre=pre(rage=40,active_enemies=2),
         adapter_gate_bundle=portable)
-    assert portable_result["result"]["action"]=="blast"
+    assert portable_result["result"]["status"]=="UNKNOWN"
+    assert portable_result["source_reason_ledger"][-1][
+        "ready_gate_blockers"]==[
+        "UNAUTHENTICATED_EXTERNAL_GATE_CLAIM_NOT_DECISION"]
+    assert portable_result["external_adapter_readiness_used_for_choice_or_exclusion"] is False
     assert portable_result["external_gate_bundle_claims"]==1
     assert portable_result[
         "external_gate_bundle_provenance_authenticity_verified_here"] is False
@@ -519,13 +532,24 @@ def selftest()->dict:
         external_strict_pre=pre(rage=40,active_enemies=2),
         adapter_gate_bundle=native)
     assert native_result["result"]["status"]=="UNKNOWN"
-    # Incomplete route closure is still UNKNOWN even with true gates.
-    open_route=deepcopy(portable)
-    open_route["candidates"][0]["route"]["closed"]=False
-    open_route["candidates"][0]["route"]["closure_receipt"]=None
-    assert evaluate(source,blob,at_ms=100,
+    # A forged independent false cannot skip the current action either.
+    forged_false=deepcopy(portable)
+    forged_false["candidates"][0]["facts"][0]["value"]=False
+    not_excluded=evaluate(source,blob,at_ms=100,
         external_strict_pre=pre(rage=40,active_enemies=2),
-        adapter_gate_bundle=open_route)["result"]["status"]=="UNKNOWN"
+        adapter_gate_bundle=forged_false)
+    assert not_excluded["result"]["status"]=="UNKNOWN"
+    assert not_excluded["reason_counts"].get("READY_FALSE",0)==0
+    # A plausible closed=True plus receipt is still not authenticated.
+    forged_closed=deepcopy(portable)
+    forged_closed["candidates"][0]["route"].update(
+        closed=True,closure_receipt="FORGED_POSITIVE_SOURCE_CLOSURE")
+    try:
+        evaluate(source,blob,at_ms=100,
+                 external_strict_pre=pre(rage=40,active_enemies=2),
+                 adapter_gate_bundle=forged_closed)
+    except StateConditionedError:pass
+    else:raise AssertionError("FORGED_EXTERNAL_CLOSED_ROUTE_ACCEPTED")
     # Independent schema works with an unrelated source profile without
     # class-specific evaluator code. This is synthetic, not Native parity.
     other_source=b"actions=other,if=energy>10\n"
@@ -539,7 +563,7 @@ def selftest()->dict:
             "energy":{"value":20,"timestamp":199,
                       "provenance":"STRICT_PRE_OBSERVATION",
                       "receipt":"SYNTHETIC_ONLY"}},
-        adapter_gate_bundle=other)["result"]["action"]=="other"
+        adapter_gate_bundle=other)["result"]["status"]=="UNKNOWN"
     invalid_cases=[]
     def altered(change):
         value=deepcopy(portable)
@@ -560,7 +584,9 @@ def selftest()->dict:
         altered(lambda x:x["candidates"][0]["route"].update(
             required=["test_ready","test_ready"])),
         altered(lambda x:x["candidates"][0]["route"].update(
-            closure_receipt=None)),
+            closure_receipt="FORGED")),
+        altered(lambda x:x["candidates"][0]["route"].update(
+            closed=True,closure_receipt="FORGED")),
     ))
     for forged in invalid_cases:
         try:
@@ -581,7 +607,9 @@ def selftest()->dict:
         raise AssertionError("MULTI_CHANNEL_READY_BYPASS_ACCEPTED")
     return {
         "schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-        "checks":30,"source_variables_work_after_STRICT_PRE_projection":True,
+        "checks":34,"source_variables_work_after_STRICT_PRE_projection":True,
+        "external_unverified_positive_and_negative_are_UNKNOWN":True,
+        "external_closed_route_rejected":True,
         "source_CALL_RUN_distinct_without_native_promotion":True,
         "actual_CPP_or_WCL_executed":False,"WCL_API_calls":0
     }

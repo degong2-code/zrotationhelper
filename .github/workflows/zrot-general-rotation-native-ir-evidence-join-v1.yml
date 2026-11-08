@@ -8,6 +8,7 @@ on:
       - tools/research/general_rotation_source_hypothesis_ir_v1.py
       - tools/research/simc_native_if_false_priority_frontier_v1.py
       - tools/research/simc_native_decision_proof_bridge_v1.py
+      - tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py
       - tools/research/general_rotation_source_route_audit_v1.py
       - tools/research/general_rotation_source_route_fixture_v1.py
       - tools/research/general_rotation_original_pre_capture_engine_v1.py
@@ -42,6 +43,7 @@ jobs:
           python -m py_compile tools/research/general_rotation_native_ir_pre_evidence_join_v1.py tools/research/general_rotation_source_route_audit_v1.py tools/research/general_rotation_source_route_fixture_v1.py
           python -m py_compile tools/research/general_rotation_original_pre_capture_engine_v1.py tools/research/general_rotation_original_pre_capture_fixture_v1.py
           python -m py_compile tools/research/simc_native_decision_proof_bridge_v1.py
+          python -m py_compile tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py
           python -B tools/research/simc_native_decision_proof_bridge_v1.py \
             >/tmp/gr-portable-adapter-source-bridge.json
           python - <<'PY'
