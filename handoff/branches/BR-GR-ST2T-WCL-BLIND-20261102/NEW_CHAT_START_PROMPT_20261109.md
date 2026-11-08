@@ -15,3 +15,7 @@
 첫 보고에는 공식 목표, 실제 HEAD·MAIN, 정책/인계 generation/parent SHA, 최신 원본 증거의 범위와 한계, 완료/미완료, 병목, 재사용 전략, 단기·중기·장기 로드맵, Product Exact Next, Session Exact Next, 사용자 당장 할 일을 포함하고 중단하라.
 
 **첫 보고 마지막 문장 정확히:** 복원 보고를 완료했습니다. 사용자의 '진행' 지시를 기다립니다.
+
+### Handoff integrity validation (read only)
+
+GitHub 인계 정책/부모/5회 후속 계승 검증 Actions [#42499559385](https://github.com/degong2-code/zrotationhelper/actions/runs/42499559385) Python 3.12·3.14 SUCCESS를 읽기 전용 확인하라. 기존 범위 잠금 검증기로 14개의 정책 훼손 테스트를 거부했고, 실제 인계 생성은 **1회(gen3→gen4)**이며 향후 5회는 **시뮬레이션**임을 구분하라. 이전 인계 원본은 `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN3_BEFORE_20261109.json`, SHA256 `acfe285053e6ee9b4662cef9a475a7b321a4e281c8c65f67539acde84d45816f`; 새 채팅에서 GitHub 실제 HEAD를 독립 재조회한다.
