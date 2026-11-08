@@ -289,3 +289,11 @@ Evidence reuse: preserve existing source JSON/Fury IR/previous A-B and method-en
 ## 2026-11-09 원본 PRE 브리지 → 범용 SpecAdapter 입력 연결
 
 **REUSE/EXTEND:** Existing `simc_native_decision_proof_bridge_v1.py` opt-in original-source gate claim exporter → `general_rotation_simc_state_conditioned_evaluator_v1.py` generic decoder. [#42501891829](https://github.com/degong2-code/zrotationhelper/actions/runs/42501891829) 3/3 SUCCESS; synthetic producer/consumer round trip, historic actual Native PRE 5,408-attempt / 953-IF regression PASS. No C++ rebuild; independent full READY remains 0. Bridge Git blob `3f96a65e5cffc2c7d91a4276ce34e340844ce5ac`. The opt-in full original export is **NOT YET run**, only synthetic transfer validated.
+
+## 2026-11-09 실제 Native PRE 20,031ms → SpecAdapter 소스 행 검증
+
+| 검증 대상 | 실제 source 영수증 | 한계 |
+|---|---|---|
+| Source behavior-aware Native gate export + Generic SpecAdapter decoder | [#42504843603](https://github.com/degong2-code/zrotationhelper/actions/runs/42504843603) 3/3 SUCCESS; Fury `moving_st` 20,031ms 실제 원본 후보 12 (`NOT_READY=9`, `UNKNOWN=3`), `slayer` 앞 6행 배제, `rampage` READY UNKNOWN; JSON SHA256 `eb476334979ea1b003eae2ac4f21ece91b8854650e3a1010df7d375aa5bc5b1b` | 기존 원본 fixture를 재생한 **bounded source truth**. 실제 전체 READY 0, WCL holdout와 dummy trainer 미실행. `source_order_complete=false`. |
+
+기존 `general_rotation_native_ir_pre_evidence_join_v1.py`, `simc_native_if_false_priority_frontier_v1.py`, `simc_native_decision_proof_bridge_v1.py` 재사용/확장. 원본 비물리 행을 독립 READY로 허위 해석하지 않도록 corrected source `behavior=ACTION` 필터 추가. 초기 CI FAIL #42504714671은 별도 보존. 상세 증거는 `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ACTUAL_SOURCE_PRE_SPEC_ADAPTER_FRONTIER_20261109.json`.

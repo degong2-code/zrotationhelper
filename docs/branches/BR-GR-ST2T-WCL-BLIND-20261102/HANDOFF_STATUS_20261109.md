@@ -70,3 +70,11 @@ Archive: `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATE
 - **확인된 원본 범위:** 기존 Fury 4조건/5,408 Native attempt, source IF 953건 (657 false/282 true/14 UNKNOWN)의 회귀 일치. Fury moving ST, 20,031ms `rampage`는 앞선 경쟁자 6건 독립 배제 확인되지만 READY **UNKNOWN**. 미해결 `BASE_VIRTUAL_COMPLETE`, `CAST_GCD`, `MOVEMENT`, `NECESSARY_ELIGIBILITY`, `SPEC_OVERRIDE_TOTAL` 총 5개 조건이 남는다.
 - **주의:** 새 native bridge 내보내기의 *원본 fixture 전체 5,408건 export E2E*가 실행됐다는 주장은 금지. 이번 회귀는 기존 producer/IR 결과 보존과 **합성 왕복 계약**을 검증했다. 완료된 사용자 로테이션·두 전문화의 양성 READY·WCL blind/general IR/dummy feedback는 여전히 미완료다.
 - **Product Exact Next:** source-verified `SpecAdapter`로 실제 Fury와 Arcane 각각 full READY와 preceding candidates를 닫는다. 선택적 원본 증거 생산은 미관측 고영향 gate에만 실시하고 Source comparator는 게이트가 아니다. 오프닝 실행 전이 및 독립 WCL lock/post-lock 검증이 이후 단계다.
+
+## 2026-11-09 실제 Native PRE 20,031ms → SpecAdapter 소스 행 검증
+
+- **원본 E2E 완료 범위:** SimC pinned Fury `moving_st`, `t=20031ms`에서 기존 Native marker 아티팩트를 그대로 재생해 실제 source 행·시각·occurrence를 범용 SpecAdapter `GateContract`와 대조. 12개 물리 행 후보 중 독립 `NOT_READY=9`, `UNKNOWN=3`, `READY=0`. 상세 해시는 `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ACTUAL_SOURCE_PRE_SPEC_ADAPTER_FRONTIER_20261109.json`에 보존.
+- **로컬 우선순위:** `slayer` 목록 앞선 인덱스 0~5의 6개 행은 해당 원본 PRE/조건에서 배제됨. 인덱스 6의 `rampage`는 실제 original Native 선택과 소스가 일치하나 물리 READY는 `UNKNOWN`. 남은 5개: `BASE_VIRTUAL_COMPLETE / CAST_GCD / MOVEMENT / NECESSARY_ELIGIBILITY / SPEC_OVERRIDE_TOTAL`. 목록 전체/게임 최적성/사용자 실수 판단은 불가.
+- **검증:** [Actions #42504843603](https://github.com/degong2-code/zrotationhelper/actions/runs/42504843603), 3/3 SUCCESS, Py3.12/3.14 및 실제 portable PRE 재생. GitHub artifact 13626009372; 원본 join JSON SHA256 `eb476334979ea1b003eae2ac4f21ece91b8854650e3a1010df7d375aa5bc5b1b`. 새로운 Native C++ 빌드/WCL/클라이언트 호출 없음.
+- **실패 구분:** #42504714671 원본 행 behavior 필터 부재로 `ADAPTER_CANDIDATE_ROW_IDENTITY_INVALID`, 파이프라인 계약 불일치였으며 새 원본 behavior `ACTION` 확인 후 수정. 실패는 보존. 기존 5,408 attempts/953 IF 변동 없음.
+- **다음:** 새로운 합성 검사 대신 실제 남은 5개 gate에 필요한 raw source producer/fixture를 우선 선택. 스킬 선택에 직접 기여하지 않는 반복 Native 빌드는 피한다.

@@ -1,0 +1,178 @@
+{
+  "schema": "ZrotBranchActualSourcePREToSpecAdapterBoundedGateAuditV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "date": "2026-11-09",
+  "official_simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "profile_git_blob_sha1": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+  "source_marker_manifest_sha256": "44ac4316dcd718a42057832b45f6b6c746f8487462589a4513d177a38d16878a",
+  "case": "moving_st",
+  "at_simc_ms": 20031,
+  "git_actions": {
+    "failed_first_run": 42504714671,
+    "failure": "ACTUAL_ORIGINAL_ROW_WAS_NOT_GUARANTEED_PHYSICAL_ACTION_IN_PORTABLE_EXPORT; ADAPTER_CANDIDATE_ROW_IDENTITY_INVALID",
+    "corrected_run": 42504843603,
+    "corrected_run_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42504843603",
+    "jobs": 3,
+    "conclusion": "success",
+    "python_versions": [
+      "3.12",
+      "3.14"
+    ],
+    "actual_source_marker_fixture_replayed": true,
+    "new_original_native_cpp_build": false,
+    "new_WCL_API_calls": 0,
+    "addon_game_client_test": false,
+    "artifact_id": 13626009372,
+    "artifact_expires_utc": "2026-11-15T17:25:19Z",
+    "artifact_zip_sha256": "f2057b1ae3b198ee626efc2a18c7c37cbf681f57eb49b7034399ff0a8f86f20e",
+    "source_json_sha256": "eb476334979ea1b003eae2ac4f21ece91b8854650e3a1010df7d375aa5bc5b1b"
+  },
+  "actual_candidate_summary": {
+    "total_source_row_bound_claims": 12,
+    "independent_NOT_READY": 9,
+    "independent_READY": 0,
+    "independent_UNKNOWN": 3,
+    "nonphysical_control_or_side_effect_rows_not_exported_as_physical": true,
+    "actual_rows": [
+      {
+        "source_list": "default",
+        "source_index": 1,
+        "action": "charge",
+        "source_row_sha256": "c479ca2a8230cd4d9d184375058399817d7508a2fb666fa28ec15773c491491d",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "NOT_READY"
+      },
+      {
+        "source_list": "default",
+        "source_index": 2,
+        "action": "heroic_leap",
+        "source_row_sha256": "8a4567109f9446c5a621f3513534c29bf2e99b583bd8004ef294a5113c3da950",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "NOT_READY"
+      },
+      {
+        "source_list": "default",
+        "source_index": 3,
+        "action": "potion",
+        "source_row_sha256": "a2c22ebd95151bb6a657b4d5da006f82cfeb9b1563dcc5119a432822f3f64961",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "NOT_READY"
+      },
+      {
+        "source_list": "default",
+        "source_index": 4,
+        "action": "pummel",
+        "source_row_sha256": "61475357249133d9a8e39959f7e289f85958e829738542e99b70e69d6a8b934e",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "UNKNOWN"
+      },
+      {
+        "source_list": "default",
+        "source_index": 13,
+        "action": "invoke_external_buff",
+        "source_row_sha256": "2cf40ce2c23861f35b27f0b2f315a48275e0d3fedd4d83a845e9993d229f21a4",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "UNKNOWN"
+      },
+      {
+        "source_list": "slayer",
+        "source_index": 0,
+        "action": "recklessness",
+        "source_row_sha256": "69a36b66f23922fc5acfd6ed7500b6842d744ff4592f3cd26ab19068a4707d1f",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "NOT_READY"
+      },
+      {
+        "source_list": "slayer",
+        "source_index": 1,
+        "action": "rampage",
+        "source_row_sha256": "c4fe757fe40b4b4937651992072aa54cfbe04793d65421f112e292e56242a8cd",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "NOT_READY"
+      },
+      {
+        "source_list": "slayer",
+        "source_index": 2,
+        "action": "rampage",
+        "source_row_sha256": "3001f211b6889baf8b97637aa47bc8b478385d53003da1585b26763514b10b94",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "NOT_READY"
+      },
+      {
+        "source_list": "slayer",
+        "source_index": 3,
+        "action": "rampage",
+        "source_row_sha256": "61ce2e7476179fd9e0cdba882cb45742470e3e21bd756c3e65e51a4495f336e4",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "NOT_READY"
+      },
+      {
+        "source_list": "slayer",
+        "source_index": 4,
+        "action": "bladestorm",
+        "source_row_sha256": "aef8027b756c60f2bc3d074db41ebe54e529fec59ab7a2605d6a33e34063435c",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "NOT_READY"
+      },
+      {
+        "source_list": "slayer",
+        "source_index": 5,
+        "action": "execute",
+        "source_row_sha256": "b1079b2b9a7fc43a798752082d4e1d8e90ae7f8228251ecc9c46c3fb07b84c63",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "NOT_READY"
+      },
+      {
+        "source_list": "slayer",
+        "source_index": 6,
+        "action": "rampage",
+        "source_row_sha256": "217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2",
+        "source_occurrence": 0,
+        "independent_local_ready_decision": "UNKNOWN"
+      }
+    ],
+    "slayer_local_frontier": {
+      "source_list": "slayer",
+      "earlier_source_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "earlier_all_independent_NOT_READY": true,
+      "observed_original_cpp_returned_action": "rampage",
+      "selected_source_index": 6,
+      "selected_source_row_sha256": "217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2",
+      "selected_physical_READY": "UNKNOWN",
+      "selected_unresolved_gates": [
+        "BASE_VIRTUAL_COMPLETE",
+        "CAST_GCD",
+        "MOVEMENT",
+        "NECESSARY_ELIGIBILITY",
+        "SPEC_OVERRIDE_TOTAL"
+      ],
+      "source_order_complete": false,
+      "actual_Native_return_only_comparator": true,
+      "global_rotation_priority_proven": false
+    },
+    "non_slayer_unknown_candidates": [
+      "default[4] pummel",
+      "default[13] invoke_external_buff"
+    ]
+  },
+  "provenance_limits": [
+    "Existing original Native marker snapshots already validated and source pinned; no new original C++ producer.",
+    "12 per-source row necessary-gate decisions are scoped to this time/fixture, not 12 physical casts or globally correct APL priorities.",
+    "Same timestamp source method PRE is not a WCL Strict PRE transition. A source-row READY unknown does not prove the player made a mistake.",
+    "No complete positive virtual-method closure for Fury or Arcane. Fresh game addon observational state and WCL independent model holdout are unverified.",
+    "Focused rows are not independent new discovery cohort or WCL holdout; they extend a verified historic source fixture."
+  ],
+  "next_product_exact": "Close actual source-verified BASE_VIRTUAL_COMPLETE, CAST_GCD, MOVEMENT, NECESSARY_ELIGIBILITY and SPEC_OVERRIDE_TOTAL for one physical chosen Fury action, and one unrelated Arcane action without using Native winner as independent input, then cross-scan variable/control and WCL blind candidate lock/holdout.",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}

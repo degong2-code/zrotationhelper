@@ -260,3 +260,11 @@ The 2026-11-08 `general_rotation_simc_state_conditioned_evaluator_v1.py` perform
 ## 2026-11-09 원본 PRE 브리지 → 범용 SpecAdapter 입력 연결
 
 `NativeProofBridge(export_source_gate_claims=True)` now produces optional source-row claim of *independently replayed original C++ method PRE gates* with source pointer and open contract. This eliminates a previously missing transfer link; comparator-only Native base completion cannot turn positive, suppressed negative gates are not exported. Source decoder validates profile blob, row SHA, action/list/index/time/occurrence. [#42501891829](https://github.com/degong2-code/zrotationhelper/actions/runs/42501891829) static Python3.12/3.14 producer→consumer tests PASS and prior Fury 4-scenario real portable replay unchanged, no new Native build. Source snapshot authentication and actual positive READY proof are still independent next gates; no user gameplay verdict.
+
+## 2026-11-09 실제 Native PRE 20,031ms → SpecAdapter 소스 행 검증
+
+**실제 실증:** 기존 artifact #41797208028의 pinned portable source PRE를 기존 E2E 경로에서 재사용하고 `--export-gate-case moving_st --export-gate-at-ms 20031` 옵션으로 소스 행 12건을 증명 계약에 연결했다. 원본 `slayer` 후보 0~5 배제 + 6번 `rampage`의 5가지 미해결 READY 조건을 같은 evidence receipt에서 재확인. 단일 로컬 frontier일 뿐 전역 플레이 우선순위 불가. [#42504843603](https://github.com/degong2-code/zrotationhelper/actions/runs/42504843603) PASS, original JSON SHA256 `eb476334979ea1b003eae2ac4f21ece91b8854650e3a1010df7d375aa5bc5b1b`.
+
+**교정 이력:** #42504714671는 `ADAPTER_CANDIDATE_ROW_IDENTITY_INVALID`로 FAIL. Native action name만으로 물리 ACTION을 판정하던 exporter 결손을 typed source row `behavior` 확인으로 수정한 후 실제 E2E PASS. "모든 Native 후보=물리 스킬" 같은 잘못된 의미론을 넣지 않는다.
+
+**정확한 다음 단계:** 5개 결손 게이트의 실제 원본 방법·상태 증명 범위를 좁혀 평가. `BASE_VIRTUAL_COMPLETE`는 현재 source method exhaustive closure가 없음. 기존 `original-pre-capture-plan`의 12개 필요한 원본 operand와 교차 확인하고, 미관측 값을 가공/추정하지 않는다. Arcane에 대한 독립 두 번째 전문화 증명은 아직 미실행. WCL blind와 dummy feedback 미완.
