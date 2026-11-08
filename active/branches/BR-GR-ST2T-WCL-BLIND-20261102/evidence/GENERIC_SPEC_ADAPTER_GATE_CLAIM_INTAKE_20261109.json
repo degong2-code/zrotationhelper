@@ -1,0 +1,49 @@
+{
+  "schema": "ZrotBranchGenericSpecAdapterGateClaimIntakeReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "parent_code_commit": "24eba87db22a7fbf5b8b06bafd62ee57faa61403",
+  "source_code": "tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py",
+  "source_code_sha256": "dd20ce39744c04776fc9009420cc92ddbb1272d697f01a1eadbe6f2e46354705",
+  "source_git_blob_sha1": "1959b124b9a027e3e8a341e4d4759adf40aac391",
+  "feature": "ZrotSpecAdapterGateClaimsV1 input parser integrated with existing Identity/GateContract/Fact and strict source evaluator, exact profile/row/time/occurrence and legacy fail-closed semantics.",
+  "validation": {
+    "run_id": 42501155498,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42501155498",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      "generic-state-synthetic (3.12) SUCCESS",
+      "generic-state-synthetic (3.14) SUCCESS",
+      "two-real-classes-fail-closed SUCCESS"
+    ],
+    "synthetic_checks_reported_per_python_version": 30,
+    "real_pinned_profiles": "Warrior Fury and Mage Arcane source-only; no externally supplied positive READY",
+    "original_native_cpp_compiled": false,
+    "WCL_API_calls": 0,
+    "WoW_client_calls": 0
+  },
+  "verified_boundary": {
+    "independent_full_positive_real_ready": 0,
+    "original_real_cpp_action_parity_from_external_gate_bundle": "NOT_PROVEN",
+    "real_WCL_independent_rotation_holdout": "NOT_RUN",
+    "actual_target_dummy_mistake_feedback": "NOT_READY",
+    "adapter_bundle_provenance_authenticity_verified_here": false,
+    "synthetic_positive_gate_claim_allowed_as_hypothetical_only": true,
+    "native_selected_return_as_readiness_operand": false,
+    "WCL_same_timestamp_or_future_rejected": true,
+    "current_General_Rotation_IR_promoted": false
+  },
+  "reuse": [
+    "simc_apl_semantic_ir_v2.py",
+    "general_rotation_decision_proof_engine_v1.py",
+    "general_rotation_ir_proof_replay_v1.py",
+    "general_rotation_simc_state_conditioned_evaluator_v1.py"
+  ],
+  "extend_next": "Connect source-verified independent real PRE/method complete SpecAdapter certificates for one actual chosen physical action + earlier competing candidates per Fury and Arcane; verify variable/control effects across scans, then WCL blind lock/post-lock/holdout.",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}

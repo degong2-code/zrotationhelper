@@ -53,3 +53,12 @@
 [Actions #42499559385](https://github.com/degong2-code/zrotationhelper/actions/runs/42499559385) **SUCCESS** (Python 3.12 + 3.14). The existing `tools/governance/validate_scope_continuity_v1.py --validate --self-test --handoff <branch-local latest>` was reused; both jobs verified: complete policy snapshot equality and pinned ID/lock SHA, **14 negative scope-drift cases rejected**, five successive simulated handoffs with valid parent links, old generation 3 → new generation 4, archive SHA256 **`acfe285053e6ee9b4662cef9a475a7b321a4e281c8c65f67539acde84d45816f`**, no user '진행' inheritance, MAIN/FROZEN untouched. This is an **actual governance CI PASS**, not a new SimC/WCL/gameplay engine test.
 
 Archive: `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN3_BEFORE_20261109.json`, original Git blob `05a9c5d65a1120e82d052dc07c3f5bf6c844059b`. New compact handoff: branch-local `LATEST_HANDOFF.json`, schema V5, scope generation 4. Do not confuse simulated five future successors with five actual successive chats.
+
+## 2026-11-09 승인 이후 Branch 개발 진행 — SpecAdapter claim ingestion
+
+- **기능:** `general_rotation_simc_state_conditioned_evaluator_v1.py`에 JSON `--adapter-gates` 증명 입력과 `decode_adapter_gate_bundle`를 추가했다. 원본 APL 행 SHA/스킬/list/0-based index, profile Git blob, 시각 및 occurrence를 일치시키고, 기존 `Identity / GateContract / Fact`를 그대로 사용한다.
+- **실제 영수증:** [Actions #42501155498](https://github.com/degong2-code/zrotationhelper/actions/runs/42501155498) completed/success, Python3.12 및 3.14 합성(각 30로 표시된 검사), 기존 공식 Fury/Arcane pinned-profile 소스 fail-closed 실증, 3/3 jobs SUCCESS. 최종 코드 SHA256 `dd20ce39744c04776fc9009420cc92ddbb1272d697f01a1eadbe6f2e46354705`.
+- **입력 검증:** 행·SHA·시각·occurrence·중복 후보/게이트 및 WCL same-timestamp 거부, Native post-comparator는 READY 불가, 미완성 route는 UNKNOWN. JSON 서명/원본 사실의 진위를 단독 인증하지 않으므로 출력에 `external_gate_bundle_provenance_authenticity_verified_here=false`를 명시한다.
+- **제품 한계:** 본 변경은 외부 SpecAdapter 증명 자료를 범용 엔진에서 다룰 수 있게 한 것이다. 실제 Original Fury/Arcane 물리 READY 완전 독립 증명은 **여전히 0**, 원본 C++ 선택 parity/실제 WCL 모델 검증/허수아비 판정은 **NOT_RUN / NOT_READY**. 합성으로 closure를 주장한 예제는 실제 게임 검증이 아니다.
+- **다음 critical path:** 기존 source-PRE producer·virtual method 경로를 실제 동작 데이터에서 독립 검증해 이 입력 계약에 연결한다. 원본 선택 결과는 comparator로만 사용한다. 이어 Fury+Arcane의 실제 양성 READY와 앞선 후보 배제 판정, 효과/변수 및 CALL/RUN 전이 parity를 마무리한다.
+- **범위:** Branch-only, 공식 scope/gen4 유지, MAIN/FROZEN 불변, Seq578=FAILED_QUARANTINED, Seq637=UNKNOWN.

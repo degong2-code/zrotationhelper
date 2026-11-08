@@ -277,3 +277,11 @@ Evidence reuse: preserve existing source JSON/Fury IR/previous A-B and method-en
 **NEXT REUSE/EXTEND vs REPLACE**: Keep parser/graph/gates. The missing core is an **actual source-pinned SpecAdapter provider + independent physical readiness and execute-state transition**, verified on Fury AND Arcane at actual chosen root before source priority model graduation. Only REPLACE a demonstrably blocking adapter, do not reimplement the parser/Native fixture or per-spell Orb diagnostics. WCL discovery 54 / disjoint holdout 51 casts are existing raw resources, NOT yet blind locked/reconciled for General Rotation. Explicit UNKNOWN: native positive complete READY=0, full dynamic opener-end/cleave/AoE, WCL-validated IF/ELSE, target-dummy actual-client verdict all incomplete.
 
 **Next chat MUST only restore/read/compare then stop until new explicit '진행'.** Source handoff scope generation 4 links byte-exact archived previous generation 3, not an authoritative MAIN promotion. Product ID `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`; shared/FROZEN unchanged.
+
+## 2026-11-09 승인 이후 Branch 개발 진행 — SpecAdapter claim ingestion
+
+| 기능 | 검증된 영수증 | 재사용 판정·한계 |
+|---|---|---|
+| External SpecAdapter Gate Evidence 입력 — `general_rotation_simc_state_conditioned_evaluator_v1.py` (`--adapter-gates`) | [#42501155498](https://github.com/degong2-code/zrotationhelper/actions/runs/42501155498) 3 jobs success; Python3.12/3.14 synthetic; 실제 고정 Fury+Arcane source remains UNKNOWN; code SHA256 `dd20ce39744c04776fc9009420cc92ddbb1272d697f01a1eadbe6f2e46354705` | **REUSE** 기존 GateContract/Fact; **EXTEND** original PRE, source method exhaustive route/source verifier → machine-readable adapter proof. 외부 JSON은 스스로 진위를 증명하지 못하며 false-positive 보호; 게임 READY 0, WCL/post-session 피드백 미완. |
+
+세부 영수증: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SPEC_ADAPTER_GATE_CLAIM_INTAKE_20261109.json`. 기존 172/262 원본은 별도 소스 검증이며 이번 신규 실증치에 더하지 않는다.
