@@ -1,0 +1,75 @@
+{
+  "schema": "ZrotBranchGenericSimCStateConditionedExecutorEvidenceV1",
+  "record_date": "2026-11-08",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "claim_status": "BOUNDED_GENERIC_ONE_SCAN_STATE_CONDITIONED_RESEARCH_EXECUTOR_SYNTHETIC_PASS_AND_REAL_SOURCE_FAIL_CLOSED_PASS",
+  "source_pins": {
+    "existing_simc_APL_parser": "tools/research/simc_apl_semantic_ir_v2.py",
+    "existing_strict_PRE_validator": "tools/research/general_rotation_ir_proof_replay_v1.py::source_pre_facts",
+    "existing_independent_gate_proof": "tools/research/general_rotation_decision_proof_engine_v1.py::decide_candidate",
+    "new_generic_evaluator": "tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py",
+    "new_generic_evaluator_sha256": "8523617ff70fc51da5a1b80cfe54834c5146d7cbb06db9533311df16b2415dde",
+    "new_CI": ".github/workflows/zrot-general-rotation-simc-state-conditioned-v1.yml",
+    "official_SIMC_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "mage_profile_git_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+    "warrior_profile_git_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be"
+  },
+  "new_engine_features": [
+    "Exact source profile Git blob pin, source AST guards from original generic parser and per-source-row reason ledger.",
+    "External WCL strict PRE facts require {value,timestamp,provenance,receipt} and source transition time timestamp < decision t; no bare or same-time/future facts.",
+    "Validated PRE values project into a trusted numeric interpreter frame; local variable effects derived in this scan are distinct from external WCL PRE; no ignored implicit zeros.",
+    "Actual action READY is provided only via existing Identity/GateContract/Fact independent route closure; source/native selected return or observed WCL cast is not READY.",
+    "IF_FALSE action rows continue; IF_UNKNOWN or higher eligible action UNKNOWN block later source alternatives rather than selecting them.",
+    "CALL child scans and returns to parent if no eligible action (only synthetic control assumption; no real Native parity claim). RUN yields queued control action not immediate child selection.",
+    "Actual t=0 opener timestamp is accepted; only strictly prior negative-time PRE fact is eligible; same-time t=0 denied.",
+    "Original SimC source priority is scoped to each list and nested controls; no global ranking, actual cast reconstruction or user error inference."
+  ],
+  "validated_CI": {
+    "run_id": 42444206139,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42444206139",
+    "python312_compile_selftest": "SUCCESS",
+    "python314_compile_selftest": "SUCCESS",
+    "synthetic_checks_per_version": 15,
+    "actual_pinned_two_real_profiles_fail_closed": "SUCCESS",
+    "actual_simc_cpp_compiled_in_this_run": false,
+    "WCL_API_calls": 0,
+    "Wow_client_calls": 0,
+    "real_native_ready_comparator_oracle_used_as_input": false,
+    "synthetic_decisions_are_not_live_native_parity": true,
+    "original_arcane_apl_result": "UNKNOWN_FULL_READY_SOURCE_PROOF_UNKNOWN",
+    "original_fury_apl_result": "UNKNOWN_SOURCE_NON_PHYSICAL_EFFECT_UNVERIFIED",
+    "synthetic_claims": [
+      "source variable assignment threshold=30 after Strict PRE projection yields correct subsequent IF evaluation",
+      "independent gate source proof decides a hypothetical action only with closed contract",
+      "necessary false makes a source row locally ineligible",
+      "unknown higher priority blocks lower priority",
+      "synthetic CALL fallback vs queued RUN",
+      "zero timestamp opener prior fact admissible and same timestamp inadmissible",
+      "false row/occurrence/time/sha proof causes failure"
+    ],
+    "CI_artifact_id": 13603106491,
+    "CI_artifact_name": "zrot-generic-state-conditioned-source-replay",
+    "CI_artifact_zip_sha256": "1af8cec0847108765732410649739414e108b3d8a3cf6dabe9bd0a4d4c6f291e",
+    "CI_artifact_expires_at_utc": "2026-11-15T03:48:29Z",
+    "actual_output_json_sha256": {
+      "mage_arcane": "eb1a44261275c22bc971f30dd22fe5df62b959859efe342838dad0cd1a19d5ae",
+      "warrior_fury": "7ec5beb1e12fab83c098b4966d6d4c2935984f18382da05578a4752781c40d2f"
+    }
+  },
+  "limits_and_missing": [
+    "Real profiles were run with explicitly EMPTY strict PRE and no proven READY gates; both safely UNKNOWN. This is real source smoke/fail-closed, not action-selection parity validation.",
+    "No proof for all physical spell global availability or an optimal General Rotation; closed route evidence in tests is synthetic, not a live SimC source closure.",
+    "Strict PRE receipt input validates schema and timestamp only; authenticity of external WCL evidence must be independently checked upstream.",
+    "Locally derived APL variable effects are research model transitions, native assignment/scheduling not yet verified; carrying variable across future scans requires observed execute transition and state provenance.",
+    "CALL/RUN control readiness is explicitly synthetic-assumed for tests; real control READY not reconstructed and cannot be auto-positive.",
+    "Other SimC source attributes, target_if/cycling, proc effects, timers, pooling and full opener finish remain unresolved and block positive readiness.",
+    "Original Native SimC full target dummy opener parity and independent WCL blind candidate lock/holdout not performed.",
+    "Current WoW retail addon API/test not performed; no real-time combat solver or user practice error verdict."
+  ],
+  "next_product_exact": "Add generic full SpecAdapter state to independent action READY gates and actually sourced effect/variable/control transitions. Reuse real original Native selected-source root PRE across Fury and Arcane, separate SimC same-clock call BEFORE from WCL strict timestamp BEFORE, validate at least one fully reproduced source chooser decision per two unrelated specs and a documented opener-end criterion, then target-count/build and WCL blind candidate lock/holdout. Keep absent states UNKNOWN; no new encounter, NSRT or in-client combat solver.",
+  "main_promoted": false,
+  "frozen_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
