@@ -528,7 +528,7 @@ def selftest()->dict:
         adapter_gate_bundle=open_route)["result"]["status"]=="UNKNOWN"
     # Independent schema works with an unrelated source profile without
     # class-specific evaluator code. This is synthetic, not Native parity.
-    other_source=b"actions=other,if=energy>10\\n"
+    other_source=b"actions=other,if=energy>10\n"
     other_blob=git_blob(other_source)
     other_row=parse_profile(
         other_source,require_source=True,
@@ -581,7 +581,7 @@ def selftest()->dict:
         raise AssertionError("MULTI_CHANNEL_READY_BYPASS_ACCEPTED")
     return {
         "schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-        "checks":29,"source_variables_work_after_STRICT_PRE_projection":True,
+        "checks":30,"source_variables_work_after_STRICT_PRE_projection":True,
         "source_CALL_RUN_distinct_without_native_promotion":True,
         "actual_CPP_or_WCL_executed":False,"WCL_API_calls":0
     }
