@@ -45,5 +45,38 @@
   "MAIN_promoted": false,
   "FROZEN_modified": false,
   "Seq578": "FAILED_QUARANTINED",
-  "Seq637": "UNKNOWN"
+  "Seq637": "UNKNOWN",
+  "followup_source_export": {
+    "code": "tools/research/simc_native_decision_proof_bridge_v1.py",
+    "code_git_blob_sha1": "3f96a65e5cffc2c7d91a4276ce34e340844ce5ac",
+    "workflow": ".github/workflows/zrot-general-rotation-native-ir-evidence-join-v1.yml",
+    "run_id": 42501891829,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42501891829",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": 3,
+    "python_312_314_synthetic_source_gate_to_generic_decoder": "PASS",
+    "prior_original_native_fixture_replay": "PASS_REUSED_EXISTING_ARTIFACT_NO_NEW_NATIVE_CXX",
+    "prior_source_original_attempts": 5408,
+    "prior_source_IF": 953,
+    "IF_false": 657,
+    "IF_true": 282,
+    "IF_UNKNOWN": 14,
+    "first_prior_proven_exclusion_fixture": {
+      "spec": "warrior_fury",
+      "context": "moving_st",
+      "t_ms": 20031,
+      "action": "rampage",
+      "earlier_candidates_independently_excluded": 6,
+      "full_READY": "UNKNOWN",
+      "missing_gate_count": 5
+    },
+    "portable_full_actual_fixture_export_tested": false,
+    "native_return_as_ready": false,
+    "all_exported_gate_contracts_open": true,
+    "WCL_API_calls": 0,
+    "WoW_client_calls": 0,
+    "priority_claim": "NOT_PROVEN",
+    "dummy_mistake_feedback": "NOT_READY"
+  }
 }

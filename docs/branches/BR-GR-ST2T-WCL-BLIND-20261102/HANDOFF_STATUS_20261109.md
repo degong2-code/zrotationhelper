@@ -62,3 +62,11 @@ Archive: `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATE
 - **제품 한계:** 본 변경은 외부 SpecAdapter 증명 자료를 범용 엔진에서 다룰 수 있게 한 것이다. 실제 Original Fury/Arcane 물리 READY 완전 독립 증명은 **여전히 0**, 원본 C++ 선택 parity/실제 WCL 모델 검증/허수아비 판정은 **NOT_RUN / NOT_READY**. 합성으로 closure를 주장한 예제는 실제 게임 검증이 아니다.
 - **다음 critical path:** 기존 source-PRE producer·virtual method 경로를 실제 동작 데이터에서 독립 검증해 이 입력 계약에 연결한다. 원본 선택 결과는 comparator로만 사용한다. 이어 Fury+Arcane의 실제 양성 READY와 앞선 후보 배제 판정, 효과/변수 및 CALL/RUN 전이 parity를 마무리한다.
 - **범위:** Branch-only, 공식 scope/gen4 유지, MAIN/FROZEN 불변, Seq578=FAILED_QUARANTINED, Seq637=UNKNOWN.
+
+## 2026-11-09 원본 PRE 브리지 → 범용 SpecAdapter 입력 연결
+
+- **코드 확장:** `simc_native_decision_proof_bridge_v1.py`의 `NativeProofBridge(export_source_gate_claims=True)` opt-in 내보내기. 독립 원본 메서드 PRE 사실 중 `INDEPENDENT_SOURCE_REPLAY`만 선택해 앞서 구현한 `ZrotSpecAdapterGateClaimsV1` 포맷으로 연결한다. Native positive exit/선택 결과는 comparator-only로 남고 `closed=false`이며, 검증되지 않은 원본 스킬 alias/control은 내보내지 않는다. 보류된 소스 음성 사실을 무단 재수입하지 않는다.
+- **실행 영수증:** [Actions #42501891829](https://github.com/degong2-code/zrotationhelper/actions/runs/42501891829) **3/3 jobs SUCCESS** — Python 3.12/3.14의 producer→consumer 합성 음성/UNKNOWN round-trip PASS, 종전 원본 portable Native PRE fixture 재생 PASS. 새로운 SimC C++ 컴파일·WCL API·게임 클라이언트 호출 없음.
+- **확인된 원본 범위:** 기존 Fury 4조건/5,408 Native attempt, source IF 953건 (657 false/282 true/14 UNKNOWN)의 회귀 일치. Fury moving ST, 20,031ms `rampage`는 앞선 경쟁자 6건 독립 배제 확인되지만 READY **UNKNOWN**. 미해결 `BASE_VIRTUAL_COMPLETE`, `CAST_GCD`, `MOVEMENT`, `NECESSARY_ELIGIBILITY`, `SPEC_OVERRIDE_TOTAL` 총 5개 조건이 남는다.
+- **주의:** 새 native bridge 내보내기의 *원본 fixture 전체 5,408건 export E2E*가 실행됐다는 주장은 금지. 이번 회귀는 기존 producer/IR 결과 보존과 **합성 왕복 계약**을 검증했다. 완료된 사용자 로테이션·두 전문화의 양성 READY·WCL blind/general IR/dummy feedback는 여전히 미완료다.
+- **Product Exact Next:** source-verified `SpecAdapter`로 실제 Fury와 Arcane 각각 full READY와 preceding candidates를 닫는다. 선택적 원본 증거 생산은 미관측 고영향 gate에만 실시하고 Source comparator는 게이트가 아니다. 오프닝 실행 전이 및 독립 WCL lock/post-lock 검증이 이후 단계다.

@@ -285,3 +285,7 @@ Evidence reuse: preserve existing source JSON/Fury IR/previous A-B and method-en
 | External SpecAdapter Gate Evidence 입력 — `general_rotation_simc_state_conditioned_evaluator_v1.py` (`--adapter-gates`) | [#42501155498](https://github.com/degong2-code/zrotationhelper/actions/runs/42501155498) 3 jobs success; Python3.12/3.14 synthetic; 실제 고정 Fury+Arcane source remains UNKNOWN; code SHA256 `dd20ce39744c04776fc9009420cc92ddbb1272d697f01a1eadbe6f2e46354705` | **REUSE** 기존 GateContract/Fact; **EXTEND** original PRE, source method exhaustive route/source verifier → machine-readable adapter proof. 외부 JSON은 스스로 진위를 증명하지 못하며 false-positive 보호; 게임 READY 0, WCL/post-session 피드백 미완. |
 
 세부 영수증: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SPEC_ADAPTER_GATE_CLAIM_INTAKE_20261109.json`. 기존 172/262 원본은 별도 소스 검증이며 이번 신규 실증치에 더하지 않는다.
+
+## 2026-11-09 원본 PRE 브리지 → 범용 SpecAdapter 입력 연결
+
+**REUSE/EXTEND:** Existing `simc_native_decision_proof_bridge_v1.py` opt-in original-source gate claim exporter → `general_rotation_simc_state_conditioned_evaluator_v1.py` generic decoder. [#42501891829](https://github.com/degong2-code/zrotationhelper/actions/runs/42501891829) 3/3 SUCCESS; synthetic producer/consumer round trip, historic actual Native PRE 5,408-attempt / 953-IF regression PASS. No C++ rebuild; independent full READY remains 0. Bridge Git blob `3f96a65e5cffc2c7d91a4276ce34e340844ce5ac`. The opt-in full original export is **NOT YET run**, only synthetic transfer validated.

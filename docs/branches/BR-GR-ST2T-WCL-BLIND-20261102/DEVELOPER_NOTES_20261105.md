@@ -256,3 +256,7 @@ The 2026-11-08 `general_rotation_simc_state_conditioned_evaluator_v1.py` perform
 **검증/한계:** Actions #42501155498 3/3 jobs SUCCESS. Synthetic 30 checks/version + pinned Fury/Arcane no-proof `UNKNOWN`; actual C++ Native 재빌드/실제 WCL API/게임 클라이언트는 호출하지 않았다. JSON receipt/closure 명칭 자체는 독립 원본 증명이 아니다. 합성 true proof로 얻은 hypothetical choice는 gameplay rule이 아니며 실제 양성 READY는 0.
 
 **제품 Exact Next:** 실제 Original source method/effect/control PRE를 검증한 SpecAdapter가 위 계약에 Fact/GateContract를 공급하도록 확장. Native 선택을 입력 근거로 쓰지 않으며, Fury와 Arcane 두 전문화의 실제 선택 및 경쟁자 제외가 완전히 증명되기 전 훈련 판정 금지.
+
+## 2026-11-09 원본 PRE 브리지 → 범용 SpecAdapter 입력 연결
+
+`NativeProofBridge(export_source_gate_claims=True)` now produces optional source-row claim of *independently replayed original C++ method PRE gates* with source pointer and open contract. This eliminates a previously missing transfer link; comparator-only Native base completion cannot turn positive, suppressed negative gates are not exported. Source decoder validates profile blob, row SHA, action/list/index/time/occurrence. [#42501891829](https://github.com/degong2-code/zrotationhelper/actions/runs/42501891829) static Python3.12/3.14 producer→consumer tests PASS and prior Fury 4-scenario real portable replay unchanged, no new Native build. Source snapshot authentication and actual positive READY proof are still independent next gates; no user gameplay verdict.
