@@ -1,0 +1,111 @@
+name: ZRot Generic SimC State-Conditioned Source Evaluation
+on:
+  push:
+    branches:
+      - work/gr-simc-st-2t-wcl-blind-20261102
+    paths:
+      - tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py
+      - .github/workflows/zrot-general-rotation-simc-state-conditioned-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generic-state-synthetic:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ["3.12","3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+      - name: Compile and test generic one-scan strict PRE state and independent READY proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py
+          python -B tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py \
+            >/tmp/zrot-state-conditioned-synthetic.json
+          python - <<'PY'
+          import json
+          v=json.load(open('/tmp/zrot-state-conditioned-synthetic.json'))
+          assert v['schema']=='ZrotGenericSimCStateConditionedCandidateEvaluatorV1'
+          assert v['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert v['source_variables_work_after_STRICT_PRE_projection'] is True
+          assert v['source_CALL_RUN_distinct_without_native_promotion'] is True
+          assert v['actual_CPP_or_WCL_executed'] is False
+          assert v['WCL_API_calls']==0
+          print('GENERIC_SOURCE_CONDITIONED_STATE_SYNTHETIC_PASS',v['checks'])
+          PY
+          sha256sum tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py
+
+  two-real-classes-fail-closed:
+    needs: generic-state-synthetic
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          submodules: false
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Evaluate actual untouched SimC Mage Arcane and Warrior Fury source with UNKNOWN readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '{}\n' >/tmp/zrot-empty-safe-observations.json
+          python -B tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py \
+            --profile simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc \
+            --expected-git-blob 8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f \
+            --snapshot /tmp/zrot-empty-safe-observations.json \
+            --at-ms 10000 \
+            --out /tmp/zrot-mage-arcane-state-conditioned.json
+          python -B tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py \
+            --profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --expected-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
+            --snapshot /tmp/zrot-empty-safe-observations.json \
+            --at-ms 10000 \
+            --out /tmp/zrot-warrior-fury-state-conditioned.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for spec,blob in (
+              ('mage-arcane','8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f'),
+              ('warrior-fury','3225992ed5b754ad5d61e8b785d9d859f1eed1be')):
+              p=Path('/tmp/zrot-'+spec+'-state-conditioned.json')
+              x=json.loads(p.read_bytes())
+              assert x['schema']=='ZrotGenericSimCStateConditionedCandidateEvaluatorV1'
+              assert x['source_git_blob_sha1']==blob
+              assert x['result']['status']=='UNKNOWN'
+              assert x['result'].get('action') is None
+              assert x['input_external_PRE_observation_count']==0
+              assert x['dummy_trainer_error_permitted'] is False
+              assert x['entire_original_SimC_native_runtime_parity_verified'] is False
+              assert x['WCL_API_calls']==0
+              print('PINNED_REAL_'+spec.upper().replace('-','_')+
+                    '_STATE_CONDITIONED_FAIL_CLOSED_PASS',
+                    x['result']['reason'],x['reason_counts'],flush=True)
+          PY
+          sha256sum /tmp/zrot-*-state-conditioned.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-generic-state-conditioned-source-replay
+          path: |
+            /tmp/zrot-mage-arcane-state-conditioned.json
+            /tmp/zrot-warrior-fury-state-conditioned.json
+          if-no-files-found: error
+          retention-days: 7
