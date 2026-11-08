@@ -327,6 +327,14 @@ def selftest()->dict:
         external_strict_pre=pre(rage=40,active_enemies=1),
         proofs=proof,synthetic_control_ready={("default",1)})
     assert e["result"]["status"]=="UNKNOWN"  # child alpha missing evidence
+    # A CALL whose child is source-proven ineligible must resume its parent
+    # within the SAME scan (unlike queued RUN), but this is synthetic only.
+    fallback=evaluate(source,blob,at_ms=100,
+        external_strict_pre=pre(rage=40,active_enemies=1,**{"buff.x.up":0}),
+        proofs=proof,synthetic_control_ready={("default",1)})
+    assert fallback["result"]["action"]=="blast"
+    assert fallback["synthetic_control_assumptions_used"] is True
+    assert fallback["source_reason_ledger"][2]["reason"]=="SOURCE_APL_IF_FALSE"
     run_source=source.replace(b"call_action_list",b"run_action_list")
     run=evaluate(run_source,git_blob(run_source),at_ms=100,
         external_strict_pre=pre(active_enemies=1),
@@ -371,7 +379,7 @@ def selftest()->dict:
     else:raise AssertionError("PHYSICAL_ACTION_LAUNDERED_AS_CONTROL")
     return {
         "schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-        "checks":14,"source_variables_work_after_STRICT_PRE_projection":True,
+        "checks":15,"source_variables_work_after_STRICT_PRE_projection":True,
         "source_CALL_RUN_distinct_without_native_promotion":True,
         "actual_CPP_or_WCL_executed":False,"WCL_API_calls":0
     }
