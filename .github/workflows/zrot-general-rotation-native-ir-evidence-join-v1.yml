@@ -125,11 +125,32 @@ jobs:
             --fixture-dir /tmp/source-pinned-native-artifact/native-portable-source-pre-fixture \
             --expected-manifest-sha256 44ac4316dcd718a42057832b45f6b6c746f8487462589a4513d177a38d16878a \
             --spec-adapter simc_native_warrior_priority_frontier_adapter_v1:WarriorPriorityAdapter \
+            --export-gate-case moving_st --export-gate-at-ms 20031 \
             --out /tmp/native-to-general-rotation-ir-evidence-join.json
           python - <<'PY'
           import json
           r=json.load(open('/tmp/native-to-general-rotation-ir-evidence-join.json'))
           assert r['schema']=='ZrotGeneralRotationNativeSourcePreIrEvidenceJoinV1'
+          x=r['source_gate_claim_export']
+          assert x['schema']=='ZrotOriginalPortableSourceGateBundleAuditV1'
+          assert x['case']=='moving_st' and x['decision_at_ms']==20031
+          assert x['source_git_blob_sha1']=='3225992ed5b754ad5d61e8b785d9d859f1eed1be'
+          assert x['claim_count']>0 and x['claim_count']<200
+          assert x['ready_status_counts'].get('READY',0)==0
+          assert x['source_virtual_ready_closed'] is False
+          assert x['all_claims_source_row_and_occurrence_validated'] is True
+          assert x['source_gate_provenance_upstream_raw_fixture_verified'] is True
+          assert x['actual_original_native_action_selection_reproduced'] is False
+          assert x['dummy_error_permitted'] is False
+          assert all(y['bundle']['decision_at_ms']==20031
+                     and not y['positive_route_closed']
+                     and y['native_choice_only_comparator']
+                     and y['independent_local_ready_decision'] in ('NOT_READY','UNKNOWN')
+                     and len(y['bundle']['candidates'])==1
+                     and y['bundle']['candidates'][0]['route']['closed'] is False
+                     for y in x['claims'])
+          print('ACTUAL_SOURCE_GATES_EXACT_PRE_SPEC_ADAPTER_BRIDGE_PASS',
+                x['claim_count'],x['ready_status_counts'])
           assert r['source_IR_source_action_rows']==121
           assert len(r['cases'])==4
           c=r['totals']
