@@ -43,8 +43,15 @@ class NativeProofBridgeError(ValueError):
 
 
 class NativeProofBridge:
-    def __init__(self,*,export_source_gate_claims:bool=False):
+    def __init__(self,*,export_source_gate_claims:bool=False,
+                 export_focus_at_ms:int|None=None):
+        if (export_focus_at_ms is not None and
+            (type(export_focus_at_ms) is not int or
+             export_focus_at_ms<0 or not export_source_gate_claims)):
+            raise NativeProofBridgeError("INVALID_OR_UNSCOPED_GATE_EXPORT_FOCUS")
         self.export_source_gate_claims=export_source_gate_claims
+        self.export_focus_at_ms=export_focus_at_ms
+        self.portable_source_gate_claims=[]
         self.counters=Counter()
         self.occurrences=Counter()
         # Bounded, source-pinned gap witnesses, not positive READY certificates.
@@ -322,7 +329,9 @@ class NativeProofBridge:
         # method-PRE facts are eligible. No Native post comparator is exported
         # as a gate. Full virtual route remains open and hence not READY.
         portable_candidate=None
-        if self.export_source_gate_claims:
+        if (self.export_source_gate_claims and
+            (self.export_focus_at_ms is None or
+             k[0]==self.export_focus_at_ms)):
             if (row["source_action"] not in CONTROL_COMMANDS and
                 row["source_action"]==k[3]):
                 trusted=[f for f in effective_facts
@@ -340,6 +349,16 @@ class NativeProofBridge:
                         "captured":f.captured,"event_t_ms":f.event_t_ms,
                         "receipt":f.receipt} for f in trusted]
                 }
+                if len(self.portable_source_gate_claims)>=10000:
+                    raise NativeProofBridgeError("PORTABLE_SOURCE_CLAIM_VOLUME_EXCEEDED")
+                self.portable_source_gate_claims.append({
+                    "decision_at_ms":identity.t_ms,
+                    "source_occurrence":identity.occurrence,
+                    "source_gate_decision":verdict["decision"],
+                    "candidate":portable_candidate,
+                    "native_ready_or_selected_used_as_gate":False,
+                    "complete_positive_route_proven":False,
+                })
             else:
                 self.counters["portable_claim_control_or_alias_skipped"]+=1
         return {
@@ -665,11 +684,33 @@ def selftest():
     assert incomplete_replay["external_gate_bundle_claims"]==1
     assert incomplete_replay[
         "external_gate_bundle_provenance_authenticity_verified_here"] is False
+    # Even an opt-in original method exporter must preserve the independently
+    # adjudicated negative and open-world UNKNOWN contracts.
+    focused=NativeProofBridge(export_source_gate_claims=True,
+                              export_focus_at_ms=20)
+    focus_row=dict(scoped,source_key=(20,"default",1,"alpha"))
+    focused.evaluate_attempt(dict(pending),focus_row)
+    assert len(focused.portable_source_gate_claims)==1
+    assert focused.portable_source_gate_claims[0]["source_occurrence"]==0
+    assert focused.portable_source_gate_claims[0][
+        "source_gate_decision"]==NOT_READY
+    ignored=dict(focus_row,source_key=(21,"default",1,"alpha"))
+    ignored_pending=dict(pending,pre=dict(pending["pre"],time_ms=21))
+    focused.evaluate_attempt(ignored_pending,ignored)
+    assert len(focused.portable_source_gate_claims)==1
+    for bad in (
+        lambda:NativeProofBridge(export_focus_at_ms=20),
+        lambda:NativeProofBridge(export_source_gate_claims=True,
+                                 export_focus_at_ms=-1),
+    ):
+        try:bad()
+        except NativeProofBridgeError:pass
+        else:raise AssertionError("UNSCOPED_SOURCE_GATE_EXPORT_ALLOWED")
     # Fake native positive bit cannot certify a skill: this adapter does
     # not even expose Native ready as an accepted input.
     assert "native_ready" not in bridge.summary()["counts"]
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":29,"portable_adapter_round_trip":True,
+            "checks":33,"portable_adapter_round_trip":True,
              "portable_gates_positive_READY":0,
              "real_native":"NOT_RUN","WCL_API_calls":0}
 
