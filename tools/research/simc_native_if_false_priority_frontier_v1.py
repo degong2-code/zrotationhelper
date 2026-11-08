@@ -161,6 +161,7 @@ def one_attempt(pending:dict, attempt:dict, ir:dict)->dict:
         "source_index":k[2]-1,
         "source_sha256":row["source_sha256"],
         "source_action":row["action"],
+        "source_behavior":row["behavior"],
         "native_action_name":attempt["native_name"],
         "status":status,
         "source_exclusion_reason":reason,

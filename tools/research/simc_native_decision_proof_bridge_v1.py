@@ -332,7 +332,7 @@ class NativeProofBridge:
         if (self.export_source_gate_claims and
             (self.export_focus_at_ms is None or
              k[0]==self.export_focus_at_ms)):
-            if (row["source_action"] not in CONTROL_COMMANDS and
+            if (row.get("source_behavior")=="ACTION" and
                 row["source_action"]==k[3]):
                 trusted=[f for f in effective_facts
                          if f.basis=="INDEPENDENT_SOURCE_REPLAY" and
@@ -490,6 +490,7 @@ def selftest():
              "base_ready_entries":0}
     row={"source_key":(20,"default",1,"alpha"),
          "source_sha256":h,"source_action":"alpha",
+         "source_behavior":"ACTION",
          "independent_IF_bool":None,
          "status":"EXCLUDED_BY_INDEPENDENT_WARRIOR_DISTANCE_FALSE",
          "source_exclusion_reason":"source_distance",
@@ -698,6 +699,12 @@ def selftest():
     ignored_pending=dict(pending,pre=dict(pending["pre"],time_ms=21))
     focused.evaluate_attempt(ignored_pending,ignored)
     assert len(focused.portable_source_gate_claims)==1
+    nonphysical=NativeProofBridge(export_source_gate_claims=True,
+                                  export_focus_at_ms=20)
+    side_effect=dict(scoped,source_behavior="SIDE_EFFECT_SOURCE_MODEL_UNVERIFIED")
+    excluded=nonphysical.evaluate_attempt(dict(pending),side_effect)
+    assert excluded["portable_source_claim_optional"] is None
+    assert len(nonphysical.portable_source_gate_claims)==0
     for bad in (
         lambda:NativeProofBridge(export_focus_at_ms=20),
         lambda:NativeProofBridge(export_source_gate_claims=True,
