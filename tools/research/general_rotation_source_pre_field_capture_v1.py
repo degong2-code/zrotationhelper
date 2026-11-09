@@ -446,11 +446,13 @@ def selftest()->dict:
             patched.count("a->action_ready()")==1 and
             patched.index(MARK)<patched.index(ORIGINAL_CALL),
             "GENERIC_CAPTURE_PATCH_TEST_FAILED")
-    for invalid in (
-        FieldRequest("equipment.main_hand.equipped",
-                     "actor_weapon_slot_equipped","main_hand"),
-        ):
-        require(invalid.key in patched,"GENERIC_CAPTURE_FIELD_EMIT_MISSING")
+    # The generic C++ producer emits a raw typed *field value*, not a
+    # semantic field name or ability-specific source expression. The
+    # field-key-to-expression mapping is carried in the pinned plan.
+    for fragment in ("main_hand_weapon.type == WEAPON_NONE",
+                     "off_hand_weapon.type == WEAPON_NONE",
+                     'buff_t::find( a->player, "prismatic_bolt" )'):
+        require(fragment in patched,"GENERIC_CAPTURE_FIELD_READER_MISSING")
     sample=(MARK+"20|default|1|alpha|1|0|-1")
     parsed=parse_marker(sample,FIELDS)
     require(parsed["values"]==[1,0,-1],"UNKNOWN_ACTOR_BUFF_NOT_PRESERVED")
