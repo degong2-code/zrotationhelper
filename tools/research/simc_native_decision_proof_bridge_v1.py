@@ -35,6 +35,9 @@ SCHEMA="ZrotSimcNativeGeneralRotationOpenWorldProofBridgeV1"
 GATES=(
     "NECESSARY_ELIGIBILITY","APL_IF","COOLDOWN","RESOURCE",
     "BASE_TARGET","MOVEMENT","CAST_GCD","SYNC_LINE",
+    # Source-subguard facts, not closure of their MOVEMENT/CAST_GCD parents.
+    "MOVEMENT_BASE_GUARD_PASS","MOVEMENT_APL_OPTION_CLEAR",
+    "CAST_REPEAT_CLEAR",
     "SPEC_LOCAL","SPEC_OVERRIDE_TOTAL","BASE_VIRTUAL_COMPLETE"
 )
 
@@ -226,6 +229,13 @@ class NativeProofBridge:
             raise NativeProofBridgeError("DUPLICATE_CAST_PRE_SOURCE_MARKER")
         if post_casts and not post_lines:
             raise NativeProofBridgeError("CAST_PRE_WITHOUT_LINE_PRE_MARKER")
+        if pending.get("base_ready_entries")==1 and (
+                pending["pre"].get("player_is_moving") == 0):
+            # action_t::ready(): is_moving() && !usable_moving()
+            # is independent false when stationary (no method shortcut bit).
+            insert("MOVEMENT_BASE_GUARD_PASS",True,
+                   receipt="original_ready_PRE_nonmoving_short_circuit")
+            self.counters["independent_base_movement_nonmoving"]+=1
         if post_lines and post_casts:
             cast=post_casts[0]
             if (cast["time_ms"],cast["list"],cast["ordinal"],
@@ -234,6 +244,22 @@ class NativeProofBridge:
             source_subset=independent_postguard_subset(post_lines[0],cast)
             movement_option_ok=not source_subset["moving_option_mismatch"]
             repeat_cast_ok=not source_subset["repeat_cast_prohibited"]
+            # Replayed raw PRE, not the later Native selected/ready result.
+            if (pending.get("base_action_entries")==1 and
+                pending.get("base_ready_entries")==1):
+                actor_moving=post_lines[0]["actor_moving"]
+                source_moving=pending["pre"].get("player_is_moving")
+                if source_moving in (0,1) and actor_moving!=source_moving:
+                    raise NativeProofBridgeError(
+                        "SAME_ATTEMPT_PRE_MOVEMENT_FIELDS_CONFLICT")
+                if movement_option_ok:
+                    insert("MOVEMENT_APL_OPTION_CLEAR",True,
+                           receipt="original_postguard_PRE_moving_option_boolean")
+                    self.counters["independent_moving_option_clear"]+=1
+                if repeat_cast_ok:
+                    insert("CAST_REPEAT_CLEAR",True,
+                           receipt="original_postguard_PRE_repeat_cast_boolean")
+                    self.counters["independent_cast_repeat_clear"]+=1
             if row["source_base_exit_observed"]=="FULL_BASE_TRUE" and not (
                     movement_option_ok and repeat_cast_ok):
                 raise NativeProofBridgeError(
@@ -537,9 +563,39 @@ def selftest():
     assert check["base_ready_movement_branch_bypassed"] is None
     assert check["movement_full_route"]=="UNKNOWN"
     assert check["cast_GCD_full_route"]=="UNKNOWN"
+    assert "MOVEMENT_APL_OPTION_CLEAR" in sub_out["independent_true_gates"]
+    assert "CAST_REPEAT_CLEAR" in sub_out["independent_true_gates"]
+    assert "MOVEMENT_BASE_GUARD_PASS:MISSING" in sub_out["missing_or_unverified"]
     assert "MOVEMENT:MISSING" in sub_out["missing_or_unverified"]
     assert "CAST_GCD:MISSING" in sub_out["missing_or_unverified"]
     assert sub_out["decision"]==UNKNOWN
+    # A source-PRE stationary actor proves only the base movement
+    # short-circuit, not the full movement directionality route.
+    still_bridge=NativeProofBridge()
+    still_pending=dict(resource_pending,
+        pre=dict(resource_pending["pre"],player_is_moving=0),
+        original_post_line_pre=[],original_post_cast_pre=[])
+    still_bridge.consume(line_ready,still_pending)
+    still_bridge.consume(
+        CAST_MARK+"20|default|1|alpha|0|0|0|0|0|0",still_pending)
+    stationary=still_bridge.evaluate_attempt(still_pending,nxt)
+    assert "MOVEMENT_BASE_GUARD_PASS" in stationary["independent_true_gates"]
+    assert "MOVEMENT_BASE_GUARD_PASS:MISSING" not in stationary["missing_or_unverified"]
+    assert "MOVEMENT:MISSING" in stationary["missing_or_unverified"]
+    assert "CAST_GCD:MISSING" in stationary["missing_or_unverified"]
+    assert stationary["decision"]==UNKNOWN
+    # Same source decision/occurrence contradictory movement facts
+    # cannot be silently treated as an independent positive gate.
+    disagree=NativeProofBridge()
+    conflict=dict(still_pending,original_post_line_pre=[],
+                  original_post_cast_pre=[])
+    disagree.consume(
+        LINE_MARK+"20|default|1|alpha|1|10|0|1|-1|1|0",conflict)
+    disagree.consume(
+        CAST_MARK+"20|default|1|alpha|0|0|0|0|0|0",conflict)
+    try:disagree.evaluate_attempt(conflict,nxt)
+    except NativeProofBridgeError:pass
+    else:raise AssertionError("CONTRADICTORY_SOURCE_MOVING_PRE_ACCEPTED")
     wrong_repeat=NativeProofBridge()
     wrong_pending=dict(resource_pending,original_post_line_pre=[],
                        original_post_cast_pre=[])
@@ -733,7 +789,8 @@ def selftest():
     # not even expose Native ready as an accepted input.
     assert "native_ready" not in bridge.summary()["counts"]
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":36,"portable_adapter_round_trip":True,
+            "checks":41,"portable_adapter_round_trip":True,
+             "partial_movement_and_cast_guards_independently_replayed":True,
              "portable_gates_positive_READY":0,
              "real_native":"NOT_RUN","WCL_API_calls":0}
 
