@@ -408,3 +408,10 @@ Permanent branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidenc
 | WCL independent candidate lock, disjoint holdout | existing tools, this step no WCL API calls | **NOT RUN**, never inject source semantics into blind discovery |
 
 Permanent receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SIMC_FIRST_NATIVE_CAST_GENERAL_ROTATION_RESEARCH_20261109.json`. See accompanying branch report.
+
+## 2026-11-09 Exact original SimC emitted-row readable opener report
+
+- New generic renderer: `tools/research/general_rotation_exact_source_opener_report_v1.py`. Source input is **same JSON2 emitter action pointer/signature**, NOT action-name/time matching. It consumes existing `general_rotation_native_sequence_row_replay_v1.py` output. No new SimC compile, WCL calls, APL parser, or class-specific logic.
+- Real prior source exact witness [Actions #42564537815](https://github.com/degong2-code/zrotationhelper/actions/runs/42564537815) **3/3 PASS**, 203 exact signature rows across four cases (59/60/41/43 including precombat), raw JSON SHA256 `c6ff2f3c9aeff1eb6d6cfc2b9791fc2ad26e656edb1d3fba152da24cac18569b`. All 149 pristine combat action samples remain independently verified against instrumented same-run sequence.
+- New [Actions #42569743989](https://github.com/degong2-code/zrotationhelper/actions/runs/42569743989) **3/3 PASS** Python3.12/3.14 plus real original artifact. 222-line Markdown with original exact source APL list/rank and literal IF for first 10s, source-row identity UNKNOWN when signature absent, separated precombat, report SHA256 `c18d6ce1a126bd65a5e91b3d94b6d2ab482218d6522161531680dcc5db214374`. Artifact `zrot-exact-simc-opener-source-if-readable-v1`.
+- Important boundary: pointer/signature proves source **row identity at JSON2 append**, not exact IF truth at earlier selection, not full READY or competitive priority, not WoW cast, not opener ending. 10-second window display only; all dummy error verdicts UNKNOWN. Next product-critical work: use original select-time PRE operands/IF evidence and branch control with exact source rows; add ST/2T/AoE and independent WCL holdout later. MAIN/FROZEN unchanged.

@@ -1,0 +1,37 @@
+{
+  "schema": "ZrotGeneralRotationExactSimCEmittedRowReadableEvidenceV1",
+  "date": "2026-11-09",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "source_exact_replay": {
+    "run": 42564537815,
+    "pass": "3/3",
+    "sha256": "c6ff2f3c9aeff1eb6d6cfc2b9791fc2ad26e656edb1d3fba152da24cac18569b",
+    "source_signature_rows_total": 203,
+    "per_case": [
+      59,
+      60,
+      41,
+      43
+    ]
+  },
+  "report": {
+    "run": 42569743989,
+    "pass": "3/3",
+    "lines": 222,
+    "sha256": "c18d6ce1a126bd65a5e91b3d94b6d2ab482218d6522161531680dcc5db214374",
+    "artifact_id": 13651964014,
+    "artifact_digest": "sha256:c9a327ec6dd0f9d010e92add1447ee71a19b4e2cbbfd114200a7cfdf847dbe8f"
+  },
+  "scope": {
+    "original_cpp_recompiled_in_this_report": false,
+    "wcl_calls": 0,
+    "exact_source_row_identity": "SIMC_SAME_RUN_JSON2_EMITTER",
+    "select_time_IF_truth": "UNKNOWN",
+    "full_ready": 0,
+    "opener_end": "UNKNOWN",
+    "dummy_mistake": "UNKNOWN",
+    "main_promoted": false
+  },
+  "exact_next": "Replay original select-time IF state for exact observed source row; reconstruct opener phase and competitor priority without equating JSON2 append-time evidence to strict PRE."
+}
