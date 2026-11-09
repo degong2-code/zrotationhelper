@@ -28,7 +28,7 @@ from general_rotation_simc_multi_spec_cold_start_v1 import load_manifest
 SCHEMA = "ZrotGenericSimCSourceTargetCountProjectionV1"
 SCENARIOS_SCHEMA = "ZrotGenericSimCSourceProjectionScenarioManifestV1"
 POLICY = "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
-FACT = re.compile(r"^talent\\.[a-z0-9_]+$")
+FACT = re.compile(r"^talent\.[a-z0-9_]+$")
 CASE = re.compile(r"^[a-z][a-z0-9_]{0,40}$")
 
 
@@ -264,11 +264,11 @@ def run(source_root: Path, manifest_path: Path, cases_path: Path,
 
 
 def selftest() -> dict:
-    raw = ("actions.precombat=variable,name=aoe_count,value=2+(3*talent.flag)\\n"
-           "actions=run_action_list,name=st,if=active_enemies=1\\n"
-           "actions+=/run_action_list,name=aoe,if=active_enemies>=variable.aoe_count\\n"
-           "actions.st=alpha,if=active_enemies=1&talent.flag\\n"
-           "actions.aoe=beta,if=active_enemies>=variable.aoe_count\\n").encode()
+    raw = ("actions.precombat=variable,name=aoe_count,value=2+(3*talent.flag)\n"
+           "actions=run_action_list,name=st,if=active_enemies=1\n"
+           "actions+=/run_action_list,name=aoe,if=active_enemies>=variable.aoe_count\n"
+           "actions.st=alpha,if=active_enemies=1&talent.flag\n"
+           "actions.aoe=beta,if=active_enemies>=variable.aoe_count\n").encode()
     metadata = {"key": "dummy_alpha", "class_key": "alpha", "git_blob": git_blob(raw)}
     def case(name, facts):
         return {"spec_key": "dummy_alpha", "name": name,
