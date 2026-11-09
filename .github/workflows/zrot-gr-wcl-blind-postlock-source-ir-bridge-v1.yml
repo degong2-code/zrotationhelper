@@ -1,0 +1,231 @@
+name: zrot-gr-wcl-blind-postlock-source-ir-bridge-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_wcl_postlock_source_ir_bridge_v1.py
+      - .github/workflows/zrot-gr-wcl-blind-postlock-source-ir-bridge-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic:
+    name: WCL numeric blind separation + strict PRE source IR Python ${{ matrix.py }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.py }}'
+      - name: Reuse source hypothesis, postlock, strict PRE, open-world readiness gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_wcl_postlock_source_ir_bridge_v1.py
+          python -B tools/research/general_rotation_wcl_postlock_source_ir_bridge_v1.py > /tmp/gr-wcl-postlock-bridge-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-wcl-postlock-bridge-synthetic.json'))
+          assert x['status']=='PASS_TWO_CLASS_SYNTHETIC'
+          assert x['synthetic_source_classes_tested']==2
+          assert x['negative_controls']>=8
+          assert x['separate_numeric_blind_phase'] is True
+          assert x['reused_strict_pre_replay'] is True
+          assert x['WCL_real_holdout_verified'] is False
+          assert x['full_READY_proven']==x['dummy_wrong_cast_proven']==0
+          assert x['new_WCL_API_calls']==x['new_SimC_CXX_builds']==0
+          print('GENERIC_WCL_NUMERIC_BLIND_STRICT_PRE_SOURCE_IR_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_wcl_postlock_source_ir_bridge_v1.py
+  offline-integration:
+    name: Four real pinned SimC source IR cases with SYNTHETIC numeric WCL only
+    needs: [synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-general-source-hypothesis-real-49-ir-v1
+          run-id: 42594344188
+          github-token: ${{ github.token }}
+          path: /tmp/gr-real-source-ir
+      - name: Check source IR receipts and pin FOUR ACTUAL SimC source cases before synthetic WCL
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_CONDITIONAL_IR_49_PROOF_BRIDGE_20261109.json)" = 9e5cd6a1f389dee6992840485ba4235cc39475c1
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          r=json.loads(Path('active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_CONDITIONAL_IR_49_PROOF_BRIDGE_20261109.json').read_bytes())
+          expected=r['real_validation']['source_case_IR_output_sha256']
+          assert r['real_validation']['successful_GitHub_Actions_run']==42594344188
+          assert r['real_validation']['source_IF_independent_true_at_original_SELECTED_call']==49
+          assert r['real_validation']['source_IF_unknown_missing_valid_PRE']==44
+          assert len(expected)==4
+          folder=Path('/tmp/gr-real-source-ir')
+          for spec,hash_value in expected.items():
+              part=spec.replace('_st','-st').replace('_2t','-2t')
+              names=list(folder.rglob(part+'-source-hypothesis-evidence.json'))
+              assert len(names)==1,(part,names)
+              assert hashlib.sha256(names[0].read_bytes()).hexdigest()==hash_value
+          print('FOUR_REAL_SOURCE_IR_INPUT_DIGESTS_PASS_SYNTHETIC_WCL_NOT_YET_CREATED')
+          PY
+      - name: Generate numeric-only synthetic discovery lock BEFORE source-binding fixtures
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-wcl-bridge-synthetic /tmp/zrot-wcl-postlock-source-outputs
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          from wcl_blind_numeric_candidate_lock_v1 import lock_candidates
+          base={'schema':'FreshWCLReplayV1',
+                'blind_numeric_only':True,
+                'candidate_lock':'NOT_IMPLEMENTED',
+                'cooldown_or_resource_readiness':'UNKNOWN',
+                'identity':{'report_code':'synthetic-discovery-one',
+                            'fight_id':1},
+                'decisions':[
+                  {'timestamp':100.0,'readiness':'UNKNOWN','ability_id':1101,
+                   'source_actor_id':42,'aura_pre':{}},
+                  {'timestamp':200.0,'readiness':'UNKNOWN','ability_id':1101,
+                   'source_actor_id':42,'aura_pre':{}}]}
+          base['replay_sha256']=sha(canonical(base))
+          lock=lock_candidates([base],min_observations=2,
+                               source_kind='SYNTHETIC_FIXTURE')
+          assert lock['source_kind']=='SYNTHETIC_FIXTURE'
+          assert lock['candidate_n']==1 and lock['candidates'][0]['action_spell_id']==1101
+          out=Path('/tmp/zrot-wcl-bridge-synthetic')
+          raw=canonical(lock)
+          (out/'numeric-discovery-lock.json').write_bytes(raw)
+          h=sha(raw)
+          (out/'numeric-lock-sha.txt').write_text(h)
+          roster={'source_kind':'SYNTHETIC_FIXTURE',
+                  'source_replay_sha256':[base['replay_sha256']],
+                  'frozen_min_observations':2,
+                  'report_fights':[{
+                      'report_code':'synthetic-discovery-one',
+                      'fight_id':1,
+                      'source_replay_sha256':base['replay_sha256']}]}
+          holdout={'source_kind':'SYNTHETIC_FIXTURE',
+                   'cohort_id':'synthetic-holdout-two',
+                   'report_code':'synthetic-holdout-two',
+                   'fight_id':2,'actor_id':'synthetic-actor',
+                   'raw_receipt_sha256':'c'*64}
+          from general_rotation_strict_pre_state_engine_v1 import (
+              RAW_SOURCE,VERIFIED
+          )
+          fixture={'schema':'ZrotGenericWclPostlockSourceBridgeInputV1',
+                   'policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+                   'discovery_roster':roster,'holdout':holdout,
+                   'cast_events':[{'event_id':'cast-numeric-1','t_ms':1000,
+                                   'spell_id':1101,'source_kind':RAW_SOURCE},
+                                  {'event_id':'cast-other','t_ms':1200,
+                                   'spell_id':9999,'source_kind':RAW_SOURCE}],
+                   'transitions':[
+                      {'source_event_id':'raw-transition-before',
+                       'signal':'raw.signal0','t_ms':900,'value':True,
+                       'valid_until_ms':None,
+                       'raw_receipt_sha256':holdout['raw_receipt_sha256'],
+                       'source_kind':RAW_SOURCE,'quality':VERIFIED},
+                      {'source_event_id':'raw-transition-same-time',
+                       'signal':'raw.signal0','t_ms':1000,'value':False,
+                       'valid_until_ms':None,
+                       'raw_receipt_sha256':holdout['raw_receipt_sha256'],
+                       'source_kind':RAW_SOURCE,'quality':VERIFIED}]}
+          (out/'synthetic-numeric-holdout.json').write_bytes(canonical(fixture))
+          print('BLIND_LOCK_CREATED_BEFORE_SOURCE_MODEL_READ',h)
+          PY
+      - name: Post-lock-only source mapping after numeric lock and strict PRE WCL synthetic
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          from simc_apl_semantic_ir_v2 import canonical
+          from general_rotation_wcl_postlock_source_ir_bridge_v1 import bridge
+          d=Path('/tmp/zrot-wcl-bridge-synthetic')
+          a=Path('/tmp/gr-real-source-ir')
+          out=Path('/tmp/zrot-wcl-postlock-source-outputs')
+          raw_lock=(d/'numeric-discovery-lock.json').read_bytes()
+          lock_sha=(d/'numeric-lock-sha.txt').read_text()
+          fixture=json.loads((d/'synthetic-numeric-holdout.json').read_bytes())
+          for spec in ('warrior_fury-st','warrior_fury-2t',
+                       'mage_arcane-st','mage_arcane-2t'):
+              files=list(a.rglob(spec+'-source-hypothesis-evidence.json'))
+              assert len(files)==1
+              case=json.loads(files[0].read_bytes())
+              graph=case['source_hypothesis_IR']
+              candidates=[(list_name,idx,row)
+                          for list_name,rows in graph['source_only_priority_graph']['lists'].items()
+                          for idx,row in enumerate(rows)
+                          if row['kind']=='EXECUTABLE_SOURCE_CANDIDATE'
+                          and row['conditions'].get('if',{}).get('symbols')]
+              assert candidates,(spec,'NO_SOURCE_CONDITION_CASE')
+              # Post-lock mapping is explicitly only a synthetic interoperability fixture.
+              list_name,idx,row=sorted(
+                  candidates,key=lambda x:(len(x[2]['conditions']['if']['symbols']),
+                                           x[0],x[1]))[0]
+              symbol=row['conditions']['if']['symbols'][0]
+              binding={
+               'schema':'ZrotGenericWclPostlockNumericToSourceBindingV1',
+               'policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+               'bound_numeric_lock_sha256':lock_sha,
+               'source_profile_git_blob':graph['source_git_blob'],
+               'source_spec':case['source_spec'],
+               'source_target_count':case['target_count'],
+               'binding_stage':'POST_LOCK_ONLY',
+               'action_identity_and_mechanic_independently_audited':False,
+               'build_equivalence_independently_verified':False,
+               'WCL_target_count_at_cast_verified':False,
+               'numeric_to_source_rows':[{
+                  'spell_id':1101,'source_list':list_name,'source_index':idx,
+                  'source_row_sha256':row['identity']['source_line_sha256'],
+                  'symbol_to_raw_signal':{symbol:'raw.signal0'}}]}
+              (d/(spec+'-postlock-binding-SYNTHETIC.json')).write_bytes(canonical(binding))
+              result=bridge(raw_lock,lock_sha,fixture,case,binding)
+              assert result['holdout_evidence_source_kind']=='SYNTHETIC_FIXTURE'
+              assert result['source_wcl_binding_applied_only_after_lock'] is True
+              assert result['raw_discovery_and_holdout_independent_audit']=='NOT_RUN'
+              assert result['real_WCL_holdout_validated'] is False
+              assert result['physical_READY_proven']==0
+              assert result['real_General_Rotation_rule_promoted'] is False
+              assert result['dummy_training_error_proven'] is False
+              assert result['WCL_target_count_at_action']=='UNKNOWN'
+              assert result['holdout_numeric_casts']==2
+              assert len(result['per_numeric_cast_conditional_probes'])==2
+              path=out/(spec+'-synthetic-wcl-postlock-probe.json')
+              path.write_bytes(canonical(result))
+              print('SOURCE_REAL_IR_WITH_SYNTHETIC_WCL_POSTLOCK',spec,
+                    result['source_vs_WCL_hypothesis_at_PRE_counts'])
+          print('REAL_SOURCE_IR_FOUR_CASE_GENERIC_WCL_POSTLOCK_INTEROPERABILITY_SYNTHETIC_PASS')
+          PY
+          sha256sum /tmp/zrot-wcl-postlock-source-outputs/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-four-real-source-ir-synthetic-wcl-postlock-bridge-v1
+          path: |
+            /tmp/zrot-wcl-postlock-source-outputs/*.json
+            /tmp/zrot-wcl-bridge-synthetic/numeric-discovery-lock.json
+            /tmp/zrot-wcl-bridge-synthetic/synthetic-numeric-holdout.json
+          if-no-files-found: warn
+          retention-days: 7
