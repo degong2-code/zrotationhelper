@@ -1,0 +1,74 @@
+{
+  "schema": "ZrotGenericSourcePREFieldTransportStaticCheckpointV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "code": {
+    "generic": "tools/research/general_rotation_original_pre_field_transport_v1.py",
+    "integration_fixture": "tools/research/general_rotation_source_pre_field_capture_v1.py",
+    "workflow": ".github/workflows/zrot-generic-source-pre-field-capture-v1.yml"
+  },
+  "original_source_revision": "simulationcraft/simc@b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "field_readers": [
+    "actor_weapon_slot_equipped",
+    "actor_named_buff_active"
+  ],
+  "source_field_requests": [
+    "equipment.main_hand.equipped",
+    "equipment.off_hand.equipped",
+    "buff.prismatic_bolt.active"
+  ],
+  "cross_spec_origin": [
+    "Warrior Fury source-bound weapon slot presence",
+    "Mage Arcane source-bound opposite Prismatic Bolt buff checks"
+  ],
+  "generic_core_spec_or_action_names_hardcoded": false,
+  "source_pre_marker_producer_stage": "ORIGINAL_METHOD_PRE_BEFORE_ONLY_EXISTING_ACTION_READY",
+  "producer_authentication_separate_from_formatter": true,
+  "readiness_claim": {
+    "full_positive_READY": 0,
+    "user_target_dummy_mistake": 0,
+    "independent_WCL_hypotheses": false
+  },
+  "validation": {
+    "historical_failed_runs": [
+      {
+        "id": 42545015114,
+        "phase": "synthetic",
+        "cause": "semantic key expected inside raw C++ code"
+      },
+      {
+        "id": 42545071202,
+        "phase": "original source patch",
+        "cause": "did not account for original buff_t::find call-count; unmodified original already has ten"
+      }
+    ],
+    "source_corrected_run": {
+      "id": 42545694098,
+      "conclusion": "SUCCESS",
+      "python_versions": [
+        "3.12",
+        "3.14"
+      ],
+      "source_cpp_preflight": true,
+      "real_native": "SKIPPED"
+    },
+    "one_off_real_native_run": {
+      "id": 42545789084,
+      "conclusion_at_checkpoint": "UNKNOWN_IN_PROGRESS",
+      "target": [
+        "Fury",
+        "Arcane"
+      ],
+      "original_cpp_build_for_pair": 1,
+      "duplicate_build_for_specs": false
+    }
+  },
+  "source_values_actual_new_research": "NOT_YET_CONFIRMED_AT_CHECKPOINT",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "product_exact_next": "Take exact real fresh source E2E evidence; use independently source-verified fields in gate proof after strict authentication, keep virtual READY unknown until exhaustive route closure.",
+  "session_exact_next": "Check run #42545789084 final status and evidence; if failure distinguish compiler/runtime transport/model mismatch. Do not simply rerun whole build. Then prove true/false necessary eligibility only with source verified raw state."
+}

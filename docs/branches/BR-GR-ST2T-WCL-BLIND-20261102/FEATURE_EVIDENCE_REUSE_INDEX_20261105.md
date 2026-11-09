@@ -336,3 +336,15 @@ Permanent branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidenc
 | Hypothetical dual DAGGER equipped subtype condition | Cross-name synthetic true/false/unknown + typed equality PASS | **REUSE** generic operator, no real class mechanics claim. |
 
 For producer/semantic normalization and exact next, see branch architecture note and `GENERIC_CONDITION_IR_TWO_SPEC_STATIC_AUDIT_20261109.json`.
+
+## 2026-11-09 범용 PRE 필드 수집기 — 코어/SpecAdapter 분리 및 원본 안전검증
+
+| 구현/영수증 | 증명된 범위 / 경계 | 판정 |
+|---|---|---|
+| `general_rotation_original_pre_field_transport_v1.py` | 이름·Spec 별도 분기가 없는 generic typed source PRE C++ emitter, marker parser, fail-closed UNKNOWN and source-identity checks. Python3.12/3.14 synthetic PASS in #42545694098 | **REUSE**; 새 spec는 adapter config로 확장 |
+| `general_rotation_source_pre_field_capture_v1.py` (two-spec integration fixture) | 공식 C++ Warrior weapon two slots, Mage opposite `prismatic_bolt` source guards and APL row pins; static patched player CPP review PASS, no extra original virtual calls | **REUSE** generic transport, **EXTEND** field requests/SpecAdapter when needed |
+| #42545015114 / #42545071202 | Historical failed original CI (key expectation, 10 existing `buff_t::find` delta) | **FAIL evidence retained**, do not reinterpret |
+| #42545694098 | latest source-only 3 jobs PASS (real-native SKIPPED) | **PASS_STATIC**, NOT actual new Native PRE |
+| #42545789084 | explicit actual original SimC Fury/Mage source field sample/parity workflow | **IN_PROGRESS at this evidence checkpoint**, verdict requires real jobs status |
+
+See design note + `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_PRE_FIELD_CAPTURE_ENGINE_STATIC_20261109.json`.
