@@ -1,0 +1,98 @@
+name: zrot-gr-original-if-gap-worklist-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_if_gap_priority_v1.py
+      - .github/workflows/zrot-gr-original-if-gap-worklist-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic:
+    name: Original IF source-fact gap audit Python ${{ matrix.py }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.py }}'
+      - name: Compile and synthetic negative provenance tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_original_if_gap_priority_v1.py
+          python -B tools/research/general_rotation_original_if_gap_priority_v1.py > /tmp/original-if-gap-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/original-if-gap-synthetic.json'))
+          assert x['selftest']=='PASS_OFFLINE_SYNTHETIC'
+          assert x['negative_controls']>=6
+          assert x['new_CXX_builds']==0 and x['WCL_API_calls']==0 and x['full_READY_proven']==0
+          print('PINNED_SOURCE_IF_GAP_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_original_if_gap_priority_v1.py
+  actual-existing:
+    name: Four native source replay reports original 78 unknown operand coverage
+    needs: [synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-original-selected-source-if-offline-v1
+          run-id: 42587480633
+          github-token: ${{ github.token }}
+          path: /tmp/original-if-source-evidence
+      - name: Source pin and verified previous 15 source IF exact call proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          test "$(git hash-object active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_DISPATCH_SOURCE_IF_REPLAY_20261109.json)" = aa6ea8b24b8aca4c854df52ca6a7c4422cb69842
+          find /tmp/original-if-source-evidence -type f -maxdepth 2 -printf '%f\n' | sort
+          python -B tools/research/general_rotation_original_if_gap_priority_v1.py \
+            --receipt active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_DISPATCH_SOURCE_IF_REPLAY_20261109.json \
+            --artifact-root /tmp/original-if-source-evidence \
+            --source-root simc-upstream \
+            --out /tmp/original-if-gap-worklist-v1.json
+          python - <<'PY'
+          import json
+          obj=json.load(open('/tmp/original-if-gap-worklist-v1.json'))
+          assert obj['source_actual_emitter_records']==203
+          assert obj['source_original_foreground_selection_callsite']==147
+          assert obj['selected_IF_source_triage']['UNKNOWN_SOURCE_IF_MISSING_VALID_ORIGINAL_PRE']==78
+          assert obj['selected_IF_source_triage']['SOURCE_IF_REPLAY_MATCH_ORIGINAL_NATIVE_SAME_CALL']==15
+          assert len(obj['nonforeground_combat_source_flag_triage'])==2
+          assert all(x['source_declares_use_off_gcd'] for x in obj['nonforeground_combat_source_flag_triage'])
+          assert all(x['actual_native_off_gcd_execute_path']=='UNKNOWN' for x in obj['nonforeground_combat_source_flag_triage'])
+          assert obj['full_READY_positive_proven']==0 and obj['new_CXX_builds']==0
+          print('ORIGINAL_IF_GAP_WORKLIST_REAL_78_UNKNOWN_TRIAGE_PASS')
+          PY
+          sha256sum /tmp/original-if-gap-worklist-v1.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-original-if-gap-worklist-v1
+          path: /tmp/original-if-gap-worklist-v1.json
+          if-no-files-found: warn
+          retention-days: 7
