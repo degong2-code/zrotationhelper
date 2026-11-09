@@ -89,6 +89,14 @@ def compile_frontier(ledger:dict,parsed:dict,pin:dict,
             pin["expected_case_count"]>=1 and
             HEX64.fullmatch(receipt_sha256) is not None,
             "PINNED_COMPETITOR_SOURCE_ADAPTER_INVALID")
+    keys=pin.get("legacy_ledger_fields")
+    require(type(keys) is dict and
+            set(keys)=={"case_array","case_count","prior_count",
+                         "if_false_count","necessary_false_count",
+                         "native_only_count"} and
+            all(type(v) is str and bool(v) for v in keys.values()) and
+            len(set(keys.values()))==len(keys),
+            "UNDECLARED_LEGACY_LEDGER_KEY_MAPPING")
     rules={}
     for rule in pin["local_gate_rules"]:
         require(type(rule) is dict and
@@ -107,13 +115,13 @@ def compile_frontier(ledger:dict,parsed:dict,pin:dict,
             ledger.get("general_rotation_priority_optimality_proven") is False and
             ledger.get("dummy_training_feedback_permitted") is False and
             ledger.get("WCL_API_calls")==0 and
-            ledger.get("counts",{}).get("original_cpp_selected_2T_orb_rows")==
+            ledger.get("counts",{}).get(keys["case_count"])==
                 pin["expected_case_count"],
             "ORIGINAL_SOURCE_LEDGER_PROOF_SCOPE_INVALID")
     source_list=parsed["action_lists"].get(pin["source_list"])
     require(type(source_list) is list and len(source_list)>0,
             "ORIGINAL_SOURCE_LIST_UNAVAILABLE")
-    rows=ledger.get("two_target_winner_decisions")
+    rows=ledger.get(keys["case_array"])
     require(type(rows) is list and len(rows)==pin["expected_case_count"],
             "ORIGINAL_COMPETITOR_CASE_COUNT_CHANGED")
     seen_occurrences=set()
@@ -288,13 +296,13 @@ def compile_frontier(ledger:dict,parsed:dict,pin:dict,
         })
     original_counts=ledger.get("counts",{})
     require(sum(x for x in counts.values())==
-            original_counts.get("prior_original_source_rows") and
+            original_counts.get(keys["prior_count"]) and
             counts["INDEPENDENT_APL_IF_FALSE"]==
-            original_counts.get("earlier_independent_source_IF_false") and
+            original_counts.get(keys["if_false_count"]) and
             counts["INDEPENDENT_LOCAL_NECESSARY_FALSE"]==
-            original_counts.get("earlier_independent_local_READY_false") and
+            original_counts.get(keys["necessary_false_count"]) and
             counts["ORIGINAL_NATIVE_POST_ONLY"]==
-            original_counts.get("earlier_original_cpp_if_false_not_independently_replayed"),
+            original_counts.get(keys["native_only_count"]),
             "ORIGINAL_LEDGER_REASON_COUNTS_DO_NOT_REPLAY")
     return {
         "schema":SCHEMA,"policy_id":POLICY,
@@ -364,6 +372,13 @@ def selftest()->dict:
              "source_list":"primary","target_count":3,
              "expected_case_count":1,
              "original_ledger_schema":"dummy-verified-original",
+             "legacy_ledger_fields":{
+                 "case_array":"generic_prior_case_rows",
+                 "case_count":"generic_case_count",
+                 "prior_count":"generic_prior_count",
+                 "if_false_count":"generic_if_false_count",
+                 "necessary_false_count":"generic_local_false_count",
+                 "native_only_count":"generic_native_only_count"},
              "local_gate_rules":[
                  {"action":action+"_two",
                   "original_numeric_field":"observed_local_gate",
@@ -376,13 +391,13 @@ def selftest()->dict:
                 "dummy_training_feedback_permitted":False,
                 "WCL_API_calls":0,
                 "counts":{
-                  "original_cpp_selected_2T_orb_rows":1,
-                  "prior_original_source_rows":2,
-                  "earlier_independent_source_IF_false":1,
-                  "earlier_independent_local_READY_false":1,
-                  "earlier_original_cpp_if_false_not_independently_replayed":0
+                  "generic_case_count":1,
+                  "generic_prior_count":2,
+                  "generic_if_false_count":1,
+                  "generic_local_false_count":1,
+                  "generic_native_only_count":0
                 },
-                "two_target_winner_decisions":[{
+                "generic_prior_case_rows":[{
                   "original_cpp_at_simc_ms":100,
                   "target_count_scenario":3,
                   "chosen_source_row_ordinal":3,
@@ -424,20 +439,20 @@ def selftest()->dict:
         cases+=1
         import copy
         for edit in (
-            lambda x:x["two_target_winner_decisions"][0][
+            lambda x:x["generic_prior_case_rows"][0][
                 "earlier_source_rows"][0].update(
                     source_independent_local_pre_witness={"a":1}),
-            lambda x:x["two_target_winner_decisions"][0][
+            lambda x:x["generic_prior_case_rows"][0][
                 "earlier_source_rows"][1].update(
                     source_independent_local_pre_witness={
                         "observed_local_gate":1,
                         "source_readiness_class":action+"_two"}),
-            lambda x:x["two_target_winner_decisions"][0][
+            lambda x:x["generic_prior_case_rows"][0][
                 "earlier_source_rows"][0].update(
                     original_cpp_ready_root_id=40),
-            lambda x:x["two_target_winner_decisions"][0][
+            lambda x:x["generic_prior_case_rows"][0][
                 "chosen_minimal_sufficient_source_facts"].update(v=0),
-            lambda x:x["two_target_winner_decisions"][0][
+            lambda x:x["generic_prior_case_rows"][0][
                 "earlier_source_rows"][0].update(
                     source_row_exclusion_condition_proven=False),
         ):
