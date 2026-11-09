@@ -45,7 +45,7 @@ def _assert_external_adapter(adapter:dict, raw:bytes, numeric:dict,
     require(type(adapter)==dict and
             adapter.get("schema")==ADAPTER_SCHEMA and
             adapter.get("scope_policy_id")==POLICY and
-            sha(raw)==sha(canonical(adapter)) and
+            type(raw)==bytes and len(raw)>0 and json.loads(raw)==adapter and
             adapter.get("allow_infer_exact_cd_from_gap") is False and
             adapter.get("allow_infer_availability_of_alternative") is False and
             adapter.get("allow_infer_priority_or_player_error") is False and
