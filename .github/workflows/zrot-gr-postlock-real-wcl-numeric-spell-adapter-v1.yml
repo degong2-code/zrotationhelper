@@ -129,6 +129,8 @@ jobs:
             'warrior_fury-st':'964886a08dbaf800ac9e3694df47b7adece905fc8825782e9cc3f5d83aa54aee',
             'warrior_fury-2t':'62d5ef47e32e066e771a447c3251ab1ba13699c24eec11481f9563f0fcc96dba'}
           outcomes={}
+          from collections import Counter
+          operand_coverage={}
           for spec,hash_value in verified.items():
               p=list(Path('/tmp/real-simc-original-four-case-IR').rglob(
                   spec+'-source-hypothesis-evidence.json'))
@@ -151,6 +153,39 @@ jobs:
               assert hypothesis['source_spell_ID_mapping_current_Retail_independently_audited'] is False
               assert hypothesis['WCL_target_count_to_SimC_source_context']=='UNKNOWN'
               assert hypothesis['binding']['binding_stage']=='POST_LOCK_ONLY'
+              # Inspect actual source IF operand coverage AFTER numeric lock.
+              # Candidate-only spell/name mapping cannot silently certify
+              # that a raw WCL numeric aura ID is the source semantic buff.
+              symbols=Counter()
+              graph=source_case['source_hypothesis_IR'][
+                  'source_only_priority_graph']['lists']
+              for link in hypothesis['binding']['numeric_to_source_rows']:
+                  row=graph[link['source_list']][link['source_index']]
+                  cond=row['conditions'].get('if')
+                  if cond:
+                      symbols.update(cond['symbols'])
+              raw_signals={x['signal'] for x in fix['transitions']}
+              raw_signal_counts=Counter(x['signal'] for x in fix['transitions'])
+              power_meta=json.loads(Path(
+                 'docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_WCL_RAGE_PREDICATE_ADAPTER_EXPLORATORY_V1.json').read_bytes())
+              candidate_buffs=power_meta['action_buff_numeric_ids']
+              candidate_symbol_to_raw={
+                  x:'raw_aura_'+str(n)+'_active'
+                  for x,n in candidate_buffs.items()}
+              candidate_buff_signals={
+                  k:{'raw_signal':v,'raw_signal_present':v in raw_signals,
+                     'source_rows_requiring':symbols[k],
+                     'raw_transition_count':raw_signal_counts.get(v,0),
+                     'semantic_to_spell_id_certified':False}
+                  for k,v in candidate_symbol_to_raw.items()}
+              operand_coverage[spec]={
+                'source_operand_occurrences':dict(sorted(symbols.items())),
+                'source_unique_operand_count':len(symbols),
+                'raw_transition_unique_signal_count':len(raw_signals),
+                'raw_candidate_buff_signal_presence':candidate_buff_signals,
+                'raw_resource_wcl_actor_owner_pre_connected':False,
+                'WCL_patch_and_talent_to_source_buffs_validated':False,
+                'WCL_source_IF_positive_proof':0}
               # Never treat source model target_count 1/2 as actual WCL target count.
               (root/(spec+'-postlock-adapter-candidate.json')).write_bytes(canonical(hypothesis))
               (root/(spec+'-real-wcl-source-IF-unverified.json')).write_bytes(canonical(postlock))
@@ -175,6 +210,7 @@ jobs:
              'source_adapter_only_after_numeric_lock':True,
              'external_adapter_sha256':hashlib.sha256(adapter_raw).hexdigest(),
              'source_case_outcomes':outcomes,
+             'source_if_operand_coverage_postlock_only':operand_coverage,
              'actual_current_Retail_SpellID_to_action_button_truth':'UNKNOWN',
              'actual_WCL_player_build_matches_SimC':'UNKNOWN',
              'actor_target_count_at_each_cast':'UNKNOWN',
@@ -187,6 +223,7 @@ jobs:
           (root/'postlock-real-wcl-adapter-study-summary.json').write_bytes(canonical(summary))
           print('REAL_WCL_PINNED_SPEC_ADAPTER_TO_SOURCE_IR_CANDIDATE_BRIDGE_PASS')
           print('REAL_WCL_POSTLOCK_SOURCE_ADAPTER_RESULT',json.dumps(outcomes,sort_keys=True))
+          print('REAL_WCL_POSTLOCK_SOURCE_IF_OPERAND_COVERAGE',json.dumps(operand_coverage,sort_keys=True))
           PY
           sha256sum /tmp/zrot-real-wcl-postlock-id/*.json
       - uses: actions/upload-artifact@v4
