@@ -312,6 +312,108 @@ def disjoint_numeric_fixture(discovery:list[dict],holdout:dict,
     }
 
 
+def strict_pre_numeric_matrix(transport:dict)->dict:
+    """Reusable WCL-only per-cast pre-state. No SimC or game semantics.
+
+    Valid raw aura transitions must be strictly before the observed cast.
+    At a disputed or same-timestamp event the existing StrictPreReplay
+    yields UNKNOWN rather than choosing the favorable event by row order.
+    Casts remain observations, never evidence of competing readiness.
+    """
+    from general_rotation_strict_pre_state_engine_v1 import (
+        Transition,StrictPreReplay,VERIFIED as STRICT_VERIFIED
+    )
+    _check_transport(transport)
+    casts=transport.get("cast_events")
+    transitions=transport.get("transitions")
+    need(type(casts)==list and type(transitions)==list and
+         len(casts)==transport["actor_numeric_cast_count"] and
+         len(transitions)==transport["raw_aura_boolean_transitions"] and
+         0<len(casts)<=50000 and len(transitions)<=100000,
+         "NUMERIC_PRE_MATRIX_RAW_ROW_COUNT_DRIFT")
+    signals=tuple(sorted({r["signal"] for r in transitions}))
+    need(len(signals)*len(casts)<=500000,
+         "WCL_PRE_MATRIX_BOUNDED_SIGNALS_TIMES_CASTS")
+    cohort="original_wcl_"+transport["source_cohort_role"].lower()
+    scope=transport["report_code"]+"/"+str(transport["fight_id"])
+    actor=str(transport["actor_id"])
+    trans=[]
+    for r in transitions:
+        need(r.get("source_kind")==RAW_SOURCE and
+             r.get("quality")==VERIFIED and
+             r.get("raw_receipt_sha256")==transport["raw_receipt_sha256"] and
+             isinstance(r.get("signal"),str) and
+             NAME.fullmatch(r["signal"]) is not None and
+             r.get("valid_until_ms") is None,
+             "STRICT_PRE_RAW_TRANSITION_SOURCE_CHANGED")
+        trans.append(Transition(
+            r["source_event_id"],cohort,scope,actor,
+            r["signal"],r["t_ms"],r["value"],
+            r["valid_until_ms"],r["raw_receipt_sha256"],
+            source_kind=RAW_SOURCE,quality=STRICT_VERIFIED))
+    engine=StrictPreReplay(trans)
+    rows=[];counts=Counter();used=set()
+    for cast in casts:
+        need(cast.get("source_kind")==RAW_SOURCE and
+             type(cast.get("t_ms")) is int and cast["t_ms"]>=0 and
+             type(cast.get("spell_id")) is int and
+             cast["spell_id"]>0 and
+             type(cast.get("event_id")) is str and
+             cast["event_id"] not in used,
+             "RAW_CAST_EVENT_IS_NOT_NUMERIC")
+        used.add(cast["event_id"])
+        snapshot=(engine.snapshot(
+             cohort_id=cohort,scope=scope,actor_id=actor,
+             at_ms=cast["t_ms"],signals=signals)
+             if signals else None)
+        facts=snapshot["signals"] if snapshot else {}
+        for signal,entry in facts.items():
+            counts[entry["status"]]+=1
+            if entry["status"]=="KNOWN":
+                need(entry["event_t_ms"]<cast["t_ms"] and
+                     entry["source_event_id"] is not None and
+                     entry["raw_receipt_sha256"]==
+                       transport["raw_receipt_sha256"],
+                     "WCL_WITNESS_NOT_FROM_STRICT_EARLIER_RAW")
+            else:
+                need(entry["value"] is None,
+                     "WCL_UNKNOWN_PRE_WAS_FILLED_BY_INFERENCE")
+                counts["UNKNOWN_REASON_"+entry["reason"]]+=1
+        rows.append({
+          "raw_cast_event_id":cast["event_id"],
+          "t_ms":cast["t_ms"],
+          "numeric_spell_id":cast["spell_id"],
+          "strict_pre_signals":facts,
+          "source_APL_semantics_injected":False,
+          "complete_spell_READY":"UNKNOWN",
+          "competing_spells_READY":"UNKNOWN",
+        })
+    output={
+       "schema":"ZrotWclRawActorStrictPreNumericMatrixV1",
+       "policy_id":POLICY,
+       "source_numeric_transport_sha256":
+         transport["numeric_transport_sha256"],
+       "source_role":transport["source_cohort_role"],
+       "raw_page_identity_sha256":transport["raw_receipt_sha256"],
+       "source_event_set_sha256":engine.fingerprint,
+       "cast_rows":len(rows),
+       "signals_requested":len(signals),
+       "signal_status_summary":dict(sorted(counts.items())),
+       "per_numeric_cast":rows,
+       "WCL_event_clock":"FIGHT_START_RELATIVE_INTEGER_MILLISECONDS",
+       "all_known_facts_strictly_before_cast":True,
+       "same_timestamp_not_used_as_state":True,
+       "SimC_source_or_spell_names_injected":False,
+       "complete_READY_proven":0,
+       "competitor_priority_proven":0,
+       "dummy_error_proven":0,
+       "new_WCL_API_calls":0,
+       "MAIN_promoted":False
+    }
+    output["matrix_sha256"]=sha(canonical(output))
+    return output
+
+
 def selftest()->dict:
     # Validate *actual producer format* with new cold-start files: a full
     # fake transport WCL report -> checkpoint -> replay -> actor gate -> lock.
@@ -412,6 +514,19 @@ def selftest()->dict:
              "RAW_TO_FIGHT_RELATIVE_WCL_ACTOR_NORMALIZATION_FAILED")
         need(d1["source_replay_sha256"]==v1["replay_sha256"],
              "NUMERIC_TRANSPORT_SOURCE_REPLAY_DRIFT")
+        matrix=strict_pre_numeric_matrix(d1)
+        state0=matrix["per_numeric_cast"][0]["strict_pre_signals"][
+            "raw_aura_1001_active"]
+        state1=matrix["per_numeric_cast"][1]["strict_pre_signals"][
+            "raw_aura_1001_active"]
+        need(matrix["cast_rows"]==2 and
+             matrix["signals_requested"]==1 and
+             state0["value"] is True and
+             state0["event_t_ms"]<500 and
+             state1["value"] is False and
+             state1["event_t_ms"]<1000 and
+             matrix["complete_READY_proven"]==0,
+             "REUSABLE_NUMERIC_STRICT_PRE_MATRIX_INCORRECT")
         # The transported same-time remove is present; StrictPreReplay
         # (not this producer) must exclude it at the 500ms cast.
         from general_rotation_strict_pre_state_engine_v1 import (
@@ -466,6 +581,7 @@ def selftest()->dict:
             "new_cold_start_snapshots":2,
             "generic_actor_scoped_transports":2,
             "strict_PRE_same_time_fence":"PASS",
+            "strict_PRE_all_cast_numeric_matrix":"PASS",
             "disjoint_lock_fixture":"PASS",
             "negative_controls":negatives,
             "real_wcl_api_requests":0,
