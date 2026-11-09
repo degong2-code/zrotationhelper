@@ -327,11 +327,13 @@ def parse_attempt(line:str):
     idx=line.find(ATTEMPT)
     if idx<0:return None
     p=line[idx:].strip().split("|")
-    require(len(p)==9 and p[3].isdigit() and p[6].isdigit() and
-            p[8] in ("0","1"),
+    # ZROT_NATIVE_SELECT_V1|ATTEMPT|t|active_list|owner|ordinal|action|return
+    # Original return remains a comparator only; not a READY gate.
+    require(len(p)==8 and p[2].isdigit() and p[5].isdigit() and
+            p[7] in ("0","1"),
             "SOURCE_ORIGINAL_NATIVE_ATTEMPT_FORMAT_CHANGED")
-    return {"time_ms":int(p[3]),"source_list":p[5],
-            "ordinal_1based":int(p[6]),"native_action_name":p[7]}
+    return {"time_ms":int(p[2]),"source_list":p[4],
+            "ordinal_1based":int(p[5]),"native_action_name":p[6]}
 
 
 def replay_original_pre(trace:str,*,plan:dict,source_root:Path,
