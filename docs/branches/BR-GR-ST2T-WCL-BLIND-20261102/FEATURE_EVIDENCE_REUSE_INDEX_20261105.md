@@ -1,5 +1,17 @@
 # zRotationHelper — Feature Evidence Reuse Index (2026-11-05)
 
+## 2026-11-10 — Raw actor combatantinfo PRE and pinned source lookup (branch-only)
+
+**REUSE / EXTEND result:** Reused the existing official WCL checkpoint/page SHA and identity gate rather than duplicating the collector or APL parser. New generic `tools/engine_first/wcl_actor_combatantinfo_pre_v1.py` extracts actual numeric actor build only when one player's `combatantinfo.timestamp < first actor cast/begincast`, preserving multi-entry talents and empty gear slots (`id=0`). [CI #42642973309](https://github.com/degong2-code/zrotationhelper/actions/runs/42642973309) **4/4 SUCCESS**: Python 3.12/3.14 synthetic and **real original 51-cast WCL holdout + distinct third report**, without new API/SimC native calls.
+
+- Original holdout: combatantinfo at 0ms before first action 464ms; 76 talent entries/74 unique numeric nodeIDs, 18/18 occupied gear slots; observed raw setID counts 2067×4 and 2070×2. Certificate SHA256 `fa8ff25079a117a2b72929eb70f2864ed4a194bcd2e5d9090ff538ee66e99d0b`; artifact 13685927180.
+- Third report: 1ms before first action 1483ms; 76 entries/74 unique nodes, **17 occupied of 18 slots** (one raw id=0); same raw setID counts but **different talent-entry SHA256**. Certificate SHA256 `08f8165058c9d85afb2f881cca152afd61ec4653d8b335fe90e5dd242da987c3`; artifact 13686601630.
+- Exact pinned official SimC `sc_warrior.cpp` Git blob `38ee3dd0d5943eb9227ec55aefb21e7d47244f96` uses `find_spell(184362)` for Enrage and `find_spell(1719)` for Recklessness; both numeric IDs appear in the held-out actor's WCL aura events. **This is source/raw numeric concordance only**, NOT current client patch parity, MID2 set/gear activation, Enrage remaining duration, proc READY, IF truth, mandatory priority, or dummy mistake.
+- **Existing code to reuse next:** `wcl_simc_build_alignment_v1.py` and `wcl_simc_apl_branch_build_guard_v1.py` for talent-source compatibility; `general_rotation_postlock_typed_pre_scenario_v1.py` and `general_rotation_mechanic_epoch_evidence_gate_v1.py` for post-lock IF/UNKNOWN evidence. Do not reinvent these engines.
+- **Evidence gap:** actual full SimC profile/build/patch/effect parity and competitor READY remain UNKNOWN. Third distinct report is NOT a new prospectively locked holdout. Raw gear setID alone does not establish active Fury MID2 4-piece bonus. See `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_COMBATANTINFO_PRE_ACTOR_BUILD_AND_PINNED_SOURCE_LOOKUPS_20261110.json`.
+
+**NEXT:** Independently compare actual held-out talent selections and setIDs/patch era with the pinned SimC profile and source mechanics; then reuse the typed post-lock IF replay only for certified operands. MAIN/FROZEN and Scope Gen6 handoff untouched.
+
 ## Scope Gen6 — 2026-11-09 latest evidence/engine reuse decision
 
 | Subsystem | Reuse/extension | Real proof vs gap |
