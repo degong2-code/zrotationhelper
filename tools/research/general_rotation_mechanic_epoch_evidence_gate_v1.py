@@ -191,6 +191,75 @@ def _study_check(study:dict):
              "UNMAPPED_OPERAND_COUNT_EXCEEDS_SOURCE_AST")
     return required
 
+
+def _cast_feedback_boundary(study:dict, symbol_rows:list[dict])->list[dict]:
+    """Shape intended for a future dummy evaluator; no WCL raid error verdict.
+
+    A cast is never proof that a different candidate was READY. A named
+    source action row from a post-lock token match is not the player's
+    selected source row or a verified game current-patch gameplay rule.
+    """
+    rows=study.get("per_numeric_cast")
+    need(type(rows)==list and len(rows)==study["numeric_observed_casts"],
+         "POSTLOCK_WCL_CAST_FEEDBACK_COVERAGE_INCOMPLETE")
+    categories={r["source_symbol"]:r for r in symbol_rows}
+    cast_ids=set();all_symbols=Counter();total_source_rows=0;out=[]
+    for cast in rows:
+        need(type(cast)==dict and
+             type(cast.get("raw_WCL_event_id"))==str and
+             cast["raw_WCL_event_id"] not in cast_ids and
+             type(cast.get("at_ms"))==int and cast["at_ms"]>=0 and
+             type(cast.get("spell_id"))==int and cast["spell_id"]>0 and
+             type(cast.get("potential_source_rows"))==list and
+             cast.get("source_action_mandatory_priority")=="UNKNOWN" and
+             cast.get("dummy_wrong_cast")=="UNKNOWN" and
+             cast.get("WCL_actual_target_count")=="UNKNOWN" and
+             cast.get("WCL_build_vs_SimC_profile")=="UNKNOWN",
+             "RAW_WCL_ACTION_WAS_ALREADY_PROMOTED_TO_GAMEPLAY_ADVICE")
+        cast_ids.add(cast["raw_WCL_event_id"])
+        symbols=set()
+        candidates=cast["potential_source_rows"]
+        for row in candidates:
+            need(type(row)==dict and
+                 row.get("certified_current_game_source_IF")=="UNKNOWN" and
+                 row.get("source_row_was_selected")=="UNKNOWN" and
+                 row.get("action_physical_READY")=="UNKNOWN" and
+                 row.get("competing_priority")=="UNKNOWN" and
+                 type(row.get("source_conditional_symbols"))==list,
+                 "SOURCE_ROW_CANDIDATE_WAS_MISTAKEN_FOR_READY_ACTION")
+            one=set(row["source_conditional_symbols"])
+            need(all(type(x)==str and x in categories for x in one),
+                 "SOURCE_ROW_CONTAINS_UNAUDITED_MECHANIC_SYMBOL")
+            symbols.update(one)
+            all_symbols.update(one)
+        total_source_rows+=len(candidates)
+        unresolved=sorted(x for x in symbols if
+            categories[x]["current_client_spell_ID_to_source_APL_certified"]
+             is False)
+        out.append({
+          "raw_WCL_event_id":cast["raw_WCL_event_id"],
+          "at_ms":cast["at_ms"],
+          "observed_numeric_spell_id":cast["spell_id"],
+          "potential_source_APL_rows_not_selected_count":len(candidates),
+          "source_IF_symbol_dependencies":sorted(symbols),
+          "uncertified_source_IF_symbol_dependencies":unresolved,
+          "game_spell_and_build_equivalence":"UNKNOWN",
+          "observed_action_vs_verified_expected_action":
+              "UNKNOWN_NO_GAMEPLAY_READY_RULE",
+          "dummy_training_mistake_verdict":"UNKNOWN_NOT_EVALUATED_AS_DUMMY",
+          "evidence_prevents_wrong_cast_claim":True,
+          "corrective_spell_recommendation":"UNKNOWN",
+          "reason_code":(
+             "POSTLOCK_TOKEN_SOURCE_ROWS_NOT_FULL_PRIORITY_PROOF"
+             if candidates else "NO_UNAMBIGUOUS_SOURCE_ACTION_MATCH"),
+        })
+    need(total_source_rows==study["individual_source_IF_candidate_row_probes"],
+         "SOURCE_CAST_CANDIDATE_ROW_TOTAL_NOT_CONSERVED")
+    require_counts=study["required_source_IF_operand_occurrence_counts"]
+    need(dict(sorted(all_symbols.items()))==dict(sorted(require_counts.items())),
+         "SOURCE_AST_SYMBOL_COUNT_NOT_CONSERVED_IN_CAST_FEEDBACK")
+    return out
+
 def compile_frontier(study:dict, registry:dict,*,context:str)->dict:
     bindings,refs,epochs,simc_time=check_registry(registry)
     required=_study_check(study)
@@ -246,6 +315,7 @@ def compile_frontier(study:dict, registry:dict,*,context:str)->dict:
     rows.sort(key=lambda x:(-x["source_candidate_rows_missing_raw_mapping"],
                             -x["source_candidate_row_occurrences"],
                             x["source_symbol"]))
+    feedback=_cast_feedback_boundary(study,rows)
     return {
       "schema":SCHEMA,
       "policy_id":POLICY,
@@ -260,6 +330,9 @@ def compile_frontier(study:dict, registry:dict,*,context:str)->dict:
       "source_candidate_WCL_casts":study["raw_WCL_candidate_casts_with_source_token"],
       "candidate_source_IF_rows":study["individual_source_IF_candidate_row_probes"],
       "mechanic_symbol_frontier":rows,
+      "per_WCL_cast_dummy_safety_feedback_preview":feedback,
+      "WCL_casts_with_UNCERTIFIED_expected_action":len(feedback),
+      "wrong_casts_marked_as_user_mistake":0,
       "raw_unmapped_source_operand_total":sum(
          x["source_candidate_rows_missing_raw_mapping"] for x in rows),
       "mechanic_coverage_stage_count":dict(sorted(Counter(
@@ -302,6 +375,25 @@ def selftest():
       "numeric_observed_casts":2,
       "raw_WCL_candidate_casts_with_source_token":2,
       "individual_source_IF_candidate_row_probes":14,
+      "per_numeric_cast":[
+       {"raw_WCL_event_id":"cast-1","at_ms":1000,"spell_id":1201,
+        "source_action_mandatory_priority":"UNKNOWN",
+        "dummy_wrong_cast":"UNKNOWN","WCL_actual_target_count":"UNKNOWN",
+        "WCL_build_vs_SimC_profile":"UNKNOWN",
+        "potential_source_rows":[
+          {"source_conditional_symbols":[
+              "buff.proc.stack" if n<6 else "gcd"],
+           "certified_current_game_source_IF":"UNKNOWN",
+           "source_row_was_selected":"UNKNOWN",
+           "action_physical_READY":"UNKNOWN",
+           "competing_priority":"UNKNOWN"} for n in range(14)
+        ]},
+       {"raw_WCL_event_id":"cast-2","at_ms":1100,"spell_id":2222,
+        "source_action_mandatory_priority":"UNKNOWN",
+        "dummy_wrong_cast":"UNKNOWN","WCL_actual_target_count":"UNKNOWN",
+        "WCL_build_vs_SimC_profile":"UNKNOWN",
+        "potential_source_rows":[]}
+      ],
       "input_original_WCL_numeric_lock_sha256":"a"*64
     }
     for spec in ("warrior_fury","mage_arcane"):
@@ -343,9 +435,20 @@ def selftest():
              r["raw_unmapped_source_operand_total"]==14 and
              r["mechanic_symbol_frontier"][0]["source_symbol"]=="gcd" and
              r["current_Retail_source_IF_trues_certified"]==0 and
+             r["WCL_casts_with_UNCERTIFIED_expected_action"]==2 and
+             len(r["per_WCL_cast_dummy_safety_feedback_preview"])==2 and
+             r["per_WCL_cast_dummy_safety_feedback_preview"][0][
+                  "potential_source_APL_rows_not_selected_count"]==14 and
+             r["per_WCL_cast_dummy_safety_feedback_preview"][1][
+                  "dummy_training_mistake_verdict"]==
+                  "UNKNOWN_NOT_EVALUATED_AS_DUMMY" and
              r["dummy_wrong_cast_verdicts"]==0,
              "GENERIC_MECHANIC_FRONTIER_SYNTHETIC_INVALID")
         positive+=1
+        v=deepcopy(sample)
+        v["per_numeric_cast"][0]["potential_source_rows"][0][
+            "action_physical_READY"]="READY"
+        must_fail(lambda:compile_frontier(v,registry,context=spec+"-st"))
         v=deepcopy(sample);v["certified_source_IF_guard_true_count"]=1
         must_fail(lambda:compile_frontier(v,registry,context=spec+"-st"))
         v=deepcopy(registry);v["requested_promotion"]=True
