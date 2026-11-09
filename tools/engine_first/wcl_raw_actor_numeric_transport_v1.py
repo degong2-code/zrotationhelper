@@ -79,7 +79,7 @@ def _raw_event_id(page_sha:str,ordinal:int,ev:dict)->str:
     return "raw_"+sha(canonical([page_sha,ordinal,ev]))[:40]
 
 def actor_snapshot(raw_folder:Path,gate:dict,blind_view:dict,
-                   original_receipt:dict)->dict:
+                   original_receipt:dict,*,source_role:str="DISCOVERY")->dict:
     """Independent raw-page replay; no SimC meaning or post-lock mapping."""
     need(gate.get("schema")=="ZrotWclActorIdentityGateV1" and
          gate.get("status")=="ACTOR_FIGHT_SPEC_CLASS_MATCH" and
@@ -88,15 +88,35 @@ def actor_snapshot(raw_folder:Path,gate:dict,blind_view:dict,
          isinstance(gate.get("source_metadata_sha256"),str) and
          HASH.fullmatch(gate["source_metadata_sha256"]),
          "ORIGINAL_ACTOR_GATE_PROVENANCE_NOT_VERIFIED")
-    need(original_receipt.get("schema")==
-         "ZrotWclActorScopedDiscoveryReceiptV1" and
-         original_receipt.get("status")=="NUMERIC_DISCOVERY_ONLY" and
-         original_receipt.get("scope_policy_id")==POLICY and
-         original_receipt.get("actor_gate_sha256")==sha(canonical(gate)) and
-         original_receipt.get("blind_actor_view_sha256")==sha(canonical(blind_view)) and
-         original_receipt.get("readiness")=="UNKNOWN" and
-         original_receipt.get("independent_holdout")=="NOT_RUN",
-         "WCL_PRIOR_ACTOR_RECEIPT_OR_IDENTITY_CHANGED")
+    need(source_role in ("DISCOVERY","HOLDOUT"),
+         "WCL_SOURCE_COHORT_ROLE_UNDECLARED")
+    if source_role=="DISCOVERY":
+        need(original_receipt.get("schema")==
+             "ZrotWclActorScopedDiscoveryReceiptV1" and
+             original_receipt.get("status")=="NUMERIC_DISCOVERY_ONLY" and
+             original_receipt.get("scope_policy_id")==POLICY and
+             original_receipt.get("actor_gate_sha256")==sha(canonical(gate)) and
+             original_receipt.get("blind_actor_view_sha256")==sha(canonical(blind_view)) and
+             original_receipt.get("readiness")=="UNKNOWN" and
+             original_receipt.get("independent_holdout")=="NOT_RUN",
+             "WCL_PRIOR_ACTOR_RECEIPT_OR_IDENTITY_CHANGED")
+    else:
+        need(original_receipt.get("schema")==
+             "ZrotDisjointWclHoldoutObservedActionsV1" and
+             original_receipt.get("scope_policy_id")==POLICY and
+             original_receipt.get("status")==
+              "DISJOINT_REPORT_HOLDOUT_OBSERVATION_ONLY" and
+             original_receipt.get("holdout_source_report")==gate["report_code"] and
+             original_receipt.get("holdout_source_fight")==gate["fight_id"] and
+             original_receipt.get("holdout_actor_id")==gate["actor_id"] and
+             original_receipt.get("different_report_from_discovery") is True and
+             original_receipt.get("strict_pre_independently_recomputed") is True and
+             original_receipt.get("candidate_set_frozen_before_holdout") is True and
+             original_receipt.get("new_discovery_candidates_added")==0 and
+             original_receipt.get("general_rotation_rule_promoted") is False and
+             original_receipt.get("dummy_trainer_rule_ready") is False and
+             original_receipt.get("cooldown_and_competing_action_readiness")=="UNKNOWN",
+             "WCL_PRIOR_DISJOINT_HOLDOUT_RECEIPT_INVALID")
     raw=replay(raw_folder)
     view=scope_replay(raw,gate)
     need(view==blind_view and
@@ -185,6 +205,7 @@ def actor_snapshot(raw_folder:Path,gate:dict,blind_view:dict,
     result={
       "schema":SCHEMA,"policy_id":POLICY,
       "origin":ORIGIN,
+      "source_cohort_role":source_role,
       "report_code":gate["report_code"],
       "fight_id":gate["fight_id"],
       "actor_id":actor,
@@ -209,6 +230,8 @@ def actor_snapshot(raw_folder:Path,gate:dict,blind_view:dict,
       "target_count_at_cast":"UNKNOWN",
       "build_equivalent_to_SimC":"UNKNOWN",
       "independent_rank_or_holdout_proven":False,
+      "prior_disjoint_report_holdout_recomputed":
+           source_role=="HOLDOUT",
       "official_WCL_live_API_called_this_run":False,
       "source_gameplay_rule":"UNKNOWN",
       "MAIN_promoted":False,
@@ -225,7 +248,10 @@ def _check_transport(t:dict)->None:
          t.get("build_equivalent_to_SimC")=="UNKNOWN" and
          t.get("independent_rank_or_holdout_proven") is False and
          t.get("target_count_at_cast")=="UNKNOWN" and
-         t.get("source_gameplay_rule")=="UNKNOWN",
+         t.get("source_gameplay_rule")=="UNKNOWN" and
+         t.get("source_cohort_role") in ("DISCOVERY","HOLDOUT") and
+         t.get("prior_disjoint_report_holdout_recomputed") is
+             (t["source_cohort_role"]=="HOLDOUT"),
          "WCL_RAW_TRANSPORT_INTEGRITY_OR_CLAIM_BOUNDARY_CHANGED")
 
 def disjoint_numeric_fixture(discovery:list[dict],holdout:dict,
@@ -233,8 +259,13 @@ def disjoint_numeric_fixture(discovery:list[dict],holdout:dict,
     """Post-lock transport only. No source APL allowed in this signature."""
     need(type(discovery)==list and bool(discovery) and
          len(discovery)<=100,"BOUNDED_DISCOVERY_SNAPSHOTS_REQUIRED")
-    for x in discovery:_check_transport(x)
+    for x in discovery:
+        _check_transport(x)
+        need(x["source_cohort_role"]=="DISCOVERY",
+             "HOLDOUT_WAS_LEAKED_INTO_BLIND_DISCOVERY")
     _check_transport(holdout)
+    need(holdout["source_cohort_role"]=="HOLDOUT",
+         "UNVERIFIED_HOLDOUT_ROLE_IN_NUMERIC_FIXTURE")
     need(frozen_lock.get("schema")==LOCK_SCHEMA and
          frozen_lock.get("source_kind")==ORIGIN and
          frozen_lock.get("status")=="LOCKED_NUMERIC_ONLY" and
@@ -287,7 +318,7 @@ def selftest()->dict:
     from pathlib import Path
     with tempfile.TemporaryDirectory(prefix="zrot-wcl-numeric-") as d:
         root=Path(d)
-        def actor_bundle(code:str,modifier:int):
+        def actor_bundle(code:str,modifier:int,role:str="DISCOVERY"):
             actor=42
             start=1000
             window=3000
@@ -353,10 +384,26 @@ def selftest()->dict:
                "actor_gate_sha256":sha(canonical(gate)),
                "blind_actor_view_sha256":sha(canonical(view)),
                "readiness":"UNKNOWN","independent_holdout":"NOT_RUN"}
-            transp=actor_snapshot(folder,gate,view,original_receipt)
+            if role=="HOLDOUT":
+                original_receipt={
+                  "schema":"ZrotDisjointWclHoldoutObservedActionsV1",
+                  "scope_policy_id":POLICY,
+                  "status":"DISJOINT_REPORT_HOLDOUT_OBSERVATION_ONLY",
+                  "holdout_source_report":code,
+                  "holdout_source_fight":1,
+                  "holdout_actor_id":42,
+                  "different_report_from_discovery":True,
+                  "strict_pre_independently_recomputed":True,
+                  "candidate_set_frozen_before_holdout":True,
+                  "new_discovery_candidates_added":0,
+                  "general_rotation_rule_promoted":False,
+                  "dummy_trainer_rule_ready":False,
+                  "cooldown_and_competing_action_readiness":"UNKNOWN"}
+            transp=actor_snapshot(folder,gate,view,original_receipt,
+                                  source_role=role)
             return folder,gate,view,original_receipt,lock,transp
         f1,g1,v1,r1,lock1,d1=actor_bundle("ReportABC1",0)
-        f2,g2,v2,r2,lock2,d2=actor_bundle("ReportABC2",1)
+        f2,g2,v2,r2,lock2,d2=actor_bundle("ReportABC2",1,"HOLDOUT")
         need(d1["actor_numeric_cast_count"]==2 and
              d1["raw_aura_boolean_transitions"]==3 and
              d1["other_actor_casts_excluded"]==1 and
@@ -431,25 +478,63 @@ def main()->None:
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--actor-root",type=Path)
     p.add_argument("--out",type=Path)
+    p.add_argument("--role",choices=("discovery","holdout"),
+                   default="discovery")
+    p.add_argument("--discovery-lock",type=Path)
+    p.add_argument("--holdout-contract",type=Path)
     a=p.parse_args()
     if a.actor_root is None and a.out is None:
+        need(a.role=="discovery" and
+             a.discovery_lock is None and a.holdout_contract is None,
+             "SELFTEST_CANNOT_USE_PRODUCTION_SOURCE_ARGUMENTS")
         print(json.dumps(selftest(),sort_keys=True))
         return
     need(a.actor_root is not None and a.out is not None,
          "ACTUAL_RAW_ACTOR_ROOT_AND_OUTPUT_REQUIRED")
     root=a.actor_root.resolve(strict=True)
     derived=root/"derived"
-    selection=read_json(derived/"selection.json")
-    gate=read_json(derived/"identity.json")
-    view=read_json(derived/"blind_replay.json")
-    receipt=read_json(derived/"receipt.json")
+    if a.role=="discovery":
+        need(a.discovery_lock is None and a.holdout_contract is None,
+             "DISCOVERY_CANNOT_LOAD_HOLDOUT_OR_LOCK_SEMANTICS")
+        selection=read_json(derived/"selection.json")
+        gate=read_json(derived/"identity.json")
+        view=read_json(derived/"blind_replay.json")
+        receipt=read_json(derived/"receipt.json")
+    else:
+        need(a.discovery_lock is not None and
+             a.holdout_contract is not None,
+             "REAL_HOLDOUT_REQUIRES_PREDECLARED_CONTRACT_AND_ORIGINAL_LOCK")
+        from wcl_disjoint_holdout_v1 import (
+             validate_contract,validate_frozen_lock,assess_holdout
+        )
+        from wcl_simc_postlock_real_audit_v1 import independently_replay_pre
+        contract=validate_contract(read_json(a.holdout_contract))
+        lock=validate_frozen_lock(a.discovery_lock.read_bytes(),contract)
+        selection=read_json(derived/"source_selection.json")
+        gate=read_json(derived/"identity_gate.json")
+        view=read_json(derived/"blind_holdout_replay.json")
+        receipt=read_json(derived/"holdout_observed_metrics.json")
+        # Recompute from the archive independently, no trust in prior metrics.
+        raw_base=root/"raw"/selection["report_code"]/(
+            "fight_"+str(selection["fight_id"]))
+        raw_events=[]
+        for page in checked_pages(raw_base,
+                read_json(raw_base/"checkpoint.json")):
+            raw_events.extend(read_json(raw_base/page["file"])["events"])
+        independent=independently_replay_pre(raw_events,gate["actor_id"])
+        rebuilt=assess_holdout(contract,lock,selection,view,independent)
+        need(all(receipt.get(k)==v for k,v in rebuilt.items()) and
+             receipt.get("data_status")=="REAL_OFFICIAL_WCL_SNAPSHOT" and
+             receipt.get("WCL_raw_event_count")==len(raw_events),
+             "REAL_HOLDOUT_METRICS_DO_NOT_REPLAY_FROM_PRIOR_RAW")
     rawpath=(root/"raw"/selection["report_code"]/
             ("fight_"+str(selection["fight_id"]))).resolve(strict=True)
     need(rawpath.is_relative_to(root) and
          gate["report_code"]==selection["report_code"] and
          gate["fight_id"]==selection["fight_id"],
          "ACTOR_SOURCE_SELECTION_PATH_OR_IDENTITY_MISMATCH")
-    result=actor_snapshot(rawpath,gate,view,receipt)
+    result=actor_snapshot(rawpath,gate,view,receipt,
+                          source_role=a.role.upper())
     a.out.parent.mkdir(parents=True,exist_ok=True)
     need(not a.out.exists(),"OUTPUT_EXISTS_NO_SILENT_OVERWRITE")
     with a.out.open("xb") as f:f.write(canonical(result))
@@ -461,7 +546,9 @@ def main()->None:
         "actor_aura_transitions":result["raw_aura_boolean_transitions"],
         "other_actors_excluded":result["other_actor_casts_excluded"]
     },sort_keys=True))
-    print("WCL_REAL_HOLDOUT_INDEPENDENT_VERIFIED=False")
+    print("WCL_DISJOINT_REPORT_OBSERVATION_REPLAYED="+
+          str(result["prior_disjoint_report_holdout_recomputed"]))
+    print("WCL_REAL_ROTATION_PRIORITY_OR_DUMMY_VERIFIED=False")
 
 
 if __name__=="__main__":
