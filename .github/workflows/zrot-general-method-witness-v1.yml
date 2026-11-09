@@ -1,0 +1,50 @@
+name: zrot-general-method-witness-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_method_witness_v1.py
+      - tools/research/simc_native_warrior_exact_ready_guard_producer_v1.py
+      - tools/research/general_rotation_warrior_exact_ready_guard_replay_v1.py
+      - .github/workflows/zrot-general-method-witness-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generic-synthetic:
+    name: Generic method witness and distinct source rules Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and test source-bound method pairing for unrelated abilities
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_original_method_witness_v1.py
+          python -B tools/research/general_rotation_original_method_witness_v1.py \
+            > /tmp/gr-generic-method-witness.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/gr-generic-method-witness.json'))
+          assert r['schema']=='ZrotGenericExactActionMethodWitnessV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=17
+          assert r['different_source_method_adapters']==2
+          assert r['same_timestamp_cross_action_guard_theft'] is False
+          assert r['unverified_external_json_can_certify_NOT_READY'] is False
+          assert r['full_positive_READY']==0 and r['WCL_API_calls']==0
+          print('GENERIC_EXACT_ACTION_METHOD_WITNESS_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_original_method_witness_v1.py
