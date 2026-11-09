@@ -45,6 +45,10 @@ jobs:
           sha256sum tools/research/general_rotation_original_source_partial_gate_consumer_v1.py
 
   real-pinned-consumer:
+    # Real upstream source artifacts expire. Do NOT make every push depend
+    # on retrieving a historical ZIP. Use workflow_dispatch for an
+    # intentionally bounded source-anchored replay while it remains available.
+    if: github.event_name == 'workflow_dispatch'
     name: Independently replay source-pinned actual passive PRE artifact
     needs: [offline-generic]
     runs-on: ubuntu-latest
