@@ -4,6 +4,7 @@ on:
     branches: [work/gr-simc-st-2t-wcl-blind-20261102]
     paths:
       - tools/engine_first/wcl_raw_actor_numeric_transport_v1.py
+      - tools/research/general_rotation_wcl_postlock_source_ir_bridge_v1.py
       - .github/workflows/zrot-gr-wcl-real-disjoint-numeric-source-ir-e2e-v1.yml
   workflow_dispatch:
 permissions:
