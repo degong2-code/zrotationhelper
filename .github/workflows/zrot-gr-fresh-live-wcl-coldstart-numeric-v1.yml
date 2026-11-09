@@ -20,6 +20,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          run-id: 41463589665
+          github-token: ${{ github.token }}
+          path: /tmp/gr-previous-discovery
+      - uses: actions/download-artifact@v4
+        with:
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          run-id: 41473060401
+          github-token: ${{ github.token }}
+          path: /tmp/gr-previous-holdout
       - name: Offline producer preflight
         shell: bash
         env:
@@ -37,6 +49,28 @@ jobs:
           assert b['selftest']=='PASS_OFFLINE_SYNTHETIC' and b['strict_PRE_all_cast_numeric_matrix']=='PASS'
           print('FRESH_WCL_ENGINE_COLDSTART_PREFLIGHT_PASS')
           PY
+      - name: Derive previous report exclusions from immutable source receipts BEFORE new live
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-fresh-live
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from wcl_disjoint_holdout_v1 import validate_contract,validate_frozen_lock
+          c=validate_contract(json.loads(Path(
+            'docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HOLDOUT_PREDECLARED_SOURCE_AND_METRICS_V1.json').read_bytes()))
+          validate_frozen_lock(Path('/tmp/gr-previous-discovery/derived/blind_lock.json').read_bytes(),c)
+          d=json.loads(Path('/tmp/gr-previous-discovery/derived/selection.json').read_bytes())
+          h=json.loads(Path('/tmp/gr-previous-holdout/derived/source_selection.json').read_bytes())
+          codes=sorted({d['report_code'],h['report_code']})
+          assert len(codes)==2 and c['frozen_discovery']['report_code'] in codes
+          Path('/tmp/zrot-fresh-live/previous-report-codes.txt').write_text(
+              ''.join(x+'\n' for x in codes))
+          print('ORIGINAL_PREVIOUS_DISCOVERY_AND_HOLDOUT_REPORT_CODES_EXCLUDED='+str(len(codes)))
+          PY
       - name: Official WCL bounded live cold-start; no secrets logged
         shell: bash
         env:
@@ -51,12 +85,18 @@ jobs:
             echo 'FRESH_WCL_OFFICIAL_SOURCE_SKIPPED_NO_AUTH_CONFIG'
             exit 0
           fi
+          mapfile -t previous_codes < /tmp/zrot-fresh-live/previous-report-codes.txt
+          exclude_args=()
+          for code in "${previous_codes[@]}"; do
+            exclude_args+=(--exclude-report-code "$code")
+          done
           set +e
           python -B tools/engine_first/wcl_official_ranker_discovery_v1.py \
             --live --encounter-id 3420 --class-name Warrior \
             --spec-name Fury --difficulty 4 --max-rank 50 \
             --max-age-days 45 --max-pages 5 --opener-window-ms 15000 \
             --out-dir /tmp/zrot-fresh-live/raw-collector \
+            "${exclude_args[@]}" \
             > /tmp/zrot-fresh-live/result/status.json
           rc=$?
           set -e
@@ -104,6 +144,10 @@ jobs:
           src=json.loads((root/'new-raw-numeric.json').read_bytes())
           assert src['source_cohort_role']=='DISCOVERY'
           assert src['actor_numeric_cast_count']>0
+          excluded=set(Path('/tmp/zrot-fresh-live/previous-report-codes.txt').read_text().splitlines())
+          assert len(excluded)==2
+          assert src['report_code'] not in excluded, 'COLDSTART_RANKER_REUSED_OLD_REPORT'
+          assert json.loads((root/'status.json').read_bytes())['excluded_previously_seen_reports']==2
           matrix=strict_pre_numeric_matrix(src)
           assert matrix['cast_rows']==src['actor_numeric_cast_count']
           assert matrix['all_known_facts_strictly_before_cast'] is True
@@ -114,6 +158,8 @@ jobs:
                'actual_WCL_API':'EXECUTED_EXISTING_OFFICIAL_COLLECTOR',
                'raw_event_count':src['raw_event_count'],
                'actor_cast_count':src['actor_numeric_cast_count'],
+               'excluded_previous_report_codes':2,
+               'new_discovery_report_distinct_from_both_prior_cohorts':True,
                'aura_transition_count':src['raw_aura_boolean_transitions'],
                'known_PRE_facts':matrix['signal_status_summary'].get('KNOWN',0),
                'unknown_PRE_facts':matrix['signal_status_summary'].get('UNKNOWN',0),
