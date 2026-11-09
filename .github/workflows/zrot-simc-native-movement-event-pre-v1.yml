@@ -29,16 +29,11 @@ on:
       - tools/research/simc_native_resource_cost_replay_v1.py
       - tools/research/simc_native_postguard_source_instrument_v1.py
       - tools/research/simc_native_postguard_source_replay_v1.py
-      - tools/research/simc_native_if_false_priority_frontier_v1.py
       - tools/research/simc_native_target_eligibility_source_instrument_v1.py
       - tools/research/simc_native_target_eligibility_source_replay_v1.py
       - tools/research/simc_native_warrior_spec_ready_instrument_v1.py
       - tools/research/simc_native_warrior_spec_ready_replay_v1.py
-      - tools/research/simc_native_warrior_priority_frontier_adapter_v1.py
-      - tools/research/general_rotation_decision_proof_engine_v1.py
-      - tools/research/simc_native_decision_proof_bridge_v1.py
       - tools/research/general_rotation_native_pre_trace_compactor_v1.py
-      - .github/workflows/zrot-simc-native-movement-event-pre-v1.yml
   workflow_dispatch:
 
 permissions:

@@ -297,3 +297,12 @@ Evidence reuse: preserve existing source JSON/Fury IR/previous A-B and method-en
 | Source behavior-aware Native gate export + Generic SpecAdapter decoder | [#42504843603](https://github.com/degong2-code/zrotationhelper/actions/runs/42504843603) 3/3 SUCCESS; Fury `moving_st` 20,031ms 실제 원본 후보 12 (`NOT_READY=9`, `UNKNOWN=3`), `slayer` 앞 6행 배제, `rampage` READY UNKNOWN; JSON SHA256 `eb476334979ea1b003eae2ac4f21ece91b8854650e3a1010df7d375aa5bc5b1b` | 기존 원본 fixture를 재생한 **bounded source truth**. 실제 전체 READY 0, WCL holdout와 dummy trainer 미실행. `source_order_complete=false`. |
 
 기존 `general_rotation_native_ir_pre_evidence_join_v1.py`, `simc_native_if_false_priority_frontier_v1.py`, `simc_native_decision_proof_bridge_v1.py` 재사용/확장. 원본 비물리 행을 독립 READY로 허위 해석하지 않도록 corrected source `behavior=ACTION` 필터 추가. 초기 CI FAIL #42504714671은 별도 보존. 상세 증거는 `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ACTUAL_SOURCE_PRE_SPEC_ADAPTER_FRONTIER_20261109.json`.
+
+## 2026-11-09 후속 — 외부 JSON 증명 신뢰 경계 및 CI 재빌드 분리
+
+| 기능 | 독립 영수증 | REUSE / EXTEND 판정 |
+|---|---|---|
+| 미인증 외부 SpecAdapter claim 차단 / synthetic-verified source channel 분리 | #42537543867 **PASS**(3/3), #42537609061 **PASS**(3/3), 최초 #42537543740 **FAIL 보존**; evaluator SHA256 `e70257a104e274d50bc783a476ec081d149b671292dad4ea12364c10af22d55a` | **EXTEND** 기존 `decode_adapter_gate_bundle`, `evaluate`, 기존 source-verified raw PRE. User-submitted JSON positivity/negativity is UNKNOWN, closed route rejected; actual original 12 claim row status remains 9 negative/3 unknown. |
+| CI C++ 재빌드 방지 트리거 분리 | Heavy Native workflow `zrot-simc-native-movement-event-pre-v1.yml` semantic-only path 제거, light replay workflow path 구독 | **REUSE** pinned original native receipt; **REPLACE** 중복 Native 빌드 트리거. 신규 메서드 진위 증거가 필요할 때만 Native producer. |
+
+증거: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/EXTERNAL_ADAPTER_PROVENANCE_BOUNDARY_20261109.json`. Product-ready 증명 및 게임 오류판정 승격 없음.

@@ -268,3 +268,9 @@ The 2026-11-08 `general_rotation_simc_state_conditioned_evaluator_v1.py` perform
 **교정 이력:** #42504714671는 `ADAPTER_CANDIDATE_ROW_IDENTITY_INVALID`로 FAIL. Native action name만으로 물리 ACTION을 판정하던 exporter 결손을 typed source row `behavior` 확인으로 수정한 후 실제 E2E PASS. "모든 Native 후보=물리 스킬" 같은 잘못된 의미론을 넣지 않는다.
 
 **정확한 다음 단계:** 5개 결손 게이트의 실제 원본 방법·상태 증명 범위를 좁혀 평가. `BASE_VIRTUAL_COMPLETE`는 현재 source method exhaustive closure가 없음. 기존 `original-pre-capture-plan`의 12개 필요한 원본 operand와 교차 확인하고, 미관측 값을 가공/추정하지 않는다. Arcane에 대한 독립 두 번째 전문화 증명은 아직 미실행. WCL blind와 dummy feedback 미완.
+
+## 2026-11-09 후속 — 외부 JSON 증명 신뢰 경계 및 CI 재빌드 분리
+
+Decode-only `ZrotSpecAdapterGateClaimsV1` JSON is NOT an authentication boundary. A forged `closed=true` is rejected, forged true and false independent facts are both non-actionable `UNKNOWN` in the public source evaluator; the independently validated original SimC fixture join retains its source-bounded 9 NOT_READY / 3 UNKNOWN at Fury moving ST, 20031ms. Prior bridge synthetic self-test had assumed a negative decoded JSON can skip a row (run #42537543740 FAIL); revised synthetic input trust separation run #42537609061 PASS. `source_conditioned_evaluator` #42537543867 PASS; code SHA256 `e70257a104e274d50bc783a476ec081d149b671292dad4ea12364c10af22d55a`.
+
+Heavy Native-source workflow no longer triggers from semantic proof interpreter/priority adapters; light pinned replay CI already covers them and now also covers proof engine plus heavy YAML edits. This prevents redundant future build triggers from bridge-only refactors. Actual new CPP source fields for real READY remain UNKNOWN, and existing auto-triggered Native run #42537609024 should not be mistaken for a positive ready experiment.

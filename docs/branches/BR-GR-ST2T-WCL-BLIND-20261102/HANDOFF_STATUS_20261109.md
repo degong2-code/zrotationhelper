@@ -78,3 +78,10 @@ Archive: `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATE
 - **검증:** [Actions #42504843603](https://github.com/degong2-code/zrotationhelper/actions/runs/42504843603), 3/3 SUCCESS, Py3.12/3.14 및 실제 portable PRE 재생. GitHub artifact 13626009372; 원본 join JSON SHA256 `eb476334979ea1b003eae2ac4f21ece91b8854650e3a1010df7d375aa5bc5b1b`. 새로운 Native C++ 빌드/WCL/클라이언트 호출 없음.
 - **실패 구분:** #42504714671 원본 행 behavior 필터 부재로 `ADAPTER_CANDIDATE_ROW_IDENTITY_INVALID`, 파이프라인 계약 불일치였으며 새 원본 behavior `ACTION` 확인 후 수정. 실패는 보존. 기존 5,408 attempts/953 IF 변동 없음.
 - **다음:** 새로운 합성 검사 대신 실제 남은 5개 gate에 필요한 raw source producer/fixture를 우선 선택. 스킬 선택에 직접 기여하지 않는 반복 Native 빌드는 피한다.
+
+## 2026-11-09 후속 — 외부 JSON 증명 신뢰 경계 및 CI 재빌드 분리
+
+- **실제 구현:** `ZrotSpecAdapterGateClaimsV1` 외부 JSON의 `closed=true` / 임의 closure receipt를 수용하지 않으며, 원본 행·시각을 통과해도 독립 producer 인증 없는 양성·음성 주장으로 APL 스킬을 선택하거나 제외하지 않는다. 결과는 `UNKNOWN`. 기존 실제 source-verified original-PRE join은 raw fixture 매니페스트 SHA를 검증한 별도 경로이므로 12건(9 NOT_READY/3 UNKNOWN) 판정 유지.
+- **CI 독립 대조:** [source evaluator #42537543867](https://github.com/degong2-code/zrotationhelper/actions/runs/42537543867) 3/3 PASS, Python3.12/3.14 34 합성 체크/버전, code SHA256 `e70257a104e274d50bc783a476ec081d149b671292dad4ea12364c10af22d55a`. 최초 native-IR [#42537543740](https://github.com/degong2-code/zrotationhelper/actions/runs/42537543740) **FAIL**: 이전 테스트의 미인증 음성 기대값 충돌. 테스트를 분리 교정한 [#42537609061](https://github.com/degong2-code/zrotationhelper/actions/runs/42537609061) 3/3 PASS; 원본 5,408 PRE attempt 및 953 IF 회귀 유지. 기존 실패는 PASS로 승격하지 않는다.
+- **속도 개선:** 원본 Native 빌드 workflow의 push path에서 증거 해석기·proof core 변경을 제외하고, 동일 원본 영수증을 쓰는 경량 native IR 재생 CI에 경로를 배정한다. 원본 C++ 계측기 변경은 Native workflow에 유지. Native workflow 변경 자체는 `workflow_dispatch` 가능하며 경량 CI에서 YAML 변경을 추적한다. 이미 시작된 기존 heavy run #42537609024는 이 변경 전 트리거라 별도다.
+- **제품 상태:** Fury 실제 완전 양성 READY **0**, Arcane 실제 완전 양성 READY **0**. WCL 독립 General Rotation 검증/허수아비 실측 없음. 범위, MAIN/FROZEN, Gen4 handoff 및 Seq578/Seq637 보존. 우선 다음은 기존 원본 자료에서 미해결 READY 조건의 source truth 검토 및 필요한 상태만 새 PRE 수집이다.

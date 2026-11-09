@@ -1,0 +1,53 @@
+{
+  "schema": "ZrotBranchExternalAdapterClaimsFailClosedAndSourceReplayCIDecouplingV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "code_path": "tools/research/general_rotation_simc_state_conditioned_evaluator_v1.py",
+  "source_code_sha256": "e70257a104e274d50bc783a476ec081d149b671292dad4ea12364c10af22d55a",
+  "code_commit": "dab3a04b857cf9f5c5db6dca1bbb8753a60b2df1",
+  "regression_test_fix_commit": "445eca14b9b89a0558c8559029ce56fdb7bdbb62",
+  "decisions": {
+    "unverified_external_JSON_closed_route": "REJECTED",
+    "unverified_external_JSON_positive_claim": "UNKNOWN",
+    "unverified_external_JSON_negative_claim": "UNKNOWN_NOT_USED_TO_ELIMINATE",
+    "verified_original_source_fixture": "NECESSARY_GATES_REPLAYED_IN_SOURCE_JOIN_WITH_RAW_MANIFEST_PINS",
+    "in_memory_synthetic_positive": "HYPOTHETICAL_SOURCE_ONLY_NOT_GAMEPLAY",
+    "WCL_strict_PRE": "NOT_INFERRED_FROM_SIMC_SOURCE_METHOD_PRE",
+    "independent_FULL_positive_READY": 0,
+    "player_target_dummy_mistake_verdict": "UNKNOWN"
+  },
+  "validation": {
+    "initial_native_ir_run_id": 42537543740,
+    "initial_native_ir_result": "FAILED_EXPECTATION_COMPATIBILITY_REJECTED_AS_PASS",
+    "corrected_native_ir_run_id": 42537609061,
+    "corrected_native_ir_result": "SUCCESS_3_OF_3",
+    "source_evaluator_run_id": 42537543867,
+    "source_evaluator_result": "SUCCESS_3_OF_3",
+    "source_evaluator_python": [
+      "3.12",
+      "3.14"
+    ],
+    "source_evaluator_synthetic_checks_reported_per_version": 34,
+    "reused_original_native_source_attempts": 5408,
+    "reused_original_source_IF": 953,
+    "focused_Fury_20031_source_claims": 12,
+    "focused_not_ready": 9,
+    "focused_unknown": 3,
+    "new_native_build_for_corrected_native_ir_replay": false,
+    "WCL_API_calls": 0,
+    "game_client_executed": false
+  },
+  "workflow_efficiency": {
+    "change": "Move semantic proof bridge/priority/decision engine push paths from expensive Native builder to pinned source replay CI; keep native workflow_dispatch and source instrumentation triggers.",
+    "rebuild_expected_for_semantic_only_changes": false,
+    "existing_in_flight_native_run_not_cancelled": "42537609024",
+    "long_term_rule": "Raw original CPP build only when producer instrumentation/mechanic source changes and justified by missing decision-critical gate"
+  },
+  "reuse": "Existing Generic Native IR Source PRE E2E fixture pinned; no new WCL discovery or SimC C++ baseline",
+  "next_exact": "Source-verify the missing CAST_GCD, MOVEMENT, NECESSARY_ELIGIBILITY, SPEC_OVERRIDE_TOTAL, BASE_VIRTUAL_COMPLETE for selected Fury and an independent Arcane physical action without Native winner as READY; use targeted raw PRE producer only if existing fixture lacks fields. Then complete multi-scan CALL/RUN/variable and WCL blind lock/postlock.",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
