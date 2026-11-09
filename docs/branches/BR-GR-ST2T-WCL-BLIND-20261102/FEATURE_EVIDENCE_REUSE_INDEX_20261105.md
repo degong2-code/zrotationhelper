@@ -531,3 +531,16 @@ Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_P
 | WCL independent lock/holdout and trainer verdict | NOT_RUN / UNKNOWN | **NOT YET PRODUCT RULES**; no READY/priority/dummy error promotion |
 
 Evidence `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_CONDITIONAL_IR_49_PROOF_BRIDGE_20261109.json`. Initial CI #42594168648 had wrong artifact unpack path (FAIL); corrected workflow #42594344188 PASS. Product architecture improvements matter more than test counts.
+
+## 2026-11-09 WCL blind numeric → General Rotation source hypothesis IR interoperability
+
+| Reusable part | Evidence status | Next |
+| --- | --- | --- |
+| `tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py` | existing candidate lock maker, numeric-only and frozen cutoff; pre-source semantic path | **REUSE**, verify actual raw source receipts |
+| `general_rotation_strict_pre_state_engine_v1.py` | immutable WCL event replay, strictly earlier PRE, UNKNOWN on same timestamp/ambiguity/expiry | **REUSE**, extend numeric field types only when actual WCL provenance supports |
+| `general_rotation_original_source_evidence_bridge_v1.py` | four actual SimC source IR, 147 exact source selections, 49 bounded IF, 44 unknown | **REUSE**, source hypotheses not WCL holdout |
+| `general_rotation_wcl_postlock_source_ir_bridge_v1.py` | [#42596023358](https://github.com/degong2-code/zrotationhelper/actions/runs/42596023358) 3/3, real source IR × synthetic WCL, two classes and target modes | **NEW REUSABLE POSTLOCK ENGINE CAPABILITY**, source mapping independent audit NOT_RUN, gameplay priority UNKNOWN |
+| WCL actual raw independent discovery & holdout | NOT_RUN in new bridge | **NEXT**, reused collector/actor scoped identity + disjoint report proof; do not call synthetic actual |
+| Live target dummy trainer | READY/competing/WCL model not independently certified | **BLOCK wrong cast**, maintain UNKNOWN |
+
+Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_BLIND_STRICT_PRE_POSTLOCK_SOURCE_IR_BRIDGE_20261109.json`. Earlier workflow #42595938581 FAIL (Python module path), corrected #42596023358 PASS. Source file SHA256 `6a1aec9c712ed377ad10f6eb4b09e03fc90b6b26d7ab150aa0d548b4da5426d3`.

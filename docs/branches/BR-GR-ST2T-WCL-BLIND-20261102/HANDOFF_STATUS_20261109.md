@@ -1,5 +1,18 @@
 # zRotationHelper — General Rotation / Dummy Trainer current status (2026-11-09)
 
+## 2026-11-09 — Engine-first WCL blind numeric/strict PRE → post-lock source IR integration
+
+**New reusable engine feature:** `tools/research/general_rotation_wcl_postlock_source_ir_bridge_v1.py` SHA256 `6a1aec9c712ed377ad10f6eb4b09e03fc90b6b26d7ab150aa0d548b4da5426d3`. Reuses existing numeric-only WCL candidate lock, immutable Strict PRE transition replay, post-lock source hypothesis IR, and open-world Decision Proof Engine. No specialization-specific action priority hardcoding, no SimC C++ rebuild, no WCL API calls.
+
+**E2E validation:** [GitHub Actions #42596023358](https://github.com/degong2-code/zrotationhelper/actions/runs/42596023358) **3/3 SUCCESS** (Python 3.12/3.14 synthetic + **four real pinned Fury/Arcane ST/2T source IR cases with explicit SYNTHETIC numeric WCL discovery/holdout fixtures**). Numeric lock created **before** opening source IR. STRICT PRE time < action, ambiguous/same-time/expired/unverified state UNKNOWN. Post-lock source identity and field binding declared, not certified. Eight additional classes of tampering rejected. All post-lock probes return physical READY UNKNOWN, priority UNKNOWN, dummy error UNKNOWN.
+
+**EVIDENCE CLASSIFICATION:** Actual SimC source IR 147 selected occurrences with 49 independently replayed source IF and 44 PRE UNKNOWN is reused, not re-collected. The new WCL half is SYNTHETIC, **real WCL independent discovery/holdout NOT_RUN**. The four per-case synthetic probes each show one synthetic condition TRUE and one unmapped cast UNKNOWN; this is interoperability only and cannot be counted as 4 real WCL IF validations. Numeric WCL↔SimC action mapping, target count, build equivalence, complete physical READY and source priority remain UNKNOWN.
+
+**CI correction:** first #42595938581 FAILED from inline Python `PYTHONPATH` omission; fixed in workflow and revalidated #42596023358. Artifact #13662808869 (expires 2026-11-16 UTC), SHA256 `e10f4dbbd62221105b897569bf75204cf575d4480f426d0e89da5be5940b8bad`. Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_BLIND_STRICT_PRE_POSTLOCK_SOURCE_IR_BRIDGE_20261109.json`.
+
+**Exact Next:** actual source-agnostic WCL normalized new data E2E via existing collector + actor identity gate, discovery lock and independent disjoint holdout, source matching only postlock; add strict-PRE *numeric* resource/target count if independently observable. Then validated WCL source conflicts, candidate/threshold lock and holdout before promotion to General Rotation and dummy. MAIN, Gen5, FROZEN unchanged.
+
+
 ## 2026-11-09 Engine-first milestone — generic Source Hypothesis + exact IF/ELSE evidence + open-world READY proof integrated
 
 **Primary product goal self-audit:** General Rotation reusable engine implementation, **not accumulating specialist source-probe receipts or completing isolated tests**. This milestone builds a reusable integration module from existing source APL full graph, exact native same-call IF replay, and open-world READY/priority evaluator. No spell-specific logic in generic code, no C++ rebuild or WCL API. Source-selected IF is occurrence-specific; no blanket per-spell TRUE rule.

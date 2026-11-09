@@ -1,0 +1,138 @@
+{
+  "schema": "ZrotGenericWclStrictPrePostlockSourceIRBridgeReceiptV1",
+  "date": "2026-11-09",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "project_goal": "Reusable General Rotation opener / conditional IF/ELSE priority research/validation engine and lightweight target dummy trainer, not isolated spec probes.",
+  "new_engine_implementation": {
+    "module": "tools/research/general_rotation_wcl_postlock_source_ir_bridge_v1.py",
+    "git_blob": "88286f8ad2f90bb967daf49671fa149df42be358",
+    "file_sha256": "6a1aec9c712ed377ad10f6eb4b09e03fc90b6b26d7ab150aa0d548b4da5426d3",
+    "workflow": ".github/workflows/zrot-gr-wcl-blind-postlock-source-ir-bridge-v1.yml",
+    "generic_action_priority_rules_hardcoded": 0,
+    "separate_stages": [
+      "WCL_NUMERIC_ONLY_FROZEN_LOCK",
+      "STRICT_PRE_RAW_EVENT_REPLAY",
+      "POSTLOCK_EXPLICIT_SOURCE_ROW_BINDING",
+      "SOURCE_GUARD_HYPOTHESIS_ONLY",
+      "OPEN_WORLD_READINESS_AND_DUMMY_SAFETY"
+    ],
+    "reuse": [
+      "tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py",
+      "tools/research/post_lock_simc_wcl_guard_replay.py (numeric-only lock validation)",
+      "tools/research/general_rotation_strict_pre_state_engine_v1.py",
+      "tools/research/general_rotation_decision_proof_engine_v1.py",
+      "tools/research/general_rotation_original_source_evidence_bridge_v1.py",
+      "tools/research/simc_apl_semantic_ir_v2.py"
+    ]
+  },
+  "real_existing_source_evidence_reused": {
+    "original_simc_run": 42589894203,
+    "original_source_IR_run": 42594344188,
+    "real_Fury_Arcane_ST_2T_source_case_count": 4,
+    "real_original_selected_source_rows": 147,
+    "earlier_actual_source_IF_replayed_true": 49,
+    "earlier_actual_source_IF_unknown": 44,
+    "earlier_no_explicit_IF": 54,
+    "source_case_document_verified_git_blob": "9e5cd6a1f389dee6992840485ba4235cc39475c1",
+    "actual_source_case_inputs_SHA256": {
+      "warrior_fury_st": "964886a08dbaf800ac9e3694df47b7adece905fc8825782e9cc3f5d83aa54aee",
+      "warrior_fury_2t": "62d5ef47e32e066e771a447c3251ab1ba13699c24eec11481f9563f0fcc96dba",
+      "mage_arcane_st": "db3abc021e3af83b6147e05955772861855840fefac743d0c7fac420a0cb61f2",
+      "mage_arcane_2t": "b7899757ddfe44968b43447f41e448d999686ea312878f9a2f2ec1597677ff2d"
+    }
+  },
+  "validation": {
+    "run": 42596023358,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42596023358",
+    "commit_tested": "2f48f9dbd78dd110d3fde34c972dd148b6c8b369",
+    "conclusion": "success",
+    "jobs_success": 3,
+    "jobs_total": 3,
+    "Python312_compile_and_synthetic": "PASS",
+    "Python314_compile_and_synthetic": "PASS",
+    "actual_pinned_SimC_IR_with_SYNTHETIC_WCL_interop": "PASS",
+    "actual_new_WCL_live_cohort_collected": false,
+    "WCL_E2E_raw_producer_actual_data": "NOT_RUN",
+    "actual_WCL_independent_holdout": "NOT_RUN",
+    "numeric_blind_lock_created_prior_to_source_IR_binding_in_test": true,
+    "synthetic_blind_lock_sha256": "c0d7c4edb8f8607fc6f4fff2ea175050b98ce503184df1ecdc9ae240012b3929",
+    "generic_frozen_lock_hash_verification": "PASS",
+    "real_source_cases_with_synthetic_numeric_wcl": 4,
+    "synthetic_casts_per_case": 2,
+    "synthetic_bound_guard_condition_results_per_case": {
+      "TRUE": 1,
+      "UNKNOWN_NO_POSTLOCK_SOURCE_BINDING": 1
+    },
+    "synthetic_num_guard_probe_results_not_actual_WCL": false,
+    "actual_complete_READY_proven": 0,
+    "actual_competing_action_priority_proven": 0,
+    "actual_dummy_wrong_cast_proven": 0,
+    "synthetic_tamper_checks": {
+      "invalid_lock_hash": "REJECT",
+      "semantic_contaminated_lock": "REJECT",
+      "holdout_discovery_report_reuse": "REJECT",
+      "mismatched_source_row_hash": "REJECT",
+      "wrong_postlock_binding_hash": "REJECT",
+      "undeclared_source_operand": "REJECT",
+      "fabricated_SOURCE_READY": "REJECT",
+      "same_timestamp_PRE_leak": "UNKNOWN",
+      "conflicting_PRE_timestamp": "UNKNOWN",
+      "unverified_PRE_transition": "UNKNOWN"
+    },
+    "failed_initial_run": {
+      "run_id": 42595938581,
+      "conclusion": "failure",
+      "reason": "CI_inline_postlock_Python_module_import_path_missing",
+      "status": "FAILED_CI_PACKAGING_NOT_A_GAMEPLAY_HYPOTHESIS_FAILURE",
+      "corrected_by": "Explicit PYTHONPATH for postlock integration step"
+    },
+    "artifact": {
+      "id": 13662808869,
+      "name": "zrot-gr-four-real-source-ir-synthetic-wcl-postlock-bridge-v1",
+      "sha256": "e10f4dbbd62221105b897569bf75204cf575d4480f426d0e89da5be5940b8bad",
+      "bytes": 9685,
+      "expires_utc": "2026-11-16T09:47:22Z"
+    },
+    "new_simc_native_builds": 0,
+    "new_WCL_API_calls": 0
+  },
+  "uncertainty": {
+    "discovery_roster_report_identity": "DECLARED_ONLY_NOT_INDEPENDENTLY_RAW_AUDITED",
+    "actual_WCL_numeric_action_to_SimC_source_row_binding": "NOT_INDEPENDENTLY_AUDITED",
+    "WCL_build_equivalent_to_source_profile": "UNKNOWN",
+    "WCL_target_count_for_cast": "UNKNOWN",
+    "WCL_full_physical_READY_positive_proven": false,
+    "WCL_competing_actions_READY_known": false,
+    "WCL_raw_typed_numeric_resources_or_target_count_supported": false,
+    "current_WCL_independent_holdout": "NOT_RUN",
+    "SimC_source_IF_and_actual_player_cast_verdict_must_be_separate": true,
+    "condition_false_under_unverified_WCL_mapping_is_not_player_error": true,
+    "WCL_blind_holdout_claim_proven": false,
+    "dummy_expected_cast": "UNKNOWN",
+    "opener_termination": "UNKNOWN"
+  },
+  "engine_first_self_audit": {
+    "reused_existing_numeric_blind_lock_generator_and_validation": true,
+    "reused_existing_strict_pre_replay": true,
+    "reused_existing_source_IR_and_open_world_decision_proof": true,
+    "no_spec_action_semantics_in_generic_layer": true,
+    "original_49_source_IF_not_promoted_to_WCL_truth": true,
+    "no_unnecessary_cpp_rebuild": true,
+    "no_old_system_recovery_dependency": true,
+    "demonstrated_real_SimC_IR_x_synthetic_WCL_four_case_interoperability": true,
+    "primary_outcome": "Reusable WCL numeric lock -> strict PRE -> post-lock source-hypothesis diagnostic and UNKNOWN-safe proof-gated training boundary",
+    "priority_metric": "General Rotation decision accuracy and safe user feedback, not count of passing test runs"
+  },
+  "branch_only": true,
+  "MAIN_promoted": false,
+  "Gen5_handoff_modified": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "next": {
+    "product_exact_next": "SimC-first General Rotation opener/IF-ELSE ST/2T/cleave/AoE model with independently validated WCL candidate/holdout and user target dummy correction.",
+    "session_exact_next": "Use existing WCL Fresh raw collector/replay and actor identity gates to produce audited real normalized numeric casts and source-state transitions with independent discovery and holdout report membership; feed generic frozen-lock/strict PRE bridge without any SimC semantic leakage; add generic numeric typed target/resource PRE when official WCL provides sufficient provenance. After independent raw audit and postlock action/build identity review, compare exact source IF candidates, do not infer readiness from observed actions. Keep dummy UNKNOWN when any gate unobserved."
+  }
+}
