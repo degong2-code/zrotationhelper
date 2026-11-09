@@ -336,6 +336,30 @@ def selftest():
     assert evaluated["counts"]["scoped_NOT_READY"]==1
     assert evaluated["counts"]["guard_entries_proven"]==1
     assert evaluated["full_positive_READY"]==0
+    # At the SAME SimC millisecond, two different source rows and
+    # different action_t* objects must never borrow each other's
+    # necessary guard. Blast's observed buff-absent gate is positive
+    # only, while Bolt's observed buff-present requirement is negative.
+    blast_pre=MARK+"2414|spellslinger|8|arcane_blast|1|0|0"
+    blast_ptr=POINTER_MARK+"2414|arcane_blast|0x2222"
+    blast_guard=METHOD_MARK+"2414|arcane_blast|arcane_blast|0x2222|0"
+    blast_attempt="ZROT_NATIVE_SELECT_V1|ATTEMPT|2414|spellslinger|spellslinger|8|arcane_blast|1"
+    both=parse_original_attempts("\n".join((
+        pre,ptr,guard,attempt,
+        blast_pre,blast_ptr,blast_guard,blast_attempt)))
+    blast_rule=replace(
+        fake,semantic_key="buff.synthetic.absent",
+        source_row_sha256="b"*64,
+        expression={"op":"compare","field":"buff.prismatic_bolt.active",
+                    "cmp":"eq","value":False})
+    blast_ident=Identity("spellslinger::arcane_blast","b"*64,2414,7,0)
+    two=replay_cases(both["rows"],[(fake,ident),(blast_rule,blast_ident)],
+                     trace_sha256="a"*64,source_patch_sha256="b"*64,
+                     parity_sha256="c"*64)
+    assert two["counts"]["guard_entries_proven"]==2
+    assert two["counts"]["scoped_NOT_READY"]==1
+    assert two["counts"]["UNKNOWN"]==1
+    assert two["full_positive_READY"]==0
     for changed in (
         guard.replace("0x1111","0x2222"),
         guard.replace("|0","|1"),
@@ -353,7 +377,7 @@ def selftest():
         except MageGuardReplayError:
             pass
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":10,"synthetic_authorized_as_real":False,
+            "checks":17,"synthetic_authorized_as_real":False,
             "strict_action_object_pointer_link":True,
             "negative_necessary_gate_without_full_READY":True,
             "real_CPP_executed":False,"WCL_API_calls":0,
