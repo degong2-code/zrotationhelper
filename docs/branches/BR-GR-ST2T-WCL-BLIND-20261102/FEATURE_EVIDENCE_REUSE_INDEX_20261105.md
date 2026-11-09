@@ -582,3 +582,14 @@ Retained receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC
 | Per-source-row missing operand inventory | `buff.enrage.remains` 24, `gcd` 24, `buff.hack_and_slash.up` 18, `cooldown.bladestorm.ready` 8, 4pc stack 2 | **NEXT coverage priority**, no inference from cast gaps/future removals |
 
 Artifact #13669824790; receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_TYPED_POSTLOCK_SOURCE_IF_SCENARIO_20261109.json`. Some source-row guard statuses are TRUE under unverified scenario assumptions; **0 real verified priority/READY/dummy rule**.
+
+## 2026-11-09 generic WCL raw aura temporal/stack typed Strict PRE
+
+| Reusable source | Proven engine/real replay | Claim scope |
+| --- | --- | --- |
+| `tools/engine_first/wcl_raw_actor_aura_temporal_pre_v1.py` | #42617968037 PASS 3/3, 3 original WCL raw verified checkpoint sources, 408 actor-target buff events, 160 casts, last prior aura event timestamp, explicit numeric stack if present | **NEW generic numeric Strict PRE evidence producer**, not game buff duration |
+| Existing raw Boolean aura PRE | Crosscheck 3/3 original raw replay: 5,349 aura-ID×cast slots = 3,254 known /189 ambiguous unknown /1,906 no-event unknown | **REUSE validated consistency**, absence is not negative buff |
+| Exact numeric WCL stack PRE | 1,210 with explicit numeric stacks incl. 0; 2,233 stack unknown after a prior aura event | **No gameplay-4pc stack ID mapping** |
+| `general_rotation_postlock_typed_pre_scenario_v1.py` | #42618455023 PASS 3/3 optional temporal input and exploratory stack IF; original 51 WCL holdout × ST/2T status counts unchanged | **NEW connector on existing source IF engine**, no READY/priority promotion |
+
+Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_RAW_AURA_TEMPORAL_STACK_PRE_20261109.json`. Raw temporal source SHA256 `79bfff88fd817cd2a3dc813a25f06b10770ffd1c6a89ed041e05be47f8b69478`; source IF scenario SHA256 `82b790d961fd4a21aa5ca43e23d53389e85d0e94501e68a74c25c1ae7076df53`.
