@@ -1,0 +1,152 @@
+{
+  "schema": "ZrotGenericMechanicEpochAndDummyEvidenceFrontierReceiptV1",
+  "product_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "recorded_utc_date": "2026-11-09",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "repo": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "product_goal": "SimC-first General Rotation opener and conditional ST/2T/cleave/AoE priorities, independently validated with WCL, then lightweight target dummy practice feedback with UNKNOWN-safe observability",
+  "out_of_scope": [
+    "ENCOUNTER_SPECIFIC_ROTATION_PLAN",
+    "NSRT",
+    "BOSS_ACTION_GUIDE",
+    "RAID_TIMELINE"
+  ],
+  "source_reuse": {
+    "original_SimC_rev": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "source_SimC_commit_UTC": "2026-11-01T09:25:22Z",
+    "commit_truth": "GIT_COMMIT_TIMESTAMP_ONLY_NOT_GAMEPLAY_MECHANIC_IMPLEMENTATION",
+    "frozen_numeric_WCL_discovery_lock_sha256": "c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e",
+    "original_real_WCL_discovery": 41463589665,
+    "original_disjoint_report_numeric_WCL_holdout": 41473060401,
+    "newer_disjoint_report_not_predeclared_holdout": 42599352437,
+    "prior_raw_actor_aura_and_power_PRE_CI": 42608104162,
+    "prior_raw_aura_temporal_stack_PRE_CI": 42617968037,
+    "prior_source_IF_typed_sensitivity_CI": 42618455023,
+    "actual_original_disjoint_WCL_casts_in_this_study": 51,
+    "same_WCL_dataset_replayed_for_both_Fury_source_target_contexts": true,
+    "actual_source_candidate_token_casts_per_context": 15,
+    "source_APL_row_probes_per_context": 152
+  },
+  "new_engine": {
+    "script": "tools/research/general_rotation_mechanic_epoch_evidence_gate_v1.py",
+    "script_git_blob_sha1": "306de73ffb833f3fee040b9d7ec5e5a6a7b8acd7",
+    "final_script_sha256": "0b0b2262d90788a523cfd241397e56e6ab1793ed94088345e92ac07af0c42f31",
+    "workflow": ".github/workflows/zrot-gr-postlock-mechanic-epoch-evidence-gate-v1.yml",
+    "external_spec_adapter_registry": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_MECHANIC_PATCH_EVIDENCE_REGISTRY_20261109.json",
+    "registry_git_blob_sha1": "63088e71ba3f45f6ec5496b217f553a35082ff56",
+    "generic_core_has_no_Fury_specific_mechanic_tables": true,
+    "validates_source_IF_symbol_dependencies_and_51_original_action_event_IDs": true,
+    "preserves_postlock_numerical_lock_boundary": true,
+    "distinguishes_official_mechanic_prose_from_public_spell_ID_candidate": true,
+    "source_commit_timestamp_not_semantic_implementation_proof": true,
+    "WCL_actor_actual_fight_epoch_missing": "UNKNOWN",
+    "source_actual_live_client_patch_gear_talent_alignment": "UNKNOWN",
+    "prioritizes_missing_source_IF_proof_by_candidate_row_occurrences": true,
+    "outputs_per_cast_unknown_safe_future_training_reason_without_claiming_dummy_evidence": true,
+    "never_promotes_missing_GCD_COOLDOWN_REMAINS_or_4pc_stack": true
+  },
+  "external_evidence_roles": [
+    {
+      "authority": "Blizzard",
+      "reference_url": "https://worldofwarcraft.blizzard.com/en-us/news/24296142/hotfixes",
+      "claim": "Fury Venomous Abyss 4pc tuning changes Bloodthirst/Recklessness crit effect: 5% to 3% each step and maximum 10% to 6%",
+      "verified_scope": "PUBLIC_OFFICIAL_MECHANIC_TEXT_ONLY",
+      "not_verified": [
+        "current WCL numeric aura buff ID",
+        "actual WCL actor equipped 4pc",
+        "pinned source C++ implements effect",
+        "exact hotfix effective timestamp"
+      ]
+    },
+    {
+      "authority": "Wowhead",
+      "reference_url": "https://www.wowhead.com/spell=184362/enrage",
+      "claim": "184362 Enrage public spell-ID/name candidate; public default 4-second buff description",
+      "verified_scope": "UNVERSIONED_EXTERNAL_PUBLIC_SPELL_CANDIDATE_ONLY",
+      "not_verified": [
+        "actual buff duration under traits/talents",
+        "strict current patch identity",
+        "WCL build parity"
+      ]
+    },
+    {
+      "authority": "Wowhead",
+      "reference_url": "https://www.wowhead.com/spell=1719/recklessness",
+      "claim": "1719 Recklessness public spell-ID/name candidate",
+      "verified_scope": "UNVERSIONED_EXTERNAL_PUBLIC_SPELL_CANDIDATE_ONLY",
+      "not_verified": [
+        "actual WCL actor build",
+        "spell replacement state READY",
+        "duration extensions"
+      ]
+    }
+  ],
+  "original_real_st_2t_research_evidence": {
+    "original_WCL_actor_casts": 51,
+    "each_source_context": "Fury single target and two target hypotheses, NOT independent WCL cohorts",
+    "source_mechanic_symbol_types": 8,
+    "official_concept_only_symbols": 1,
+    "public_numeric_ID_name_candidate_symbols": 3,
+    "missing_external_semantic_binding_symbols": 4,
+    "original_source_APL_conditional_row_probes_per_context": 152,
+    "source_apl_rows_with_unmapped_operands_per_context_total_occurrences": 76,
+    "missing_operand_occurrences_each_context": {
+      "buff.enrage.remains": 24,
+      "gcd": 24,
+      "buff.hack_and_slash.up": 18,
+      "cooldown.bladestorm.ready": 8,
+      "buff.fury_mid2_4pc_crit.stack": 2
+    },
+    "real_WCL_cast_action_feedback_preview_rows_per_context": 51,
+    "all_real_WCL_cast_feedback_verdicts": "UNKNOWN_NOT_EVALUATED_AS_DUMMY",
+    "WCL_mapped_source_APL_selected_row_verified": 0,
+    "WCL_current_game_complete_READY": 0,
+    "user_action_error_certified": 0,
+    "WCL_SimC_current_Retail_source_IF_certified": 0,
+    "General_Rotation_priority_rules_certified": 0
+  },
+  "validation": {
+    "initial_wiring_failure_run": 42624120653,
+    "initial_failure_classification": "VALIDATOR_OVERSTRICT_DESCRIPTION_KEYWORD_NOT_GAME_MECHANIC_CONFLICT",
+    "subsequent_real_source_CI_success_run": 42624263308,
+    "last_final_CI_run": 42624671123,
+    "last_final_CI_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42624671123",
+    "last_final_CI_status": "SUCCESS_3_OF_3",
+    "Python312_compile_synthetic": "PASS",
+    "Python314_compile_synthetic": "PASS",
+    "two_specialization_synthetic_and_negative_claim_controls": "PASS",
+    "official_vs_external_spell_ID_promotion_negative_controls": "PASS",
+    "actual_raw_WCL_and_original_source_APL_frontier_offline": "PASS",
+    "original_WCL_holdout_not_reclassified_as_gameplay_optimality": true,
+    "existing_WCL_and_SimC_source_data_reused": true,
+    "new_actual_WCL_API_calls": 0,
+    "new_native_SimC_CXX_builds": 0,
+    "final_artifact_id": 13677577367,
+    "final_artifact_name": "zrot-gr-real-wcl-source-mechanic-epoch-frontier-v1",
+    "final_artifact_zip_sha256": "1451f30c58f6f44ec70df52c24cf7aeaedbcb914f9c97a26fb8077684cf867f4",
+    "final_artifact_size_bytes": 9920,
+    "final_artifact_expiry_UTC": "2026-11-16T13:21:12Z",
+    "summary_json_sha256": "2c7f94c756345525a67a3448f74060a9a31f8b5eb792e19bd9cd0edca5465d38"
+  },
+  "engine_first_self_audit": {
+    "original_WCL_raw_collector_rebuilt": false,
+    "SimC_APL_parser_rebuilt": false,
+    "reusable_source_agnostic_mechanic_evidence_gate_created": true,
+    "found_official_mechanic_trust_separation_improves_gameplay_confidence_gating": true,
+    "structured_future_dummy_feedback_reason_reused_real_WCL_action_receipts": true,
+    "NOT_product_ready_priorities_or_dummy_errors": true,
+    "extra_SimC_builds_needed_now": false,
+    "test_passes_not_gameplay_scientific_validation": true
+  },
+  "exact_next": {
+    "session": "Highest impact is independently pinned WCL actor epoch/build + game spell numeric ID and current Blizzard mechanic version for Enrage remains/GCD/Hack and Slash and 4pc stack. Prefer using existing metadata/talent parser and pinned SimC source DBC, not new collectors. Once that is evidenced, rerun existing typed IF replay through verified semantics and READY necessity gates. Avoid stamping 'PASS' on mere observed casts.",
+    "product": "Source-based current Retail General Rotation opener and conditional priority ST/2T/cleave/AoE, then lightweight own-cast dummy training with actual error reason versus UNKNOWN."
+  },
+  "branch_only": true,
+  "MAIN_promoted": false,
+  "Gen5_handoff_modified": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}

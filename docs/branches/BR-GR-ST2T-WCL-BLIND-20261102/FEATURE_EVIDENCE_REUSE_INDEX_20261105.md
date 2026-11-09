@@ -593,3 +593,14 @@ Artifact #13669824790; receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/ev
 | `general_rotation_postlock_typed_pre_scenario_v1.py` | #42618455023 PASS 3/3 optional temporal input and exploratory stack IF; original 51 WCL holdout × ST/2T status counts unchanged | **NEW connector on existing source IF engine**, no READY/priority promotion |
 
 Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_RAW_AURA_TEMPORAL_STACK_PRE_20261109.json`. Raw temporal source SHA256 `79bfff88fd817cd2a3dc813a25f06b10770ffd1c6a89ed041e05be47f8b69478`; source IF scenario SHA256 `82b790d961fd4a21aa5ca43e23d53389e85d0e94501e68a74c25c1ae7076df53`.
+
+## 2026-11-09 generic official-mechanic-to-WCL proof gate and dummy-UNKNOWN feedback frontier
+
+| Reusable component | Proof / real source | Bound |
+| --- | --- | --- |
+| `tools/research/general_rotation_mechanic_epoch_evidence_gate_v1.py` | #42624671123 PASS 3/3, two independent synthetic spec types, existing real WCL 51 casts × original SimC ST/2T source 152 candidate APL rows per target context | **NEW source-neutral game-mechanic evidence gate**; no unjustified spell-ID or READY upgrade |
+| External Fury registry `FURY_MECHANIC_PATCH_EVIDENCE_REGISTRY_20261109.json` | Blizzard Fury Venomous Abyss 4pc update; Wowhead unversioned Enrage/ Recklessness names and numeric ID candidates | Public evidence types separated from client/actor/source C++/patch authority |
+| Per-cast unknown-safety consumer | 51/51 original real WCL casts per source context have candidate-row/required operand reason and UNKNOWN practice-feedback preview | Not a target dummy log, no false wrong-cast errors, future trainer adapter ready |
+| Missing gameplay inputs | 76 source operand occurrences/model remain without raw mapping; high impact remains 24, GCD 24, Hack and Slash 18, Bladestorm ready 8, Fury4pc stacks 2 | **Research priority**, not causal rule strength |
+
+Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_POSTLOCK_MECHANIC_EPOCH_EVIDENCE_FRONTIER_20261109.json`; engine SHA256 `0b0b2262d90788a523cfd241397e56e6ab1793ed94088345e92ac07af0c42f31`. Original frozen numeric lock untouched.
