@@ -39,6 +39,7 @@ jobs:
           assert o["same_timestamp_changes_not_PRE"] is True
           assert o["same_timestamp_contradictory_events_UNKNOWN"] is True
           assert o["last_apply_or_refresh_age_not_remains"] is True
+          assert o["no_prior_raw_event_not_interpreted_as_buff_absent"] is True
           assert o["source_APl_source_IF_proven"]==o["full_READY_proven"]==0
           print("GENERIC_WCL_RAW_TEMPORAL_STACK_STRICT_PRE_SYNTHETIC_PASS")
           PY
@@ -95,6 +96,7 @@ jobs:
           from pathlib import Path
           from fresh_wcl_engine_v1 import canonical,sha
           from wcl_raw_actor_aura_temporal_pre_v1 import from_verified_raw_actor_root
+          from wcl_raw_actor_numeric_transport_v1 import strict_pre_numeric_matrix
           def exactly(root,pattern):
               files=list(Path(root).rglob(pattern))
               assert len(files)==1,(root,pattern,files)
@@ -125,6 +127,14 @@ jobs:
               assert transport['actor_numeric_cast_count']==casts
               assert transport['raw_event_count']==raw
               m=from_verified_raw_actor_root(Path(source),transport)
+              prior_reference=strict_pre_numeric_matrix(transport)
+              observed=m['strict_prior_raw_aura_observability']
+              reference=prior_reference['signal_status_summary']
+              assert observed['KNOWN_AURA_ACTIVE_PRE']==reference.get('KNOWN',0)
+              assert observed.get('UNKNOWN_AURA_ACTIVE_PRE',0)+observed.get(
+                  'UNKNOWN_NO_PRIOR_AURA_EVENT',0)==reference.get('UNKNOWN',0)
+              assert m['all_raw_aura_ID_x_cast_state_slots']==(
+                  casts*m['distinct_raw_numeric_aura_spell_ids'])
               assert m['actual_cast_rows']==casts
               assert m['aura_remains_known']==0
               assert m['full_GCD_cooldown_charge_READY_proven']==0
@@ -147,6 +157,11 @@ jobs:
                 'distinct_numeric_aura_ids':m['distinct_raw_numeric_aura_spell_ids'],
                 'aura_event_type_counts':m['actor_raw_buff_event_type_counts'],
                 'strict_pre_aura_statuses':m['strict_prior_raw_aura_observability'],
+                'all_raw_aura_ID_x_cast_state_slots':
+                    m['all_raw_aura_ID_x_cast_state_slots'],
+                'unknown_no_prior_aura_event_state_slots':
+                    observed.get('UNKNOWN_NO_PRIOR_AURA_EVENT',0),
+                'crosscheck_existing_bool_strict_PRE':'PASS_COMPATIBILITY',
                 'aura_remaining_duration_verified':0,
                 'matrix_sha256':m['temporal_matrix_sha256']
               }
