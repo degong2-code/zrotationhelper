@@ -1,0 +1,91 @@
+name: zrot-gr-fresh-vs-existing-wcl-identity-audit-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/engine_first/wcl_raw_actor_numeric_transport_v1.py
+      - .github/workflows/zrot-gr-fresh-vs-existing-wcl-identity-audit-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline-identity-audit:
+    name: Existing vs freshly queried original WCL cohort identity, no new API
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42598175488
+          name: zrot-gr-real-existing-wcl-raw-numeric-transport-v1
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-existing-transport
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42598862764
+          name: zrot-gr-live-wcl-coldstart-status-e3e2a8bbcba399d5c891152697fda94f0eb6bd77
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-fresh-transport
+      - name: Provenance-aware report collision classification
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-cohort-identity
+          python -m py_compile tools/engine_first/wcl_raw_actor_numeric_transport_v1.py
+          python -B tools/engine_first/wcl_raw_actor_numeric_transport_v1.py > /tmp/zrot-cohort-identity/producer-selftest.json
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          from fresh_wcl_engine_v1 import canonical,sha
+          from wcl_raw_actor_numeric_transport_v1 import classify_cohort_identity
+          old=list(Path('/tmp/zrot-existing-transport').rglob('real-raw-actor-numeric-transport.json'))
+          fresh=list(Path('/tmp/zrot-fresh-transport').rglob('new-raw-numeric.json'))
+          assert len(old)==len(fresh)==1,(old,fresh)
+          one=json.loads(old[0].read_bytes())
+          two=json.loads(fresh[0].read_bytes())
+          assert one['source_cohort_role']==two['source_cohort_role']=='DISCOVERY'
+          assert one['actor_numeric_cast_count']>0 and two['actor_numeric_cast_count']>0
+          result=classify_cohort_identity(one,two)
+          assert result['valid_as_independent_holdout_against_other'] is False
+          assert result['WCL_source_readiness']=='UNKNOWN'
+          assert result['validated_gameplay_priority'] is False
+          result['evidence_sources']=[
+             {'kind':'PRIOR_RAW_WCL_ARCHIVE_OFFLINE_REPLAY',
+              'origin_GitHub_run':41463589665,
+              'source_raw_transport_sha256':one['numeric_transport_sha256']},
+             {'kind':'NEW_OFFICIAL_WCL_API_QUERY_COLDSTART',
+              'origin_GitHub_run':42598862764,
+              'source_raw_transport_sha256':two['numeric_transport_sha256']}
+          ]
+          result['actual_new_WCL_API_requests_in_this_audit']=0
+          result['previous_fresh_API_run_completed']=True
+          result['new_independent_holdout_cohort_collected_by_this_run']=False
+          result['source_hypotheses_used_to_classify']=False
+          path=Path('/tmp/zrot-cohort-identity/fresh-versus-existing-identity.json')
+          path.write_bytes(canonical(result))
+          print('GENERIC_WCL_FRESH_VS_PREVIOUS_REPORT_IDENTITY_AUDIT_PASS')
+          print('GENERIC_WCL_FRESH_VS_PREVIOUS_REPORT_IDENTITY='+json.dumps({
+             'classification':result['classification'],
+             'same_report':result['same_report'],
+             'same_fight':result['same_fight'],
+             'same_actor':result['same_actor'],
+             'same_raw':result['same_raw_actor_snapshot_sha256'],
+             'different_report':result['report_disjoint']},sort_keys=True))
+          print('GENERIC_WCL_FRESH_VS_PREVIOUS_REPORT_IDENTITY_SHA256='+sha(path.read_bytes()))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-wcl-fresh-vs-existing-source-identity-v1
+          path: /tmp/zrot-cohort-identity/fresh-versus-existing-identity.json
+          if-no-files-found: warn
+          retention-days: 7
