@@ -219,6 +219,37 @@ def _strict_transitions(numeric:dict,fixture:dict)->StrictPreReplay:
     return StrictPreReplay(trans)
 
 
+
+def _one_source_guard_at_WCL_pre(replay:StrictPreReplay,
+                                numeric:dict,cast:dict,
+                                node:dict,m:dict)->tuple[str,dict,dict]:
+    """Per-source-row conditional hypothesis, never a selected-row proof."""
+    cond=node["conditions"].get("if")
+    s_to_raw=m["symbol_to_raw_signal"]
+    signals=tuple(sorted(set(s_to_raw.values())))
+    state=(replay.snapshot(
+          cohort_id=numeric["holdout_cohort_id"],
+          scope=numeric["holdout_scope"],
+          actor_id=numeric["holdout_actor"],
+          at_ms=cast["at_ms"],signals=signals)
+          if signals else None)
+    wcl_facts={}
+    for symbol,signal in s_to_raw.items():
+        evidence=state["signals"][signal]
+        if evidence["status"]=="KNOWN" and evidence["value"] is not None:
+            wcl_facts[symbol]={
+               "value":1.0 if evidence["value"] else 0.0,
+               "timestamp":evidence["event_t_ms"],
+               "provenance":"STRICT_PRE_OBSERVATION"}
+    tested=(None if cond is None else
+            truth(evaluate_ast(
+                 cond["source_ast"],wcl_facts,
+                 action_timestamp=cast["at_ms"],strict_pre=True)))
+    guard=("SOURCE_IF_ABSENT_NOT_READY_PROOF" if cond is None else
+           "TRUE" if tested is True else
+           "FALSE" if tested is False else "UNKNOWN")
+    return guard,state["signals"] if state else {},wcl_facts
+
 def postlock_source_probe(numeric:dict,fixture:dict,source_case:dict,
                           binding:dict)->dict:
     """Second phase only. An explicit binding is a hypothesis, not game truth."""
@@ -256,14 +287,14 @@ def postlock_source_probe(numeric:dict,fixture:dict,source_case:dict,
     mappings=binding.get("numeric_to_source_rows")
     need(type(mappings)==list and len(mappings)<=200,
          "POSTLOCK_NUMERIC_BINDINGS_MALFORMED")
-    bound={};lists=graph["source_only_priority_graph"]["lists"]
+    bound={};seen_mappings=set()
+    lists=graph["source_only_priority_graph"]["lists"]
     for m in mappings:
         need(type(m)==dict and set(m)=={
              "spell_id","source_list","source_index",
              "source_row_sha256","symbol_to_raw_signal"} and
              type(m["spell_id"]) is int and m["spell_id"]>0 and
              m["spell_id"] in numeric["numeric_locked_spell_ids"] and
-             m["spell_id"] not in bound and
              type(m["source_list"]) is str and m["source_list"] in lists and
              type(m["source_index"]) is int and
              0<=m["source_index"]<len(lists[m["source_list"]]) and
@@ -279,12 +310,16 @@ def postlock_source_probe(numeric:dict,fixture:dict,source_case:dict,
              all(type(v)==str and TOKEN.fullmatch(v) for v in symbols.values()) and
              len(set(symbols.values()))==len(symbols),
              "UNDECLARED_RAW_SIGNAL_MAPPING_OR_DUPLICATE")
-        bound[m["spell_id"]]=(node,m)
+        unique=(m["spell_id"],m["source_list"],m["source_index"])
+        need(unique not in seen_mappings,
+             "DUPLICATE_POSTLOCK_NUMERIC_TO_SOURCE_ROW_BINDING")
+        seen_mappings.add(unique)
+        bound.setdefault(m["spell_id"],[]).append((node,m))
     replay=_strict_transitions(numeric,fixture)
     output=[];counts=Counter()
     for cast in numeric["numeric_casts"]:
-        item=bound.get(cast["spell_id"])
-        if item is None:
+        items=bound.get(cast["spell_id"])
+        if items is None:
             counts["UNKNOWN_NO_POSTLOCK_SOURCE_BINDING"]+=1
             output.append({
               "raw_event_id":cast["event_id"],"at_ms":cast["at_ms"],
@@ -295,31 +330,38 @@ def postlock_source_probe(numeric:dict,fixture:dict,source_case:dict,
               "action_READY":"UNKNOWN","competitor_priority":"UNKNOWN",
               "dummy_wrong_cast":"UNKNOWN"})
             continue
-        node,m=item
-        cond=node["conditions"].get("if")
-        s_to_raw=m["symbol_to_raw_signal"]
-        signals=tuple(sorted(set(s_to_raw.values())))
-        state=(replay.snapshot(
-              cohort_id=numeric["holdout_cohort_id"],
-              scope=numeric["holdout_scope"],
-              actor_id=numeric["holdout_actor"],
-              at_ms=cast["at_ms"],signals=signals)
-              if signals else None)
-        wcl_facts={}
-        for symbol,signal in s_to_raw.items():
-            evidence=state["signals"][signal]
-            if evidence["status"]=="KNOWN" and evidence["value"] is not None:
-                wcl_facts[symbol]={
-                   "value":1.0 if evidence["value"] else 0.0,
-                   "timestamp":evidence["event_t_ms"],
-                   "provenance":"STRICT_PRE_OBSERVATION"}
-        tested=(None if cond is None else
-                truth(evaluate_ast(
-                     cond["source_ast"],wcl_facts,
-                     action_timestamp=cast["at_ms"],strict_pre=True)))
-        guard=("SOURCE_IF_ABSENT_NOT_READY_PROOF" if cond is None else
-               "TRUE" if tested is True else
-               "FALSE" if tested is False else "UNKNOWN")
+        if len(items)>1:
+            # One numeric WCL spell can be dispatched through several
+            # original APL rows. Evaluate each IF, but NEVER pick the row
+            # merely from a TRUE guard or the observed native cast.
+            candidates=[]
+            for node,m in items:
+                guard,strict_pre,facts=_one_source_guard_at_WCL_pre(
+                    replay,numeric,cast,node,m)
+                candidates.append({
+                    "source_identity":node["identity"],
+                    "source_action":node["action"],
+                    "source_IF_hypothesis_at_WCL_PRE":guard,
+                    "strict_pre_signals":strict_pre,
+                    "strict_pre_hypothesis_facts":facts,
+                    "physical_READY":"UNKNOWN",
+                    "source_row_was_selected":"UNKNOWN"})
+            counts["UNKNOWN_MULTIPLE_POSTLOCK_SOURCE_ROWS"]+=1
+            output.append({
+                "raw_event_id":cast["event_id"],"at_ms":cast["at_ms"],
+                "spell_id":cast["spell_id"],
+                "postlock_source_row":"UNKNOWN_MULTIPLE_SOURCE_ROWS",
+                "possible_source_rows":candidates,
+                "source_if_hypothesis_at_WCL_PRE":
+                    "UNKNOWN_AMBIGUOUS_SOURCE_ROW",
+                "original_APL_source_row_winner":"UNKNOWN",
+                "action_READY":"UNKNOWN","competitor_priority":"UNKNOWN",
+                "dummy_wrong_cast":"UNKNOWN"
+            })
+            continue
+        node,m=items[0]
+        guard,strict_pre,wcl_facts=_one_source_guard_at_WCL_pre(
+            replay,numeric,cast,node,m)
         counts[guard]+=1
         ident=Identity(
            scope="POSTLOCK_NUMERIC:"+str(cast["spell_id"]),
@@ -350,7 +392,7 @@ def postlock_source_probe(numeric:dict,fixture:dict,source_case:dict,
             "postlock_source_row":node["identity"],
             "postlock_source_candidate":node["action"],
             "source_if_hypothesis_at_WCL_PRE":guard,
-            "WCL_strict_pre_state":state["signals"] if state else {},
+            "WCL_strict_pre_state":strict_pre,
             "WCL_strict_pre_facts_used_for_hypothesis":wcl_facts,
             "independent_source_action_numeric_mapping":"NOT_AUDITED",
             "build_and_WCL_target_equivalence":"UNKNOWN",
@@ -471,7 +513,7 @@ def selftest()->dict:
            "WCL_independent_holdout":"NOT_RUN",
            "dummy_wrong_skill":"UNKNOWN",
            "native_selected_used_as_positive_ready_input":False}
-    w=case("actions=synthetic_alpha,if=buff.proc.up","warrior","fury")
+    w=case("actions=synthetic_alpha,if=buff.proc.up\nactions+=/synthetic_alpha,if=!buff.proc.up","warrior","fury")
     m=case("actions=synthetic_beta,if=buff.proc.up","mage","arcane")
     def bind(source):
         row=source["source_hypothesis_IR"][
@@ -499,6 +541,23 @@ def selftest()->dict:
              result["physical_READY_proven"]==0 and
              not result["dummy_training_error_proven"],
              "MULTI_CLASS_BOUNDED_POSTLOCK_SOURCE_PROBE_FAILED")
+    multi=bind(w)
+    second=w["source_hypothesis_IR"][
+        "source_only_priority_graph"]["lists"]["default"][1]
+    multi["numeric_to_source_rows"].append({
+        "spell_id":1101,"source_list":"default","source_index":1,
+        "source_row_sha256":second["identity"]["source_line_sha256"],
+        "symbol_to_raw_signal":{"buff.proc.up":"raw.proc"}
+    })
+    ambiguous=bridge(raw,h,fixture,w,multi)
+    need(ambiguous["source_vs_WCL_hypothesis_at_PRE_counts"][
+            "UNKNOWN_MULTIPLE_POSTLOCK_SOURCE_ROWS"]==1 and
+         len(ambiguous["per_numeric_cast_conditional_probes"][0][
+             "possible_source_rows"])==2 and
+         ambiguous["per_numeric_cast_conditional_probes"][0][
+             "postlock_source_row"]=="UNKNOWN_MULTIPLE_SOURCE_ROWS" and
+         ambiguous["physical_READY_proven"]==0,
+         "MULTIPLE_IDENTICAL_SPELL_APL_CONDITIONS_WRONGLY_COLLAPSED")
     events=copy.deepcopy(fixture)
     events["transitions"]=[trans("same",1000,True)]
     same=bridge(raw,h,events,w,bind(w))
@@ -533,6 +592,10 @@ def selftest()->dict:
     binding_bad=bind(w);binding_bad["numeric_to_source_rows"][0][
         "symbol_to_raw_signal"]={"buff.proc.up":"some.unpinned","evil":"raw.proc"}
     must_fail(lambda:bridge(raw,h,fixture,w,binding_bad))
+    duplicate=copy.deepcopy(multi)
+    duplicate["numeric_to_source_rows"].append(
+        copy.deepcopy(duplicate["numeric_to_source_rows"][1]))
+    must_fail(lambda:bridge(raw,h,fixture,w,duplicate))
     forged=copy.deepcopy(w);forged["source_full_READY_proven"]=1
     must_fail(lambda:bridge(raw,h,fixture,forged,bind(w)))
     spoof=copy.deepcopy(fixture);spoof["cast_events"][0]["spell_id"]="synthetic_alpha"
@@ -551,6 +614,7 @@ def selftest()->dict:
             "negative_controls":negatives,
             "WCL_real_holdout_verified":False,
             "source_if_state_probe_synthetic_tested":True,
+            "duplicate_spell_multiple_APL_IF_rows_unknown":True,
             "full_READY_proven":0,
             "dummy_wrong_cast_proven":0,"new_WCL_API_calls":0,
             "new_SimC_CXX_builds":0}
