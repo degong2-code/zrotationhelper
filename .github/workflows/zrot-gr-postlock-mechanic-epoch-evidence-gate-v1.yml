@@ -1,0 +1,144 @@
+name: zrot-gr-postlock-mechanic-epoch-evidence-gate-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_mechanic_epoch_evidence_gate_v1.py
+      - docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_MECHANIC_PATCH_EVIDENCE_REGISTRY_20261109.json
+      - .github/workflows/zrot-gr-postlock-mechanic-epoch-evidence-gate-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  generic-synthetic:
+    name: Blizzard concept vs spell ID vs gameplay source/built proof Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12","3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: "${{ matrix.python }}"}
+      - name: Compile + two class negative promotion regressions
+        shell: bash
+        env:
+          PYTHONPATH: tools/research:tools/engine_first
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_mechanic_epoch_evidence_gate_v1.py
+          python -B tools/research/general_rotation_mechanic_epoch_evidence_gate_v1.py > /tmp/zrot-mechanic-epoch-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/zrot-mechanic-epoch-synthetic.json'))
+          assert x["status"]=="PASS_GENERIC_SOURCE_MECHANIC_EPOCH_GATE"
+          assert x["two_different_specializations_synthetic"]==2
+          assert x["negative_claim_controls"]>=14
+          assert x["Blizzard_prose_does_not_assign_spell_ID"] is True
+          assert x["current_Retail_source_IF_certified"]==0
+          assert x["actual_WCL_API_calls"]==0
+          print("GENERIC_PATCH_EPOCH_MECHANIC_ID_READINESS_PROVENANCE_SELFTEST_PASS")
+          PY
+          sha256sum tools/research/general_rotation_mechanic_epoch_evidence_gate_v1.py
+  real-original-wcl:
+    name: Actual 51 WCL cast conditional IF frontier and Blizzard public hotfix era gate
+    needs: [generic-synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-real-wcl-typed-postlock-source-if-scenarios-v1
+          run-id: 42618455023
+          github-token: ${{ github.token }}
+          path: /tmp/real-original-WCL-source-IF
+      - name: Source IR real WCL numeric lock -> unverified public mechanic epoch evidence classifier
+        shell: bash
+        env:
+          PYTHONPATH: tools/research:tools/engine_first
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-real-mechanic-frontier
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          from simc_apl_semantic_ir_v2 import canonical
+          from general_rotation_mechanic_epoch_evidence_gate_v1 import (
+            check_registry,compile_frontier,sha
+          )
+          root=Path('/tmp/real-original-WCL-source-IF')
+          registry_path=Path(
+             'docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_MECHANIC_PATCH_EVIDENCE_REGISTRY_20261109.json')
+          registry=json.loads(registry_path.read_bytes())
+          check_registry(registry)
+          assert registry['source_commit_timestamp_utc']=='2026-11-01T09:25:22Z'
+          assert registry['claim_gates']['physical_READY_and_competing_actions']=='UNKNOWN'
+          assert registry['WCL_actor_fight_UTC_epoch']=='UNKNOWN'
+          outdir=Path('/tmp/zrot-real-mechanic-frontier')
+          overall={}
+          for context in ('warrior_fury-st','warrior_fury-2t'):
+              matches=list(root.rglob(context+'-postlock-typed-if-scenarios.json'))
+              assert len(matches)==1,(context,matches)
+              source_study=json.loads(matches[0].read_bytes())
+              result=compile_frontier(source_study,registry,context=context)
+              assert result['original_numeric_WCL_blind_lock_sha256']==(
+                 'c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e')
+              assert result['source_candidate_WCL_casts']==15
+              assert result['candidate_source_IF_rows']==152
+              assert result['raw_unmapped_source_operand_total']==76
+              assert len(result['mechanic_symbol_frontier'])==8
+              assert result['mechanic_coverage_stage_count']=={
+                'MECHANIC_REFERENCE_ONLY':1,
+                'PUBLIC_SPELL_ID_NAME_CANDIDATE_ONLY':3,
+                'NO_REGISTERED_EXTERNAL_SEMANTIC_EVIDENCE':4}
+              assert result['patch_and_build_evidence_completed'] is False
+              assert result['source_time_after_public_bulletin_does_not_certify_game_mechanic']
+              assert result['current_Retail_source_IF_trues_certified']==0
+              assert result['General_Rotation_rules_promoted']==0
+              assert result['dummy_wrong_cast_verdicts']==0
+              p=outdir/(context+'-mechanic-epoch-frontier.json')
+              p.write_bytes(canonical(result))
+              overall[context]={
+                'source_WCL_casts':15,'source_apl_candidate_rows':152,
+                'unmapped_source_operand_row_occurrences':76,
+                'coverage_stages':result['mechanic_coverage_stage_count'],
+                'top_remaining_source_operands':[
+                  [x['source_symbol'],x['source_candidate_rows_missing_raw_mapping']]
+                  for x in result['mechanic_symbol_frontier']
+                  if x['source_candidate_rows_missing_raw_mapping']>0
+                ],
+                'certified_source_mechanic_rules':0,
+                'eligible_user_dummy_errors':0}
+              print('REAL_WCL_OFFICIAL_MECHANIC_EPOCH_FRONTIER',
+                    context,json.dumps(overall[context],sort_keys=True))
+          summary={
+             'schema':'ZrotOfficialAndThirdPartyMechanicFrontierActualWclSourceStudyV1',
+             'policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+             'source_study_real_official_WCL_holdout_casts':51,
+             'source_evidence_uses_postlock_only':True,
+             'registry_sha256':sha(registry_path.read_bytes()),
+             'two_source_contexts_same_real_WCL_casts_not_independent_samples':True,
+             'actual_official_Blizzard_text_mechanic_changes_corroborated':1,
+             'source_spell_ID_or_build_patch_truth_CERTIFIED':0,
+             'full_readiness_or_general_rotation_priority_CERTIFIED':0,
+             'per_target_model':overall,
+             'new_WCL_api_requests':0,'new_SimC_CXX_builds':0
+          }
+          (outdir/'actual-WCL-mechanic-frontier-summary.json').write_bytes(canonical(summary))
+          print('GENERIC_MECHANIC_SOURCE_PROOF_EPOCH_FRONTIER_REAL_WCL_PASS')
+          PY
+          sha256sum /tmp/zrot-real-mechanic-frontier/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-real-wcl-source-mechanic-epoch-frontier-v1
+          path: /tmp/zrot-real-mechanic-frontier/*.json
+          if-no-files-found: warn
+          retention-days: 7
