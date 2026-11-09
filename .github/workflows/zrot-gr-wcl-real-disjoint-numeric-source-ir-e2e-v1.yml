@@ -3,6 +3,7 @@ on:
   push:
     branches: [work/gr-simc-st-2t-wcl-blind-20261102]
     paths:
+      - tools/engine_first/wcl_raw_actor_numeric_transport_v1.py
       - .github/workflows/zrot-gr-wcl-real-disjoint-numeric-source-ir-e2e-v1.yml
   workflow_dispatch:
 permissions:
@@ -86,7 +87,9 @@ jobs:
           import json
           from pathlib import Path
           from fresh_wcl_engine_v1 import canonical,sha
-          from wcl_raw_actor_numeric_transport_v1 import disjoint_numeric_fixture
+          from wcl_raw_actor_numeric_transport_v1 import (
+             disjoint_numeric_fixture,strict_pre_numeric_matrix
+          )
           from general_rotation_wcl_postlock_source_ir_bridge_v1 import (
              numeric_frozen_boundary,postlock_source_probe,BINDING_SCHEMA
           )
@@ -105,6 +108,22 @@ jobs:
           assert holdout['prior_disjoint_report_holdout_recomputed'] is True
           assert holdout['report_code']!=discovery['report_code']
           assert discovery['source_replay_sha256'] in lock['source_replay_sha256']
+          # Raw-only Strict PRE provenance for EVERY actor cast, separately
+          # from any source row meaning or observed native action readiness.
+          a_matrix=strict_pre_numeric_matrix(discovery)
+          h_matrix=strict_pre_numeric_matrix(holdout)
+          assert a_matrix['cast_rows']==54
+          assert h_matrix['cast_rows']==51
+          assert a_matrix['all_known_facts_strictly_before_cast'] is True
+          assert h_matrix['all_known_facts_strictly_before_cast'] is True
+          assert h_matrix['SimC_source_or_spell_names_injected'] is False
+          assert a_matrix['complete_READY_proven']==h_matrix['complete_READY_proven']==0
+          assert a_matrix['matrix_sha256']==sha(canonical({
+              k:v for k,v in a_matrix.items() if k!='matrix_sha256'}))
+          assert h_matrix['matrix_sha256']==sha(canonical({
+              k:v for k,v in h_matrix.items() if k!='matrix_sha256'}))
+          (root/'discovery-strict-pre-all-casts.json').write_bytes(canonical(a_matrix))
+          (root/'holdout-strict-pre-all-casts.json').write_bytes(canonical(h_matrix))
           # Neither the numeric lock nor the dual raw audit has ever imported
           # a SimC source IF or class-specific spell name.
           fixture=disjoint_numeric_fixture([discovery],holdout,lock,sha(raw))
@@ -163,6 +182,16 @@ jobs:
             'holdout_raw_event_count':holdout['raw_event_count'],
             'holdout_actor_cast_count':holdout['actor_numeric_cast_count'],
             'holdout_actor_aura_pre_transition_count':holdout['raw_aura_boolean_transitions'],
+            'discovery_numeric_strict_pre_matrix_sha256':a_matrix['matrix_sha256'],
+            'holdout_numeric_strict_pre_matrix_sha256':h_matrix['matrix_sha256'],
+            'discovery_strict_pre_known_state_facts':
+                a_matrix['signal_status_summary'].get('KNOWN',0),
+            'holdout_strict_pre_known_state_facts':
+                h_matrix['signal_status_summary'].get('KNOWN',0),
+            'discovery_strict_pre_unknown_state_facts':
+                a_matrix['signal_status_summary'].get('UNKNOWN',0),
+            'holdout_strict_pre_unknown_state_facts':
+                h_matrix['signal_status_summary'].get('UNKNOWN',0),
             'holdout_other_report_verified':discovery['report_code']!=holdout['report_code'],
             'prior_immutable_discovery_lock_sha256':sha(raw),
             'discovery_candidates_count':len(numeric['numeric_locked_spell_ids']),
