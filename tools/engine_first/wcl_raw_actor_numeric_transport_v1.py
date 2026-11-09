@@ -293,6 +293,117 @@ def classify_cohort_identity(left:dict,right:dict)->dict:
     }
 
 
+def replicate_frozen_numeric_candidates(discovery:list[dict],
+                                        newly_observed:dict,
+                                        frozen_lock:dict,
+                                        frozen_sha256:str,
+                                        fixed_metrics:dict,
+                                        *,already_seen_report_codes:tuple[str,...]=())->dict:
+    """Cross-report numeric observation with immutable thresholds, not a holdout.
+
+    A new report's observed spell IDs can only be evaluated against the
+    previously frozen discovery candidate set. No new action can enter that
+    set, and no observed cast can establish READY or mandatory priority.
+    This is a product-level independent-report *candidate replay*, NOT an
+    independently locked gameplay-rule holdout.
+    """
+    need(type(discovery)==list and 1<=len(discovery)<=100,
+         "LOCKED_DISCOVERY_SOURCE_ROSTER_REQUIRED")
+    for d in discovery:
+        _check_transport(d)
+        need(d["source_cohort_role"]=="DISCOVERY",
+             "DISCOVERY_SOURCE_ROLE_UNVERIFIED")
+    _check_transport(newly_observed)
+    need(frozen_lock.get("schema")==LOCK_SCHEMA and
+         frozen_lock.get("status")=="LOCKED_NUMERIC_ONLY" and
+         frozen_lock.get("source_kind")==ORIGIN and
+         frozen_lock.get("threshold_retuned_after_discovery") is False and
+         frozen_lock.get("semantic_names_attached") is False and
+         frozen_lock.get("gameplay_rule_claim") is False and
+         frozen_lock.get("holdout_validated") is False and
+         type(frozen_sha256)==str and HASH.fullmatch(frozen_sha256) and
+         sha(canonical(frozen_lock))==frozen_sha256,
+         "IMMUTABLE_NUMERIC_SOURCE_CANDIDATES_REQUIRED")
+    old_hashes=sorted(x["source_replay_sha256"] for x in discovery)
+    need(old_hashes==frozen_lock.get("source_replay_sha256") and
+         len(set(old_hashes))==len(old_hashes),
+         "NEW_REPORT_NOT_COMPARED_TO_THIS_LOCKED_DISCOVERY")
+    old_reports={x["report_code"] for x in discovery}
+    need(len(old_reports)==len(discovery) and
+         newly_observed["report_code"] not in old_reports and
+         newly_observed["source_replay_sha256"] not in old_hashes and
+         type(already_seen_report_codes)==tuple and
+         newly_observed["report_code"] not in already_seen_report_codes and
+         all(isinstance(x,str) for x in already_seen_report_codes),
+         "NEW_COHORT_REUSES_PREVIOUSLY_SEEN_REPORT")
+    need(type(fixed_metrics)==dict and
+         fixed_metrics.get("candidate_set_source")==
+             "IMMUTABLE_DISCOVERY_LOCK_ONLY" and
+         type(fixed_metrics.get("observed_threshold")) is int and
+         1<=fixed_metrics["observed_threshold"]<=1000 and
+         fixed_metrics.get("no_new_candidate_discovery_in_holdout") is True and
+         fixed_metrics.get("no_threshold_retuning") is True,
+         "LOCKED_NUMERIC_REOBSERVATION_METRIC_MUST_NOT_RETUNE")
+    ids=set();rows=frozen_lock.get("candidates")
+    need(type(rows)==list and len(rows)==frozen_lock.get("candidate_n") and
+         len(rows)>0,"FROZEN_NUMERIC_CANDIDATE_SET_EMPTY")
+    for row in rows:
+        sid=row.get("action_spell_id")
+        need(type(sid)==int and sid>0 and sid not in ids and
+             row.get("semantic_name") is None and
+             row.get("readiness")=="UNKNOWN" and
+             row.get("priority_claim") is False and
+             row.get("causality_claim") is False and
+             row.get("gameplay_rule_claim") is False,
+             "FROZEN_NUMERIC_CANDIDATES_NOT_BLIND")
+        ids.add(sid)
+    observations=Counter(x["spell_id"] for x in newly_observed["cast_events"])
+    threshold=fixed_metrics["observed_threshold"]
+    candidates=[{
+      "action_spell_id":sid,
+      "original_discovery_observed_casts":next(
+         x["observed_event_count"] for x in rows
+         if x["action_spell_id"]==sid),
+      "new_report_numeric_casts":observations[sid],
+      "previously_fixed_presence_threshold":threshold,
+      "observed_at_least_fixed_threshold":observations[sid]>=threshold,
+      "real_action_READY":"UNKNOWN",
+      "necessary_or_mandatory_priority":"UNKNOWN",
+      "player_cast_manual_action":"UNKNOWN"
+    } for sid in sorted(ids)]
+    return {
+       "schema":"ZrotWclCrossReportLockedNumericCandidateReobservationV1",
+       "policy_id":POLICY,
+       "source_kind":"NUMERIC_WCL_ONLY",
+       "status":"ADDITIONAL_DISTINCT_REPORT_REOBSERVATION_NOT_FORMAL_HOLDOUT",
+       "original_frozen_discovery_lock_sha256":frozen_sha256,
+       "old_discovery_replay_hashes":old_hashes,
+       "new_report_numeric_transport_sha256":
+          newly_observed["numeric_transport_sha256"],
+       "new_report_disjoint_from_discovery":True,
+       "new_report_disjoint_from_additional_exclusions":True,
+       "new_cast_count":newly_observed["actor_numeric_cast_count"],
+       "candidate_set_unchanged":True,
+       "previously_fixed_metrics_sha256":sha(canonical(fixed_metrics)),
+       "predeclared_numeric_presence_threshold":threshold,
+       "candidates":candidates,
+       "reobserved_locked_candidate_count":sum(
+           v["observed_at_least_fixed_threshold"] for v in candidates),
+       "original_frozen_candidate_count":len(candidates),
+       "new_unlocked_numeric_spells_seen":len(set(observations)-ids),
+       "no_new_candidates_added":True,
+       "independent_research_holdout_validation":"NOT_RUN_FOR_THIS_REPORT",
+       "new_WCL_spell_to_SimC_source_mapping":"UNKNOWN",
+       "build_equivalence_to_SimC":"UNKNOWN",
+       "target_count_at_cast":"UNKNOWN",
+       "competing_action_READY_proven":0,
+       "General_Rotation_rule_promoted":False,
+       "dummy_wrong_cast_proven":False,
+       "new_WCL_API_calls_in_this_comparison":0,
+       "MAIN_promoted":False
+    }
+
+
 def disjoint_numeric_fixture(discovery:list[dict],holdout:dict,
                              frozen_lock:dict,frozen_lock_sha256:str)->dict:
     """Post-lock transport only. No source APL allowed in this signature."""
@@ -591,6 +702,18 @@ def selftest()->dict:
              "EXACT_SAME_RAW_ACTOR_REPLAY" and
              classify_cohort_identity(d1,d2)["report_disjoint"] is True,
              "WCL_COHORT_OVERLAP_GENERIC_GATE_FAILED")
+        metrics={"candidate_set_source":"IMMUTABLE_DISCOVERY_LOCK_ONLY",
+                 "observed_threshold":1,
+                 "no_new_candidate_discovery_in_holdout":True,
+                 "no_threshold_retuning":True}
+        repeated=replicate_frozen_numeric_candidates(
+            [d1],d2,lock1,sha(canonical(lock1)),metrics,
+            already_seen_report_codes=("ReportABC1",))
+        need(repeated["new_report_disjoint_from_discovery"] is True and
+             repeated["reobserved_locked_candidate_count"]==1 and
+             repeated["independent_research_holdout_validation"]==
+                 "NOT_RUN_FOR_THIS_REPORT",
+             "NUMERIC_FROZEN_CROSS_REPORT_REOBSERVATION_NOT_SAFE")
         need(fixture["holdout"]["report_code"]=="ReportABC2" and
              fixture["independent_WCL_holdout_proven"] is False and
              fixture["source_APL_or_SimC_present"] is False,
@@ -615,10 +738,18 @@ def selftest()->dict:
             [d1],d1,lock1,sha(canonical(lock1))))
         rejects(lambda:disjoint_numeric_fixture(
             [d2],d1,lock1,sha(canonical(lock1))))
+        rejects(lambda:replicate_frozen_numeric_candidates(
+            [d1],d1,lock1,sha(canonical(lock1)),metrics))
+        rejects(lambda:replicate_frozen_numeric_candidates(
+            [d1],d2,lock1,sha(canonical(lock1)),
+            {**metrics,"no_threshold_retuning":False}))
+        rejects(lambda:replicate_frozen_numeric_candidates(
+            [d1],d2,lock1,sha(canonical(lock1)),metrics,
+            already_seen_report_codes=("ReportABC2",)))
         orig=(f1/"page_00000.json").read_bytes()
         (f1/"page_00000.json").write_bytes(orig.replace(b"2001",b"2002",1))
         rejects(lambda:actor_snapshot(f1,g1,v1,r1))
-        need(negatives==7,"EXPECTED_ALL_NEGATIVE_CONTROLS")
+        need(negatives==10,"EXPECTED_ALL_NEGATIVE_CONTROLS")
         return {
             "schema":SCHEMA,"selftest":"PASS_OFFLINE_SYNTHETIC",
             "new_cold_start_snapshots":2,
@@ -627,6 +758,7 @@ def selftest()->dict:
             "strict_PRE_all_cast_numeric_matrix":"PASS",
             "disjoint_lock_fixture":"PASS",
             "cohort_identity_duplicate_vs_disjoint":"PASS",
+            "frozen_numeric_candidate_cross_report_replay":"PASS",
             "negative_controls":negatives,
             "real_wcl_api_requests":0,
             "real_wcl_holdout_completed":False,
