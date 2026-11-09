@@ -111,10 +111,11 @@ def check_registry(r:dict):
         publication_times[ref["reference_id"]]=(
             None if publication=="UNKNOWN" else _utc(publication))
         # An externally described mechanic is not itself current game truth.
-        need(("NO_SPELL_ID" in ref["policy"] or
-              "NOT_PLAYER_BUILD" in ref["policy"]) and
-             "MECHANIC" in ref["information_scope"].upper() or
-             ref["provider"]=="UNVERSIONED_PUBLIC_SPELL_DB",
+        expected_policy=(
+           "MECHANIC_TEXT_SCOPE_ONLY_NO_SPELL_ID_OR_APL_SEMANTIC_CERTIFICATION"
+           if ref["provider"]=="BLIZZARD_OFFICIAL" else
+           "SPELL_ID_NAME_CANDIDATE_ONLY_NOT_PLAYER_BUILD_OR_EXACT_DURATION")
+        need(ref["policy"]==expected_policy,
              "REFERENCE_PROOF_SCOPE_NOT_CONSERVATIVE")
         ids[ref["reference_id"]]=ref
     rows=r.get("source_symbol_bindings")
@@ -354,6 +355,8 @@ def selftest():
         v=deepcopy(registry);v["claim_gates"]["spell_ID"]="PASS"
         must_fail(lambda:compile_frontier(sample,v,context=spec+"-st"))
         v=deepcopy(registry);v["references"][0]["url"]="https://evil.example/spell"
+        must_fail(lambda:compile_frontier(sample,v,context=spec+"-st"))
+        v=deepcopy(registry);v["references"][0]["policy"]="CERTIFIED_GAMEPLAY"
         must_fail(lambda:compile_frontier(sample,v,context=spec+"-st"))
         v=deepcopy(registry);v["original_blind_numeric_lock_sha256"]="0"*64
         must_fail(lambda:compile_frontier(sample,v,context=spec+"-st"))
