@@ -1,0 +1,46 @@
+{
+  "schema": "ZrotOriginalNativeSourceIFPortfolioPinnedArtifactV1",
+  "source_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "original_workflow_run": 42594344188,
+  "artifact_id": 13662519082,
+  "original_artifact_zip_digest_sha256": "b9277acd9d0eb32a85dc00a6da8515e6e4db88d0d4d95e70e92ade52221a6d92",
+  "portfolio": {
+    "path": "generic-general-rotation-source-conditional-portfolio.json",
+    "sha256": "1a4df6f85503a190325541bf0ffac2424b3cc08ef8d57971af626b900624185f"
+  },
+  "case_files": [
+    {
+      "path": "warrior_fury-st-source-hypothesis-evidence.json",
+      "sha256": "964886a08dbaf800ac9e3694df47b7adece905fc8825782e9cc3f5d83aa54aee",
+      "spec_key": "warrior_fury",
+      "target_count": 1,
+      "expected_original_rows": 43,
+      "source_profile_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be"
+    },
+    {
+      "path": "warrior_fury-2t-source-hypothesis-evidence.json",
+      "sha256": "62d5ef47e32e066e771a447c3251ab1ba13699c24eec11481f9563f0fcc96dba",
+      "spec_key": "warrior_fury",
+      "target_count": 2,
+      "expected_original_rows": 44,
+      "source_profile_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be"
+    },
+    {
+      "path": "mage_arcane-st-source-hypothesis-evidence.json",
+      "sha256": "db3abc021e3af83b6147e05955772861855840fefac743d0c7fac420a0cb61f2",
+      "spec_key": "mage_arcane",
+      "target_count": 1,
+      "expected_original_rows": 29,
+      "source_profile_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f"
+    },
+    {
+      "path": "mage_arcane-2t-source-hypothesis-evidence.json",
+      "sha256": "b7899757ddfe44968b43447f41e448d999686ea312878f9a2f2ec1597677ff2d",
+      "spec_key": "mage_arcane",
+      "target_count": 2,
+      "expected_original_rows": 31,
+      "source_profile_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f"
+    }
+  ],
+  "evidence_boundary": "Only source IF original same-call PRE and native post-comparator observations. These are not full physical READY or gameplay priority."
+}
