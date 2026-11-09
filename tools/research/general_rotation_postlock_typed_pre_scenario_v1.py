@@ -420,7 +420,8 @@ def selftest():
     for cls,spec in [("warrior","fury"),("mage","arcane")]:
         p=(cls+'="Synthetic"\nspec='+spec+'\n'
            'actions=alpha,if=buff.ready.up&energy>=100\n'
-           'actions+=/alpha,if=energy<100\n').encode()
+           'actions+=/alpha,if=energy<100\n'
+           'actions+=/alpha,if=energy>=100&variable.missing\n').encode()
         model=compile_profile(
             p,{"key":spec,"class_key":cls,"git_blob":git_blob(p)})
         case={"schema":EVIDENCE_SCHEMA,"policy_id":POLICY,
@@ -525,13 +526,17 @@ def selftest():
         res=evaluate(numeric,transport,joint,case,compiled,mapping)
         need(res["numeric_observed_casts"]==1 and
              res["required_source_IF_operand_occurrence_counts"]==
-                {"buff.ready.up":1,"energy":2} and
+                {"buff.ready.up":1,"energy":3,"variable.missing":1} and
              res["source_operand_scenario_usage_counts"]==
-                {"buff.ready.up":2,"energy":4} and
+                {"buff.ready.up":2,"energy":6} and
+             res["unmapped_source_IF_operand_occurrence_counts"]==
+                {"variable.missing":1} and
+             res["unobserved_source_IF_operand_scenario_counts"]==
+                {"variable.missing":2} and
              res["raw_WCL_candidate_casts_with_source_token"]==1 and
-             res["individual_source_IF_candidate_row_probes"]==2 and
+             res["individual_source_IF_candidate_row_probes"]==3 and
              res["source_conditional_scenario_counts"][
-                 "SCALE_SENSITIVE_OR_SCENARIO_UNKNOWN"]==2 and
+                 "SCALE_SENSITIVE_OR_SCENARIO_UNKNOWN"]==3 and
              res["certified_source_IF_guard_true_count"]==0 and
              res["real_competing_spell_READY_proven"]==0 and
              res["dummy_wrong_cast_verdicts"]==0,
@@ -572,6 +577,7 @@ def selftest():
        "same_timestamp_state_leak_rejected":True,
        "uncertain_power_divisor_sensitivity_visible":True,
        "multiple_APL_row_conditions_preserved":True,
+       "missing_unmapped_source_operand_remains_UNKNOWN":True,
        "source_semantics_current_game_certified":False,
        "player_competitor_READY_proven":0,
        "player_dummy_errors_proven":0,
