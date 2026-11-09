@@ -1,0 +1,109 @@
+{
+  "schema": "ZrotOriginalSimCSelectSameCallIFPreEvidenceReceiptV1",
+  "date": "2026-11-09",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "engine": {
+    "producer": "tools/research/simc_original_select_if_pre_witness_v1.py",
+    "sha256": "9dc29736ec9dca355efb8cf29cb45102f448cedb840e5f6ec696178f2355f49d",
+    "adapter": "tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json",
+    "workflow": ".github/workflows/zrot-simc-original-same-call-if-pre-v1.yml",
+    "new_apl_parser": false,
+    "spec_semantics_in_generic_core": false,
+    "added_ready_calls": 0,
+    "added_original_if_success_calls": 0
+  },
+  "actual_original_native": {
+    "simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "same_binary_four_scenarios": true,
+    "seed": 31459,
+    "fight_seconds": 30,
+    "casings": [
+      {
+        "spec": "warrior_fury",
+        "case": "st",
+        "action_samples": 43,
+        "independent_IF_matches": 58,
+        "first_10s_IF_matches": 10,
+        "AST_known_but_native_if_not_evaluated": 236
+      },
+      {
+        "spec": "warrior_fury",
+        "case": "2t",
+        "action_samples": 44,
+        "independent_IF_matches": 2,
+        "first_10s_IF_matches": 2,
+        "AST_known_but_native_if_not_evaluated": 67
+      },
+      {
+        "spec": "mage_arcane",
+        "case": "st",
+        "action_samples": 30,
+        "independent_IF_matches": 0,
+        "first_10s_IF_matches": 0
+      },
+      {
+        "spec": "mage_arcane",
+        "case": "2t",
+        "action_samples": 32,
+        "independent_IF_matches": 0,
+        "first_10s_IF_matches": 0
+      }
+    ],
+    "json2_performed_sample_action_order_parity": {
+      "matched": 149,
+      "expected": 149,
+      "exact_time_name_id_ordinal": true
+    },
+    "same_call_original_source_if_ast_native_matches": 60,
+    "known_conflicts": 0,
+    "valid_original_selection_PRE_order_before_ready": true,
+    "same_original_call_id_and_action_object_pointer": true,
+    "previous_209_diff_run_IF_comparisons_not_joined": true
+  },
+  "validation": {
+    "run_id": 42573758563,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42573758563",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs_success": 3,
+    "jobs_total": 3,
+    "python_versions": [
+      "3.12",
+      "3.14"
+    ],
+    "new_CPP_compile_once": true,
+    "WCL_API_calls": 0,
+    "WoW_addon_tests": 0,
+    "source_cpp_patch_receipt_sha256": "ce911273cb9a382ae2e123437f4a94f6a59a1c93a6d3e4c461dea19a49e5e8e5",
+    "replay_sha256": {
+      "warrior_fury_st": "4454b21a9fa3699d6f06c3803880bde69352b7383be3ff042b4fe67d1ecc2ccd",
+      "warrior_fury_2t": "82824b9fb3732e641620cf9c917f954e89dc526777d01c9d0e1c777843ee756c",
+      "mage_arcane_st": "a17d90153789e853fc8baf067ac407964f906a45e5ff4740c1de4b9802530600",
+      "mage_arcane_2t": "c95f01fbbd29d3389ca57c86444808d0977fde4040142adc8191b4d1d33a7717"
+    },
+    "artifact": {
+      "id": 13654636939,
+      "name": "zrot-simc-original-same-call-source-if-pre-v1",
+      "zip_digest": "sha256:29fe90ae0433965513d79556e1d40199bc5e295d59ac0f48ef88acc56ebe27b4",
+      "expires_utc": "2026-11-16T06:37:52Z"
+    }
+  },
+  "boundary": {
+    "source_IF_true_or_false_for_proven_subset": true,
+    "source_IF_is_not_global_priority_proof": true,
+    "full_positive_READY_proven": 0,
+    "causal_JSON2_emitter_to_select_root_join": false,
+    "current_WoW_mechanics_truth_verified": false,
+    "opener_end": "UNKNOWN",
+    "independent_WCL_holdout": "NOT_RUN",
+    "target_dummy_mistakes": "UNKNOWN",
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "product_exact_next": "Source-pinned replay of original selected action rows with full condition state and competitor readiness, conditional opener end, 3+ target AoE; WCL blind independent lock and disjoint holdout only after SimC baseline.",
+  "session_exact_next": "Find a minimal same-run selected-root to JSON2 emitter causal linkage using actual object and ordering without inventing readiness; extend source PRE adapters only to high-impact Arcane buff/variable fields; build decision replay with UNKNOWN for unresolved competition."
+}

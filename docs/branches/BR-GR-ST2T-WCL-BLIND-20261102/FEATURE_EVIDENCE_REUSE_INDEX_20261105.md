@@ -427,3 +427,15 @@ Permanent receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SIMC_
 | Next SimC E2E | same original root call ID+signature+pre-stage operand on identical action selected/cast; no need for new general parser |
 
 Branch evidence receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SIMC_EXACT_IF_PRE_CAPTURE_FRONTIER_20261109.json`.
+
+## 2026-11-09 Same-run SimC source PRE→original IF proof (Fury)
+
+| Item | Result / reuse |
+|---|---|
+| `simc_original_select_if_pre_witness_v1.py` | **NEW original source-PRE consumer**, one action_ready()/IF evaluation, independent AST replay; SHA256 `9dc29736...` |
+| Fury source SpecAdapter | `zrot_fury_source_if_pre_adapter_v1.json`, original warrior buff construction Git source lock, generic field accessor |
+| Real same source native E2E | [#42573758563](https://github.com/degong2-code/zrotationhelper/actions/runs/42573758563) 3/3 PASS; 149 pristine/instrumented JSON2 parity; Fury ST58 +2T2 = **60 actual same-call original native IF/independent AST matches** |
+| SOURCE run gap | Prior 209 independent source AST/native comparisons from *different run* remain separate, not joined or counted in same-run proof |
+| Unobserved | selected-root→emitter unique causal identity, other readiness candidates, full READY, opener end, 3+ targets, WCL independent holdout; **UNKNOWN** |
+
+Canonical branch evidence receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SIMC_SAME_CALL_SOURCE_IF_PRE_20261109.json`.
