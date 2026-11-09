@@ -126,6 +126,7 @@ def compile_frontier(ledger:dict,parsed:dict,pin:dict,
             "ORIGINAL_COMPETITOR_CASE_COUNT_CHANGED")
     seen_occurrences=set()
     counts=Counter()
+    missing_if_symbols=Counter()
     result=[]
     for case in rows:
         at=case.get("original_cpp_at_simc_ms")
@@ -209,8 +210,14 @@ def compile_frontier(ledger:dict,parsed:dict,pin:dict,
                 reason="INDEPENDENT_LOCAL_NECESSARY_FALSE"
             else:
                 require(label==NATIVE_ONLY and witness is None and
-                        e["source_row_exclusion_condition_proven"] is False,
+                        e["source_row_exclusion_condition_proven"] is False and
+                        condition is not None,
                         "NATIVE_ONLY_COMPETITOR_PROMOTED_TO_SOURCE_FALSE")
+                # This original source-root IF was evaluated by Native, but
+                # source AST inputs at this exact root were not witnessed.
+                # List every SOURCE symbol as a capture upper bound, never
+                # assert all are independently necessary to prove IF false.
+                missing_if_symbols.update(condition["symbols"])
             proof=decide_candidate(source_identity,contract,facts,True)
             required=NOT_READY if label!=NATIVE_ONLY else UNKNOWN
             require(proof["decision"]==required and
@@ -231,6 +238,10 @@ def compile_frontier(ledger:dict,parsed:dict,pin:dict,
                 "source_original_PRE_minimal_witness":minimal,
                 "source_IF_expression":(
                     condition["source"] if condition is not None else None),
+                "missing_original_same_root_IF_source_operands_upper_bound":
+                    (condition["symbols"] if label==NATIVE_ONLY else []),
+                "missing_symbol_list_is_not_proof_each_is_necessary":
+                    True,
                 "global_physical_ability_NOT_READY":"UNKNOWN",
                 "dummy_expected_action":"UNKNOWN",
                 "proof":proof,
@@ -321,6 +332,10 @@ def compile_frontier(ledger:dict,parsed:dict,pin:dict,
             "INDEPENDENT_LOCAL_NECESSARY_FALSE"],
         "original_native_POST_ONLY_UNKNOWN_counts":counts[
             "ORIGINAL_NATIVE_POST_ONLY"],
+        "unreconstructed_source_IF_symbol_occurrences_upper_bound":
+            dict(sorted(missing_if_symbols.items(),
+                        key=lambda p:(-p[1],p[0]))),
+        "missing_symbol_counts_are_NOT_needed_CAPTURE_claims":True,
         "source_only_case_frontiers":result,
         "source_row_local_NOT_READY_not_global_ability_unavailability":True,
         "source_original_single_list_not_entire_APL_control_graph":True,
