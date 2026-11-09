@@ -38,6 +38,7 @@ jobs:
           assert x['synthetic_class_count']==2
           assert x['negative']>=16
           assert x['uncertain_power_divisor_sensitivity_visible'] is True
+          assert x['missing_unmapped_source_operand_remains_UNKNOWN'] is True
           assert x['source_semantics_current_game_certified'] is False
           assert x['player_competitor_READY_proven']==x['player_dummy_errors_proven']==0
           assert x['live_WCL_API_calls']==0
@@ -223,6 +224,9 @@ jobs:
                  'hypothetical_condition_states':
                      result['source_conditional_scenario_counts'],
                  'exploratory_operand_usage':result['source_operand_scenario_usage_counts'],
+                 'required_source_IF_operands':result['required_source_IF_operand_occurrence_counts'],
+                 'unmapped_source_IF_operands':result['unmapped_source_IF_operand_occurrence_counts'],
+                 'unobserved_source_IF_operand_scenarios':result['unobserved_source_IF_operand_scenario_counts'],
                  'independently_certified_wcl_if':0,
                  'ready_or_dummy_errors':0
               }
