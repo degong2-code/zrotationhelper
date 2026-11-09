@@ -1,0 +1,121 @@
+name: zrot-general-rotation-research-delivery-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_research_delivery_v1.py
+      - .github/workflows/zrot-general-rotation-research-delivery-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  synthetic:
+    name: Generic research model translator Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Safe no-argument research compiler and fail-closed regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_research_delivery_v1.py
+          python -B tools/research/general_rotation_research_delivery_v1.py \
+            > /tmp/gr-product-delivery-synthetic.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/gr-product-delivery-synthetic.json'))
+          assert r['schema']=='ZrotGeneralRotationSourceEvidenceToTrainerResearchIRV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=16
+          assert r['specializations_unrelated']==2
+          assert r['generic_core_has_no_class_or_spell_branches'] is True
+          assert r['independent_full_READY_proven']==0
+          assert r['WCL_API_calls']==0
+          print('GENERIC_GENERAL_ROTATION_RESEARCH_DELIVERY_OFFLINE_PASS')
+          PY
+          sha256sum tools/research/general_rotation_research_delivery_v1.py
+
+  real-archived-original-source:
+    name: Existing two-class four-target actual original SimC E2E model research delivery
+    needs: [synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-generic-simc-source-to-conditional-opener-ir-v1
+          run-id: 42195342553
+          github-token: ${{ github.token }}
+          path: /tmp/gr-pinned-original-source-E2E
+      - name: Reuse pinned 172 APL row and 262 source return receipts, no SimC rebuild
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC=/tmp/gr-pinned-original-source-E2E/zrot-generic-simc-source-to-opener-ir.json
+          test -s "$SRC"
+          echo "bd391e15e9cc7828c6b50714cfe64852dbdb8e42985355f0f24b9f748911a6b2  $SRC" | sha256sum -c -
+          python -B tools/research/general_rotation_research_delivery_v1.py \
+            --source-e2e "$SRC" \
+            --expected-sha256 bd391e15e9cc7828c6b50714cfe64852dbdb8e42985355f0f24b9f748911a6b2 \
+            --out /tmp/zrot-general-rotation-research-delivery.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/zrot-general-rotation-research-delivery.json'))
+          assert r['schema']=='ZrotGeneralRotationSourceEvidenceToTrainerResearchIRV1'
+          assert r['source_model_count']==2
+          assert r['distinct_classes']==2
+          assert r['source_IF_ELSE_rows']==172
+          assert r['original_SimC_source_returns_not_player_casts']==262
+          assert r['source_target_case_count']==4
+          assert r['product_expected_casts_verified']==0
+          assert r['complete_READY_proven']==0
+          assert r['dummy_wrong_action_flags']==0
+          assert r['WCL_API_calls']==0 and r['MAIN_promoted'] is False
+          expected={'warrior_fury':{'st':100,'2t':90},
+                    'mage_arcane':{'st':35,'2t':37}}
+          for model in r['research_models']:
+              key=model['source_spec_key']
+              assert key in expected
+              assert model['post_opener_IF_ELSE_priority']['entry_list']=='default'
+              assert model['opener_source_hypothesis']['actual_opener_cast_order']=='UNKNOWN'
+              assert model['user_practice_expected_action']=='UNKNOWN'
+              assert all(x['independent_native_READINESS']=='UNKNOWN'
+                         for l in model['post_opener_IF_ELSE_priority']['lists'].values()
+                         for x in l)
+              for case,count in expected[key].items():
+                  c=model['observed_original_SimC_selection_cases'][case]
+                  assert c['source_selection_count']==count
+                  assert c['actual_first_player_damage_cast']=='UNKNOWN'
+                  assert c['opener_end_transition']=='UNKNOWN'
+                  assert c['dummy_mistake_verdict']=='UNKNOWN'
+                  print('PRODUCT_GENERAL_ROTATION_SOURCE_CASE_PASS',key,case,
+                        'returns',count,'early_refs',c['initial_source_selection_count'])
+          print('ACTUAL_SOURCE_GENERAL_ROTATION_RESEARCH_DELIVERY_PASS',
+                r['source_IF_ELSE_rows'],r['original_SimC_source_returns_not_player_casts'])
+          PY
+          sha256sum /tmp/zrot-general-rotation-research-delivery.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-general-rotation-source-evidence-trainer-research-v1
+          path: /tmp/zrot-general-rotation-research-delivery.json
+          if-no-files-found: error
+          retention-days: 7
