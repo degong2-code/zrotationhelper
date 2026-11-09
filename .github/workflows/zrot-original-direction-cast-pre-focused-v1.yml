@@ -1,0 +1,196 @@
+name: zrot-original-source-direction-cast-pre-focused-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_native_direction_cast_pre_probe_v1.py
+      - .github/workflows/zrot-original-direction-cast-pre-focused-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-probe-contract:
+    name: Passive Source-PRE Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and self-test zero-additional-virtual-call source probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_native_direction_cast_pre_probe_v1.py
+          python -B tools/research/simc_native_direction_cast_pre_probe_v1.py > /tmp/source-pre-probe-synthetic.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/source-pre-probe-synthetic.json'))
+          assert r['schema']=='ZrotSourcePinnedOriginalDirectionCastPREProbeV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=12
+          assert r['full_positive_READY']==0 and r['WCL_API_calls']==0
+          print('SOURCE_DIRECTION_CAST_FOCUSED_SYNTHETIC_PASS',r['checks'])
+          PY
+          sha256sum tools/research/simc_native_direction_cast_pre_probe_v1.py
+
+  focused-real-native:
+    name: One-case pinned Fury source PRE nonperturbation
+    needs: [source-probe-contract]
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install ccache (per pinned source)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: simc-ubuntu-gcc-b522cded8c26b97dac03fdf56e57a03ec7e8faa6-v1
+      - name: Original native SimC build and pristine LightMovement ST capture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = "b522cded8c26b97dac03fdf56e57a03ec7e8faa6"
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-focused-source-pre-build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_GUI=OFF -DBUILD_TESTING=OFF -DSC_NO_NETWORKING=ON \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-focused-source-pre-build --target simc --parallel 3
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0,"tools/research")
+          from simc_apl_semantic_ir_v2 import git_blob
+          src=Path("simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc").read_bytes()
+          assert git_blob(src)=="3225992ed5b754ad5d61e8b785d9d859f1eed1be"
+          assert b"fight_style=" not in src and b"raid_events=" not in src
+          Path("/tmp/zrot-focused-light-movement.simc").write_bytes(
+              src+b"\nfight_style=LightMovement\n")
+          PY
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile /tmp/zrot-focused-light-movement.simc \
+            --spec fury --simc-bin /tmp/zrot-focused-source-pre-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/original-focused-move-st --timeout 180
+      - name: Extend existing pinned Warrior producer with passive PRE fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_warrior_spec_ready_instrument_v1.py \
+            --simc-root simc-upstream \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --expected-profile-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
+            --receipt /tmp/focused-warrior-original-instrument.json
+          python -B tools/research/simc_native_direction_cast_pre_probe_v1.py \
+            --simc-root simc-upstream \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --expected-profile-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
+            --receipt /tmp/focused-source-direction-cast-patch.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/focused-source-direction-cast-patch.json'))
+          assert p['schema']=='ZrotSourcePinnedOriginalDirectionCastPREProbeV1'
+          assert p['original_ready_method_call_count_unchanged'] is True
+          assert p['new_virtual_or_target_calls']==0
+          assert p['original_NATIVE_and_pristine_behavior_parity']=='NOT_YET_TESTED'
+          print('PINNED_ORIGINAL_PASSIVE_PRODUCER_PATCH_OK')
+          PY
+      - name: Rebuild modified original source once; capture same seed and same general movement
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake --build /tmp/zrot-focused-source-pre-build --target simc --parallel 3
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile /tmp/zrot-focused-light-movement.simc \
+            --spec fury --simc-bin /tmp/zrot-focused-source-pre-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/instrumented-focused-move-st --timeout 180
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          original=extract_json_sequence(Path('/tmp/original-focused-move-st'))
+          observed=extract_json_sequence(Path('/tmp/instrumented-focused-move-st'))
+          assert original['status']=='SEQUENCE_SNAPSHOTS_EXTRACTED'
+          assert original['source_apl_sha256']==observed['source_apl_sha256']
+          assert original['source_profile_sha256']==observed['source_profile_sha256']
+          assert original['combat_sequence']==observed['combat_sequence']
+          assert original['precombat_sequence']==observed['precombat_sequence']
+          record={
+              'schema':'ZrotFocusedOriginalSourcePRESequenceNonperturbationV1',
+              'original_profile_and_APL_identical':True,
+              'precombat_cast_sequence_equal':True,
+              'combat_cast_sequence_equal':True,
+              'original_combat_count':original['combat_count'],
+              'instrumented_combat_count':observed['combat_count'],
+              'full_READY_proven':False,
+              'WCL_calls':0,
+          }
+          Path('/tmp/focused-source-sequence-parity.json').write_text(
+              json.dumps(record,sort_keys=True,indent=2)+'\n')
+          print('ORIGINAL_SIMC_FURY_PRISTINE_INSTRUMENTED_MOVING_ST_PARITY_PASS',
+                record['original_combat_count'])
+          PY
+      - name: Source exact PRE audit for chosen Rampage; do not infer full READY
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_native_direction_cast_pre_probe_v1.py \
+            --audit-log /tmp/instrumented-focused-move-st/simc_native_log.txt \
+            --focus-time-ms 20031 --focus-list slayer --focus-ordinal 7 \
+            --focus-action rampage \
+            --out /tmp/focused-source-direction-cast-real-audit.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/focused-source-direction-cast-real-audit.json'))
+          assert r['schema']=='ZrotSourcePinnedOriginalDirectionCastPREProbeV1'
+          assert r['original_pre_attempts_with_fields']>0
+          assert r['scope']=='SIMC_ORIGINAL_METHOD_PRE'
+          focused=r['one_exact_source_key']
+          assert focused['source_key']==[20031,'slayer',7,'rampage']
+          fact=focused['independent_base_subpredicates']
+          assert fact['physical_skill_READY']=='UNKNOWN'
+          assert fact['MOVEMENT_full_route']=='UNKNOWN'
+          assert fact['CAST_GCD_full_route']=='UNKNOWN'
+          assert r['full_positive_READY_proven']==0
+          assert r['dummy_error_permitted'] is False
+          assert r['WCL_API_calls']==0
+          print('ACTUAL_FURY_RAMPAGE_SOURCE_DIRECTION_CAST_PRE_CAPTURE_PASS')
+          print('SCOPE_ONLY_FIELD_TRUTHS',json.dumps(fact,sort_keys=True))
+          PY
+          sha256sum /tmp/focused-source-direction-cast-real-audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-focused-original-source-direction-cast-pre-evidence
+          path: |
+            /tmp/focused-source-direction-cast-patch.json
+            /tmp/focused-source-direction-cast-real-audit.json
+            /tmp/focused-source-sequence-parity.json
+          if-no-files-found: warn
+          retention-days: 7
