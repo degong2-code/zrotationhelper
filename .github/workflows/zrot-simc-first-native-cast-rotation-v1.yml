@@ -1,0 +1,203 @@
+name: zrot-simc-first-native-cast-rotation-v1
+
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_simc_native_cast_delivery_v1.py
+      - .github/workflows/zrot-simc-first-native-cast-rotation-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-cast-bridge:
+    name: Generic actual SimC action-to-source IR Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and synthetic fail-closed cross-spec action-to-APL bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_simc_native_cast_delivery_v1.py
+          python -B tools/research/general_rotation_simc_native_cast_delivery_v1.py \
+            > /tmp/gr-cast-bridge-synth.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-cast-bridge-synth.json'))
+          assert x['schema']=='ZrotSimCNativeObservedCastGeneralRotationResearchV1'
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC' and x['checks']>=23
+          assert x['unrelated_specs']==2
+          assert x['source_APL_rows_reparsed'] is False
+          assert x['same_timestamp_not_strict_PRE'] is True
+          assert x['cast_source_row_unique_mapping_claims']==0
+          assert x['target_dummy_mistakes_proven']==0 and x['WCL_API_calls']==0
+          print('ACTUAL_NATIVE_CAST_SOURCE_PRIORITY_GENERIC_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_simc_native_cast_delivery_v1.py
+
+  actual-original-simc:
+    name: One pristine official SimC C++ binary two specs ST and 2T actual JSON2 action opener
+    needs: [generic-cast-bridge]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-general-rotation-source-evidence-trainer-research-v1
+          run-id: 42561334139
+          github-token: ${{ github.token }}
+          path: /tmp/gr-original-source-program
+      - name: Pin original SimC and original reusable General Rotation IF ELSE source model
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          SRC=/tmp/gr-original-source-program/zrot-general-rotation-research-delivery.json
+          test -s "$SRC"
+          echo "44fdfbe9bb41048bcda68150e9c5ae6fef1fe1e2cbbfec4676759c9c627681a1  $SRC" | sha256sum -c -
+          python - <<'PY'
+          from pathlib import Path
+          from hashlib import sha1
+          for name,blob in (
+              ('MID2_Warrior_Fury.simc','3225992ed5b754ad5d61e8b785d9d859f1eed1be'),
+              ('MID2_Mage_Arcane.simc','8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f')):
+              b=(Path('simc-upstream/profiles/MID2')/name).read_bytes()
+              assert sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()==blob
+          print('OFFICIAL_PINNED_WARRIOR_AND_MAGE_PROFILES_PASS')
+          PY
+      - name: Compile pristine official Native once and capture four target cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/gr-simc-casts-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/gr-simc-casts-build --target simc --parallel 3
+          test -x /tmp/gr-simc-casts-build/simc
+          for line in "fury:warrior_fury:MID2_Warrior_Fury.simc" "arcane:mage_arcane:MID2_Mage_Arcane.simc"; do
+            IFS=: read -r actor spec profile <<< "$line"
+            for count in 1 2; do
+              case_name=st
+              if [ "$count" = 2 ]; then case_name=2t; fi
+              python -B tools/research/simc_native_reference_capture.py \
+                --profile "simc-upstream/profiles/MID2/$profile" --spec "$actor" \
+                --simc-bin /tmp/gr-simc-casts-build/simc \
+                --targets "$count" --seed 31459 --fight-seconds 30 \
+                --out-dir "/tmp/gr-original-action-captures/$spec-$case_name" \
+                --timeout 180
+            done
+          done
+      - name: Verify four actual source and cast receipts then build General Rotation research IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          cases=[]
+          for key,actor,p,blob in (
+              ('warrior_fury','fury','MID2_Warrior_Fury.simc',
+               '3225992ed5b754ad5d61e8b785d9d859f1eed1be'),
+              ('mage_arcane','arcane','MID2_Mage_Arcane.simc',
+               '8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f')):
+              profile=Path('simc-upstream/profiles/MID2')/p
+              for case,target in [('st',1),('2t',2)]:
+                  ref=Path('/tmp/gr-original-action-captures')/(key+'-'+case)
+                  meta=json.loads((ref/'simc_reference_receipt.json').read_text())
+                  assert meta['simc_spec']==actor
+                  assert meta['controlled_seed']==31459
+                  assert meta['controlled_fight_seconds']==30
+                  assert meta['controlled_target_count']==target
+                  cases.append({
+                      'source_spec_key':key,'source_case_key':case,
+                      'target_count':target,'source_profile_git_blob':blob,
+                      'official_profile':str(profile),
+                      'reference_dir':str(ref),'simc_actor_spec':actor,
+                      'profile_sha256':meta['profile_sha256'],
+                      'effective_apl_sha256':meta['effective_apl_sha256']})
+          manifest={
+              'schema':'ZrotSimCCastGeneralRotationCaseManifestV1',
+              'product_policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+              'cases':cases}
+          Path('/tmp/gr-actual-cast-case-manifest.json').write_text(
+              json.dumps(manifest,sort_keys=True,indent=2)+'\n')
+          PY
+          python -B tools/research/general_rotation_simc_native_cast_delivery_v1.py \
+            --source-research /tmp/gr-original-source-program/zrot-general-rotation-research-delivery.json \
+            --expected-source-sha256 44fdfbe9bb41048bcda68150e9c5ae6fef1fe1e2cbbfec4676759c9c627681a1 \
+            --case-manifest /tmp/gr-actual-cast-case-manifest.json \
+            --window-ms 10000 \
+            --out /tmp/gr-simc-original-performed-action-and-condition-model.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-simc-original-performed-action-and-condition-model.json'))
+          assert x['schema']=='ZrotSimCNativeObservedCastGeneralRotationResearchV1'
+          assert x['source_model_count']==2 and x['target_count_cases']==4
+          assert x['original_source_choice_count_not_casts']==262
+          assert x['actual_simc_JSON2_observed_action_count']>30
+          assert x['full_ready_proven']==0
+          assert x['opener_true_end_and_competing_READY']=='UNKNOWN'
+          assert x['post_opener_conditioned_source_program_complete'] is True
+          assert x['target_dummy_error_verdict']=='UNKNOWN'
+          assert x['WCL_API_calls']==0 and x['MAIN_promoted'] is False
+          for c in x['research_cases']:
+              assert c['simc_JSON2_observed_combat_action_count']>0
+              assert c['first_real_player_cast']=='UNKNOWN'
+              assert c['observed_first_window_actions']
+              assert c['source_APL_priority_model']
+              assert c['opener_end_transition']=='UNKNOWN'
+              print('OBSERVED_SIMC_FIRST_ACTIONS',c['source_spec_key'],c['case'],
+                    'targets',c['target_count'],
+                    'sample_count',c['simc_JSON2_observed_combat_action_count'],
+                    'first_10s',json.dumps([
+                        {'t':a['at_simc_ms'],'action':a['action_token'],
+                         'id':a['numeric_spell_id'],
+                         'possible_source_rows':len(a[
+                             'potential_APL_source_rows_by_action_name_ONLY'])}
+                        for a in c['observed_first_window_actions'][:14]]))
+          print('SIMC_SOURCE_TO_ACTUAL_ACTION_OPENING_MODEL_PASS')
+          PY
+          sha256sum /tmp/gr-actual-cast-case-manifest.json \
+            /tmp/gr-simc-original-performed-action-and-condition-model.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-general-rotation-first-real-cast-and-source-ir
+          path: |
+            /tmp/gr-actual-cast-case-manifest.json
+            /tmp/gr-simc-original-performed-action-and-condition-model.json
+            /tmp/gr-original-action-captures/**/simc_native_sequence.json
+            /tmp/gr-original-action-captures/**/simc_reference_receipt.json
+            /tmp/gr-original-action-captures/**/simc_effective_actions.simc
+          if-no-files-found: warn
+          retention-days: 7
