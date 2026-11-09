@@ -1,0 +1,111 @@
+name: zrot-general-rotation-condition-ir-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_condition_ir_v1.py
+      - tools/research/general_rotation_equipment_source_fixture_v1.py
+      - .github/workflows/zrot-general-rotation-condition-ir-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generic-conditional-ir:
+    name: Source-neutral condition IR Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile, compare different spell names, enforce UNKNOWN/provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_condition_ir_v1.py \
+            tools/research/general_rotation_equipment_source_fixture_v1.py
+          python -B tools/research/general_rotation_condition_ir_v1.py \
+            > /tmp/gr-generic-condition-ir-synthetic.json
+          python -B tools/research/general_rotation_equipment_source_fixture_v1.py \
+            > /tmp/gr-equip-source-fixture-synthetic.json
+          python - <<'PY'
+          import json
+          g=json.load(open('/tmp/gr-generic-condition-ir-synthetic.json'))
+          f=json.load(open('/tmp/gr-equip-source-fixture-synthetic.json'))
+          assert g['schema']=='ZrotGeneralRotationSourceBoundConditionalEligibilityIRV1'
+          assert g['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert g['checks']>=20
+          assert g['different_opaque_ability_names'] is True
+          assert g['weapon_slot_subclass_conditions_declarative'] is True
+          assert g['unverified_evidence_never_skips_or_selects_spells'] is True
+          assert g['full_positive_READY']==0 and g['WCL_API_calls']==0
+          assert f['schema']=='ZrotWarriorSourcePinnedEquipmentSpecAdapterFixtureV1'
+          assert f['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert f['actual_official_CPP_files_read'] is False
+          assert f['full_positive_READY']==0
+          print('GENERIC_CONDITIONAL_IR_SYNTHETIC_CROSS_SPEC_FAIL_CLOSED_PASS')
+          PY
+          sha256sum tools/research/general_rotation_condition_ir_v1.py \
+            tools/research/general_rotation_equipment_source_fixture_v1.py
+
+  official-source-equipment-guard:
+    name: Pin original Warrior source guard without Native rebuild
+    needs: [generic-conditional-ir]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Confirm actual C++ ready guard, original APL row pin, UNKNOWN runtime equipment
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = \
+            "b522cded8c26b97dac03fdf56e57a03ec7e8faa6"
+          python -B tools/research/general_rotation_equipment_source_fixture_v1.py \
+            --official-warrior-source simc-upstream/engine/class_modules/sc_warrior.cpp \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --out /tmp/gr-original-equipment-source-bound-rule.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-original-equipment-source-bound-rule.json'))
+          assert x['schema']=='ZrotWarriorSourcePinnedEquipmentSpecAdapterFixtureV1'
+          assert x['source_guard_verified_against_original_cpp'] is True
+          assert x['weapon_requirement_equivalence']=='MAIN_HAND_PRESENT_AND_OFF_HAND_PRESENT'
+          assert x['single_two_handed_weapon_requirement_proven'] is False
+          assert x['original_source_equipment_field_observations']==0
+          assert x['original_runtime_equipment_eligibility']=='UNKNOWN'
+          assert x['original_virtual_dispatch_or_full_ready']=='UNKNOWN'
+          assert x['tested_generic_rule']['hypothesis']['tri_value']=='UNKNOWN'
+          assert x['tested_generic_rule']['open_world_candidate_proof']=='UNKNOWN'
+          assert x['actual_WCL_or_dummy_practice_verdict'] is False
+          assert x['MAIN_promoted'] is False
+          print('ACTUAL_WARRIOR_SOURCE_PINNED_DUAL_WEAPON_REQUIREMENT_STATIC_VALIDATION_PASS')
+          PY
+          sha256sum /tmp/gr-original-equipment-source-bound-rule.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-general-rotation-equipment-source-rule-static-audit
+          path: /tmp/gr-original-equipment-source-bound-rule.json
+          if-no-files-found: error
+          retention-days: 7
