@@ -315,3 +315,13 @@ Evidence reuse: preserve existing source JSON/Fury IR/previous A-B and method-en
 | Official source truth for stationary vs directionality | Pinned action.cpp `399ecd94...`, player.cpp `88e03a01...`, player.hpp `f2648bec...` | **REUSE** source semantics; **UNKNOWN** actual runtime movement_directionality and player.current.movement_direction at same PRE. Never infer from `is_moving()==0` alone. |
 
 Full branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_PRE_MOVEMENT_CAST_SUBGATES_20261109.json`.
+
+## 2026-11-09 실제 신규 방향·시전 PRE 생산 및 독립 GateContract E2E
+
+| 코드/증거 | 현재 정확도 | REUSE / EXTEND / UNKNOWN |
+|---|---|---|
+| `simc_native_direction_cast_pre_probe_v1.py` / CI #42540080769 | 실제 C++ pristine↔instrumented 이동 ST **46 casts exact parity**; 원본 PRE `action_dir=0, actor_dir=0, usable_casting=0, gcd_ready_ms=20027` at Rampage 20031ms | **EXTEND** 기존 Warrior source marker patch에 direct-field 1개; 원본 C++ 단일 action_ready 호출 불변. **UNKNOWN** 전체 virtual route. |
+| `general_rotation_original_source_partial_gate_consumer_v1.py` / CI #42541015084 | SHA 고정된 real source JSON을 독립 재계산하고 2개 typed 독립 true subgates 생성; open-world `READY=UNKNOWN`, 3/3 PASS | **REUSE** Generic `GateContract`/`Fact`/APL source row pin. **UNKNOWN** FULL MOVEMENT, CAST_GCD, eligibility, spec override, full READY. |
+| `EXACT Native produced artifact` / source audit source marker | producer audit SHA `c1cec740...`, parity `b01edea8...`, consumer `9d756607...`, artifacts expiry 2026-11-16 | **REUSE** locked scoped receipt; **NOT** prerequisite for new source collection or cross-specialization support. Routine push tests remain offline synthetic; optional manual artifact validation. |
+
+Permanent branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_FURY_ORIGINAL_SOURCE_MOVEMENT_CAST_REAL_E2E_20261109.json`.

@@ -1,0 +1,119 @@
+{
+  "schema": "ZrotGeneralRotationActualSimcSourceDirectionCastCrossCheckReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "date": "2026-11-09",
+  "source_revision": "simulationcraft/simc@b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_profile_git_blob_sha1": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+  "source_apl_action": {
+    "case": "moving_st",
+    "time_ms": 20031,
+    "list": "slayer",
+    "source_index_zero_based": 6,
+    "native_ordinal": 7,
+    "action": "rampage",
+    "source_row_sha256": "217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2",
+    "occurrence": 0
+  },
+  "producer": {
+    "code": "tools/research/simc_native_direction_cast_pre_probe_v1.py",
+    "code_git_blob_sha1": "69eecf73ced1711c4d286f0dd1bdd558afe8b47e",
+    "run_id": 42540080769,
+    "head_sha": "3be53644e856dc0535a65fe002150d2f5009fcc9",
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42540080769",
+    "run_conclusion": "success",
+    "jobs_success": 3,
+    "jobs_total": 3,
+    "source_original_CPP_compiled": true,
+    "profile": "Fury LightMovement single target, seed 31459, fight seconds 30",
+    "pristine_instrumented_combat_casts": 46,
+    "identical_combat_and_precombat": true,
+    "original_virtual_method_calls_added": 0,
+    "artifacts": {
+      "id": 13640508844,
+      "zip_digest": "sha256:9cc298f8d360b451d6e5b1d7083c58a69310281ee9981e6e08d1f8d36ca09f2d",
+      "expires_utc": "2026-11-16T00:31:40Z"
+    },
+    "sha256": {
+      "source_audit_json": "c1cec740870610cf039cc953be3c9ec183c99828ba971fe9781593ba458620ec",
+      "source_patch_json": "ab7bfd505194f691ea3338bdf1fb1bda8f1eda8dfa6051b9db23f7fd261ade7f",
+      "pristine_instrumented_parity_json": "b01edea8a309ed3833b5dee8bba92fbcbcfdc4c610efdee1b92e043c44edd4ce"
+    }
+  },
+  "actual_original_source_PRE_values": {
+    "action_direction": 0,
+    "actor_direction": 0,
+    "actor_is_moving": 0,
+    "usable_while_casting": 0,
+    "actor_executing": 0,
+    "actor_channeling": 0,
+    "gcd_ready_ms": 20027,
+    "time_ms": 20031,
+    "movement_base_directionality_numeric": true,
+    "usable_while_casting_base_branch_bypassed": true
+  },
+  "independent_consumer": {
+    "code": "tools/research/general_rotation_original_source_partial_gate_consumer_v1.py",
+    "code_git_blob_sha1": "af040b94c0e6a121f99bf745a7f717c904fe045c",
+    "run_id": 42541015084,
+    "head_sha": "b27aa1401ae4af2c61e2f8bb9d8d8d4e0b299fcb",
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42541015084",
+    "run_conclusion": "success",
+    "jobs_success": 3,
+    "jobs_total": 3,
+    "python_synthetic": [
+      "3.12",
+      "3.14"
+    ],
+    "real_artifact_downloaded_from_producer_run": true,
+    "real_typed_proven_subgates": [
+      "MOVEMENT_DIRECTIONALITY_BASE_CLEAR",
+      "CAST_BASE_WHILE_CASTING_BRANCH_BYPASS"
+    ],
+    "typed_subgate_basis": "INDEPENDENT_SOURCE_REPLAY",
+    "typed_subgate_capture": "SIMC_ORIGINAL_METHOD_PRE",
+    "typed_subgate_count": 2,
+    "full_positive_READY": 0,
+    "selected_candidate_status": "UNKNOWN",
+    "sha256_output_json": "9d756607984bea463f880a33fc36af58fa41015a8240b1a335580cc6f0d880a8",
+    "artifacts": {
+      "id": 13641342339,
+      "zip_digest": "sha256:3a808b8eaca11b570e41476c36b7a0ce6bcd23a5248a4d1effda1c55a2d54e34",
+      "expires_utc": "2026-11-16T00:35:55Z"
+    },
+    "routine_push_real_artifact_download": false,
+    "manual_replay_when_available": true
+  },
+  "old_Fury_source_proof_ledger_preserved": {
+    "prior_original_native_attempts": 5408,
+    "prior_original_if_evaluations": 953,
+    "prior_focused_source_rows": 12,
+    "prior_focused_NOT_READY": 9,
+    "prior_focused_UNKNOWN": 3,
+    "same_original_fixture_claimed_for_new_run": false
+  },
+  "remaining_parent_gates": [
+    "MOVEMENT",
+    "CAST_GCD",
+    "NECESSARY_ELIGIBILITY",
+    "SPEC_OVERRIDE_TOTAL",
+    "BASE_VIRTUAL_COMPLETE"
+  ],
+  "next_source_obligation": {
+    "original_warrior_cpp_git_blob_sha1": "38ee3dd0d5943eb9227ec55aefb21e7d47244f96",
+    "rampage_ready_source_lines": [
+      5809,
+      5816
+    ],
+    "unverified": "Dynamic both-hand weapon presence and full subclass/replacement route, target and scheduler readiness, Arcane generalization"
+  },
+  "full_general_rotation_opener_proven": false,
+  "WCL_blind_holdout_proven": false,
+  "WCL_API_calls": 0,
+  "actual_live_WoW_client_tested": false,
+  "user_practice_error_permitted": false,
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
