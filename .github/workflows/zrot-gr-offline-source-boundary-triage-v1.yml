@@ -119,8 +119,12 @@ jobs:
           assert v['first_window_combat_event_count']>0
           print('GENERIC_SOURCE_BOUNDARY_REAL_203_OF_203_REPLAY_PASS')
           print('EMISSION_PHASES',json.dumps(v['emitter_phase_counts'],sort_keys=True))
+          print('PHASE_BY_ROOT_WITNESS',json.dumps(v['emitter_phase_identity_counts'],sort_keys=True))
           print('SOURCE_CONDITION_CLASSES',json.dumps(v['typed_source_IF_boundary_counts'],sort_keys=True))
           print('FIRST_WINDOW_COMBAT_EVENTS',v['first_window_combat_event_count'])
+          print('FIRST_WINDOW_MISSING_OPERANDS',json.dumps(v['first_window_missing_IF_symbol_frequency'][:15],sort_keys=True))
+          for item in v['first_window_source_row_capture_focus'][:10]:
+              print('FIRST_WINDOW_FOCUS_ROW',json.dumps(item,sort_keys=True))
           for item in v['first_window_capture_worklist'][:12]:
               print('PRIORITIZED_EVIDENCE_GAP',json.dumps(item,sort_keys=True))
           PY
