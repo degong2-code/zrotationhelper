@@ -1,5 +1,20 @@
 # zRotationHelper — General Rotation / Dummy Trainer current status (2026-11-09)
 
+## 2026-11-09 Engine-first milestone — generic Source Hypothesis + exact IF/ELSE evidence + open-world READY proof integrated
+
+**Primary product goal self-audit:** General Rotation reusable engine implementation, **not accumulating specialist source-probe receipts or completing isolated tests**. This milestone builds a reusable integration module from existing source APL full graph, exact native same-call IF replay, and open-world READY/priority evaluator. No spell-specific logic in generic code, no C++ rebuild or WCL API. Source-selected IF is occurrence-specific; no blanket per-spell TRUE rule.
+
+**Actual GitHub Actions:** [#42594344188](https://github.com/degong2-code/zrotationhelper/actions/runs/42594344188) **3/3 PASS** (Py3.12/3.14 synthetic two classes + 9 negative controls, real pinned prior four cases). Legacy original action parity 149/149 and selected→JSON2 147/147 inherited and SHA-verified from pinned #42589894203. Compiled real **147 exact selected original source decision IR occurrences** with **49 source IF TRUE**, **44 IF UNKNOWN missing PRE**, **54 no explicit IF**; two alternative COMBAT execution paths UNKNOWN; per-case complete SimC APL list/control graph including precombat preserved as **source hypothesis**. Output per-case IR digests and portfolio: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_CONDITIONAL_IR_49_PROOF_BRIDGE_20261109.json`.
+
+**Strict safety:** every selected row has READY=UNKNOWN, source-priority=UNKNOWN, WCL independent holdout NOT_RUN, dummy expected action/wrong cast UNKNOWN; first 10 seconds only a sample window, opener end UNKNOWN. Source APL candidate ordering is not certified simultaneously-ready or a validated General Rotation priority. `evaluate_priority` and `decide_candidate` from existing generic proof engine do not let selected IF imply READY.
+
+**Code:** `tools/research/general_rotation_original_source_evidence_bridge_v1.py` SHA256 `eb49a774910021e8ce8d5a2994ff7c9db673db561b989cb210a476de50264211` plus workflow `.github/workflows/zrot-gr-original-source-evidence-bridge-v1.yml`; artifact #13662519082 (expires 2026-11-16 UTC), full research result portfolio digest `1a4df6f85503a190325541bf0ffac2424b3cc08ef8d57971af626b900624185f`.
+
+**Correction transparency:** initial run #42594168648 failed from incorrect GitHub Actions artifact root path. Fixed only the workflow path; final #42594344188 verified all four source cases. Do not mark the failed run as PASS.
+
+**Exact Next:** reuse compiled source IR and attach WCL blind independent candidate/strict PRE states without injecting SimC answers pre-lock. Promote General Rotation rules only after readiness/competing decisions and holdout. Do not initiate another broad SimC build merely to raise IF evidence count; 44 missing source IF remain UNKNOWN. MAIN, Gen5 pointer, FROZEN unchanged.
+
+
 ## 2026-11-09 Gen5 continuation — Original SELECT-PRE 12-field SpecAdapter expansion, 49 source IF matches
 
 **Original SimC native E2E:** [Actions #42589894203](https://github.com/degong2-code/zrotationhelper/actions/runs/42589894203), **3/3 SUCCESS** (Python 3.12/3.14 static synthetic + one official original C++ build + four Fury/Arcane ST/2T real source cases). Previous [gap planner #42588693756](https://github.com/degong2-code/zrotationhelper/actions/runs/42588693756) 3/3 PASS, zero C++ build, ranked 78 missing PRE actual selected IF by source operand demand.

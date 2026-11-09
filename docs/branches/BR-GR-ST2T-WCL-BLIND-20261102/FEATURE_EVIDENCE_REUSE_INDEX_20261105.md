@@ -518,3 +518,16 @@ Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL
 | Alternative off-GCD combat | two `touch_of_the_magi` records, pinned APL row has `use_off_gcd=1` | **candidate only**; original execution cause not yet proven |
 
 Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_PRE_12_FIELD_ORIGINAL_IF_SUCCESSOR_20261109.json`. Product scope, unknown readiness, WCL blind and dummy training safety not promoted. Future: typed General Rotation source hypothesis IR from 49; selectively close 44 only by impact; independent WCL candidate and holdout.
+
+## Reusable source-to-decision General Rotation IR engine — 2026-11-09
+
+| Component | Real status / role | Reuse decision |
+| --- | --- | --- |
+| `simc_apl_semantic_ir_v2.py` and `general_rotation_source_hypothesis_ir_v1.py` | Original exact source profile full APL control graph, conditions, source line hashes | **REUSED** not cloned/reparsed, source hypothesis only |
+| `general_rotation_original_select_extra_pre_replay_v1.py` | 147 same-call selected events, 49 bounded IF TRUE, 44 UNKNOWN, 54 rows without explicit IF from prior raw native | **REUSED** as occurrence-specific source state |
+| `general_rotation_decision_proof_engine_v1.py` | Existing `decide_candidate` and `evaluate_priority` return UNKNOWN for open-world physical READY and unproven earlier alternative | **REUSED** runtime decision safety |
+| `general_rotation_original_source_evidence_bridge_v1.py` | New generic IR bridge, [Actions #42594344188](https://github.com/degong2-code/zrotationhelper/actions/runs/42594344188) 3/3 PASS; two classes synthetic / actual four cases; 147 exact IR occurrences | **NEW REUSABLE ENGINE FEATURE** keyed by source row SHA + original call ID; no specialization-dependent spell rules |
+| CI artifact `zrot-gr-general-source-hypothesis-real-49-ir-v1` #13662519082 | Four source hypothesis/evidence IR JSONs + portfolio, SHA256 `b9277acd9d0eb32a85dc00a6da8515e6e4db88d0d4d95e70e92ade52221a6d92` | **REUSE** offline until 2026-11-16 UTC; do not duplicate C++ execution |
+| WCL independent lock/holdout and trainer verdict | NOT_RUN / UNKNOWN | **NOT YET PRODUCT RULES**; no READY/priority/dummy error promotion |
+
+Evidence `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_CONDITIONAL_IR_49_PROOF_BRIDGE_20261109.json`. Initial CI #42594168648 had wrong artifact unpack path (FAIL); corrected workflow #42594344188 PASS. Product architecture improvements matter more than test counts.

@@ -1,0 +1,106 @@
+{
+  "schema": "ZrotOriginalSourceConditionedGeneralRotationHypothesisBridgeReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "date": "2026-11-09",
+  "official_SimC_source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "product_scope": {
+    "final_goal": "General Rotation opener and ST/2T/cleave/AoE conditional IF/ELSE priority engine, WCL blind validation, lightweight target dummy feedback",
+    "excluded": [
+      "Encounter-Specific Rotation Plan",
+      "NSRT",
+      "raid timeline and boss execution advice"
+    ],
+    "source_hypothesis_must_remain_distinct_from_trained_general_rotation": true
+  },
+  "engine_reuse": {
+    "existing_source_apl_parser_and_typed_ast": "tools/research/simc_apl_semantic_ir_v2.py",
+    "existing_full_source_hypothesis_ir": "tools/research/general_rotation_source_hypothesis_ir_v1.py",
+    "existing_open_world_ready_and_priority_proof": "tools/research/general_rotation_decision_proof_engine_v1.py",
+    "existing_original_same_select_call_pinned_if_replay": "tools/research/general_rotation_original_select_extra_pre_replay_v1.py",
+    "created_source_evidence_ir_compiler": "tools/research/general_rotation_original_source_evidence_bridge_v1.py",
+    "created_source_evidence_ir_compiler_git_blob_sha1": "ca007d962cc90caf5b318d04482d8dfa45c093f2",
+    "created_source_evidence_ir_compiler_sha256": "eb49a774910021e8ce8d5a2994ff7c9db673db561b989cb210a476de50264211",
+    "CI_workflow": ".github/workflows/zrot-gr-original-source-evidence-bridge-v1.yml",
+    "generic_core_has_per_spec_spell_priority_hardcoded": false,
+    "game_API_and_WCL_API_not_called": true,
+    "new_SimC_CXX_builds": 0
+  },
+  "real_validation": {
+    "successful_GitHub_Actions_run": 42594344188,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42594344188",
+    "CI_head_sha": "bb3eb3d644480da81d682ffb6b40d7d77ec42cb5",
+    "conclusion": "success",
+    "Python_312_compile_two_class_synthetic_negative": "PASS",
+    "Python_314_compile_two_class_synthetic_negative": "PASS",
+    "actual_pinned_four_case_Fury_Arcane_ST_2T_evidence_join": "PASS",
+    "jobs_completed": 3,
+    "jobs_succeeded": 3,
+    "previous_initial_CI_run": 42594168648,
+    "previous_initial_CI_conclusion": "failure",
+    "previous_initial_CI_failure_classification": "WORKFLOW_ARTIFACT_UNPACK_LAYOUT_WRONG_PATH_NOT_ENGINE_READY_OR_IF_FAILURE",
+    "previous_initial_CI_fixed_only_workflow_relative_artifact_root": true,
+    "previous_original_action_parity": "149/149 per original native #42589894203",
+    "original_selected_to_JSON2_causal_dataflow": "147/147 per original native #42589894203",
+    "source_IF_independent_true_at_original_SELECTED_call": 49,
+    "source_IF_unknown_missing_valid_PRE": 44,
+    "no_explicit_source_IF": 54,
+    "other_combat_native_route_unknown": 2,
+    "first_10_seconds_not_proven_opener_end": true,
+    "generic_source_hypothesis_original_APL_list_graph_present": true,
+    "per_exact_occurrence_original_call_id_retained": true,
+    "source_ROW_SHA_provenance_retained": true,
+    "original_PRE_values_and_native_IF_post_comparator_separated": true,
+    "no_per_spell_source_truth_aggregation": true,
+    "source_READY_unknown_for_all": 147,
+    "simultaneous_competitor_PRIORITY_unknown_for_all": 147,
+    "dummy_error_claimed": 0,
+    "source_apl_priority_graph_NOT_validated_general_rotation_rules": true,
+    "source_case_IR_output_sha256": {
+      "warrior_fury_st": "964886a08dbaf800ac9e3694df47b7adece905fc8825782e9cc3f5d83aa54aee",
+      "warrior_fury_2t": "62d5ef47e32e066e771a447c3251ab1ba13699c24eec11481f9563f0fcc96dba",
+      "mage_arcane_st": "db3abc021e3af83b6147e05955772861855840fefac743d0c7fac420a0cb61f2",
+      "mage_arcane_2t": "b7899757ddfe44968b43447f41e448d999686ea312878f9a2f2ec1597677ff2d"
+    },
+    "portfolio_sha256": "1a4df6f85503a190325541bf0ffac2424b3cc08ef8d57971af626b900624185f",
+    "result_artifact": {
+      "id": 13662519082,
+      "name": "zrot-gr-general-source-hypothesis-real-49-ir-v1",
+      "digest_sha256": "b9277acd9d0eb32a85dc00a6da8515e6e4db88d0d4d95e70e92ade52221a6d92",
+      "bytes": 64617,
+      "expires_utc": "2026-11-16T09:33:53Z"
+    }
+  },
+  "guardrails": {
+    "independent_source_IF_not_complete_positive_READY": true,
+    "source_call_PRE_same_call_timestamps_not_WCL_strict_PRE": true,
+    "WCL_candidate_lock": "NOT_RUN",
+    "WCL_independent_holdout": "NOT_RUN",
+    "native_apl_action_selected_not_spell_executed_to_completion": true,
+    "selected_action_not_permanent_priority_rule": true,
+    "no_observed_opener_end": true,
+    "target_count_comparison_not_gameplay_switch_threshold": true,
+    "trainer_feedback_expectation": "UNKNOWN",
+    "full_positive_READY_proven": 0,
+    "did_not_modify_MAIN": true,
+    "did_not_promote_FROZEN": true,
+    "Gen5_LATEST_HANDOFF_not_modified": true,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "engine_first_self_audit": {
+    "reused_two_existing_generic_core_modules_instead_of_duplicate_parsers": true,
+    "consumes_original_49_IF_proofs_into_actionable_data_contract_for_future_WCL_and_dummy_evaluator": true,
+    "does_not_treat_observation_as_optimality": true,
+    "dual_spec_and_target_count_reproducibility_tested": true,
+    "real_replay_and_synthetic_validation_distinguished": true,
+    "no_additional_native_CXX_build_or_WCL_cost": true,
+    "further_engine_work_before_collecting_more_raw_witnesses": true,
+    "success_metric": "Reusable compiled source IF/ELSE and proof-gated choice frontier, not number of CI PASS"
+  },
+  "next": {
+    "product_exact_next": "General Rotation opener and conditional priority across spec/target/gear/build; independently verified WCL hypotheses and safe target dummy practice feedback.",
+    "session_exact_next": "Reuse compiled General Rotation source IR for 4 cases and original 49 selected IF facts. Implement generic WCL independent candidate-state mapping to IR with strict PRE and readiness UNKNOWN if missing, keeping WCL discovery blind and candidate lock before SimC source replay. Selectively investigate 44 IF-state unknowns only where WCL/source conflicts affect player feedback. Distinguish source hypothesis from independently validated rule and dummy advice."
+  }
+}
