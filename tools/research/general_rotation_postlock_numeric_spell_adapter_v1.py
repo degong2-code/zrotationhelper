@@ -53,11 +53,19 @@ def _assert_external_adapter(adapter:dict, raw:bytes, numeric:dict,
             "POSTLOCK_EXTERNAL_SPEC_ADAPTER_LOCK_OR_AUTHORITY_INVALID")
     claim=source_case
     spec=adapter.get("specialization",{})
+    # Source profiles can be keyed `fury` or `warrior_fury`, whereas the
+    # external adapter stores separated class and specialization fields.
+    # Accept exact component checks only, not fuzzy substring similarity.
     require(type(spec)==dict and
             type(spec.get("class"))==str and
             type(spec.get("spec"))==str and
+            type(claim.get("class_key"))==str and
+            type(claim.get("source_spec"))==str and
             spec["class"].casefold()==claim["class_key"].casefold() and
-            spec["spec"].casefold()==claim["source_spec"].casefold() and
+            claim["source_spec"].casefold() in (
+               spec["spec"].casefold(),
+               spec["class"].casefold()+"_"+spec["spec"].casefold(),
+               spec["spec"].casefold()+"_"+spec["class"].casefold()) and
             type(spec.get("spec_id")) is int and spec["spec_id"]>0,
             "ADAPTER_CLASS_SPEC_NOT_SOURCE_PROFILE")
     source=adapter.get("source_simc",{})
