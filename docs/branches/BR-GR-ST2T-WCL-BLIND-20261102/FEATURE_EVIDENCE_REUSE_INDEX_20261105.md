@@ -396,3 +396,15 @@ Detailed source pins, contract, limitations and bridge design: GENERIC_ORIGINAL_
 | target dummy app judgement | Current exact game addon state readiness and target count not proven | **UNKNOWN**, no false errors |
 
 Permanent branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_SOURCE_RESEARCH_DELIVERY_IR_20261109.json`.
+
+## 2026-11-09 SimC-first General Rotation 실제 JSON2 시전 표본 + APL 전체 IF/ELSE 연결
+
+| 신규/기존 자산 | 검증 실제 상태 | REUSE/UNKNOWN |
+|---|---|---|
+| 기존 `general_rotation_research_delivery_v1.py` 및 source JSON | pinned 172 APL rows, original SimC source returns 262; [#42561334139](https://github.com/degong2-code/zrotationhelper/actions/runs/42561334139) 3/3 PASS | **REUSE** source IF/ELSE, exact cast가 아님 |
+| `general_rotation_simc_native_cast_delivery_v1.py` | [#42562520191](https://github.com/degong2-code/zrotationhelper/actions/runs/42562520191) 3/3 PASS, pinned one original CPP binary, 4 cases Fury43/44 Mage30/32 JSON2 SAMPLE_ACTION (149 total), output SHA256 58481914... | **NEW ACTUAL ACTION RESEARCH**; source-row cause/READY UNKNOWN |
+| `general_rotation_simc_readable_report_v1.py` | [#42563131631](https://github.com/degong2-code/zrotationhelper/actions/runs/42563131631) 3/3 PASS, 389 lines all 172 source APL rows plus 4-case observed opener windows, SHA256 bfaebe2e... | **REUSE readable report**, WCL/Trainer advice NOT READY |
+| Future replay integration | existing original selected root PRE/IF bridge/priority IR and 149 new sample actions | **EXTEND** action-time same-cohort source-row/condition/competing candidate exact replay |
+| WCL independent candidate lock, disjoint holdout | existing tools, this step no WCL API calls | **NOT RUN**, never inject source semantics into blind discovery |
+
+Permanent receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SIMC_FIRST_NATIVE_CAST_GENERAL_ROTATION_RESEARCH_20261109.json`. See accompanying branch report.

@@ -1,0 +1,221 @@
+{
+  "schema": "ZrotSimCFirstNativeCastAndConditionalGeneralRotationResearchV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "source_pins": {
+    "simc_upstream_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "fury_profile_git_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+    "arcane_profile_git_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+    "seed": 31459,
+    "fight_seconds": 30
+  },
+  "implementation": {
+    "cast_bridge": "tools/research/general_rotation_simc_native_cast_delivery_v1.py",
+    "readable_report": "tools/research/general_rotation_simc_readable_report_v1.py",
+    "existing_source_model": "tools/research/general_rotation_research_delivery_v1.py",
+    "prior_source_model_sha256": "44fdfbe9bb41048bcda68150e9c5ae6fef1fe1e2cbbfec4676759c9c627681a1",
+    "new_APL_parser_written": false,
+    "generic_core_spell_or_class_hardcoded": false,
+    "only_source_spec_lookup_declarations_in_manifest": true
+  },
+  "observed": {
+    "original_CXX_root_choices_not_actions": 262,
+    "original_APL_rows": 172,
+    "json2_sample_actions_total": 149,
+    "cases": [
+      {
+        "spec": "warrior_fury",
+        "targets": 1,
+        "source_root_returns": 100,
+        "simc_json2_sample_actions": 43,
+        "first_actions": [
+          [
+            "auto_attack",
+            0
+          ],
+          [
+            "charge",
+            0
+          ],
+          [
+            "recklessness",
+            0
+          ],
+          [
+            "potion",
+            0
+          ],
+          [
+            "rampage",
+            0
+          ],
+          [
+            "bladestorm",
+            899
+          ],
+          [
+            "storm_bolt",
+            1681
+          ]
+        ]
+      },
+      {
+        "spec": "warrior_fury",
+        "targets": 2,
+        "source_root_returns": 90,
+        "simc_json2_sample_actions": 44,
+        "first_actions": [
+          [
+            "auto_attack",
+            0
+          ],
+          [
+            "charge",
+            0
+          ],
+          [
+            "recklessness",
+            0
+          ],
+          [
+            "rampage",
+            0
+          ],
+          [
+            "bladestorm",
+            899
+          ],
+          [
+            "storm_bolt",
+            1681
+          ],
+          [
+            "odyns_fury",
+            4542
+          ]
+        ]
+      },
+      {
+        "spec": "mage_arcane",
+        "targets": 1,
+        "source_root_returns": 35,
+        "simc_json2_sample_actions": 30,
+        "first_actions": [
+          [
+            "potion",
+            0
+          ],
+          [
+            "arcane_orb",
+            0
+          ],
+          [
+            "arcane_surge",
+            907
+          ],
+          [
+            "arcane_missiles",
+            2513
+          ],
+          [
+            "arcane_blast",
+            4048
+          ],
+          [
+            "arcane_barrage",
+            4971
+          ]
+        ]
+      },
+      {
+        "spec": "mage_arcane",
+        "targets": 2,
+        "source_root_returns": 37,
+        "simc_json2_sample_actions": 32,
+        "first_actions": [
+          [
+            "potion",
+            0
+          ],
+          [
+            "arcane_orb",
+            0
+          ],
+          [
+            "arcane_surge",
+            907
+          ],
+          [
+            "arcane_missiles",
+            2510
+          ],
+          [
+            "arcane_blast",
+            3908
+          ],
+          [
+            "arcane_barrage",
+            4819
+          ]
+        ]
+      }
+    ]
+  },
+  "verification": {
+    "actual_original_simc_run": {
+      "id": 42562520191,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42562520191",
+      "status": "completed",
+      "conclusion": "success",
+      "jobs_success": 3,
+      "jobs_total": 3,
+      "one_original_cpp_build_for_all_four": true,
+      "new_wcl_calls": 0
+    },
+    "actual_research_json_sha256": "584819145ec6e51bd7596bd273da74402622adf7bd0ecf1ea25ce19b0f26c715",
+    "actual_case_manifest_sha256": "c6609844857b1ca526eef7996c16dc4525e49c49b40f31b08a67d889a93d1781",
+    "actual_archive": {
+      "id": 13650441657,
+      "digest": "sha256:070977c060eb664554293fc8f050ccb5e7c4ff7fcbc9e1f308938ab70dc5b0ad",
+      "expires_utc": "2026-11-16T04:39:40Z"
+    },
+    "readable_report_run": {
+      "id": 42563131631,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42563131631",
+      "status": "completed",
+      "conclusion": "success",
+      "jobs_success": 3,
+      "jobs_total": 3,
+      "new_cpp_build": false
+    },
+    "readable_markdown_line_count": 389,
+    "readable_markdown_sha256": "bfaebe2eb605a3e51dd3d87b0688578197dc85b68519c23c811f7fcc7f3a258b",
+    "readable_archive": {
+      "id": 13650445983,
+      "digest": "sha256:bf8a4ea9ce6367653cd68d0f1dc4a39ca5f6ed1a557b69bb0900c246d8f1b841",
+      "expires_utc": "2026-11-16T04:40:58Z"
+    }
+  },
+  "limits": {
+    "native_json2_samples_include_autoattack_consumables_offgcd": true,
+    "exact_apl_row_per_native_action": "UNKNOWN",
+    "same_timestamp_state_not_strict_pre": true,
+    "opener_end": "UNKNOWN",
+    "full_ready_proven": 0,
+    "simultaneously_ready_alternatives": "UNKNOWN",
+    "aoe_3plus_not_tested": true,
+    "current_retail_blizzard_mechanics_not_reverified": true,
+    "independent_wcl_holdout": "NOT_RUN",
+    "target_dummy_wrong_rotation_verdict": "UNKNOWN"
+  },
+  "lifecycle": "ORIGINAL_SIMC_ACTION_OBSERVED_AND_PINNED_SOURCE_PRIORITY_HYPOTHESIS_NOT_CAUSAL_OR_OPTIMALITY",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "product_exact_next": "SimC-only exact decision-state replay: observed cast to exact source APL row and actual condition/readiness, opener-end/sequence, resource proc cd talent and ST/2T/AoE conditional priority before independent WCL blind validation.",
+  "session_exact_next": "Reuse original selected-root/IF state bridges and newly verified SimC JSON2 sequence; quantify source row identity and dynamic PRE gaps without duplicating parser or rebuilding unneeded SimC C++."
+}
