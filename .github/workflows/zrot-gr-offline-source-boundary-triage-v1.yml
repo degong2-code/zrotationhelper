@@ -1,0 +1,134 @@
+name: zrot-gr-offline-source-boundary-triage-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_same_run_source_triage_v1.py
+      - .github/workflows/zrot-gr-offline-source-boundary-triage-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline-synthetic:
+    name: Generic same-run triage synthetic Python ${{ matrix.py }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.py }}'
+      - name: Compile and fail-closed synthetic regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_same_run_source_triage_v1.py
+          python -B tools/research/general_rotation_same_run_source_triage_v1.py > /tmp/gr-boundary-triage-synthetic.json
+          python - <<'PY'
+          import json
+          obj=json.load(open('/tmp/gr-boundary-triage-synthetic.json'))
+          assert obj['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert obj['negative_controls']>=10
+          assert obj['cross_spec_test_cases']>=2
+          assert obj['full_ready_proven']==0
+          assert obj['CXX_builds']==0 and obj['WCL_calls']==0
+          print('GENERIC_SOURCE_CONDITION_BOUNDARY_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_same_run_source_triage_v1.py
+
+  pinned-offline-replay:
+    name: Replay original 203 SimC emitters into typed source condition gaps, no new CXX
+    needs: [offline-synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-same-run-return-emitter-v1
+          run-id: 42581326058
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-return-emitter
+      - name: Pin old real CI evidence and official source identity without compilation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          test "$(git hash-object active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SAME_RUN_RETURN_EMITTER_BOUNDARY_20261109.json)" = f6c43d408952a9ea90ebfa17297e3244a9de05be
+          printf '%s\n' \
+            "db0de2f2c1ededdbbc696a8968c8da710f05e23779c397061cc5d55ded58e942  /tmp/zrot-return-emitter/zrot-same-run-native/warrior_fury-st/select-emitter-identity.json" \
+            "d73de692f810b772a9f6917c15904f6445bc9838288c174d4da51c352d5453af  /tmp/zrot-return-emitter/zrot-same-run-native/warrior_fury-2t/select-emitter-identity.json" \
+            "e37cc9712f7775f3e1aead271a101d9881b9c59248229dac9f55c4a0f5f0fcdb  /tmp/zrot-return-emitter/zrot-same-run-native/mage_arcane-st/select-emitter-identity.json" \
+            "33f4899bb8f6b8714efc5216cb94b814da7bbcf55a3d37aa10f6b8b66c67faab  /tmp/zrot-return-emitter/zrot-same-run-native/mage_arcane-2t/select-emitter-identity.json" \
+            | sha256sum -c -
+          python - <<'PY'
+          import json
+          p="/tmp/gr-pinned-boundary-manifest.json"
+          cases=[]
+          for spec,profile in [('warrior_fury','MID2_Warrior_Fury.simc'),
+                               ('mage_arcane','MID2_Mage_Arcane.simc')]:
+              for n,label in ((1,'st'),(2,'2t')):
+                  cases.append({
+                      'spec':spec,'targets':n,
+                      'profile_path':'simc-upstream/profiles/MID2/'+profile,
+                      'report_path':'/tmp/zrot-return-emitter/zrot-same-run-native/'+spec+'-'+label+'/select-emitter-identity.json'
+                  })
+          obj={'schema':'ZrotGeneralRotationBoundaryReplayPathsManifestV1',
+               'policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+               'source_revision':'b522cded8c26b97dac03fdf56e57a03ec7e8faa6',
+               'cases':cases}
+          with open(p,'x') as f:json.dump(obj,f,sort_keys=True,indent=2)
+          PY
+      - name: Replay four pinned reports, emit top source-state capture obligations
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_same_run_source_triage_v1.py \
+            --pinned-receipt active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SAME_RUN_RETURN_EMITTER_BOUNDARY_20261109.json \
+            --manifest /tmp/gr-pinned-boundary-manifest.json \
+            --out /tmp/gr-pinned-source-boundary-triage.json
+          python - <<'PY'
+          import json
+          v=json.load(open('/tmp/gr-pinned-source-boundary-triage.json'))
+          assert v['schema']=='ZrotGeneralRotationPinnedSameRunSourceBoundaryTriageV1'
+          assert v['case_count']==4 and v['original_emitter_total']==203
+          assert v['identity_counts']['UNIQUE_SAME_RUN_RETURN_POINTER_ROW_TEMPORAL_WITNESS']==139
+          assert v['identity_counts']['UNKNOWN_MULTIPLE_ROOT_RETURNS']==10
+          assert v['identity_counts']['UNKNOWN_NO_ROOT_RETURN_BEFORE_EMITTER']==54
+          assert v['same_run_true_dispatch_causality_proven']==0
+          assert v['complete_source_physical_READY_proven']==0
+          assert v['new_SimC_CXX_builds']==0 and v['new_WCL_API_calls']==0
+          assert v['first_window_combat_event_count']>0
+          print('GENERIC_SOURCE_BOUNDARY_REAL_203_OF_203_REPLAY_PASS')
+          print('EMISSION_PHASES',json.dumps(v['emitter_phase_counts'],sort_keys=True))
+          print('SOURCE_CONDITION_CLASSES',json.dumps(v['typed_source_IF_boundary_counts'],sort_keys=True))
+          print('FIRST_WINDOW_COMBAT_EVENTS',v['first_window_combat_event_count'])
+          for item in v['first_window_capture_worklist'][:12]:
+              print('PRIORITIZED_EVIDENCE_GAP',json.dumps(item,sort_keys=True))
+          PY
+          sha256sum /tmp/gr-pinned-source-boundary-triage.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-original-203-source-boundary-triage-v1
+          path: /tmp/gr-pinned-source-boundary-triage.json
+          if-no-files-found: warn
+          retention-days: 7
