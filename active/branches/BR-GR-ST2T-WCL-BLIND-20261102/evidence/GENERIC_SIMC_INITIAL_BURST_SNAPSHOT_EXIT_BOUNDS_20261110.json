@@ -1,0 +1,100 @@
+{
+  "schema": "ZrotGenericSimcInitialBurstSourcePinnedSnapshotIntervalReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-10",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "what_was_verified": "First observed absent Native JSON2 action snapshot after source-pinned initial major buff presence; bounded snapshot interval, NOT exact buff expiry nor complete opener end.",
+  "source": {
+    "repo": "simulationcraft/simc",
+    "commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "cpp_numeric_lookup": [
+      {
+        "source": "engine/class_modules/sc_warrior.cpp",
+        "symbol": "recklessness",
+        "id": 1719
+      },
+      {
+        "source": "engine/class_modules/sc_mage.cpp",
+        "symbol": "arcane_surge",
+        "id": 365362
+      }
+    ],
+    "saved_native_original_run": 42562520191,
+    "saved_native_original_artifact": 13650441657,
+    "source_adapter": "tools/research/fixtures/general_rotation_simc_pinned_burst_aura_source_adapter_v1.json",
+    "generic_engine": "tools/research/general_rotation_simc_burst_snapshot_interval_v1.py"
+  },
+  "direct_action_snapshot_aura_observations": [
+    {
+      "spec": "warrior_fury",
+      "targets": 1,
+      "source_buff_id": 1719,
+      "last_present_ms": 23404,
+      "first_absent_ms": 24159,
+      "status": "OBSERVED_BOUNDED_AURA_SNAPSHOT_EXIT"
+    },
+    {
+      "spec": "warrior_fury",
+      "targets": 2,
+      "source_buff_id": 1719,
+      "last_present_ms": 23407,
+      "first_absent_ms": 24160,
+      "status": "OBSERVED_BOUNDED_AURA_SNAPSHOT_EXIT"
+    },
+    {
+      "spec": "mage_arcane",
+      "targets": 1,
+      "source_buff_id": 365362,
+      "last_present_ms": 17295,
+      "first_absent_ms": 18174,
+      "status": "OBSERVED_BOUNDED_AURA_SNAPSHOT_EXIT"
+    },
+    {
+      "spec": "mage_arcane",
+      "targets": 2,
+      "source_buff_id": 365362,
+      "last_present_ms": 16693,
+      "first_absent_ms": 18142,
+      "status": "OBSERVED_BOUNDED_AURA_SNAPSHOT_EXIT"
+    }
+  ],
+  "validation": {
+    "final_run": 42718056047,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42718056047",
+    "conclusion": "SUCCESS_3_OF_3",
+    "python_312": "PASS",
+    "python_314": "PASS",
+    "saved_original_pinned_CXX_sources_and_JSON2": "PASS",
+    "synthetic_positive_checks": 4,
+    "synthetic_negative_fail_closed": 3,
+    "python_final_sha256": "ec11fa2d737b49f1c6f2741d2cbacdcbc2e18a8ab227323b38db6533eed90b4f",
+    "output_json_sha256": "52889cb79312caebcaff8299e6a20ae264f4c96d2b501b118f67e2c039cf12a8",
+    "artifact_id": 13719585800,
+    "artifact_zip_sha256": "684c8bb9dfff8b7fa279e3eed0be082470962d08a976add3da5b04f250845ce0",
+    "artifact_expires_utc": "2026-11-16T23:09:23Z",
+    "first_prior_run": 42717748432,
+    "first_prior_result": "PASS_BUT_GIT_SOURCE_COMMIT_AND_MISSING_BUFF_FIELD_HARDENED_IN_SUCCESSOR",
+    "intermediate_run": 42718035874,
+    "intermediate_failure": "CI_SYNTHETIC_CHECK_COUNT_ASSERTION_STALE",
+    "final_corrected_run": 42718056047
+  },
+  "scope_and_unknowns": {
+    "native_source_spell_id_lookup_supported": true,
+    "native_same_timestamp_strict_pre": false,
+    "missing_buff_field_not_assumed_absent": true,
+    "exact_aura_expiry_ms": "UNKNOWN",
+    "source_physical_FULL_READY": "UNKNOWN",
+    "numeric_aura_presence_not_complete_opener_end": true,
+    "opener_exit_phase_flag": "UNKNOWN",
+    "WCL_holdout_not_involved": true,
+    "trained_user_mistake_claims": 0,
+    "MAIN_promoted": false,
+    "FROZEN_modified": false
+  },
+  "no_new_WCL_API": true,
+  "no_new_native_CPP_build_for_burst_interval": true,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "session_exact_next": "Define a condition-driven opener transition using actual source APL, dynamic buff/resource/cooldown events and original Native PRE source. If no explicit source phase-end semantics exists, represent opener exit as UNKNOWN and provide conditional phase cues instead of arbitrary 10s."
+}
