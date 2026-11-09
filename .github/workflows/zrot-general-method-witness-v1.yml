@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   generic-synthetic:
@@ -270,3 +271,80 @@ jobs:
             /tmp/zrot-fury-method-instrumented/simc_native_log.txt
           if-no-files-found: warn
           retention-days: 7
+
+  replay-pinned-native-archive:
+    # A bounded successor test, not a future production dependency:
+    # historic run artifacts expire. A new producer can always collect
+    # fresh data and test the same generic engine.
+    if: contains(github.event.head_commit.message, '[offline-fury-replay]') || github.event_name == 'workflow_dispatch'
+    name: Independently replay previously captured real Fury source PRE without C++ rebuild
+    needs: [official-source-fury]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-fury-generic-original-ready-method-witness
+          path: /tmp/fury-witness-from-original-native
+          run-id: 42551182559
+          github-token: ${{ github.token }}
+      - name: Verify original raw Native artifact bytes against same source method producer
+        shell: bash
+        run: |
+          set -euo pipefail
+          ORIGINAL=/tmp/fury-witness-from-original-native
+          test -s "$ORIGINAL/gr-fury-method-source-patch.json"
+          test -s "$ORIGINAL/gr-fury-exact-ready-sequence-parity.json"
+          test -s "$ORIGINAL/zrot-fury-method-instrumented/simc_native_log.txt"
+          python -B tools/research/general_rotation_source_pre_field_capture_v1.py \
+            --source-root simc-upstream --patch \
+            --patch-receipt /tmp/recreated-fury-pre-patch.json
+          python -B tools/research/simc_native_warrior_exact_ready_guard_producer_v1.py \
+            --source-root simc-upstream \
+            --out /tmp/recreated-fury-method-patch.json
+          cmp "$ORIGINAL/gr-fury-method-source-patch.json" /tmp/recreated-fury-method-patch.json
+          python -B tools/research/general_rotation_warrior_exact_ready_guard_replay_v1.py \
+            --source-root simc-upstream \
+            --raw-log "$ORIGINAL/zrot-fury-method-instrumented/simc_native_log.txt" \
+            --patch-receipt "$ORIGINAL/gr-fury-method-source-patch.json" \
+            --parity-receipt "$ORIGINAL/gr-fury-exact-ready-sequence-parity.json" \
+            --out /tmp/fury-offline-scoped-proof-v1.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/fury-offline-scoped-proof-v1.json'))
+          assert x['schema']=='ZrotFuryExactOriginalMethodWeaponNecessaryGateReplayV1'
+          assert x['pristine_instrumented_combat_casts']==46
+          assert x['counts']['method_witnesses']>=1
+          assert x['full_positive_READY']==0
+          assert x['source_evidence_authenticated_by_independent_original_run'] is True
+          assert x['dummy_practice_error_permitted'] is False
+          assert x['actual_WCL_holdout_completed'] is False
+          assert x['source_requirement']=='both_main_hand_and_off_hand_weapon_slots_occupied'
+          assert all(y['full_positive_READY']==0 for y in x['candidate_proofs'])
+          print('REAL_ORIGINAL_FURY_METHOD_WITNESS_OFFLINE_REPLAY_PASS',
+                json.dumps(x['counts'],sort_keys=True))
+          print('FURY_ACTION_PROOFS',json.dumps(x['candidate_proofs'],sort_keys=True))
+          PY
+          sha256sum "$ORIGINAL/gr-fury-method-source-patch.json" \
+            "$ORIGINAL/gr-fury-exact-ready-sequence-parity.json" \
+            "$ORIGINAL/zrot-fury-method-instrumented/simc_native_log.txt" \
+            /tmp/fury-offline-scoped-proof-v1.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-fury-generic-witness-offline-source-replay-correction
+          path: /tmp/fury-offline-scoped-proof-v1.json
+          retention-days: 7
+          if-no-files-found: error
