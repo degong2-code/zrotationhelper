@@ -254,6 +254,45 @@ def _check_transport(t:dict)->None:
              (t["source_cohort_role"]=="HOLDOUT"),
          "WCL_RAW_TRANSPORT_INTEGRITY_OR_CLAIM_BOUNDARY_CHANGED")
 
+def classify_cohort_identity(left:dict,right:dict)->dict:
+    """Source-numeric-only exact/report overlap. Never infer independent actors.
+
+    A newly fetched snapshot of a known report cannot be a blind holdout,
+    even with a new revision, action ordinal, or different fight.
+    """
+    _check_transport(left)
+    _check_transport(right)
+    same_report=left["report_code"]==right["report_code"]
+    same_fight=same_report and left["fight_id"]==right["fight_id"]
+    same_actor=same_fight and left["actor_id"]==right["actor_id"]
+    same_replay=left["source_replay_sha256"]==right["source_replay_sha256"]
+    same_raw=left["raw_receipt_sha256"]==right["raw_receipt_sha256"]
+    need(not same_raw or (same_report and same_fight and same_actor),
+         "IDENTICAL_RAW_EVIDENCE_HAS_CONFLICTING_ACTOR_REPORT_IDENTITY")
+    status=("EXACT_SAME_RAW_ACTOR_REPLAY" if same_actor and same_raw else
+            "SAME_REPORT_FIGHT_ACTOR_DIFFERENT_SNAPSHOT" if same_actor else
+            "SAME_REPORT_NOT_INDEPENDENT" if same_report else
+            "DISTINCT_REPORT_NOT_YET_FULLY_INDEPENDENCE_AUDITED")
+    return {
+        "schema":"ZrotWclNumericSourceCohortOverlapV1",
+        "policy_id":POLICY,
+        "left_transport_sha256":left["numeric_transport_sha256"],
+        "right_transport_sha256":right["numeric_transport_sha256"],
+        "same_report":same_report,
+        "same_fight":same_fight,
+        "same_actor":same_actor,
+        "same_actor_replay_sha256":same_replay,
+        "same_raw_actor_snapshot_sha256":same_raw,
+        "classification":status,
+        "report_disjoint":not same_report,
+        "valid_as_independent_holdout_against_other":False,
+        "cannot_count_as_new_independent_cohort":same_report,
+        "actual_independent_player_identity":"UNKNOWN",
+        "WCL_source_readiness":"UNKNOWN",
+        "validated_gameplay_priority":False
+    }
+
+
 def disjoint_numeric_fixture(discovery:list[dict],holdout:dict,
                              frozen_lock:dict,frozen_lock_sha256:str)->dict:
     """Post-lock transport only. No source APL allowed in this signature."""
@@ -548,6 +587,10 @@ def selftest()->dict:
         # before constructing this separately reported research fixture.
         fixture=disjoint_numeric_fixture([d1],d2,lock1,
                                         sha(canonical(lock1)))
+        need(classify_cohort_identity(d1,d1)["classification"]==
+             "EXACT_SAME_RAW_ACTOR_REPLAY" and
+             classify_cohort_identity(d1,d2)["report_disjoint"] is True,
+             "WCL_COHORT_OVERLAP_GENERIC_GATE_FAILED")
         need(fixture["holdout"]["report_code"]=="ReportABC2" and
              fixture["independent_WCL_holdout_proven"] is False and
              fixture["source_APL_or_SimC_present"] is False,
@@ -583,6 +626,7 @@ def selftest()->dict:
             "strict_PRE_same_time_fence":"PASS",
             "strict_PRE_all_cast_numeric_matrix":"PASS",
             "disjoint_lock_fixture":"PASS",
+            "cohort_identity_duplicate_vs_disjoint":"PASS",
             "negative_controls":negatives,
             "real_wcl_api_requests":0,
             "real_wcl_holdout_completed":False,
