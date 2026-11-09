@@ -341,7 +341,8 @@ def selftest()->dict:
         "observed_source_target_count":3,
         "original_selected_call_id":11,"original_dispatch_token":21,
         "original_simc_time_ms":900,
-        "source_identity":origin["identity"],
+        # The source graph and observed source identity must not share an object.
+        "source_identity":dict(origin["identity"]),
         "source_action":origin["action"],
         "source_behavior":"ACTION",
         "source_kind":"EXECUTABLE_SOURCE_CANDIDATE",
@@ -383,7 +384,8 @@ def selftest()->dict:
     for alter in (
         lambda x:x["exact_selected_occurrence_proofs"][0]["bounded_condition"].update(
             source_guard_result="FALSE"),
-        lambda x:x["exact_selected_occurrence_proofs"][0]["native_IF_post_comparator_only"].__class__,
+        lambda x:x["exact_selected_occurrence_proofs"][0].update(
+            native_IF_post_comparator_only="FALSE"),
         lambda x:x["exact_selected_occurrence_proofs"][0]["source_ready_proof"].update(
             decision="READY"),
         lambda x:x["exact_selected_occurrence_proofs"][0]["original_PRE_symbol_values"].update(
@@ -392,8 +394,7 @@ def selftest()->dict:
             source_line_sha256="0"*64),
     ):
         obj=copy.deepcopy(fake)
-        if bad==1:obj["exact_selected_occurrence_proofs"][0]["native_IF_post_comparator_only"]="FALSE"
-        else:alter(obj)
+        alter(obj)
         try:audit_case(obj,definition)
         except FrontierError:bad+=1
         else:raise AssertionError("FORGED_SOURCE_IF_EVIDENCE_ACCEPTED")
