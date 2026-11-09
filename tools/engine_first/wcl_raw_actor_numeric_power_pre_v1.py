@@ -54,8 +54,8 @@ def power_cast_matrix(events:list,actor_id:int,fight_start_ms:int,
              math.isfinite(float(e["timestamp"])) and
              float(e["timestamp"]).is_integer(),
              "RESOURCE_RAW_EVENT_TIME_NOT_INTEGER")
-        if e.get("sourceID")==actor_id and
-           str(e.get("type","")).casefold() in ("cast","begincast"):
+        if (e.get("sourceID")==actor_id and
+            str(e.get("type","")).casefold() in ("cast","begincast")):
             raw_casts.append({
                "timestamp":e["timestamp"],
                "ability_id":_ability(e)
