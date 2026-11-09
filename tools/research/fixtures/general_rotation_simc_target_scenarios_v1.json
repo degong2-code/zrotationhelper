@@ -1,0 +1,46 @@
+{
+  "schema": "ZrotGenericSimCSourceProjectionScenarioManifestV1",
+  "purpose": "SIMC_SOURCE_ONLY_BOOLEAN_TALENT_COUNTERFACTUALS_NOT_REAL_WCL_BUILDS",
+  "cases": [
+    {
+      "spec_key": "warrior_fury",
+      "name": "unknown_build",
+      "assumed_talent_facts": {}
+    },
+    {
+      "spec_key": "warrior_fury",
+      "name": "slayer_hypothesis",
+      "assumed_talent_facts": {
+        "talent.slayers_dominance": 1,
+        "talent.lightning_strikes": 0
+      }
+    },
+    {
+      "spec_key": "warrior_fury",
+      "name": "thane_hypothesis",
+      "assumed_talent_facts": {
+        "talent.slayers_dominance": 0,
+        "talent.lightning_strikes": 1
+      }
+    },
+    {
+      "spec_key": "mage_arcane",
+      "name": "unknown_build",
+      "assumed_talent_facts": {}
+    },
+    {
+      "spec_key": "mage_arcane",
+      "name": "sphere_talent_off_hypothesis",
+      "assumed_talent_facts": {
+        "talent.spellfire_spheres": 0
+      }
+    },
+    {
+      "spec_key": "mage_arcane",
+      "name": "sphere_talent_on_hypothesis",
+      "assumed_talent_facts": {
+        "talent.spellfire_spheres": 1
+      }
+    }
+  ]
+}
