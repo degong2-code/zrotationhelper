@@ -141,9 +141,13 @@ def install(root:Path,prior:dict)->dict:
                        capture_output=True,text=True,check=True).stdout.strip()
     require(rev==SIMC_COMMIT,"OFFICIAL_SIMC_REVISION_DRIFT")
     player=root/PLAYER;hdr=root/HEADER
-    require(prior.get("original_simc_revision")==SIMC_COMMIT
-            and prior.get("original_player_cpp_git_blob_sha1")==PLAYER_CPP_BLOB
-            and prior.get("patched_player_cpp_sha256")==sha(player.read_bytes()),
+    require(prior.get("source_revision")==SIMC_COMMIT
+            and prior.get("official_player_git_blob")==PLAYER_CPP_BLOB
+            and prior.get("original_action_ready_calls_added")==0
+            and prior.get("original_if_expr_success_calls_added")==0
+            and prior.get("json2_original_emission_marker")==EMITTER_MARK
+            and prior.get("patch_sha256",{}).get(PLAYER)==sha(player.read_bytes())
+            and prior.get("patch_sha256",{}).get(HEADER)==sha(hdr.read_bytes()),
             "PRIOR_SAME_CALL_PATCH_RECEIPT_REQUIRED")
     before=player.read_bytes();beforeh=hdr.read_bytes()
     after,afterh=patch(before,beforeh)
