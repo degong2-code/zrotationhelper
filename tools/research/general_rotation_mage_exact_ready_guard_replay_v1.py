@@ -32,7 +32,7 @@ from general_rotation_original_pre_field_transport_v1 import (
     parse_marker,parse_attempt,MARK as FIELD_MARK,FieldCaptureError)
 from general_rotation_source_pre_field_capture_v1 import FIELDS
 from general_rotation_mage_source_fixture_v1 import (
-    rules as mage_source_rules,CPP_BLOB,MAGE_PROFILE_BLOB)
+    rules as mage_source_rules, CPP_BLOB, PROFILE_BLOB as MAGE_PROFILE_BLOB)
 from simc_native_mage_exact_ready_guard_producer_v1 import (
     MAGE_PATH,PLAYER_PATH,PROFILE_PATH,POINTER_MARK,METHOD_MARK,
     SIMC_COMMIT,verify_pristine_root)
