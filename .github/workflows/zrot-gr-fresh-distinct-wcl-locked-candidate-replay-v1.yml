@@ -1,0 +1,120 @@
+name: zrot-gr-fresh-distinct-wcl-locked-candidate-replay-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - .github/workflows/zrot-gr-fresh-distinct-wcl-locked-candidate-replay-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  fresh-cross-report-replication:
+    name: Existing frozen numeric lock -> third new WCL report fixed metric
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          run-id: 41463589665
+          github-token: ${{ github.token }}
+          path: /tmp/wcl-original-frozen-source
+      - uses: actions/download-artifact@v4
+        with:
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          run-id: 41473060401
+          github-token: ${{ github.token }}
+          path: /tmp/wcl-original-holdout-source
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-real-existing-wcl-raw-numeric-transport-v1
+          run-id: 42598175488
+          github-token: ${{ github.token }}
+          path: /tmp/wcl-replayed-original-actor
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-live-wcl-coldstart-status-56c016ab41b2b161fa79675194f26ab7df3c6d1d
+          run-id: 42599352437
+          github-token: ${{ github.token }}
+          path: /tmp/wcl-fresh-third-actor
+      - name: Original frozen numeric candidate set and distinct actual new report immutable replay
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/wcl-fresh-third-replication
+          python -m py_compile tools/engine_first/wcl_raw_actor_numeric_transport_v1.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          from wcl_disjoint_holdout_v1 import validate_contract,validate_frozen_lock
+          from wcl_raw_actor_numeric_transport_v1 import (
+             classify_cohort_identity,replicate_frozen_numeric_candidates
+          )
+          c=validate_contract(json.loads(Path(
+            'docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HOLDOUT_PREDECLARED_SOURCE_AND_METRICS_V1.json').read_bytes()))
+          oldlock=Path('/tmp/wcl-original-frozen-source/derived/blind_lock.json').read_bytes()
+          lock=validate_frozen_lock(oldlock,c)
+          oldpath=list(Path('/tmp/wcl-replayed-original-actor').rglob(
+              'real-raw-actor-numeric-transport.json'))
+          newpath=list(Path('/tmp/wcl-fresh-third-actor').rglob('new-raw-numeric.json'))
+          statuspath=list(Path('/tmp/wcl-fresh-third-actor').rglob('e2e.json'))
+          assert len(oldpath)==len(newpath)==len(statuspath)==1
+          old=json.loads(oldpath[0].read_bytes())
+          fresh=json.loads(newpath[0].read_bytes())
+          status=json.loads(statuspath[0].read_bytes())
+          assert status['status']=='PASS_FRESH_OFFICIAL_RAW_NUMERIC_STRICT_PRE'
+          assert status['excluded_previous_report_codes']==2
+          assert status['new_discovery_report_distinct_from_both_prior_cohorts'] is True
+          assert status['raw_transport_sha256']==fresh['numeric_transport_sha256']
+          prior_holdout=json.loads(Path(
+            '/tmp/wcl-original-holdout-source/derived/source_selection.json').read_bytes())
+          prior_original=json.loads(Path(
+            '/tmp/wcl-original-frozen-source/derived/selection.json').read_bytes())
+          excluded=tuple(sorted({prior_original['report_code'],
+                                 prior_holdout['report_code']}))
+          assert len(excluded)==2
+          identity=classify_cohort_identity(old,fresh)
+          assert identity['report_disjoint'] is True
+          assert identity['same_actor_replay_sha256'] is False
+          result=replicate_frozen_numeric_candidates(
+              [old],fresh,lock,sha(oldlock),c['locked_metrics'],
+              already_seen_report_codes=excluded)
+          assert result['status']=='ADDITIONAL_DISTINCT_REPORT_REOBSERVATION_NOT_FORMAL_HOLDOUT'
+          assert result['new_report_disjoint_from_additional_exclusions'] is True
+          assert result['original_frozen_candidate_count']==4
+          assert result['new_cast_count']==55
+          assert result['no_new_candidates_added'] is True
+          assert result['independent_research_holdout_validation']=='NOT_RUN_FOR_THIS_REPORT'
+          assert result['competing_action_READY_proven']==0
+          assert result['General_Rotation_rule_promoted'] is False
+          assert result['dummy_wrong_cast_proven'] is False
+          assert result['new_WCL_API_calls_in_this_comparison']==0
+          out=Path('/tmp/wcl-fresh-third-replication')
+          (out/'distinct-source-identity.json').write_bytes(canonical(identity))
+          (out/'locked-candidates-fixed-metric-new-report.json').write_bytes(canonical(result))
+          print('NEW_FRESH_DISTINCT_WCL_REPORT_NUMERIC_CANDIDATE_REOBSERVATION_PASS')
+          print('NEW_DISTINCT_WCL_REPORT_FROZEN_CANDIDATE_COUNTS',json.dumps({
+             'original_locked':result['original_frozen_candidate_count'],
+             'reobserved':result['reobserved_locked_candidate_count'],
+             'locked_candidate_rows':result['candidates'],
+             'unlocked_spell_kinds':result['new_unlocked_numeric_spells_seen']},sort_keys=True))
+          print('NEW_DISTINCT_WCL_FROZEN_CANDIDATE_RESULT_SHA256='+sha(
+             (out/'locked-candidates-fixed-metric-new-report.json').read_bytes()))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-third-real-report-frozen-numeric-reobservation-v1
+          path: /tmp/wcl-fresh-third-replication/*.json
+          if-no-files-found: warn
+          retention-days: 7
