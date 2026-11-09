@@ -1,0 +1,129 @@
+{
+  "schema": "ZrotGeneralRotationSameRunReturnEmitterBoundaryReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "source_simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "engine": {
+    "path": "tools/research/general_rotation_same_run_return_emitter_v1.py",
+    "code_sha256": "c2b77937daa109c9d516ecdb61127bf96e03c6d5da850133f6b280c7bf92156d",
+    "git_blob_sha1": "a2d447710c5a5f1bcd4f4448b1cb6cd72b6fd280",
+    "workflow": ".github/workflows/zrot-gr-same-run-return-emitter-v1.yml",
+    "reuses": [
+      "original SimC same-call IF source patch",
+      "original source-row JSON2 emitter",
+      "existing pristine 149-action parity contract",
+      "original SimC reference capture",
+      "existing generic source parser"
+    ],
+    "new_source_or_ready_calls": 0,
+    "new_specialization_specific_core_logic": 0,
+    "classification": "SAME_RUN_TEMPORAL_SOURCE_IDENTITY_NOT_CAUSAL"
+  },
+  "validation": {
+    "final_run_id": 42581326058,
+    "final_run_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42581326058",
+    "final_run_status": "completed",
+    "final_run_conclusion": "success",
+    "jobs_total": 3,
+    "jobs_success": 3,
+    "python_312_compile_synthetic": "PASS",
+    "python_314_compile_synthetic": "PASS",
+    "native_official_cpp_build": "PASS",
+    "pinned_profile_preflight": "PASS_FURY_ARCANE",
+    "original_JSON2_action_order_time_id_ordinal_parity": "149/149",
+    "original_emitter_records_total": 203,
+    "unique_temporal_same_run_pointer_row_candidates": 139,
+    "ambiguous_multi_root": 10,
+    "no_matching_root_before_emitter": 54,
+    "actual_source_row_selection_to_emission_causality_proven": false,
+    "current_general_rotation_full_ready_proven": 0,
+    "WCL_current_IR_holdout": "NOT_RUN",
+    "actual_target_dummy_user_error_verdict": "UNKNOWN",
+    "new_live_WCL_calls": 0,
+    "actual_Retail_addon_API_test": "NOT_RUN",
+    "cases": [
+      {
+        "spec": "warrior_fury",
+        "targets": 1,
+        "identity_candidates": 43,
+        "unknown_multi_root": 0,
+        "unknown_no_root": 16,
+        "report_sha256": "db0de2f2c1ededdbbc696a8968c8da710f05e23779c397061cc5d55ded58e942"
+      },
+      {
+        "spec": "warrior_fury",
+        "targets": 2,
+        "identity_candidates": 44,
+        "unknown_multi_root": 0,
+        "unknown_no_root": 16,
+        "report_sha256": "d73de692f810b772a9f6917c15904f6445bc9838288c174d4da51c352d5453af"
+      },
+      {
+        "spec": "mage_arcane",
+        "targets": 1,
+        "identity_candidates": 25,
+        "unknown_multi_root": 5,
+        "unknown_no_root": 11,
+        "report_sha256": "e37cc9712f7775f3e1aead271a101d9881b9c59248229dac9f55c4a0f5f0fcdb"
+      },
+      {
+        "spec": "mage_arcane",
+        "targets": 2,
+        "identity_candidates": 27,
+        "unknown_multi_root": 5,
+        "unknown_no_root": 11,
+        "report_sha256": "33f4899bb8f6b8714efc5216cb94b814da7bbcf55a3d37aa10f6b8b66c67faab"
+      }
+    ],
+    "patch_receipt_sha256": "aefdab0badc7360bca2a33afbd1d3ada7b06ba4dd57caa7159ffebcb22bddd18",
+    "artifact_id": 13657392846,
+    "artifact_zip_digest": "sha256:56bea509eedf590539741275e76cdb907fd1fd9e20d3014d022e5378ec7997d8",
+    "artifact_expiry_utc": "2026-11-16T07:52:23Z",
+    "prior_failed_trials": [
+      {
+        "run": 42579688909,
+        "reason": "NEW_WRAPPER_PRIOR_RECEIPT_FIELD_CONTRACT_MISMATCH",
+        "stage": "BEFORE_CPP_BUILD"
+      },
+      {
+        "run": 42579822119,
+        "reason": "NEW_WORKFLOW_INCORRECT_SPEC_EXPECTED_SLUG",
+        "stage": "AFTER_CPP_BUILD_BEFORE_CAPTURE"
+      },
+      {
+        "run": 42580709508,
+        "reason": "NEW_WORKFLOW_EXPECTED_FULL_CLASS_SPEC_INSTEAD_OF_PROFILE_SPEC",
+        "stage": "AFTER_CPP_BUILD_BEFORE_CAPTURE"
+      }
+    ]
+  },
+  "evidence_boundaries": {
+    "203_emission_rows_vs_149_combat_actions": "SEPARATE_RECORD_TYPES_AND_PHASES_NOT_SUMMABLE",
+    "same_run_pointer_temporal_witness": "A_MATCHED_POINTER_IS_NOT_PROOF_OF_DISPATCH_CAUSALITY",
+    "original_same_call_Fury_IF_60": "EXISTING_DISTINCT_JOB_42573758563_NOT_JOINED_TO_NEW_EVENT_ROWS",
+    "complete_original_READY": "UNKNOWN",
+    "opener_end": "UNKNOWN",
+    "simultaneous_competitor_priority": "UNKNOWN",
+    "build_AoE_3plus": "NOT_RUN",
+    "current_WoW_Retail_mechanic_truth": "NOT_REVERIFIED",
+    "WCL_blind_current_model": "NOT_RUN",
+    "user_training": "NOT_READY"
+  },
+  "self_audit": {
+    "reusable_engine_improved": "YES_GENERIC_SOURCE_RETURN_TO_EMITTER_WITNESS_ACROSS_TWO_SPECS",
+    "gameplay_rule_accuracy_ready": "NO_ONLY_PROVENANCE_NOT_PRIORITY",
+    "dummy_feedback_improved": "NOT_YET_REQUIRE_CONFIRMED_COMPETITOR_READY_AND_INDEPENDENT_VALIDATION",
+    "duplicate_parser_avoided": true,
+    "extra_native_compiles_were_avoidable": "YES_CI_WRAPPER_CONTRACT_ERRORS",
+    "mitigation": "PINNED_PROFILE_PRECHECK_BEFORE_BUILD; REUSE_THIS_ARTIFACT_FOR_NEXT_OFFLINE_REPLAY",
+    "branch_only": true,
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "product_exact_next": "Produce generalized conditional opener/priority decision model from verified original select-state and competing READY, then independent WCL blind candidate lock/holdout and safe dummy evaluation.",
+  "session_exact_next": "Reuse 139 same-run temporal witnesses and 64 UNKNOWN cases. Without rebuilding native C++ first, inspect original artifact/source to identify scheduling causal provenance only for high-impact Fury/Arcane decisions, then connect verified facts to generic state-conditioned IR while preserving UNKNOWN. Use a single focused native run only if necessary."
+}
