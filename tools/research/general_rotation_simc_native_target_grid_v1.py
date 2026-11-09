@@ -61,7 +61,7 @@ def examine(combat: list[dict], program: dict, count: int) -> dict:
     previous = -1
     for row in combat:
         timestamp = row.get("timestamp_ms")
-        require(type(timestamp) is int and timestamp >= previous,
+        require(type(timestamp) is int and timestamp >= 0 and timestamp >= previous,
                 "NATIVE_ACTION_SEQUENCE_NOT_ORDERED")
         previous = timestamp
         kind = row.get("record_kind")
