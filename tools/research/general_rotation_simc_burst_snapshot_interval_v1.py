@@ -15,6 +15,7 @@ from hashlib import sha256,sha1
 import json
 from pathlib import Path
 import re
+import subprocess
 
 from simc_apl_semantic_ir_v2 import canonical
 
@@ -43,7 +44,10 @@ def observe(rows,aura_id):
              "NONINTEGRAL_MILLISECOND_SAMPLE")
         if "name" not in row:continue
         if row.get("queue_failed",False) is True:continue
-        buffs=row.get("buffs",[])
+        # A missing snapshot field is UNKNOWN, not an explicitly empty aura list.
+        if "buffs" not in row:
+            continue
+        buffs=row["buffs"]
         need(type(buffs) is list and all(type(b) is dict and
              is_int(b.get("id")) and b["id"]>=0 for b in buffs),
              "BUFF_SNAPSHOT_UNTRUSTED")
@@ -97,6 +101,10 @@ def run(source_root:Path, captures_root:Path, adapter_path:Path)->dict:
          "PINNED_SOURCE_AURA_ADAPTER_INVALID")
     root=source_root.resolve(strict=True)
     need(root.is_dir(),"SOURCE_ROOT_INVALID")
+    rev=subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],
+                       check=True,capture_output=True,text=True).stdout.strip()
+    need(rev==adapter["source_commit"],
+         "ORIGINAL_SIMC_SOURCE_COMMIT_NOT_PINNED")
     results=[]
     seen=set()
     for item in adapter["specs"]:
@@ -186,6 +194,10 @@ def selftest():
          "SAME_TIMESTAMP_CAUSAL_LEAKAGE")
     need(observe([a(1,True)],9)["status"]==
          "UNKNOWN_NOT_SEEN_ABSENT_AFTER_ACTIVE","NO_EXIT_SHOULD_BE_UNKNOWN")
+    # Missing snapshot may not be treated as an observed absent aura.
+    missing=observe([a(1,True),{"time":2,"name":"x"},a(3,False)],9)
+    need(missing["first_seen_absent_after_active_ms"]==3000,
+         "MISSING_BUFFS_NOT_AN_EXPLICIT_ABSENCE")
     bad=0
     for val in ([a(2,True),a(1,False)],
                 [{"time":-1,"name":"x","buffs":[]}],
@@ -194,7 +206,7 @@ def selftest():
         except SnapshotIntervalError:bad+=1
         else:raise AssertionError("BAD_BURST_OBSERVATION_ACCEPTED")
     return {"status":"PASS_OFFLINE_SYNTHETIC",
-            "positive":3,"negative":bad,
+            "positive":4,"negative":bad,
             "opener_end_inferred":False,
             "full_READY_inferred":False}
 
