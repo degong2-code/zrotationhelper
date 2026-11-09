@@ -1,0 +1,241 @@
+name: zrot-gr-wcl-typed-postlock-source-if-sensitivity-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_postlock_typed_pre_scenario_v1.py
+      - .github/workflows/zrot-gr-wcl-typed-postlock-source-if-sensitivity-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  generic-synthetic:
+    name: Generic typed aura+numeric IF replay synthetic Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - name: Compile and all negative-gate tests across two unrelated spec classes
+        shell: bash
+        env:
+          PYTHONPATH: tools/research:tools/engine_first
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_postlock_typed_pre_scenario_v1.py
+          python -B tools/research/general_rotation_postlock_typed_pre_scenario_v1.py > /tmp/zrot-typed-if-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/zrot-typed-if-synthetic.json'))
+          assert x['status']=='PASS_TWO_CLASS_TYPED_SCENARIO'
+          assert x['synthetic_class_count']==2
+          assert x['negative']>=16
+          assert x['uncertain_power_divisor_sensitivity_visible'] is True
+          assert x['source_semantics_current_game_certified'] is False
+          assert x['player_competitor_READY_proven']==x['player_dummy_errors_proven']==0
+          assert x['live_WCL_API_calls']==0
+          print('GENERIC_POSTLOCK_WCL_TYPED_PRE_SENSITIVITY_ENGINE_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_postlock_typed_pre_scenario_v1.py
+  real-original-sources:
+    name: Actual old WCL distinct holdout raw 51 casts + pinned original SimC source IR ST/2T
+    needs: [generic-synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          run-id: 41463589665
+          github-token: ${{ github.token }}
+          path: /tmp/original-frozen-numeric-lock
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-replayed-real-disjoint-wcl-numeric-source-ir-v1
+          run-id: 42599589497
+          github-token: ${{ github.token }}
+          path: /tmp/original-dual-raw-numeric
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-real-three-report-wcl-actor-owned-numeric-pre-v1
+          run-id: 42608104162
+          github-token: ${{ github.token }}
+          path: /tmp/original-typed-raw-aura-power-matrix
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-general-source-hypothesis-real-49-ir-v1
+          run-id: 42594344188
+          github-token: ${{ github.token }}
+          path: /tmp/original-source-IR-four-cases
+      - name: First validate numeric WCL lock and disjoint actor raw only
+        shell: bash
+        env:
+          PYTHONPATH: tools/research:tools/engine_first
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-real-postlock-typed-if
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          from general_rotation_wcl_postlock_source_ir_bridge_v1 import numeric_frozen_boundary
+          raw=Path('/tmp/original-frozen-numeric-lock/derived/blind_lock.json').read_bytes()
+          assert sha(raw)=='c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e'
+          files=list(Path('/tmp/original-dual-raw-numeric').rglob(
+             'real-wcl-numeric-disjoint-bridge-input.json'))
+          assert len(files)==1
+          fixture=json.loads(files[0].read_bytes())
+          numeric=numeric_frozen_boundary(
+              raw,sha(raw),fixture['discovery_roster'],
+              fixture['holdout'],fixture['cast_events'])
+          assert len(numeric['numeric_casts'])==51
+          assert numeric['source_APL_injected_in_numeric_phase'] is False
+          assert numeric['numeric_locked_spell_ids']==[1,184367,335096,335097]
+          Path('/tmp/zrot-real-postlock-typed-if/frozen-WCL-numeric-before-APL.json').write_bytes(canonical(numeric))
+          print('ORIGINAL_WCL_NUMERIC_FROZEN_LOCK_VALIDATED_BEFORE_SOURCE_SEMANTICS')
+          PY
+      - name: Build postlock source row candidates from original external adapter then typed scenarios
+        shell: bash
+        env:
+          PYTHONPATH: tools/research:tools/engine_first
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          from general_rotation_postlock_numeric_spell_adapter_v1 import compile_binding
+          from general_rotation_postlock_typed_pre_scenario_v1 import (
+              evaluate,MAP_SCHEMA
+          )
+          def one(root,name):
+              files=list(Path(root).rglob(name))
+              assert len(files)==1,(root,name,files)
+              return files[0]
+          root=Path('/tmp/zrot-real-postlock-typed-if')
+          numeric=json.loads((root/'frozen-WCL-numeric-before-APL.json').read_bytes())
+          transport=json.loads(one('/tmp/original-dual-raw-numeric',
+              'holdout-original-numeric.json').read_bytes())
+          joint=json.loads(one('/tmp/original-typed-raw-aura-power-matrix',
+              'holdout-actor-numeric-joint-aura-power-pre.json').read_bytes())
+          assert joint['actor_cast_rows']==transport['actor_numeric_cast_count']==51
+          assert joint['complete_and_competing_READY_proven']==0
+          source_adapter_path=Path(
+              'docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_ACTION_FAMILY_MECHANICS_ADAPTER_V1.json')
+          speculative_path=Path(
+              'docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_WCL_RAGE_PREDICATE_ADAPTER_EXPLORATORY_V1.json')
+          adapter_raw=source_adapter_path.read_bytes()
+          adapter=json.loads(adapter_raw)
+          exploratory=json.loads(speculative_path.read_bytes())
+          assert sha(adapter_raw)==sha(adapter_raw)
+          assert exploratory['factor_authority']==(
+             'OBSERVATIONAL_ONLY_EXTERNAL_COMBAT_LOG_GUIDE_NOT_PATCH_PINNED_BLIZZARD_TRUTH')
+          assert exploratory['allowed_conclusion']=='RAW_STRICT_PRE_OBSERVED_PREDICATES_ONLY'
+          assert exploratory['wcl_actor_power_type']==1
+          assert exploratory['wcl_raw_units_per_game_resource']==10
+          assert exploratory['action_buff_numeric_ids']=={
+              'buff.recklessness.up':1719,'buff.enrage.up':184362}
+          source_hashes={
+             'warrior_fury-st':'964886a08dbaf800ac9e3694df47b7adece905fc8825782e9cc3f5d83aa54aee',
+             'warrior_fury-2t':'62d5ef47e32e066e771a447c3251ab1ba13699c24eec11481f9563f0fcc96dba'}
+          summary={
+            'schema':'ZrotOriginalActualWclTypedSourceIfScenariosStudyV1',
+            'scope_policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+            'source_WCL_origin':'PREVIOUSLY_COLLECTED_OFFICIAL_DISJOINT_REPORT_HOLDOUT',
+            'original_numeric_lock_sha256':numeric['lock_sha256'],
+            'actual_WCL_holdout_casts':51,
+            'old_WCL_raw_actor_transport_sha256':transport['numeric_transport_sha256'],
+            'old_WCL_owned_aura_power_join_sha256':joint['joined_numeric_pre_sha256'],
+            'external_exploratory_power_adapter_sha256':sha(speculative_path.read_bytes()),
+            'scenario_divisors_for_uncertain_raw_resource_units':[1,10],
+            'per_target_model':{},
+            'actual_current_WoW_semantic_source_operand_certifications':0,
+            'actual_verified_source_IF_true':0,
+            'real_competing_spell_READY_proven':0,
+            'validated_general_rotation_priority_rules':0,
+            'dummy_wrong_skill_errors':0,
+            'new_WCL_API_calls':0,
+            'new_SimC_CXX_builds':0
+          }
+          for case_name,case_hash in source_hashes.items():
+              source_path=one('/tmp/original-source-IR-four-cases',
+                  case_name+'-source-hypothesis-evidence.json')
+              assert hashlib.sha256(source_path.read_bytes()).hexdigest()==case_hash
+              source=json.loads(source_path.read_bytes())
+              compiled=compile_binding(numeric,source,adapter,adapter_raw)
+              assert compiled['numeric_candidate_CASTS_with_exact_token_hypothesis']==15
+              mapping={
+                  'schema':MAP_SCHEMA,
+                  'policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+                  'use_stage':'AFTER_FROZEN_NUMERIC_CANDIDATE_LOCK_ONLY',
+                  'frozen_numeric_lock_sha256':numeric['lock_sha256'],
+                  'source_profile_git_blob':source['source_hypothesis_IR']['source_git_blob'],
+                  'assert_current_game_mechanic_truth':False,
+                  'assert_WCL_actor_build_equivalence':False,
+                  'assert_WCL_target_count_match':False,
+                  'assert_full_READY_or_player_error':False,
+                  'operand_bindings':[
+                     *[{
+                         'source_symbol':symbol,
+                         'raw_kind':'WCL_RAW_AURA_BOOL',
+                         'raw_signal':'raw_aura_'+str(spell)+'_active',
+                         'confidence':'EXPLORATORY_UNVERIFIED_MECHANIC_AND_BUILD'}
+                       for symbol,spell in sorted(
+                          exploratory['action_buff_numeric_ids'].items())],
+                     {'source_symbol':exploratory['actor_resource_name'],
+                      'raw_kind':'WCL_RAW_ACTOR_NUMERIC_POWER',
+                      'raw_power_type':exploratory['wcl_actor_power_type'],
+                      'raw_units_per_source_unit_scenarios':[
+                          1,exploratory['wcl_raw_units_per_game_resource']],
+                      'confidence':'EXPLORATORY_UNVERIFIED_MECHANIC_AND_BUILD'}
+                  ]
+              }
+              result=evaluate(numeric,transport,joint,source,compiled,mapping)
+              assert result['numeric_observed_casts']==51
+              assert result['raw_WCL_candidate_casts_with_source_token']==15
+              assert result['individual_source_IF_candidate_row_probes']>0
+              assert result['source_operand_semantics_independently_certified'] is False
+              assert result['WCL_actor_build_and_target_source_equivalent'] is False
+              assert result['certified_source_IF_guard_true_count']==0
+              assert result['real_competing_spell_READY_proven']==0
+              assert result['mandatory_General_Rotation_priorities_promoted']==0
+              assert result['dummy_wrong_cast_verdicts']==0
+              assert all(c['dummy_wrong_cast']=='UNKNOWN'
+                         for c in result['per_numeric_cast'])
+              (root/(case_name+'-postlock-typed-if-scenarios.json')).write_bytes(canonical(result))
+              (root/(case_name+'-exploratory-operand-contract.json')).write_bytes(canonical(mapping))
+              x={
+                 'numeric_CASTS_with_source_action_token':15,
+                 'source_candidate_rows_evaluated':
+                     result['individual_source_IF_candidate_row_probes'],
+                 'hypothetical_condition_states':
+                     result['source_conditional_scenario_counts'],
+                 'exploratory_operand_usage':result['source_operand_scenario_usage_counts'],
+                 'independently_certified_wcl_if':0,
+                 'ready_or_dummy_errors':0
+              }
+              summary['per_target_model'][case_name]=x
+              print('REAL_WCL_POSTLOCK_TYPED_SOURCE_IF_SCENARIOS',case_name,json.dumps(x,sort_keys=True))
+          (root/'real-WCL-typed-IF-research-summary.json').write_bytes(canonical(summary))
+          print('REAL_WCL_TYPED_PRE_IF_SENSITIVITY_ENGINE_2_TARGET_MODELS_PASS')
+          PY
+          sha256sum /tmp/zrot-real-postlock-typed-if/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-real-wcl-typed-postlock-source-if-scenarios-v1
+          path: /tmp/zrot-real-postlock-typed-if/*.json
+          if-no-files-found: warn
+          retention-days: 7
