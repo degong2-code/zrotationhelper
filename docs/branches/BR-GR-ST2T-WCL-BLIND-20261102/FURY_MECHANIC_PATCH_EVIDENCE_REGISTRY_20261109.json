@@ -1,0 +1,145 @@
+{
+  "schema": "ZrotPostlockMechanicEvidenceRegistryV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "purpose": "Source-condition mechanic identity/epoch validity and evidence-gap routing; strictly AFTER WCL numeric candidate lock",
+  "source_spec": "warrior_fury",
+  "source_repo": "simulationcraft/simc",
+  "source_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_commit_timestamp_utc": "2026-11-01T09:25:22Z",
+  "source_commit_evidence_url": "https://github.com/simulationcraft/simc/commit/b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_commit_timestamp_role": "CODE_REVISION_TIME_NOT_GAMEPLAY_MECHANIC_IMPLEMENTATION_PROOF",
+  "WCL_actor_fight_UTC_epoch": "UNKNOWN",
+  "original_blind_numeric_lock_sha256": "c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e",
+  "original_WCL_report_actor_build_complete": "UNKNOWN",
+  "actual_WCL_target_count_at_action": "UNKNOWN",
+  "assumption_policy": "NO_EXTERNAL_PUBLIC_NOTE_ALONE_CAN_CERTIFY_GAME_SPELL_ID_OR_GAMEPLAY_READY",
+  "references": [
+    {
+      "reference_id": "blizzard_fury_venomous_4pc_2026",
+      "provider": "BLIZZARD_OFFICIAL",
+      "url": "https://worldofwarcraft.blizzard.com/en-us/news/24296142/hotfixes",
+      "retrieved_utc_date": "2026-11-09",
+      "publication_and_mechanic_effective_time": "UNKNOWN",
+      "information_scope": "Fury Venomous Abyss 4-piece tuning: Bloodthirst damage +10%, Recklessness crit bonus gain 3% per step up to 6% (formerly 5% up to 10%). No numeric buff spell ID stated.",
+      "policy": "MECHANIC_TEXT_SCOPE_ONLY_NO_SPELL_ID_OR_APL_SEMANTIC_CERTIFICATION"
+    },
+    {
+      "reference_id": "wowhead_retail_enrage_184362",
+      "provider": "UNVERSIONED_PUBLIC_SPELL_DB",
+      "url": "https://www.wowhead.com/spell=184362/enrage",
+      "retrieved_utc_date": "2026-11-09",
+      "publication_and_mechanic_effective_time": "UNKNOWN",
+      "information_scope": "Retail-looking Enrage numeric 184362 and 4 sec displayed buff; no independent verification of actor-specific extensions, patch/build, or raw WCL ID-to-apl binding.",
+      "policy": "SPELL_ID_NAME_CANDIDATE_ONLY_NOT_PLAYER_BUILD_OR_EXACT_DURATION"
+    },
+    {
+      "reference_id": "wowhead_retail_recklessness_1719",
+      "provider": "UNVERSIONED_PUBLIC_SPELL_DB",
+      "url": "https://www.wowhead.com/spell=1719/recklessness",
+      "retrieved_utc_date": "2026-11-09",
+      "publication_and_mechanic_effective_time": "UNKNOWN",
+      "information_scope": "Retail-looking Recklessness numeric 1719, buff description; no actor-talent/build or dynamic duration proof.",
+      "policy": "SPELL_ID_NAME_CANDIDATE_ONLY_NOT_PLAYER_BUILD_OR_EXACT_DURATION"
+    }
+  ],
+  "source_symbol_bindings": [
+    {
+      "symbol": "buff.fury_mid2_4pc_crit.stack",
+      "candidate_sources": [
+        "blizzard_fury_venomous_4pc_2026"
+      ],
+      "raw_numeric_id": null,
+      "signal_kind": "STACK",
+      "source_semantics": "UNVERIFIED",
+      "source_spell_ID_identity": "UNKNOWN",
+      "source_implementation_patch_parity": "UNKNOWN",
+      "required_next_proof": "Pin exact current patch numeric buff ID and verify source member, proc-stack event, 4-piece equipped and talent/build."
+    },
+    {
+      "symbol": "buff.enrage.remains",
+      "candidate_sources": [
+        "wowhead_retail_enrage_184362"
+      ],
+      "raw_numeric_id": 184362,
+      "signal_kind": "DYNAMIC_DURATION",
+      "source_semantics": "UNVERIFIED",
+      "source_spell_ID_identity": "CANDIDATE_EXTERNAL_NAME",
+      "source_implementation_patch_parity": "UNKNOWN",
+      "required_next_proof": "Find complete official duration+refresh/extension mechanics, affected build and previous event source; no future removal to infer PRE."
+    },
+    {
+      "symbol": "buff.enrage.up",
+      "candidate_sources": [
+        "wowhead_retail_enrage_184362"
+      ],
+      "raw_numeric_id": 184362,
+      "signal_kind": "BOOLEAN",
+      "source_semantics": "UNVERIFIED",
+      "source_spell_ID_identity": "CANDIDATE_EXTERNAL_NAME",
+      "source_implementation_patch_parity": "UNKNOWN",
+      "required_next_proof": "Verify raw WCL aura spell ID, actor target, relevant talent/spec/build, correct patch."
+    },
+    {
+      "symbol": "buff.recklessness.up",
+      "candidate_sources": [
+        "wowhead_retail_recklessness_1719"
+      ],
+      "raw_numeric_id": 1719,
+      "signal_kind": "BOOLEAN",
+      "source_semantics": "UNVERIFIED",
+      "source_spell_ID_identity": "CANDIDATE_EXTERNAL_NAME",
+      "source_implementation_patch_parity": "UNKNOWN",
+      "required_next_proof": "Verify actor target buff 1719 and source SimC Recklessness modifier/override family/actual build."
+    },
+    {
+      "symbol": "buff.hack_and_slash.up",
+      "candidate_sources": [],
+      "raw_numeric_id": null,
+      "signal_kind": "BOOLEAN",
+      "source_semantics": "UNKNOWN",
+      "source_spell_ID_identity": "UNKNOWN",
+      "source_implementation_patch_parity": "UNKNOWN",
+      "required_next_proof": "Identify exact current client buff ID and model proc conditions from Blizzard mechanic data or source DBC; raw presence not yet certified."
+    },
+    {
+      "symbol": "cooldown.bladestorm.ready",
+      "candidate_sources": [],
+      "raw_numeric_id": null,
+      "signal_kind": "COOLDOWN_READY",
+      "source_semantics": "UNKNOWN",
+      "source_spell_ID_identity": "UNKNOWN",
+      "source_implementation_patch_parity": "UNKNOWN",
+      "required_next_proof": "Verified cooldown/charges/proc reset Strict PRE; do not extrapolate cast intervals."
+    },
+    {
+      "symbol": "gcd",
+      "candidate_sources": [],
+      "raw_numeric_id": null,
+      "signal_kind": "DYNAMIC_GCD",
+      "source_semantics": "UNKNOWN",
+      "source_spell_ID_identity": "UNKNOWN",
+      "source_implementation_patch_parity": "UNKNOWN",
+      "required_next_proof": "Observed haste, GCD caps, effect modifiers, action off-GCD state from official API and player build; do not use average cast intervals."
+    },
+    {
+      "symbol": "rage",
+      "candidate_sources": [],
+      "raw_numeric_id": null,
+      "signal_kind": "RESOURCE",
+      "source_semantics": "UNVERIFIED",
+      "source_spell_ID_identity": "UNKNOWN",
+      "source_implementation_patch_parity": "UNKNOWN",
+      "required_next_proof": "Blizzard/WCL exact type1 raw amount units vs source resource, actor owning and spend snapshot; /1 or /10 scenario is not game truth."
+    }
+  ],
+  "claim_gates": {
+    "independent_current_patch_numeric_spell_identity": "UNKNOWN",
+    "complete_WCL_actor_build_talent_gear_fingerprint": "UNKNOWN",
+    "source_cpp_mechanic_implementation_revision_verified": "UNKNOWN",
+    "mechanic_effective_timestamp_UTC": "UNKNOWN",
+    "WCL_actor_report_epoch_UTC": "UNKNOWN",
+    "source_IF_operand_semantics_certified": "UNKNOWN",
+    "physical_READY_and_competing_actions": "UNKNOWN"
+  },
+  "requested_promotion": false
+}
