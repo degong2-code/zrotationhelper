@@ -1,0 +1,104 @@
+{
+  "schema": "ZrotOriginalSimcPartialPRESourceIFMinimumEvidenceSuccessorReceiptV1",
+  "date": "2026-11-10",
+  "product_scope_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "status": "ACTUAL_ORIGINAL_SIMC_SOURCE_IF_PARTIAL_PRE_INCLUSION_MINIMAL_REPLAY_VERIFIED__NOT_FULL_READY",
+  "source_reuse": {
+    "original_workflow_run": 42594344188,
+    "original_artifact_id": 13662519082,
+    "original_artifact_zip_sha256": "b9277acd9d0eb32a85dc00a6da8515e6e4db88d0d4d95e70e92ade52221a6d92",
+    "official_simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "original_portfolio_member_sha256": "1a4df6f85503a190325541bf0ffac2424b3cc08ef8d57971af626b900624185f",
+    "source_cases": 4,
+    "distinct_specializations": 2,
+    "spec_keys": [
+      "warrior_fury",
+      "mage_arcane"
+    ],
+    "target_counts": [
+      1,
+      2
+    ],
+    "reused_AST": "tools/research/simc_apl_semantic_ir_v2.py",
+    "reused_minimal_witness_engine": "tools/research/general_rotation_source_if_minimal_witness_v1.py",
+    "reused_original_source_IR": "tools/research/general_rotation_original_source_evidence_bridge_v1.py"
+  },
+  "implementation": {
+    "generic_partial_PRE_AST_extension": "tools/research/general_rotation_source_if_minimal_witness_v1.py::sufficient_partial_source_witness",
+    "generic_original_case_pinned_consumer": "tools/research/general_rotation_original_simc_if_minimal_frontier_v1.py",
+    "profile_manifest": "tools/research/fixtures/general_rotation_simc_original_if49_pinned_archive_v1.json",
+    "workflow": ".github/workflows/zrot-gr-original-source-if-partial-minimal-v1.yml",
+    "no_spell_class_encounter_semantics_in_generic_core": true,
+    "missing_operands_remain_UNKNOWN_not_zero": true,
+    "source_row_SHA_and_original_call_identity_checked": true,
+    "source_IF_native_post_comparator_not_as_AST_input": true,
+    "explicit_full_READY_gate_not_promoted": true,
+    "no_new_native_CXX_builds": true,
+    "no_new_WCL_API_calls": true
+  },
+  "actual_replay_counts": {
+    "original_selected_source_occurrences": 147,
+    "original_IF_confirmed_true_at_same_native_call": 49,
+    "original_IF_unknown": 44,
+    "source_no_explicit_IF": 54,
+    "observed_source_operand_instances_for_49_proven_true_IF": 122,
+    "inclusion_minimal_sufficient_operand_instances_for_same_49": 89,
+    "observed_operand_instances_not_needed_to_certify_these_same_IF": 33,
+    "share_of_previously_observed_operand_instances_not_required_for_IF_truth_percent_approx": 27.05,
+    "share_is_not_measured_API_or_capture_cost_reduction": true,
+    "also_not_proof_of_simc_priority_or_player_advice": true,
+    "selective_source_IF_examples": [
+      "IF target.time_to_die>300|buff.recklessness.up|target.time_to_die<25: observed buff.recklessness.up=1 suffices for this original Fury selection; target.time_to_die need not be observed for this occurrence.",
+      "IF buff.clearcasting.react&(buff.arcane_salvo.stack<15|active_enemies<variable.aoe_count&buff.clearcasting.react=3): clearcasting react and arcane_salvo stack can suffice for selected Arcane instances, without asserting a general rotation priority."
+    ]
+  },
+  "observed_but_unresolved_IF_upper_bound_symbol_occurrence_counts": {
+    "prev_gcd.1.arcane_surge": 17,
+    "talent.orb_barrage": 17,
+    "buff.cumulative_power.stack": 8,
+    "set_bonus.midnight_season_2_4pc": 8,
+    "fight_remains": 6,
+    "cooldown.arcane_surge.ready": 4
+  },
+  "capture_priority_semantics": "Missing-symbol frequency is an observation, NOT proof that each is necessary to resolve a given IF, not mechanic priority and not code-level hardcoding.",
+  "validation": {
+    "final_GitHub_Actions_run": 42721244205,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42721244205",
+    "jobs_total": 3,
+    "jobs_success": 3,
+    "python312_compile_and_synthetic": "PASS",
+    "python314_compile_and_synthetic": "PASS",
+    "pinned_four_original_100pct_member_sha_replay": "PASS",
+    "partial_source_witness_synthetic_checks_each_version": 13,
+    "original_source_frontier_negative_fail_closed_mutations": 5,
+    "source_minimal_witness_final_python_SHA256": "b878cef9390c2d546da37ccee9ac6349b5011ff7ca2f15a266341a602cfc1bc0",
+    "original_source_frontier_final_python_SHA256": "512d70180b0595ab0f91827fc5b43c16dfeaae61f56dcf5daca7b5f708e41f5d",
+    "derived_result_JSON_SHA256": "19ceaa979d8bc9d48cd152d544586969abb1684be66412dfe38eb162071cc503",
+    "derived_artifact_id": 13721095736,
+    "derived_artifact_zip_sha256": "da398d1d571243aec13ec991da64c772432fe228e44169f990fcc875247bf009",
+    "artifact_expiry_UTC": "2026-11-16T23:32:33Z",
+    "initial_synthetic_failure_run": 42720811286,
+    "initial_synthetic_failure_cause": "Synthetic source identity and original observation identity shared same Python dict, defeating tamper mutation; isolated input copies in successor.",
+    "previously_successful_unhardened_run": 42720906054,
+    "final_successor_excludes_nonfinite_observed_PRE": true
+  },
+  "evidence_limits": {
+    "original_source_IF_TRUE_subset_verified": 49,
+    "full_competing_action_READY_proven": 0,
+    "source_if_unknown_remains": 44,
+    "source_no_if_not_automatic_READY": 54,
+    "source_opener_end": "UNKNOWN",
+    "native_3plus_selections_not_covered_by_this_original_same_call_source_IR": true,
+    "WCL_numeric_blind_candidate_discovery_not_influenced": true,
+    "current_Retail_optimal_general_priority_certified": false,
+    "target_dummy_wrong_rotation_certified": false,
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "product_exact_next": "Complete evidence-bounded source-driven General Rotation IF/ELSE and actual source action READY for ST, 2T and 3+ with opener state transition, then independently contrast locked blind WCL and safe player dummy feedback.",
+  "session_exact_next": "Reuse original selected-root PRE and source-stage readiness/IF evidence. Target high-impact still-UNKNOWN source operands such as original Arcane prev_gcd state / hero and tier build using generic source field adapters; prove or retain UNKNOWN for earlier competing actions rather than adding new spell-specific core logic. Only extend Native source capture where real decision impact demands."
+}
