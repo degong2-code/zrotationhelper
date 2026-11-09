@@ -54,6 +54,19 @@ def power_cast_matrix(events:list,actor_id:int,fight_start_ms:int,
              math.isfinite(float(e["timestamp"])) and
              float(e["timestamp"]).is_integer(),
              "RESOURCE_RAW_EVENT_TIME_NOT_INTEGER")
+        # The reused historical parser enforces ordering and ownership,
+        # but its float comparisons alone do not reject positive infinity.
+        # Reject nonfinite owned raw values at ingestion even when a later
+        # observation supersedes them before the first cast. Otherwise an
+        # invalid event can disappear silently from the PRE result.
+        if e.get("classResources") is not None and (
+            resource_owner(e,actor_id) in
+            ("ACTOR_OWNED_SOURCE","ACTOR_OWNED_TARGET")):
+            values=parse_resources(e)
+            for entry in values.values():
+                need(math.isfinite(float(entry["raw_amount"])) and
+                     math.isfinite(float(entry["raw_max"])),
+                     "NONFINITE_OWNED_RAW_RESOURCE_VALUE")
         if (e.get("sourceID")==actor_id and
             str(e.get("type","")).casefold() in ("cast","begincast")):
             raw_casts.append({
