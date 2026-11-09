@@ -415,3 +415,15 @@ Permanent receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SIMC_
 - Real prior source exact witness [Actions #42564537815](https://github.com/degong2-code/zrotationhelper/actions/runs/42564537815) **3/3 PASS**, 203 exact signature rows across four cases (59/60/41/43 including precombat), raw JSON SHA256 `c6ff2f3c9aeff1eb6d6cfc2b9791fc2ad26e656edb1d3fba152da24cac18569b`. All 149 pristine combat action samples remain independently verified against instrumented same-run sequence.
 - New [Actions #42569743989](https://github.com/degong2-code/zrotationhelper/actions/runs/42569743989) **3/3 PASS** Python3.12/3.14 plus real original artifact. 222-line Markdown with original exact source APL list/rank and literal IF for first 10s, source-row identity UNKNOWN when signature absent, separated precombat, report SHA256 `c18d6ce1a126bd65a5e91b3d94b6d2ab482218d6522161531680dcc5db214374`. Artifact `zrot-exact-simc-opener-source-if-readable-v1`.
 - Important boundary: pointer/signature proves source **row identity at JSON2 append**, not exact IF truth at earlier selection, not full READY or competitive priority, not WoW cast, not opener ending. 10-second window display only; all dummy error verdicts UNKNOWN. Next product-critical work: use original select-time PRE operands/IF evidence and branch control with exact source rows; add ST/2T/AoE and independent WCL holdout later. MAIN/FROZEN unchanged.
+
+## 2026-11-09 Original SimC exact APL IF select-time PRE frontier — source-observability lock
+
+| Reuse/implementation | Evidence and status |
+| --- | --- |
+| Generic source IF PRE symbol capture backlog | `general_rotation_simc_exact_if_capture_frontier_v1.py`; source AST reused, no spec hardcode |
+| Actual 203 original emitted-row witness | `general_rotation_native_sequence_row_replay_v1.py`, Actions #42564537815; real original JSON SHA `c6ff2f3c...` |
+| New 95 explicit IF / 108 no explicit IF classification | Actions #42570521693 3/3 PASS; output SHA `6ae5868a...`; **not causal IF proof** |
+| Earlier separate original root-PRE 209 native IF matches | `ORIGINAL_MANA_NATIVE_IF_ST_2T_20261106.json` fixed evidence, **different run, no emission-row join** |
+| Next SimC E2E | same original root call ID+signature+pre-stage operand on identical action selected/cast; no need for new general parser |
+
+Branch evidence receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SIMC_EXACT_IF_PRE_CAPTURE_FRONTIER_20261109.json`.

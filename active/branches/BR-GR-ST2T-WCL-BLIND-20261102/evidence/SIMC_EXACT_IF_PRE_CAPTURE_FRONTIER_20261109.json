@@ -1,0 +1,111 @@
+{
+  "schema": "ZrotSimCExactEmittedAPLSourceIFCaptureFrontierEvidenceV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "date": "2026-11-09",
+  "source": {
+    "original_simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "native_actual_emitter_replay_run": 42564537815,
+    "real_source_json_sha256": "c6ff2f3c9aeff1eb6d6cfc2b9791fc2ad26e656edb1d3fba152da24cac18569b",
+    "emitted_apl_signature_rows": 203
+  },
+  "engine": {
+    "path": "tools/research/general_rotation_simc_exact_if_capture_frontier_v1.py",
+    "uses_existing_apl_expression_ast": true,
+    "source_semantics_hardcoded": false
+  },
+  "verification": {
+    "run_id": 42570521693,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42570521693",
+    "jobs_total": 3,
+    "jobs_success": 3,
+    "conclusion": "success",
+    "real_source_parse": true,
+    "new_CXX_compilation": false,
+    "WCL_API_calls": 0
+  },
+  "classification": {
+    "warrior_fury_st": {
+      "explicit_if_unobserved": 29,
+      "no_explicit_if": 30
+    },
+    "warrior_fury_2t": {
+      "explicit_if_unobserved": 10,
+      "no_explicit_if": 50
+    },
+    "mage_arcane_st": {
+      "explicit_if_unobserved": 26,
+      "no_explicit_if": 15
+    },
+    "mage_arcane_2t": {
+      "explicit_if_unobserved": 30,
+      "no_explicit_if": 13
+    },
+    "totals": {
+      "exact_emitted_rows": 203,
+      "explicit_if_requires_selection_PRE": 95,
+      "source_if_not_written": 108
+    },
+    "selection_window_ms": 10000,
+    "top_missing_fury_st": [
+      [
+        "buff.recklessness.up",
+        10
+      ],
+      [
+        "buff.hack_and_slash.up",
+        3
+      ],
+      [
+        "rage",
+        3
+      ]
+    ],
+    "top_missing_mage_st": [
+      [
+        "active_enemies",
+        6
+      ],
+      [
+        "variable.aoe_count",
+        6
+      ],
+      [
+        "buff.arcane_salvo.stack",
+        5
+      ],
+      [
+        "buff.clearcasting.react",
+        4
+      ]
+    ]
+  },
+  "previous_independent_root_if": {
+    "receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ORIGINAL_MANA_NATIVE_IF_ST_2T_20261106.json",
+    "original_cpp_root_pre": 4682,
+    "source_AST_vs_native_IF_matches": 209,
+    "conflicts": 0,
+    "source_run_distinct_from_emitter": true,
+    "join_per_emitted_action": false
+  },
+  "result": {
+    "json_sha256": "6ae5868ab73c9aa63e1f9411765499c1dbd2239ca2387a284727d4bca0101fb8",
+    "artifact_id": 13652539917,
+    "zip_digest": "sha256:a078b644264d9abd80cc89ddd3e3cc917f8b83a95ef8f0641f99be463ac4dcd3",
+    "expires_utc": "2026-11-16T06:01:07Z"
+  },
+  "scope": {
+    "same_run_selection_IF_proofs": 0,
+    "positive_full_READY_proven": 0,
+    "independent_WCL_holdout": false,
+    "real_dummy_mistakes": "UNKNOWN",
+    "opener_end": "UNKNOWN",
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "product_exact_next": "SimC-first actual IF truth and competitor readiness at selected root; source action row/virtual method/strict original PRE identity in same run, then ST 2T 3+ targets/opener end and WCL blind validation.",
+  "session_exact_next": "Minimal original pinned SimC selection-time witness producer for Fury buff.recklessness.up/rage and counterpart needed row identity; prove pristine/instrumented cast parity, independent IF AST, fail close other operands."
+}
