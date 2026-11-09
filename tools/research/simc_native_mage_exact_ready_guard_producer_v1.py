@@ -31,13 +31,14 @@ from general_rotation_mage_source_fixture_v1 import (
     CPP_BLOB as MAGE_BLOB, PROFILE_BLOB as MAGE_PROFILE_BLOB)
 from general_rotation_original_pre_field_transport_v1 import (
     MARK as GENERIC_PRE_MARK, ORIGINAL_CALL as ORIGINAL_READY_CALL)
+from general_rotation_original_method_witness_v1 import (
+    POINTER_MARK,extend_player_pointer,MethodWitnessError)
 
 SCHEMA="ZrotMageOriginalReadyMethodGuardWitnessProducerV1"
 POLICY="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
 PLAYER_PATH="engine/player/player.cpp"
 MAGE_PATH="engine/class_modules/sc_mage.cpp"
 PROFILE_PATH="profiles/MID2/MID2_Mage_Arcane.simc"
-POINTER_MARK="ZROT_GR_EXACT_ACTION_POINTER_PRE_V1|"
 METHOD_MARK="ZROT_GR_MAGE_EXACT_READY_METHOD_PRE_V1|"
 BUFF_CHECK="p()->buffs.prismatic_bolt->check()"
 DELEGATE="return arcane_mage_spell_t::ready();"
@@ -129,30 +130,6 @@ def extend_mage(pristine:bytes,*,require_pin:bool=True)->bytes:
     return code.encode("utf-8")
 
 
-def extend_player_pointer(already_generic:bytes)->bytes:
-    src=already_generic.decode("utf-8")
-    require(GENERIC_PRE_MARK in src and
-            POINTER_MARK not in src and
-            src.count(ORIGINAL_READY_CALL)==1 and
-            src.index(GENERIC_PRE_MARK)<src.index(ORIGINAL_READY_CALL),
-            "GENERIC_SOURCE_PRE_BEFORE_READY_REQUIRED")
-    code=(
-        "    // Object address is a per-run correlator, never cross-run identity.\n"
-        "    if ( sim->log && !is_pet() && !is_enemy() )\n"
-        '      sim->print_log( "'+POINTER_MARK+'{}|{}|{}",\n'
-        "        sim->current_time().total_millis(), a->name_str,\n"
-        "        static_cast<const void*>( a ) );\n"
-    )
-    revised=src.replace(ORIGINAL_READY_CALL,code+ORIGINAL_READY_CALL,1)
-    require(revised.count("a->action_ready()")==src.count("a->action_ready()") and
-            revised.count(ORIGINAL_READY_CALL)==1 and
-            revised.index(GENERIC_PRE_MARK)<revised.index(POINTER_MARK)<
-                revised.index(ORIGINAL_READY_CALL) and
-            revised.count(POINTER_MARK)==1,
-            "ORIGINAL_SELECT_READY_CALL_COUNT_OR_ORDER_CHANGED")
-    return revised.encode("utf-8")
-
-
 def patch_original_tree(root:Path)->dict:
     root=root.resolve(strict=True)
     revision=verify_pristine_root(root)
@@ -203,7 +180,7 @@ def selftest()->dict:
     for fn,x in ((extend_player_pointer,pointed.encode()),
                  (lambda y:extend_mage(y,require_pin=False),modified.encode())):
         try:fn(x)
-        except GuardProducerError:pass
+        except (GuardProducerError,MethodWitnessError):pass
         else:raise AssertionError("DUPLICATE_SOURCE_GUARD_PRODUCER_ACCEPTED")
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
             "checks":12,
