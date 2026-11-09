@@ -1,0 +1,44 @@
+{
+  "schema": "ZrotOriginalSimCSourceCompetitorPinnedAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_profile_git_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+  "source_profile": "profiles/MID2/MID2_Mage_Arcane.simc",
+  "source_spec_key": "mage_arcane",
+  "source_list": "spellslinger",
+  "target_count": 2,
+  "original_ledger_schema": "ZrotArcane2TFullSourceRowDecisionReasonLedgerV1",
+  "original_ledger_run_id": 42186794065,
+  "original_ledger_artifact_id": 13487477840,
+  "original_ledger_sha256": "323939228eddea328e1d74eb38c293caf3c866a1dbbfa95c946d59a4ce8a9c7e",
+  "expected_case_count": 2,
+  "legacy_ledger_fields": {
+    "case_array": "two_target_winner_decisions",
+    "case_count": "original_cpp_selected_2T_orb_rows",
+    "prior_count": "prior_original_source_rows",
+    "if_false_count": "earlier_independent_source_IF_false",
+    "necessary_false_count": "earlier_independent_local_READY_false",
+    "native_only_count": "earlier_original_cpp_if_false_not_independently_replayed"
+  },
+  "local_gate_rules": [
+    {
+      "action": "prismatic_bolt",
+      "original_numeric_field": "original_CPP_class_buff_check",
+      "false_value": 0
+    },
+    {
+      "action": "arcane_missiles",
+      "original_numeric_field": "original_CPP_class_buff_check",
+      "false_value": 0
+    }
+  ],
+  "evidence_basis": "Original pinned SimC Mage C++ necessary buff check + same exact root native return, independently verified in original source-specific producer; this adapter names legacy fields only.",
+  "source_implementation_pin": {
+    "source_cpp_path": "engine/class_modules/sc_mage.cpp",
+    "original_blob_sha1": "306d835f2db5f7418da221ce155d32e81c53f45c",
+    "original_verified_run_id": 42186013774
+  },
+  "source_scenario_assumptions": "NONE_IMPUTED",
+  "actual_gameplay_READY": "UNKNOWN",
+  "MAIN_promoted": false
+}
