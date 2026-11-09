@@ -120,8 +120,9 @@ def extend_pristine_player(raw:bytes,fields:tuple[FieldRequest,...])->bytes:
             modified.count("if ( zrot_native_ready )")==1 and
             modified.count(MARK)==1 and
             modified.index(MARK)<modified.index(ORIGINAL_CALL) and
-            modified.count("buff_t::find(")==sum(
-                f.reader=="actor_named_buff_active" for f in fields),
+            modified.count("buff_t::find(")==(
+                patched.count("buff_t::find(")+sum(
+                    f.reader=="actor_named_buff_active" for f in fields)),
             "CXX_ORIGINAL_READINESS_CALL_OR_MARKER_CHANGED")
     return modified.encode("utf-8")
 

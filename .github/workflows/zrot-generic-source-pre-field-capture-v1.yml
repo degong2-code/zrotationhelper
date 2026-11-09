@@ -99,7 +99,23 @@ jobs:
           assert p['CXX_source_guard_provenance_verified'] is True
           print('PINNED_GENERIC_TWO_SPEC_PRE_CAPTURE_SOURCE_PLAN_PASS')
           PY
-          sha256sum /tmp/gr-source-pre-capture-plan.json
+          # Fail cheaply before the C++ job if raw source patch invariants
+          # cannot be met. Native is reserved for genuinely new PRE facts.
+          python -B tools/research/general_rotation_source_pre_field_capture_v1.py \
+            --source-root simc-upstream \
+            --patch --patch-receipt /tmp/gr-static-source-pre-patch-receipt.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/gr-source-pre-capture-plan.json'))
+          r=json.load(open('/tmp/gr-static-source-pre-patch-receipt.json'))
+          assert r['plan_sha256']==p['plan_sha256']
+          assert r['fields_emitted']==3
+          assert r['original_select_action_ready_call_count_unchanged'] is True
+          assert r['new_virtual_ready_calls']==0
+          assert r['target_selection_parity']=='NOT_YET_PROVEN'
+          print('STATIC_CXX_FIELD_PATCH_READER_DELTA_SOURCE_GUARD_PASS')
+          PY
+          sha256sum /tmp/gr-source-pre-capture-plan.json /tmp/gr-static-source-pre-patch-receipt.json
       - uses: actions/upload-artifact@v4
         with:
           name: zrot-generic-source-pre-capture-plan
@@ -111,7 +127,7 @@ jobs:
     # Routine semantic/transport edits use source-pinned cheap static CI.
     # One-time original native E2E is explicitly opted into when capture
     # bytes or an API mechanic actually need fresh confirmation.
-    if: github.event_name == 'workflow_dispatch'
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[native-pre-e2e]') }}
     name: Real native Fury and Arcane same-binary nonperturbing PRE capture
     needs: [pinned-original-schema]
     runs-on: ubuntu-latest
