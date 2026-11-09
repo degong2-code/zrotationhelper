@@ -109,6 +109,11 @@ jobs:
           assert x['source_IF_FALSE_counts']==2
           assert x['source_necessary_ready_FALSE_counts']==6
           assert x['original_native_POST_ONLY_UNKNOWN_counts']==2
+          missing=x['unreconstructed_source_IF_symbol_occurrences_upper_bound']
+          assert missing.get('talent.orb_barrage')==2
+          assert missing.get('prev_gcd.1.arcane_surge')==2
+          assert missing.get('buff.arcane_salvo.react')==2
+          assert x['missing_symbol_counts_are_NOT_needed_CAPTURE_claims'] is True
           for y in x['source_only_case_frontiers']:
               assert y['prior_APL_rows_contiguous_from_first'] is True
               assert len(y['prior_competitors'])==5
