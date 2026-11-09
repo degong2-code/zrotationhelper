@@ -1,0 +1,151 @@
+name: zrot-gr-same-run-return-emitter-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_same_run_return_emitter_v1.py
+      - .github/workflows/zrot-gr-same-run-return-emitter-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic:
+    name: Generic return/emitter proof Python ${{ matrix.py }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.py }}'
+      - name: Compile and fail-closed synthetic tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_same_run_return_emitter_v1.py
+          python -B tools/research/general_rotation_same_run_return_emitter_v1.py > /tmp/zrot-same-run-synthetic.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/zrot-same-run-synthetic.json'))
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['checks']>=20 and d['negative_identity_controls']>=5
+          assert d['full_ready_proven']==0
+          assert d['actual_simc_run'] is False and d['WCL_API_calls']==0
+          print('GENERIC_RETURN_EMITTER_FAIL_CLOSED_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_same_run_return_emitter_v1.py
+  native:
+    name: Pinned original SimC 2 specs ST/2T same-run return/emission
+    needs: [synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-general-rotation-first-real-cast-and-source-ir
+          run-id: 42562520191
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-pristine
+      - name: Reuse official prior source and add passive return/emitter witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          test -s /tmp/zrot-pristine/gr-simc-original-performed-action-and-condition-model.json
+          echo "584819145ec6e51bd7596bd273da74402622adf7bd0ecf1ea25ce19b0f26c715  /tmp/zrot-pristine/gr-simc-original-performed-action-and-condition-model.json" | sha256sum -c -
+          python -B tools/research/simc_original_select_if_pre_witness_v1.py \
+            --source-root simc-upstream \
+            --plan tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json \
+            --receipt /tmp/zrot-original-same-call-prior.json
+          python -B tools/research/general_rotation_same_run_return_emitter_v1.py \
+            --source-root simc-upstream \
+            --prior-receipt /tmp/zrot-original-same-call-prior.json \
+            --patch-receipt /tmp/zrot-selected-return-emitter-patch.json
+      - name: Compile one pinned original SimC with passive witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-link-native -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-link-native --target simc --parallel 3
+          test -x /tmp/zrot-link-native/simc
+      - name: Native four-case proof, pristine 149 parity and bounded link report
+        shell: bash
+        run: |
+          set -euo pipefail
+          for row in "warrior_fury:warrior:MID2_Warrior_Fury.simc" "mage_arcane:mage:MID2_Mage_Arcane.simc"; do
+            IFS=: read -r spec actor profile <<< "$row"
+            for n in 1 2; do
+              key=st
+              if [ "$n" = 2 ]; then key=2t; fi
+              d="/tmp/zrot-same-run-native/$spec-$key"
+              python -B tools/research/simc_native_reference_capture.py \
+                --profile "simc-upstream/profiles/MID2/$profile" --spec "$actor" \
+                --simc-bin /tmp/zrot-link-native/simc \
+                --targets "$n" --seed 31459 --fight-seconds 30 \
+                --out-dir "$d" --timeout 180
+              python -B tools/research/general_rotation_same_run_return_emitter_v1.py \
+                --log "$d/simc_native_log.txt" --out "$d/select-emitter-identity.json"
+            done
+          done
+          python - <<'PY'
+          import json,sys,collections
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          from general_rotation_native_sequence_row_replay_v1 import compare_pristine
+          root=Path('/tmp/zrot-same-run-native')
+          base=json.loads(Path('/tmp/zrot-pristine/gr-simc-original-performed-action-and-condition-model.json').read_bytes())
+          old={(c['source_spec_key'],c['case']):c for c in base['research_cases']}
+          total=0
+          counts=collections.Counter()
+          for spec in ('warrior_fury','mage_arcane'):
+            for case in ('st','2t'):
+              p=root/(spec+'-'+case)
+              probe=extract_json_sequence(p)
+              compare_pristine(old[(spec,case)],probe)
+              d=json.loads((p/'select-emitter-identity.json').read_bytes())
+              assert d['source_readiness_proven']==0
+              assert d['selection_to_emission_causality_proven'] is False
+              assert d['emitter_records']>0
+              total+=old[(spec,case)]['simc_JSON2_observed_combat_action_count']
+              counts.update(d['identity_counts'])
+              print('SAME_RUN_BOUNDARY',spec,case,json.dumps(d['identity_counts'],sort_keys=True))
+          assert total==149
+          print('PRISTINE_JSON2_PARITY_149_OF_149_PASS')
+          print('SAME_RUN_GENERIC_IDENTITY_COUNTS',json.dumps(counts,sort_keys=True))
+          PY
+          sha256sum /tmp/zrot-selected-return-emitter-patch.json /tmp/zrot-same-run-native/*/select-emitter-identity.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-same-run-return-emitter-v1
+          path: |
+            /tmp/zrot-selected-return-emitter-patch.json
+            /tmp/zrot-same-run-native/**/select-emitter-identity.json
+            /tmp/zrot-same-run-native/**/simc_reference_receipt.json
+          if-no-files-found: warn
+          retention-days: 7
