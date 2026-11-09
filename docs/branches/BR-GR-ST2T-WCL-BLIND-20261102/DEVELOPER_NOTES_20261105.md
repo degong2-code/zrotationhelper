@@ -1,5 +1,12 @@
 # zRotationHelper — Developer Notes / Branch Local (2026-11-05)
 
+## 2026-11-09 Scope Gen5 — evidence vs model correctness
+
+The final latest official source selector result is **#42573758563**, 3/3 green; its original C++ source IF truth only covers 60 same-call Fury cases, not all 203 exact JSON2 emitted row IDs. Those 203 are action signatures at emitter timing; 209 historic original IF comparisons are a DIFFERENT run. A source return is NOT a performed player cast; JSON2 SAMPLE_ACTION is not a WoW button press; 149/149 action parity proves no tested behavior drift only. An AST calculable but original if_expr not reached (303 Fury calls) is NOT native IF false. No positive full READY, global priority, opener phase, WCL current holdout or target dummy error was validated.
+
+Before any new code, re-read evidence index and exact source receipts, batch only independent E2E, reuse pinned binary and tests where possible; next critical step is same-run original select-root→emitter identity with original PRE, not another isolated ready() witness. Generic core remains class/weapon/spell neutral; SourceAdapter declares class-specific operands. Active product is **General Rotation opener + priority & dummy**, NOT raid/encounter/NSRT. User asked new chat to perform ONLY read-only restoration until new explicit '진행'. MAIN pointers/FROZEN untouched.
+
+
 ## 엔진 우선·유효 권위
 공식 범위: `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`, 전체 scope snapshot은 branch-local `LATEST_HANDOFF.json`와 불변 `docs/PRODUCT_SCOPE_LOCK_V1.json`에 포함. 사용자 승인 없는 Encounter/NSRT 목표 복원 금지. MAIN만 공유 pointer/contract/registry/FROZEN 승격. 연구 브랜치에는 승인된 격리 구현·검증·인계만.
 

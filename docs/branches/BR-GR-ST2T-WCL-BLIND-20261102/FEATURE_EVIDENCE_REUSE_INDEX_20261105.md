@@ -1,4 +1,21 @@
 # zRotationHelper — Feature Evidence Reuse Index (2026-11-05)
+
+## Gen5 (2026-11-09) — current feature/evidence reuse decision
+
+| Feature | Actual evidence / proof boundary | Action |
+|---|---|---|
+| SimC source IR & first model | 172 APL rows, 262 source returns #42195342553, two classes ST/2T | **REUSE**, never count as 262 actual casts |
+| Native performed SimC JSON2 actions | 149 SAMPLE_ACTION incl autoattack/items #42562520191, original/modified parity 149/149 in #42573758563 | **REUSE**, not game play |
+| Emitted source APL identity | 203 exact action object signatures #42564537815 (incl precombat) | **REUSE**, do not infer same earlier select root |
+| IF missing state frontier | 95 explicit IF needing decision PRE; 108 no explicit IF #42570521693 | **REUSE**, lack of IF != READY |
+| Source selector same-call native IF | Fury ST58 + 2T2 = 60 consistent AST/native #42573758563; 0 conflicts; Arcane same-call 0 | **EXTEND** only high-value same-root causal identity / Arcane adapter |
+| Earlier original IF proof | 209 independent AST-vs-native matches from DIFFERENT run | **REUSE separately**, NEVER join/sum to 60/203 |
+| Competitor READY, opener end and 3+ AoE | Not verified in current source model | **UNKNOWN**, implement targeted proof not per-spell loop |
+| WCL old cohorts / current model | 54 discovery + 51 holdout historical; current IR blind lock NOT PROVEN | **REUSE raw** only after SimC hypothesis fixed; WCL semantic blindness |
+| Dummy evaluation | Current Retail addon API observability and actual client test NOT RUN | **UNKNOWN**, do not flag user mistake |
+
+**Decision:** existing source/parser/producer/validator is adequate to advance; no blanket rewrite or old archive recovery required. Current handoff: `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json`, scope generation 5.
+
 이 파일은 20261104 장문 인덱스를 대체하는 **최신 길잡이**다. 구 인덱스·원본·FROZEN을 삭제/수정하지 않는다.
 
 ## 2026-11-06 필수 외부 구조/정책 참조 (신규, branch-only)

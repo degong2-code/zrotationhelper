@@ -21,3 +21,9 @@ This is a branch-local operational successor. **Do not edit or supersede** canon
 - New chat tasks may update **branch-local** handoff and evidence only after explicit progress. Do not inflate source/hypothesis completion to validated gameplay output.
 
 See `HANDOFF_STATUS_20261109.md` for measured scope and Product/Session Exact Next.
+
+## Gen5 read-only new-chat gate (2026-11-09)
+
+Current branch-local handoff is scope Gen5, `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json`. Parent Gen4 archived exactly at `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN4_BEFORE_20261109.json`, SHA256 `84c15a489c7709bdbd24f4474f6665afc9cc9692ccc286cda1c1ce1e7a6a7a9e`. **Every new chat first response MUST independently re-read branch and MAIN actual refs and real receipts, give goal / gap categories / reuse strategy / short-medium-long roadmap and STOP until the user gives a new explicit '진행'.** Past chat progress is not inherited. See `handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_SCOPEGEN5_20261109.md` for the current boot prompt. Original Gen4 prompt is historical, not the latest.
+
+Newest source truth: Fury 60 same-call native IF/AST matches and 149/149 actual SimC JSON2 parity in #42573758563. This does NOT link all select roots to the 203 JSON2 emitter APL signatures, close all full READY, define opener end, validate 3+ target or WCL current rotation IR. Never turn UNKNOWN into an error. MAIN/FROZEN unchanged.

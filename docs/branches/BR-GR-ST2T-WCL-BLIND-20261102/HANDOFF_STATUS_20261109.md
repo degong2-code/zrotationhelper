@@ -1,5 +1,18 @@
 # zRotationHelper — General Rotation / Dummy Trainer current status (2026-11-09)
 
+## 2026-11-09 Scope Gen5 handoff — latest verified same-call SimC proof
+
+**Handoff authority:** branch Gen5 `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json`; parent Gen4 exact bytes archived `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN4_BEFORE_20261109.json` SHA256 `84c15a489c7709bdbd24f4474f6665afc9cc9692ccc286cda1c1ce1e7a6a7a9e`. The branch HEAD displayed here is preparation-time `0a33183eaee1565e7481027c98231d86bc17b6ff`, **not** an eternal HEAD; new chat re-queries. MAIN checked read-only `4790f77f76a75f26ff0558d1d18c16cd9d630c4b`.
+
+**What advanced since old Gen4:** [Actions #42573758563](https://github.com/degong2-code/zrotationhelper/actions/runs/42573758563) **3/3 success**; Fury original select-call same-pointer PRE/IF independent AST vs native comparator **60/60** observed evaluable calls (58 ST + 2 2T; no conflicts), 149/149 original JSON2 emitted action parity across Fury/Arcane ST/2T. Arcane exact same-call IF matches **0** in this Fury adapter run. 303 Fury original selector calls had AST state but native IF was not reached: **not** a proof that IF was false. Historic distinct 209 comparisons do not get joined or summed. Exact JSON2 emitter source APL signatures 203 incl precombat remain distinct from original select-root identity. Source rows 172 and source returns 262 are not performed casts.
+
+**Product is NOT finished:** missing exact selected-root→emitter causal link, global competing READY, validated opener end, 3+ AoE/build breakpoints, current WCL blind-lock/holdout and official current Retail mechanics, target dummy API observability/actual correction. Strongest recent evidence establishes original-source IF truth for a limited same-call Fury subset, **not** an optimal General Rotation. No user mistake inferred from missing data.
+
+**Reuse:** source AST/pins, 172/262 source IR, 149 JSON2 records, 203 emitted signatures, 95 explicit IF symbol frontier, 60 same-call original IF and 209 unrelated-run proof, 47 Fury scoped necessary gear gate and 4 Arcane scoped negative gate, existing generic Proof/Condition IR and WCL blind tools. Extend only minimal source-pinned emitter↔selected-root identity plus high-impact PRE and conditional priority. Do not repeat validated SimC builds merely to improve CI PASS counts. No MAIN/FROZEN/global handoff promotion.
+
+**Exact Next:** SimC-only precise decision replay/phase state first; then cross-spec + 3+ targets, independent WCL numeric blind lock and held-out postlock comparison; only then safe dummy feedback. **New chat first turn READ-ONLY report, STOP until new explicit '진행'.**
+
+
 **Authoritative product policy:** `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1` · lock SHA256 `157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295`. The final deliverable is a reusable specialization-neutral General Rotation opener + state-conditioned ST/2T/cleave/AoE priority research/validation engine and lightweight evidence-bounded target-dummy practice feedback. **No encounter/raid execution plans, NSRT, boss timelines or in-combat Hekili solver.** MAIN alone promotes canonical state; this branch is an implementation/validation candidate.
 
 ## Live HEAD observed BEFORE the 2026-11-09 handoff commits
