@@ -481,3 +481,15 @@ Permanent branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidenc
 | WCL current independent validation | not run this step | **NOT_RUN**; preserve blind candidate lock then holdout |
 
 Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_CONDITION_BOUNDARY_TRIAGE_20261109.json`. Relevant output SHA256 `ee9d35b01ca66de84578cc84a62e0a6e663c597e56783c7fad79cd801241ac9c`. New original SimC rebuilds 0. No historical evidence status changed.
+
+## 2026-11-09 reusable generic source-dispatch proof (after offline 203 triage)
+
+| Asset | Confirmed | Scope and reuse |
+| --- | --- | --- |
+| `tools/research/general_rotation_original_foreground_dispatch_v1.py` | Original official `player_t::execute_action` same-local-action selection→JSON2 append-site; 147 (Fury ST 43/2T44; Arcane ST29/2T31), [run #42584765533](https://github.com/degong2-code/zrotationhelper/actions/runs/42584765533) 3/3 PASS | **REUSE** generic callsite witness; no spell hardcoding; provenance not complete READY or optimality |
+| 56 without direct APL foreground callsite | 54 precombat, 2 combat distinct route unknown | **UNKNOWN / ROUTE EXTEND**; never call 54 precombat a failed combat selection; trace only material 2 combat actions |
+| 147 selected original action_ready PRE markers | 91 have native original IF comparator, 56 did not reach it | **REUSE AS OBSERVED CXX COMPARATOR**; do not silently treat as independent IF truth or full READY |
+| Real old/new parity | Original 149/149 JSON2 action order/time/name/id; 203/203 emitter rows; pinned C++ source revision | **FROZEN-ELIGIBLE BRANCH EVIDENCE ONLY**, not canonical FROZEN/MAIN |
+| Native output artifact | `zrot-gr-original-foreground-dispatch-proof-v1` #13658762910, SHA256 `14f2986d02988f45aa930aa73f0272db3b0c143b5e9004b3bb60629680463544` | **REUSE raw logs offline ASAP**; 7-day retention until 2026-11-16; no redundant broad native rebuild |
+
+Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_FOREGROUND_DISPATCH_CAUSAL_20261109.json`. Full trained gameplay rules, WCL current model holdout, confirmed opener end and practice verdict still UNKNOWN.

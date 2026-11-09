@@ -1,5 +1,19 @@
 # zRotationHelper — General Rotation / Dummy Trainer current status (2026-11-09)
 
+## 2026-11-09 Gen5 continuation — original C++ foreground APL→JSON2 callsite causal dataflow
+
+**Real native E2E:** [GitHub Actions #42584765533](https://github.com/degong2-code/zrotationhelper/actions/runs/42584765533) **3/3 SUCCESS** (Python 3.12/3.14 synthetic+compile; original pinned C++ single build and actual Fury/Arcane ST/2T). Original JSON2 action time/name/ID/ordinal parity **149/149**, all original emitter 203 accounted for.
+
+**New precise evidence:** 147/203 original emitters are linked by the actual original `player_t::execute_action()` local `action` from `select_action` return to that same invocation's `sequence_add(action,...)` JSON2 callsite. Fury ST 43, Fury2T44, ArcaneST29, Arcane2T31. The 56 without this direct foreground APL path comprise 54 PRECOMBAT plus **2 COMBAT** unexplained by this path. The 91 selected exact original action_ready calls with native IF comparator are *observed native comparator outcomes only*, not independently evaluated full IF/READY; 56 selected calls did not reach the native IF comparator. No action execution completion proven by a JSON2 append or queue call.
+
+**Scientific boundary:** original SimC C++ method-local dataflow is now directly demonstrated for these 147 records; actual spell execution, source complete READY, competing alternatives, gameplay mandatory priority, WCL independent holdout, opener end, and dummy wrong-cast verdict remain UNKNOWN/NOT_RUN. Prior 139 temporal matches were from another original native run and are NOT joined by event ID to current 147.
+
+**Source and evidence:** `tools/research/general_rotation_original_foreground_dispatch_v1.py`, SHA256 `da8d0135726ab369b962ff4c23bc15d84e697f4082b58eb02e86d28299edeffe`; receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_FOREGROUND_DISPATCH_CAUSAL_20261109.json`; CI archive artifact #13658762910 (raw native logs + per-case proof JSON; expires 2026-11-16 08:23:35 UTC). Official SimC revision `b522cded8c26b97dac03fdf56e57a03ec7e8faa6`. All modifications branch-local, Gen5 handoff original and MAIN FROZEN unchanged.
+
+**Session Exact Next:** reuse new raw native logs to replay original selected IF for 147 exact dispatch tokens using source-pinned spec-agnostic APL AST and field adapters. Resolve 2 non-foreground combat records as an explicit execution-path gap. Avoid another native C++ build unless missing independent source PRE cannot be obtained offline. Then General Rotation IF/ELSE and WCL blind independent holdout.
+
+
+
 ## 2026-11-09 Gen5 이후 Branch 진행 — Generic same-run return/emitter 경계
 
 - 원본 GitHub 실증: [Actions #42581326058](https://github.com/degong2-code/zrotationhelper/actions/runs/42581326058), 3/3 SUCCESS (Python 3.12/3.14 synthetic + pinned official C++ single build). 4사례 Fury/Arcane ST/2T, 실제 JSON2 pristine/instrumented 행동 순서·시간·ID·ordinal **149/149 보존**.

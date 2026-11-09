@@ -1,0 +1,116 @@
+{
+  "schema": "ZrotGenericOriginalForegroundDispatchCausalReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "code_path": "tools/research/general_rotation_original_foreground_dispatch_v1.py",
+  "code_git_blob_sha1": "7e462b3ba391036fe0c28f06aed75db3613a20c5",
+  "code_sha256": "da8d0135726ab369b962ff4c23bc15d84e697f4082b58eb02e86d28299edeffe",
+  "workflow": ".github/workflows/zrot-gr-original-foreground-dispatch-v1.yml",
+  "CI": {
+    "run_id": 42584765533,
+    "run_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42584765533",
+    "run_head": "de57c613792b04226b621d9c76c02a046db1bdf1",
+    "status": "completed",
+    "conclusion": "success",
+    "python_312_compile_synthetic": "PASS",
+    "python_314_compile_synthetic": "PASS",
+    "official_original_CXX_single_build": "PASS",
+    "actual_native_4cases": "PASS",
+    "JSON2_pristine_instrumented_actual_combat_action_parity": "149/149",
+    "source_emitter_record_count": "203/203",
+    "original_native_CPP_patch_receipt_sha256": "1907c564023cbcd92b3366a9d8e43bdbb9549f6f0ec3de8960854b75c593faf1",
+    "artifact_id": 13658762910,
+    "artifact_name": "zrot-gr-original-foreground-dispatch-proof-v1",
+    "artifact_sha256": "14f2986d02988f45aa930aa73f0272db3b0c143b5e9004b3bb60629680463544",
+    "artifact_expires_utc": "2026-11-16T08:23:35Z",
+    "artifact_includes_raw_native_log": true
+  },
+  "observations": {
+    "emitter_total": 203,
+    "combat_original_SimC_JSON2": 149,
+    "precombat_original_SimC_JSON2": 54,
+    "direct_CXX_local_action_APL_root_select_to_JSON2_callsite": 147,
+    "unknown_not_original_foreground_execute_action": 56,
+    "unknown_combat_not_foreground": 2,
+    "unknown_precombat": 54,
+    "selected_same_original_action_ready_call_native_IF_comparator_observed": 91,
+    "selected_same_original_action_ready_call_native_IF_not_reached": 56,
+    "native_IF_comparison_and_source_PARITY_not_confused": true,
+    "cases": [
+      {
+        "spec": "warrior_fury",
+        "target_count": 1,
+        "source_to_callsite": 43,
+        "unknown_not_foreground": 16,
+        "selected_same_call_native_IF": 29,
+        "selected_same_call_pre_native_IF_not_reached": 14,
+        "result_sha256": "3b69794074fe91e43a6e1d55f71729af1f768e0d8c5539e6cb0a473e701a4f4e"
+      },
+      {
+        "spec": "warrior_fury",
+        "target_count": 2,
+        "source_to_callsite": 44,
+        "unknown_not_foreground": 16,
+        "selected_same_call_native_IF": 10,
+        "selected_same_call_pre_native_IF_not_reached": 34,
+        "result_sha256": "990a51f967b6f0a88b873b80a98aa30b41df9359b09e738a811c41ff9bbcaee8"
+      },
+      {
+        "spec": "mage_arcane",
+        "target_count": 1,
+        "source_to_callsite": 29,
+        "unknown_not_foreground": 12,
+        "selected_same_call_native_IF": 24,
+        "selected_same_call_pre_native_IF_not_reached": 5,
+        "result_sha256": "9accb79024ac0604f33ff9d4229e4c326c362cb074d697796443866ad15203ba"
+      },
+      {
+        "spec": "mage_arcane",
+        "target_count": 2,
+        "source_to_callsite": 31,
+        "unknown_not_foreground": 12,
+        "selected_same_call_native_IF": 28,
+        "selected_same_call_pre_native_IF_not_reached": 3,
+        "result_sha256": "e1fa2bea77d611ef6a514cdf54797e0ac4622e611dc4d00e8d2f7990416d2892"
+      }
+    ]
+  },
+  "scientific_claim_level": {
+    "source_witness": "PINNED_ORIGINAL_CPP_SAME_METHOD_APL_ROOT_RETURN_LOCAL_ACTION_TO_JSON2_CALLSITE",
+    "exact_case_token_from_original_method": true,
+    "observed_sequence_to_actual_JSON2_callsite_causal_dataflow": true,
+    "actual_action_queue_execution_completion_proven": false,
+    "source_original_action_ready_complete_true_proven_independently": 0,
+    "source_original_native_if_observed_as_comparator_only": 91,
+    "if_true_independently_replayed_for_this_147": false,
+    "source_action_priority_optimality_proven": false,
+    "competing_skills_ready_proven": 0,
+    "observed_opener_end": "UNKNOWN",
+    "ST_2T_AoE_full_model": "NOT_COMPLETED",
+    "WCL_independent_holdout_current_IR": "NOT_RUN",
+    "dummy_player_wrong_cast": "UNKNOWN",
+    "blizzard_live_Retail_API_truth_current": "NOT_REVERIFIED",
+    "cross_run_prior_139_temporal_instances_joined": false
+  },
+  "efficiency": {
+    "new_original_SimC_native_CXX_builds": 1,
+    "new_WCL_API_calls": 0,
+    "reuse_previous_source_IF_emitter_and_profile": true,
+    "new_per_spec_spell_hardcoded_in_generic_engine": false,
+    "original_JSON2_action_149_parity_guard": true,
+    "original_CXX_source_preflight_before_build": true,
+    "raw_log_artifact_reused_for_offline_followup": true
+  },
+  "future_exact_next": {
+    "product": "Proven source-conditioned General Rotation opener and IF/ELSE priority for ST/2T/AoE/builds validated independently via WCL and delivered as safe dummy trainer feedback.",
+    "session": "Reuse single original native run #42584765533 raw logs. Offline exact token→source IF field/AST replay on the 147 direct APL selection-to-JSON2 callsites, quantify IF-known/unknown and the two non-foreground combat paths; do not build new SimC C++ first. Recover high-impact active_enemies/variable.aoe_count through generic original state semantics, then independent WCL blind candidate lock/holdout."
+  },
+  "FROZEN_modified": false,
+  "MAIN_promoted": false,
+  "Gen5_handoff_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
