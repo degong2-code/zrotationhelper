@@ -1,0 +1,170 @@
+{
+  "schema": "ZrotGeneralRotationWclTypedPostlockSourceIfSensitivityReceiptV1",
+  "date": "2026-11-09",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "feature": "Generic source-only post-lock WCL raw aura+numeric actor-owned Strict PRE -> multiple APL row IF sensitivity and missing-operand discovery",
+  "true_product_goal": "Reusable current-retail SimC-first General Rotation opener/conditional IF-ELSE priority engine + independent WCL research + lightweight target dummy trainer.",
+  "excludes": [
+    "Encounter Rotation Plan",
+    "NSRT",
+    "Raid timeline",
+    "Boss action guide"
+  ],
+  "authority": {
+    "official_sourced_SimC_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "original_source_IR_generator_run": 42594344188,
+    "original_source_IF_at_original_SIMC_selected": 49,
+    "original_source_IF_missing_PRE": 44,
+    "original_WCL_numeric_discovery_run": 41463589665,
+    "original_separate_report_real_WCL_holdout_run": 41473060401,
+    "official_real_coldstart_third_distinct_WCL_run": 42599352437,
+    "original_frozen_numeric_lock_sha256": "c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e",
+    "raw_actor_owned_aura_numeric_PRE_replay_run": 42608104162,
+    "raw_actor_owned_aura_numeric_PRE_replay_SHA256": "3cabc5e938d3df607bdc45e1813f80c5513303dd0a81f20fb27b22c3e47ace4d",
+    "source_postlock_action_candidate_mapper_CI_run": 42604456025,
+    "source_adapter_path": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_ACTION_FAMILY_MECHANICS_ADAPTER_V1.json",
+    "source_adapter_git_blob": "538d0850e13a0cfd1e053ea02a27a71194a93a87",
+    "exploratory_power_predicate_adapter_path": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_WCL_RAGE_PREDICATE_ADAPTER_EXPLORATORY_V1.json",
+    "exploratory_power_predicate_adapter_git_blob": "6c75321d8a86ec8be3f6a63e890e6a69b65fda39"
+  },
+  "generic_engine": {
+    "file": "tools/research/general_rotation_postlock_typed_pre_scenario_v1.py",
+    "final_git_blob": "e2f1230d87acce74def25c81db6db85b9a39072d",
+    "final_file_SHA256": "77894e62791a44b663fc25538aef18ae1ac9ae06e41ed7d7622f80006ff31922",
+    "CI_workflow": ".github/workflows/zrot-gr-wcl-typed-postlock-source-if-sensitivity-v1.yml",
+    "reused_existing": [
+      "tools/research/simc_apl_semantic_ir_v2.py typed AST evaluate_ast truth",
+      "tools/research/general_rotation_postlock_numeric_spell_adapter_v1.py",
+      "tools/research/general_rotation_wcl_postlock_source_ir_bridge_v1.py numeric-only lock stage",
+      "tools/engine_first/wcl_raw_actor_numeric_transport_v1.py",
+      "tools/engine_first/wcl_raw_actor_numeric_power_pre_v1.py actual raw aura and resource join",
+      "existing pinned SimC source hypothesis IR and external per-spec adapters"
+    ],
+    "input_contract": [
+      "frozen WCL numeric-only discovery/actor/report scope with SHA",
+      "verified raw actor numeric cast transport with original event IDs",
+      "same-cast aura and source-owned raw resource PRE with SHA",
+      "pinned original source-only SimC APL IR",
+      "postlock source candidate mapping preserving repeated source APL rows",
+      "explicit external exploratory assumption map with 2 alternative raw resource unit scales"
+    ],
+    "class_and_spell_semantics_hardcoded_in_generic_core": false,
+    "prelock_SimC_leakage_prevented": true,
+    "postlock_exact_ID_timestamp_cast_join": true,
+    "raw_state_source_t_less_than_action_t": true,
+    "raw_aura_boolean_and_numeric_resource_type_preserved": true,
+    "only_IF_used_operand_read": true,
+    "unobserved_and_unmapped_condition_inputs_UNKNOWN": true,
+    "num_scenarios_bounded_to_16": true,
+    "status_if_scale_sensitive_explicit": true,
+    "no_shortcut_from_cast_to_source_APL_row_or_READY": true,
+    "no_weakened_open_world_proof_contract": true
+  },
+  "validation": {
+    "initial_3_of_3_SUCCESS_run": 42612209620,
+    "later_per_IF_operand_only_success_run": 42612462644,
+    "final_run": 42612725972,
+    "final_CI_conclusion": "SUCCESS_3_OF_3",
+    "final_ci_head": "4b5bff1ee0722c2d1a577885177dc94d058f3136",
+    "Python312_synthetic_compile_negative": "PASS",
+    "Python314_synthetic_compile_negative": "PASS",
+    "two_independent_synthetic_specializations": [
+      "Warrior Fury",
+      "Mage Arcane"
+    ],
+    "synthetic_negative_controls_per_two_classes": 16,
+    "synthetic_unmapped_source_operand_must_be_UNKNOWN": true,
+    "synthetic_same_timestamp_or_unknown_source_proof_rejected": true,
+    "actual_WCL_disjoint_report_casts": 51,
+    "source_model_target_cases": [
+      "Fury_ST",
+      "Fury_2T"
+    ],
+    "actual_WCL_action_token_candidate_casts": 15,
+    "WCL_action_casts_without_source_token_or_unscorable": 36,
+    "source_row_candidate_probes_per_target_model": 152,
+    "source_rows_no_explicit_IF": 60,
+    "source_row_raw_assumption_TRUE_if_invariant": 33,
+    "source_row_raw_scaling_sensitive_or_scenario_unknown": 16,
+    "source_row_raw_unknown_under_assumption": 43,
+    "numeric_resource_scaling_scenarios": [
+      1,
+      10
+    ],
+    "same_real_WCL_51_casts_used_in_two_simc_target_model_probes": true,
+    "two_model_probe_results_NOT_independent_105_casts": true,
+    "raw_source_operand_validity_certified": 0,
+    "source_IF_true_under_full_independent_mechanic_certification": 0,
+    "WCL_full_physical_READY_or_competitor_priority_proven": 0,
+    "General_Rotation_mandatory_rule_promoted": 0,
+    "target_dummy_mistake_proven": 0,
+    "new_WCL_API_calls": 0,
+    "new_native_SimC_CXX_builds": 0,
+    "final_results_artifact": {
+      "id": 13669824790,
+      "name": "zrot-gr-real-wcl-typed-postlock-source-if-scenarios-v1",
+      "SHA256": "4d831e06a6df4ce0f08c3d60bf7747152011a6383abacdea494b7a1adf9d8aa4",
+      "bytes": 21140,
+      "expires_utc": "2026-11-16T11:55:07Z",
+      "summary_JSON_SHA256": "b61eddf1d9a63c06f18d26b0e59dd36b6942cc25aaa6f295ba6bad7582d43fa1"
+    }
+  },
+  "per_original_source_model_unmapped_operand_occurrence_counts": {
+    "buff.enrage.remains": 24,
+    "gcd": 24,
+    "buff.hack_and_slash.up": 18,
+    "cooldown.bladestorm.ready": 8,
+    "buff.fury_mid2_4pc_crit.stack": 2
+  },
+  "per_original_source_model_all_required_operand_counts": {
+    "buff.enrage.remains": 24,
+    "buff.enrage.up": 8,
+    "buff.fury_mid2_4pc_crit.stack": 2,
+    "buff.hack_and_slash.up": 18,
+    "buff.recklessness.up": 42,
+    "cooldown.bladestorm.ready": 8,
+    "gcd": 24,
+    "rage": 32
+  },
+  "semantic_uncertainty": {
+    "original_WCL_raw_power_type_1_community_documented_as_Rage": true,
+    "raw_resource_data_1_divisor": "RAW_SCENARIO_ONLY",
+    "raw_resource_data_10_divisor": "THIRD_PARTY_EXPLORATORY_ONLY_NOT_OFFICIAL_PATCH_PINNED",
+    "raw_aura_1719_as_recklessness": "UNVERIFIED_AS_ACTOR_BUILD_AND_CURRENT_PATCH_MECHANIC",
+    "raw_aura_184362_as_enrage": "UNVERIFIED_AS_ACTOR_BUILD_AND_CURRENT_PATCH_MECHANIC",
+    "WCL_actor_talent_profile_to_SimC_build": "UNKNOWN",
+    "actual_WCL_active_enemy_target_count_at_cast": "UNKNOWN",
+    "APL_source_row_selected_by_player": "UNKNOWN",
+    "raw_buff_enrage_remains": "UNKNOWN_NO_VALID_PRIOR_DURATION",
+    "global_cooldown_value": "UNKNOWN_NO_TRUSTED_PRE",
+    "buff_hack_and_slash_UP": "UNKNOWN",
+    "cooldown_bladestorm_ready": "UNKNOWN",
+    "buff_fury_mid2_4pc_crit_stack": "UNKNOWN",
+    "cooldown_charges_GCD_and_competing_action_READY": "UNKNOWN",
+    "dummy_wrong_cast": "UNKNOWN",
+    "full_priority_optimality": "UNKNOWN"
+  },
+  "engine_first_self_audit": {
+    "actual_reusable_engine_capability_increased": true,
+    "new_source_data_recollected_unnecessarily": false,
+    "duplicated_apl_parser_or_original_wcl_collector": false,
+    "unsupported_game_semantics_promoted": false,
+    "source_only_49_SIMC_IF_not_mislabeled_actual_WCL_validation": true,
+    "uncertain_scale_forked_scenario_not_default_game_truth": true,
+    "missing_source_pre_observability_ranking_guides_next_feature": true,
+    "no_MAIN_FROZEN_gen5_mutation": true,
+    "product_score_not_equal_CI_PASS_count": true
+  },
+  "exact_next": {
+    "product": "Complete source-based General Rotation openers and conditional skill priority, independently validate with WCL and provide UNKNOWN-safe dummy practice correction.",
+    "session": "Priority: inspect actual WCL/raw Blizzard mechanic evidence for buff.enrage.remains and gcd source conditions (24 source-row occurrences each), buff.hack_and_slash.up (18), cooldown.bladestorm.ready (8), 4pc stack (2); do NOT use later aura removals to fill PRE or cast gaps to infer cooldown. Evaluate official source WCL raw power units (1 vs 10), talent build equivalence and exact buff action identities. Only after external mechanic truth and negative competitor gates independent audit allow next stateful source IF claims; keep third distinct report as replication, not retrospectively formal holdout."
+  },
+  "branch_only": true,
+  "MAIN_promoted": false,
+  "Gen5_handoff_modified": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}

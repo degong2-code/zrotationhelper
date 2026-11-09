@@ -570,3 +570,15 @@ Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_REAL
 | WCL independent source-hypothesis truth | 8 source IF operands, raw candidate buff aura 1719/184362 present but semantic identity and actual actor build/target equivalence UNKNOWN | **No causal priorities, cooldown READY or dummy errors promoted** |
 
 Retained receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_POSTLOCK_AND_ACTOR_NUMERIC_AURA_RESOURCE_PRE_20261109.json`, code SHA `8be52485590dbc3a03f88e2577e3d025e0a5263f8da3d2080a969d4f88ede03a`, artifact #13669700190 (expires 2026-11-16).
+
+## 2026-11-09 Conditional IF source operand sensitivity engine
+
+| Component | Actual evidence | Classification |
+| --- | --- | --- |
+| `general_rotation_postlock_typed_pre_scenario_v1.py` | [#42612725972](https://github.com/degong2-code/zrotationhelper/actions/runs/42612725972) 3/3: generic two-class self-test, actual WCL 51 strict PRE casts × pinned Fury ST/2T source IR, 15 mapped action-token casts, 152 source-row probes per target context | **NEW reusable generic source IF scenario evaluator**, not a WCL source IF certified validation |
+| Reused `general_rotation_postlock_numeric_spell_adapter_v1.py` | 3 WCL numeric token matches and duplicate source rows retained | **REUSE**, exact game spell identity/build unknown |
+| Reused actor numeric/aura Strict PRE join | Real two WCL reports, 157/160 raw prior owned resource, all 160 aura+power cast rows | **REUSE**, no game scale or READY |
+| External `FURY_WCL_RAGE_PREDICATE_ADAPTER_EXPLORATORY_V1.json` | Source propositions `rage`, `buff.recklessness.up`, `buff.enrage.up`, raw power type1 assumed /1 and /10 | **EXPLORATORY ONLY**, no patch-pinned game truth |
+| Per-source-row missing operand inventory | `buff.enrage.remains` 24, `gcd` 24, `buff.hack_and_slash.up` 18, `cooldown.bladestorm.ready` 8, 4pc stack 2 | **NEXT coverage priority**, no inference from cast gaps/future removals |
+
+Artifact #13669824790; receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_TYPED_POSTLOCK_SOURCE_IF_SCENARIO_20261109.json`. Some source-row guard statuses are TRUE under unverified scenario assumptions; **0 real verified priority/READY/dummy rule**.
