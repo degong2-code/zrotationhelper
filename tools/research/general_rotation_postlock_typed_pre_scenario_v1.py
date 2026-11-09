@@ -708,30 +708,30 @@ def selftest():
             "1"]["strict_prior_at_ms"]=1000
         bad["joined_numeric_pre_sha256"]=sha(canonical({
            k:v for k,v in bad.items() if k!="joined_numeric_pre_sha256"}))
-        must_fail(lambda:evaluate(numeric,transport,bad,case,compiled,mapping))
+        must_fail(lambda:evaluate(numeric,transport,bad,case,compiled,mapping,temporal=temporal))
         bad=copy.deepcopy(joint)
         bad["per_numeric_cast"][0]["raw_aura_strict_pre"][
              "raw_aura_123_active"]["event_t_ms"]=1000
         bad["joined_numeric_pre_sha256"]=sha(canonical({
            k:v for k,v in bad.items() if k!="joined_numeric_pre_sha256"}))
-        must_fail(lambda:evaluate(numeric,transport,bad,case,compiled,mapping))
+        must_fail(lambda:evaluate(numeric,transport,bad,case,compiled,mapping,temporal=temporal))
         bad=copy.deepcopy(mapping)
         bad["assert_current_game_mechanic_truth"]=True
-        must_fail(lambda:evaluate(numeric,transport,joint,case,compiled,bad))
+        must_fail(lambda:evaluate(numeric,transport,joint,case,compiled,bad,temporal=temporal))
         bad=copy.deepcopy(mapping)
         bad["operand_bindings"][1]["raw_units_per_source_unit_scenarios"]=[0]
-        must_fail(lambda:evaluate(numeric,transport,joint,case,compiled,bad))
+        must_fail(lambda:evaluate(numeric,transport,joint,case,compiled,bad,temporal=temporal))
         bad=copy.deepcopy(numeric);bad["source_APL_injected_in_numeric_phase"]=True
-        must_fail(lambda:evaluate(bad,transport,joint,case,compiled,mapping))
+        must_fail(lambda:evaluate(bad,transport,joint,case,compiled,mapping,temporal=temporal))
         bad=copy.deepcopy(compiled);bad["allow_whole_spell_READY_from_mapping"]=True
-        must_fail(lambda:evaluate(numeric,transport,joint,case,bad,mapping))
+        must_fail(lambda:evaluate(numeric,transport,joint,case,bad,mapping,temporal=temporal))
         bad=copy.deepcopy(joint)
         bad["per_numeric_cast"][0]["spell_id"]=999
         bad["joined_numeric_pre_sha256"]=sha(canonical({
            k:v for k,v in bad.items() if k!="joined_numeric_pre_sha256"}))
-        must_fail(lambda:evaluate(numeric,transport,bad,case,compiled,mapping))
+        must_fail(lambda:evaluate(numeric,transport,bad,case,compiled,mapping,temporal=temporal))
         bad=copy.deepcopy(mapping);bad["operand_bindings"][0]["confidence"]="CERTIFIED"
-        must_fail(lambda:evaluate(numeric,transport,joint,case,compiled,bad))
+        must_fail(lambda:evaluate(numeric,transport,joint,case,compiled,bad,temporal=temporal))
     return {
        "schema":SCHEMA,"status":"PASS_TWO_CLASS_TYPED_SCENARIO",
        "synthetic_class_count":2,"positive":positive,"negative":negative,
