@@ -480,7 +480,8 @@ def selftest():
     duplicate_casts=casts+[{
         "event_id":"dup","t_ms":200,"spell_id":2001,"source_kind":RAW_SOURCE
     }]
-    duplicate_events=rows+[cast(1200,2001)]
+    # Original WCL raw pages are ordered by timestamp; keep that invariant.
+    duplicate_events=rows[:3]+[cast(1200,2001)]+rows[3:]
     resource_duplicate=power_cast_matrix(
         duplicate_events,actor,start,duplicate_casts,"c"*64)
     need(resource_duplicate[
