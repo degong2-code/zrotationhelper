@@ -250,7 +250,6 @@ def selftest():
       base.replace(adapter_sha,"0"*64),
       base.replace(MARK+"100|21",MARK+"101|21"),
       base.replace(MARK+"100|21",MARK+"100|22"),
-      base.replace("|1|92","|0|92",1),
       base.replace("ZROT_ORIGINAL_SELECT_NATIVE_IF_V1|100|21|0xaa|1",
                    "ZROT_ORIGINAL_SELECT_NATIVE_IF_V1|100|21|0xaa|0"),
       base.replace(MARK+"100|21|0xaa|"+adapter_sha+"|1|92",""),
@@ -258,6 +257,12 @@ def selftest():
         try:replay(bad,source,plan,legacy_plan,source_label="synthetic",targets=1)
         except (ExtraError,DispatchIFError,PREError):failures+=1
         else:raise AssertionError("FOREIGN_OR_FUTURE_EXTRA_FACT_PRODUCED_READY")
+    missing=base.replace(MARK+"100|21|0xaa|"+adapter_sha+"|1|92",
+                         MARK+"100|21|0xaa|"+adapter_sha+"|0|92")
+    safe=replay(missing,source,plan,legacy_plan,
+                source_label="synthetic",targets=1)
+    assert safe["source_independent_IF_triage"][UNKNOWN]==1
+    assert safe["full_physical_READY_proven"]==0
     return {"schema":SCHEMA,"status":"PASS_SYNTHETIC_STATIC",
             "negative_controls":failures,
             "source_IF_independent":True,
