@@ -30,6 +30,8 @@ INSERT="      zrot_if_ready=a->action_ready();"
 FIELD_NAME=re.compile(r"^[a-z][a-z0-9_]*$")
 GIT40=re.compile(r"^[a-f0-9]{40}$")
 CXX_EXPR={
+ "actor_resource": lambda f:
+   f"std::pair<int,double>{{1,static_cast<double>(resources.current[{f['name']}])}}",
  "sim_active_enemies": lambda f:
    "std::pair<int,double>{1,static_cast<double>(sim->active_enemies)}",
  "player_variable": lambda f:
@@ -93,7 +95,12 @@ def valid_plan(p:dict,root:Path|None=None)->None:
              "INVALID_OR_DUPLICATE_CAPTURE_SYMBOL")
         typ=f["kind"];name=f.get("name")
         expected={"sim_active_enemies":"active_enemies"} .get(typ)
-        if typ=="player_variable":
+        if typ=="actor_resource":
+            need(type(name)==str and re.fullmatch(r"RESOURCE_[A-Z0-9_]+",name) is not None and
+                 re.fullmatch(r"[a-z][a-z0-9_]*",f["symbol"]) is not None,
+                 "INVALID_SOURCE_ACTOR_RESOURCE")
+            expected=f["symbol"]
+        elif typ=="player_variable":
             need(type(name)==str and FIELD_NAME.fullmatch(name) is not None,
                  "INVALID_PLAYER_VARIABLE_NAME")
             expected="variable."+name
