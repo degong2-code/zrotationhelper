@@ -135,6 +135,9 @@ def analyze(receipt:dict,
     all_counts=Counter()
     all_phases=Counter()
     all_conditions=Counter()
+    all_phase_identity=Counter()
+    window_if_symbols=Counter()
+    window_source_rows=Counter()
     triage_rows=[]
     for decl in declarations:
         spec=decl["spec"];targets=decl["targets"]
@@ -159,7 +162,7 @@ def analyze(receipt:dict,
         summary=Counter()
         phases=Counter()
         conditions=Counter()
-        rows=[]
+        phase_identity=Counter()
         seen=set()
         p=source[spec]
         for event in sample:
@@ -223,7 +226,16 @@ def analyze(receipt:dict,
             summary[status]+=1
             phases[phase]+=1
             conditions[condition]+=1
+            phase_identity[(phase,status)]+=1
+            all_phase_identity[(phase,status)]+=1
             if in_window:
+                for symbol in symbols:
+                    window_if_symbols[symbol]+=1
+                window_source_rows[(
+                    spec,targets,owner,rank,
+                    source_row["source_sha256"] if source_row else "-",
+                    source_row["action"] if source_row else "-",
+                    condition,status)]+=1
                 triage_rows.append({
                     "source_spec":spec,"targets":targets,
                     "simc_emitter_t_ms":event["t_ms"],
@@ -270,6 +282,11 @@ def analyze(receipt:dict,
             "emitter_records":len(sample),
             "identity_counts":dict(sorted(summary.items())),
             "phase_counts":dict(sorted(phases.items())),
+            "phase_identity_counts":{
+                phase:{status:phase_identity.get((phase,status),0)
+                       for status in sorted(STATUS)
+                       if phase_identity.get((phase,status),0)>0}
+                for phase in ("P","C")},
             "source_if_observation_boundary_counts":
                 dict(sorted(conditions.items())),
         })
@@ -299,11 +316,33 @@ def analyze(receipt:dict,
         "original_emitter_total":sum(all_counts.values()),
         "identity_counts":dict(sorted(all_counts.items())),
         "emitter_phase_counts":dict(sorted(all_phases.items())),
+        "emitter_phase_identity_counts":{
+            phase:{status:all_phase_identity.get((phase,status),0)
+                   for status in sorted(STATUS)
+                   if all_phase_identity.get((phase,status),0)>0}
+            for phase in ("P","C")},
         "typed_source_IF_boundary_counts":dict(sorted(all_conditions.items())),
         "case_count":len(results),"cases":results,
         "first_window_ms_not_opener_end":window_ms,
         "first_window_combat_event_count":len(triage_rows),
         "first_window_evidence_gaps":triage_rows,
+        "first_window_missing_IF_symbol_frequency":[
+            {"symbol":symbol,"emitted_source_row_observations":count,
+             "actual_original_select_PRE":"UNKNOWN"}
+            for symbol,count in sorted(
+                window_if_symbols.items(),key=lambda p:(-p[1],p[0]))],
+        "first_window_source_row_capture_focus":[
+            {"source_spec":spec,"targets":targets,
+             "source_list":owner,"source_rank":rank,
+             "source_row_sha256":row_sha,"source_action":action,
+             "IF_class":condition,"identity_status":status,
+             "emitted_first_window_occurrences":count,
+             "source_IF_at_actual_select":"UNKNOWN",
+             "actual_dispatch_proven":False,
+             "gameplay_action_priority_rank":None}
+            for (spec,targets,owner,rank,row_sha,action,condition,status),count
+            in sorted(window_source_rows.items(),
+                      key=lambda p:(-p[1],p[0]))],
         "first_window_capture_worklist":[{
             "identity_status":status,"required_capture":needed,
             "IF_class":condition,"occurrences":count,
@@ -379,6 +418,11 @@ def selftest()->dict:
     value=analyze(receipt,profile_map,reports)
     assert value["original_emitter_total"]==6
     assert value["first_window_combat_event_count"]==4
+    assert value["emitter_phase_identity_counts"]["C"][unique]==2
+    assert value["first_window_missing_IF_symbol_frequency"]==[
+        {"symbol":"rage","emitted_source_row_observations":4,
+         "actual_original_select_PRE":"UNKNOWN"}]
+    assert len(value["first_window_source_row_capture_focus"])==4
     assert value["typed_source_IF_boundary_counts"][
         "SOURCE_IF_REQUIRES_SAME_CALL_PRE"]==4
     assert value["typed_source_IF_boundary_counts"][
