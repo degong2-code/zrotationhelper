@@ -65,7 +65,7 @@ def valid_plan(p:dict,root:Path|None=None)->None:
     for x in p.get("profiles",[]):
         cls=x.get("actor_class");src=x.get("path");cpp=x.get("class_cpp")
         need(type(cls)==str and FIELD_NAME.fullmatch(cls) is not None and
-             type(src)==str and src==f"profiles/MID2/MID2_{'Mage_Arcane' if cls=='mage' else 'Warrior_Fury' if cls=='warrior' else '__INVALID__'}.simc" and
+             type(src)==str and re.fullmatch(r"profiles/MID2/MID2_[A-Za-z0-9_]+\\.simc",src) is not None and
              cpp==f"engine/class_modules/sc_{cls}.cpp" and
              GIT40.fullmatch(x.get("profile_git_blob","")) is not None and
              GIT40.fullmatch(x.get("class_cpp_git_blob","")) is not None and
@@ -82,7 +82,7 @@ def valid_plan(p:dict,root:Path|None=None)->None:
             classes[cls]=(x,ast,used)
         else:classes[cls]=(x,None,None)
         files.add(src)
-    need(set(classes)=={"mage","warrior"},"TWO_PINNED_SOURCE_CLASSES_REQUIRED")
+    need(1<=len(classes)<=8,"BOUNDED_PINNED_SOURCE_CLASSES_REQUIRED")
     fields=p.get("fields",[])
     need(type(fields)==list and 1<=len(fields)<=24,"BOUNDED_SOURCE_PRE_FIELD_COUNT")
     symbols=set()
@@ -131,7 +131,7 @@ def patch_cpp(pristine:bytes,plan:dict)->bytes:
     payload_sha=sha(canonical(plan))
     helper=r"""      if ( sim->log && !is_pet() && !is_enemy() )
       {
-        // Original SELECT-PRE call scope only, strictly before a->action_ready().
+        // Original select PRE scope, strictly before the single native readiness call.
         // All accessors below are read-only and never execute an IF expression.
         const auto zrot_extra_var = [this](const char* key)->std::pair<int,double> {
           for (const auto* v: variables) {
