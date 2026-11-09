@@ -1,0 +1,187 @@
+name: zrot-gr-original-dispatch-if-offline-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_dispatch_if_replay_v1.py
+      - .github/workflows/zrot-gr-original-dispatch-if-offline-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic:
+    name: Exact same-call original source IF AST replay Python ${{ matrix.py }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.py }}'
+      - name: Compile and run source adapter provenance negative tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_original_dispatch_if_replay_v1.py
+          python -B tools/research/general_rotation_original_dispatch_if_replay_v1.py > /tmp/gr-source-if-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-source-if-synthetic.json'))
+          assert x['status']=='PASS_SYNTHETIC_OFFLINE'
+          assert x['negative_controls']>=7 and x['cross_source_adapter_test'] is True
+          assert x['full_ready_proven']==0
+          assert x['actual_original_CXX_builds']==0 and x['WCL_API_calls']==0
+          print('SOURCE_IF_EXACT_CALL_PROVENANCE_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_original_dispatch_if_replay_v1.py
+  real-offline:
+    name: Reuse original 147 direct dispatch and 56 separate emitter records, no CXX
+    needs: [synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-original-foreground-dispatch-proof-v1
+          run-id: 42584765533
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-previous-foreground
+      - name: Verify original GitHub CI receipt, raw logs, profile revision and artifact case identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          test "$(git hash-object active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_FOREGROUND_DISPATCH_CAUSAL_20261109.json)" = 358dde50f3e8c37e48b2897e5c53198e2abcace9
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_FOREGROUND_DISPATCH_CAUSAL_20261109.json').read_bytes())
+          assert r['CI']['conclusion']=='success' and r['CI']['run_id']==42584765533
+          assert r['CI']['source_emitter_record_count']=='203/203'
+          assert r['CI']['JSON2_pristine_instrumented_actual_combat_action_parity']=='149/149'
+          assert r['observations']['direct_CXX_local_action_APL_root_select_to_JSON2_callsite']==147
+          assert r['observations']['selected_same_original_action_ready_call_native_IF_comparator_observed']==91
+          assert r['scientific_claim_level']['source_action_priority_optimality_proven'] is False
+          assert r['scientific_claim_level']['WCL_independent_holdout_current_IR']=='NOT_RUN'
+          logs=list(Path('/tmp/zrot-previous-foreground').rglob('simc_native_log.txt'))
+          assert len(logs)==4,logs
+          print('PINNED_PRIOR_CAUSAL_RAW_ARTIFACT_FOUR_LOGS_PASS')
+          PY
+      - name: Independent typed source IF replay exact dispatch by class-scoped PRE
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-dispatch-if-v1
+          python - <<'PY'
+          import json,subprocess,sys
+          from pathlib import Path
+          from collections import Counter
+          receipt=json.loads(Path('active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_FOREGROUND_DISPATCH_CAUSAL_20261109.json').read_bytes())
+          root=Path('/tmp/zrot-previous-foreground')
+          dest=Path('/tmp/zrot-dispatch-if-v1')
+          source={'warrior_fury':'MID2_Warrior_Fury.simc',
+                  'mage_arcane':'MID2_Mage_Arcane.simc'}
+          all_counts=Counter()
+          if_count=0
+          total_emitter=0
+          total_direct=0
+          unknown_combat=[]
+          case_summary=[]
+          for case in receipt['observations']['cases']:
+              spec=case['spec'];targets=case['target_count']
+              suffix='st' if targets==1 else '2t'
+              logs=[p for p in root.rglob('simc_native_log.txt')
+                    if p.parent.name==spec+'-'+suffix]
+              assert len(logs)==1, (spec,suffix,logs)
+              results=[p for p in root.rglob('foreground-source-to-JSON2.json')
+                       if p.parent.name==spec+'-'+suffix]
+              assert len(results)==1,(spec,suffix,results)
+              import hashlib
+              assert hashlib.sha256(results[0].read_bytes()).hexdigest()==case['result_sha256']
+              profile=Path('simc-upstream/profiles/MID2')/source[spec]
+              assert profile.is_file()
+              out=dest/(spec+'-'+suffix+'.json')
+              cmd=[sys.executable,'-B','tools/research/general_rotation_original_dispatch_if_replay_v1.py',
+                   '--native-log',str(logs[0]),
+                   '--original-profile',str(profile),
+                   '--source-adapter','tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json',
+                   '--source-label',spec,'--targets',str(targets),
+                   '--expected-original-dispatch-sha256',case['result_sha256'],
+                   '--first-window-ms','10000','--out',str(out)]
+              subprocess.run(cmd,check=True)
+              x=json.loads(out.read_bytes())
+              assert x['source_IF_exact_selected_rows'] and x['original_foreground_selected_direct_count']==case['source_to_callsite']
+              assert x['native_IF_same_call_comparator_count']==case['selected_same_call_native_IF'] if 'native_IF_same_call_comparator_count' in x else x['native_IF_comparator_count']==case['selected_same_call_native_IF']
+              assert x['native_IF_not_reached_count']==case['selected_same_call_pre_native_IF_not_reached']
+              assert x['full_physical_READY_proven']==0 and not x['actual_action_execute_completion_proven']
+              assert x['WCL_blind_holdout']=='NOT_RUN'
+              assert x['source_PRE_adapter_applies']==(spec=='warrior_fury')
+              total_emitter+=x['actual_original_emitter_records']
+              total_direct+=x['original_foreground_selected_direct_count']
+              if_count+=x['native_IF_comparator_count']
+              all_counts.update(x['source_IF_triage_counts'])
+              for y in x['non_foreground_combat_emitter_rows']:
+                  unknown_combat.append({'source_spec':spec,'targets':targets,**y})
+              case_summary.append({'source_spec':spec,'targets':targets,
+                                   'profile_git_blob':x['profile_git_blob'],
+                                   'replay_sha256':hashlib.sha256(out.read_bytes()).hexdigest(),
+                                   'source_if_counts':x['source_IF_triage_counts'],
+                                   'first_10s_counts':x['first_window_CXX_source_IF_triage_counts'],
+                                   'source_adapter_applies':x['source_PRE_adapter_applies']})
+              print('EXACT_ORIGINAL_DISPATCH_IF_SOURCE_CASE',spec,suffix,json.dumps(x['source_IF_triage_counts'],sort_keys=True))
+          assert total_emitter==203 and total_direct==147 and if_count==91
+          assert len(unknown_combat)==2
+          assert all_counts['PRECOMBAT_SEPARATE_ORIGINAL_EXECUTION_PATH']==54
+          assert all_counts['UNKNOWN_NON_FOREGROUND_COMBAT_EXECUTION_PATH']==2
+          assert sum(all_counts.values())==203
+          print('REAL_EXACT_ORIGINAL_CXX_SOURCE_IF_147_OF_147_JOIN_PASS')
+          print('NATIVE_SOURCE_IF_COMPARATOR_91_OF_91_RECONCILED')
+          print('SOURCE_IF_TRISTATE_COUNTS',json.dumps(all_counts,sort_keys=True))
+          print('TWO_SEPARATE_COMBAT_PATHS',json.dumps(unknown_combat,sort_keys=True))
+          result={'schema':'ZrotGeneralRotationOfflineFourCaseOriginalSourceIFSummaryV1',
+                  'policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+                  'original_simc_commit':'b522cded8c26b97dac03fdf56e57a03ec7e8faa6',
+                  'source_ci_run_id':42584765533,
+                  'source_emitter_events':total_emitter,
+                  'source_foreground_direct_join':total_direct,
+                  'native_original_if_comparator_same_call':if_count,
+                  'source_if_counts':dict(sorted(all_counts.items())),
+                  'source_cases':case_summary,
+                  'non_foreground_combat_source_rows':unknown_combat,
+                  'source_IF_independent_actual_value_proven_only_if_source_adapter_bound':True,
+                  'source_FULL_READY_proven':0,
+                  'WCL_independent_holdout':'NOT_RUN',
+                  'dummy_player_error':'UNKNOWN',
+                  'new_native_CXX_builds':0,'new_WCL_API_calls':0,
+                  'MAIN_promoted':False}
+          (dest/'original-four-case-summary.json').write_text(json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print('REAL_SOURCE_IF_FOUR_CASE_SUMMARY_SHA256='+hashlib.sha256(
+              (dest/'original-four-case-summary.json').read_bytes()).hexdigest())
+          PY
+          sha256sum /tmp/zrot-dispatch-if-v1/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-original-selected-source-if-offline-v1
+          path: /tmp/zrot-dispatch-if-v1/*.json
+          if-no-files-found: warn
+          retention-days: 7
