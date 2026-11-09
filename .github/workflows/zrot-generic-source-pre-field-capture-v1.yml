@@ -4,6 +4,7 @@ on:
     branches: [work/gr-simc-st-2t-wcl-blind-20261102]
     paths:
       - tools/research/general_rotation_source_pre_field_capture_v1.py
+      - tools/research/general_rotation_original_pre_field_transport_v1.py
       - .github/workflows/zrot-generic-source-pre-field-capture-v1.yml
   workflow_dispatch:
 
@@ -30,7 +31,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/research/general_rotation_source_pre_field_capture_v1.py
+          python -m py_compile tools/research/general_rotation_source_pre_field_capture_v1.py \
+            tools/research/general_rotation_original_pre_field_transport_v1.py
+          python -B tools/research/general_rotation_original_pre_field_transport_v1.py > /tmp/source-pre-transport-synthetic.json
+          python - <<'PY'
+          import json
+          t=json.load(open('/tmp/source-pre-transport-synthetic.json'))
+          assert t['schema']=='ZrotGenericOriginalSimcPREFieldTransportV1'
+          assert t['checks']>=11 and t['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert t['spec_and_ability_agnostic'] is True
+          assert t['full_READY']==0
+          print('SPEC_NEUTRAL_PRE_FIELD_TRANSPORT_SYNTHETIC_PASS')
+          PY
           python -B tools/research/general_rotation_source_pre_field_capture_v1.py > /tmp/source-pre-generic-synthetic.json
           python - <<'PY'
           import json
@@ -45,7 +57,8 @@ jobs:
           assert r['WCL_API_calls']==0
           print('GENERIC_SOURCE_PRE_CAPTURE_SYNTHETIC_PASS',r['checks'])
           PY
-          sha256sum tools/research/general_rotation_source_pre_field_capture_v1.py
+          sha256sum tools/research/general_rotation_source_pre_field_capture_v1.py \
+            tools/research/general_rotation_original_pre_field_transport_v1.py
 
   pinned-original-schema:
     name: Official Warrior and Mage rule-to-PRE capture plan
@@ -95,6 +108,10 @@ jobs:
           retention-days: 7
 
   real-original-source-fields:
+    # Routine semantic/transport edits use source-pinned cheap static CI.
+    # One-time original native E2E is explicitly opted into when capture
+    # bytes or an API mechanic actually need fresh confirmation.
+    if: github.event_name == 'workflow_dispatch'
     name: Real native Fury and Arcane same-binary nonperturbing PRE capture
     needs: [pinned-original-schema]
     runs-on: ubuntu-latest
