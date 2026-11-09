@@ -1,0 +1,187 @@
+name: zrot-simc-original-same-call-if-pre-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_original_select_if_pre_witness_v1.py
+      - tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json
+      - .github/workflows/zrot-simc-original-same-call-if-pre-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  synthetic-contract:
+    name: Source-pinned IF PRE and native comparator Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: No args, Python compile and independent source-IF synthetic
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_original_select_if_pre_witness_v1.py
+          python -B tools/research/simc_original_select_if_pre_witness_v1.py > /tmp/gr-if-root-synthetic.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/gr-if-root-synthetic.json'))
+          assert r['schema']=='ZrotOriginalSimCSelectedRowSameCallIFPreWitnessV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=20
+          assert r['same_run_AST_and_native_IF_comparisons']==2
+          assert r['new_ready_calls']==0 and r['WCL_API_calls']==0
+          print('SIMC_ORIGINAL_IF_SOURCE_SAME_CALL_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_original_select_if_pre_witness_v1.py
+
+  actual-official-native:
+    name: One original SimC C++ build two specs ST and 2T same-call IF and action parity
+    needs: [synthetic-contract]
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-general-rotation-first-real-cast-and-source-ir
+          run-id: 42562520191
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-pristine-json2-baseline
+      - name: Install pinned minimal source field reader and unchanged IF native comparator
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          test -s /tmp/zrot-pristine-json2-baseline/gr-simc-original-performed-action-and-condition-model.json
+          echo "584819145ec6e51bd7596bd273da74402622adf7bd0ecf1ea25ce19b0f26c715  /tmp/zrot-pristine-json2-baseline/gr-simc-original-performed-action-and-condition-model.json" | sha256sum -c -
+          python -B tools/research/simc_original_select_if_pre_witness_v1.py \
+            --source-root simc-upstream \
+            --plan tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json \
+            --receipt /tmp/zrot-source-original-if-patch-receipt.json
+          test -s /tmp/zrot-source-original-if-patch-receipt.json
+      - name: Build official original SimC once with passive witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-if-pre-native-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-if-pre-native-build --target simc --parallel 3
+          test -x /tmp/zrot-if-pre-native-build/simc
+      - name: Capture four 30-second original action sequence cases and same-call original IF values
+        shell: bash
+        run: |
+          set -euo pipefail
+          for line in "fury:warrior_fury:MID2_Warrior_Fury.simc" "arcane:mage_arcane:MID2_Mage_Arcane.simc"; do
+            IFS=: read -r actor spec profile <<< "$line"
+            for count in 1 2; do
+              key=st
+              if [ "$count" = 2 ]; then key=2t; fi
+              python -B tools/research/simc_native_reference_capture.py \
+                --profile "simc-upstream/profiles/MID2/$profile" --spec "$actor" \
+                --simc-bin /tmp/zrot-if-pre-native-build/simc \
+                --targets "$count" --seed 31459 --fight-seconds 30 \
+                --out-dir "/tmp/zrot-simc-original-if-pre/$spec-$key" --timeout 180
+            done
+          done
+      - name: Verify same 149 original JSON2 actions, exact source PRE, and original native IF
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,sys,collections
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          from general_rotation_native_sequence_row_replay_v1 import compare_pristine
+          base=json.loads(Path('/tmp/zrot-pristine-json2-baseline/gr-simc-original-performed-action-and-condition-model.json').read_bytes())
+          cases={(c['source_spec_key'],c['case']):c for c in base['research_cases']}
+          counts=collections.Counter()
+          for spec,actor,profile in (
+              ('warrior_fury','fury','MID2_Warrior_Fury.simc'),
+              ('mage_arcane','arcane','MID2_Mage_Arcane.simc')):
+              for key,num in [('st',1),('2t',2)]:
+                  ref=Path('/tmp/zrot-simc-original-if-pre')/(spec+'-'+key)
+                  x=extract_json_sequence(ref)
+                  c=cases[spec,key]
+                  assert x['simc_spec']==actor
+                  parity=compare_pristine(c,x)
+                  assert parity['recorded_combat_action_order_and_times_unchanged'] is True
+                  assert parity['recorded_precombat_action_order_and_times_unchanged'] is True
+                  counts['actual_performed_JSON2_actions']+=c['simc_JSON2_observed_combat_action_count']
+                  print('ORIGINAL_SOURCE_CAST_PARITY_PASS',spec,key,
+                        c['simc_JSON2_observed_combat_action_count'])
+          assert counts['actual_performed_JSON2_actions']==149
+          PY
+          for line in "warrior_fury:st:1" "warrior_fury:2t:2" "mage_arcane:st:1" "mage_arcane:2t:2"; do
+            IFS=: read -r spec key num <<< "$line"
+            ref="/tmp/zrot-simc-original-if-pre/$spec-$key"
+            profile=simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc
+            if [ "$spec" = "mage_arcane" ]; then
+              profile=simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc
+            fi
+            python -B tools/research/simc_original_select_if_pre_witness_v1.py \
+              --plan tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json \
+              --log "$ref/simc_native_log.txt" --profile "$profile" \
+              --target-count "$num" \
+              --out "/tmp/zrot-simc-original-if-pre/$spec-$key/selected-if-pre.json"
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          sums={}
+          total=0
+          for spec in ['warrior_fury','mage_arcane']:
+              for key in ['st','2t']:
+                  p=Path('/tmp/zrot-simc-original-if-pre')/(spec+'-'+key)/'selected-if-pre.json'
+                  d=json.loads(p.read_bytes())
+                  n=d['comparisons'].get('MATCH_ORIGINAL_SAME_ROOT_SOURCE_IF',0)
+                  assert d['original_select_PRE_calls']>0
+                  assert d['exact_same_call_ID_and_object_comparison'] is True
+                  assert d['full_ready_proven']==0
+                  assert d['WCL_API_calls']==0
+                  total+=n;sums[spec+'-'+key]=d['comparisons']
+                  print('SELECT_IF_SAME_ROOT_EVIDENCE',spec,key,
+                        json.dumps(d['comparisons'],sort_keys=True))
+          print('SELECT_IF_SAME_ROOT_NATIVE_AST_MATCHES',total)
+          assert total>0
+          PY
+          sha256sum /tmp/zrot-source-original-if-patch-receipt.json \
+            /tmp/zrot-simc-original-if-pre/*/selected-if-pre.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-simc-original-same-call-source-if-pre-v1
+          path: |
+            /tmp/zrot-source-original-if-patch-receipt.json
+            /tmp/zrot-simc-original-if-pre/**/selected-if-pre.json
+            /tmp/zrot-simc-original-if-pre/**/simc_reference_receipt.json
+          if-no-files-found: warn
+          retention-days: 7

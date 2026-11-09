@@ -1,0 +1,13 @@
+{
+  "schema": "ZrotOriginalSimCSourceIFPreSpecAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "resource_enum": "RESOURCE_RAGE",
+  "resource_symbol": "rage",
+  "buff_name": "recklessness",
+  "buff_symbol": "buff.recklessness.up",
+  "class_cpp": "engine/class_modules/sc_warrior.cpp",
+  "original_class_cpp_blob": "38ee3dd0d5943eb9227ec55aefb21e7d47244f96",
+  "source_expected_buff_construction": "make_buff( this, \"recklessness\"",
+  "approved_source_only_nongame_capture": true
+}
