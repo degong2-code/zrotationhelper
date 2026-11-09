@@ -306,3 +306,12 @@ Evidence reuse: preserve existing source JSON/Fury IR/previous A-B and method-en
 | CI C++ 재빌드 방지 트리거 분리 | Heavy Native workflow `zrot-simc-native-movement-event-pre-v1.yml` semantic-only path 제거, light replay workflow path 구독 | **REUSE** pinned original native receipt; **REPLACE** 중복 Native 빌드 트리거. 신규 메서드 진위 증거가 필요할 때만 Native producer. |
 
 증거: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/EXTERNAL_ADAPTER_PROVENANCE_BOUNDARY_20261109.json`. Product-ready 증명 및 게임 오류판정 승격 없음.
+
+## 2026-11-09 source-PRE MOVEMENT / CAST 하위 조건 독립 증명
+
+| 증거 단위 | 검증 | REUSE / EXTEND |
+|---|---|---|
+| Fury 원본 PRE 세 독립 necessary subgates (`MOVEMENT_BASE_GUARD_PASS`, `MOVEMENT_APL_OPTION_CLEAR`, `CAST_REPEAT_CLEAR`) | [#42539035586](https://github.com/degong2-code/zrotationhelper/actions/runs/42539035586) 3/3 PASS, `slayer[6] rampage`, `t=20031ms` source occurrence-bound, native original method PRE; prior [#42538919914](https://github.com/degong2-code/zrotationhelper/actions/runs/42538919914) PASS | **REUSE** raw CAST/LINE + base READY markers, prior 12 real source rows. **EXTEND** generic gate names and conflict guard. Three independent true subgates do not replace `MOVEMENT` / `CAST_GCD` total; selected remains UNKNOWN. |
+| Official source truth for stationary vs directionality | Pinned action.cpp `399ecd94...`, player.cpp `88e03a01...`, player.hpp `f2648bec...` | **REUSE** source semantics; **UNKNOWN** actual runtime movement_directionality and player.current.movement_direction at same PRE. Never infer from `is_moving()==0` alone. |
+
+Full branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_PRE_MOVEMENT_CAST_SUBGATES_20261109.json`.

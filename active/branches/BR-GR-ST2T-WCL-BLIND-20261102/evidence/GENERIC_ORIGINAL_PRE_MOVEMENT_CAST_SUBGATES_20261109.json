@@ -1,0 +1,112 @@
+{
+  "schema": "ZrotGeneralRotationFuryOriginalSourcePREPartialMovementCastGateProofV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "date": "2026-11-09",
+  "source_revision": "simulationcraft/simc@b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "profile_blob_sha1": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+  "manifest_sha256": "44ac4316dcd718a42057832b45f6b6c7462589a4513d177a38d16878a",
+  "source_row_sha256": "217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2",
+  "context": {
+    "spec": "warrior_fury",
+    "case": "moving_st",
+    "source_list": "slayer",
+    "source_index": 6,
+    "source_action": "rampage",
+    "time_ms": 20031,
+    "source_occurrence": 0
+  },
+  "original_proven_subgates": [
+    {
+      "gate": "MOVEMENT_BASE_GUARD_PASS",
+      "value": true,
+      "basis": "INDEPENDENT_SOURCE_REPLAY",
+      "captured": "SIMC_ORIGINAL_METHOD_PRE",
+      "event_t_ms": 20031,
+      "meaning": "base ready movement && usable_moving branch bypassed by source PRE stationary state; directionality still unknown"
+    },
+    {
+      "gate": "MOVEMENT_APL_OPTION_CLEAR",
+      "value": true,
+      "basis": "INDEPENDENT_SOURCE_REPLAY",
+      "captured": "SIMC_ORIGINAL_METHOD_PRE",
+      "event_t_ms": 20031,
+      "meaning": "original APL option.moving matches source sampled actor moving state"
+    },
+    {
+      "gate": "CAST_REPEAT_CLEAR",
+      "value": true,
+      "basis": "INDEPENDENT_SOURCE_REPLAY",
+      "captured": "SIMC_ORIGINAL_METHOD_PRE",
+      "event_t_ms": 20031,
+      "meaning": "original repeat cast input fields do not trigger repeat prohibition; usable_while_casting/GCD remains unknown"
+    }
+  ],
+  "remaining_selected_full_gates": [
+    "BASE_VIRTUAL_COMPLETE",
+    "CAST_GCD",
+    "MOVEMENT",
+    "NECESSARY_ELIGIBILITY",
+    "SPEC_OVERRIDE_TOTAL"
+  ],
+  "source_cohort_verified_counts": {
+    "source_bound_physical_rows": 12,
+    "NOT_READY": 9,
+    "UNKNOWN": 3,
+    "READY": 0
+  },
+  "validated_ci": [
+    {
+      "run_id": 42538919914,
+      "conclusion": "success",
+      "jobs": 3,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42538919914",
+      "scope": "Python3.12+3.14 generic and real portable source replay"
+    },
+    {
+      "run_id": 42539035586,
+      "conclusion": "success",
+      "jobs": 3,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42539035586",
+      "scope": "assert actual original PRE 3 positive partial subgates with method provenance and full READY UNKNOWN"
+    }
+  ],
+  "source_producer_code_blob_sha1": "474e107094e7e9197e8895d75fab63cee8744621",
+  "source_truth_sanity": [
+    {
+      "original_cpp_file": "engine/action/action.cpp",
+      "blob_sha1": "399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4",
+      "finding": "base action_t::ready movement check and action_t::action_ready directionality check are distinct"
+    },
+    {
+      "original_cpp_file": "engine/player/player.cpp",
+      "blob_sha1": "88e03a01ca87ff66fd3902c9d6e047fe1a03ecb8",
+      "finding": "player_t::is_moving checks buffs.movement"
+    },
+    {
+      "original_cpp_file": "engine/player/player.hpp",
+      "blob_sha1": "f2648bec55750fce281e52185966d0424961a5c6",
+      "finding": "player_t::movement_direction returns current.movement_direction"
+    }
+  ],
+  "unobserved_decision_inputs": [
+    "action movement_directionality",
+    "actor current.movement_direction",
+    "cast usable_while_casting and gating player states",
+    "full spec override/replacement route",
+    "complete base virtual readiness"
+  ],
+  "limitations": {
+    "new_original_cpp_build": false,
+    "new_WCL_API_calls": 0,
+    "live_game_client_tested": false,
+    "full_ready_certified": 0,
+    "opener_sequence_proven": false,
+    "user_target_dummy_error_proven": false,
+    "source_pre_equals_WCL_strict_pre": false
+  },
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
