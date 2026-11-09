@@ -71,9 +71,9 @@ jobs:
           set -euo pipefail
           SRC=/tmp/simc-real-native-first-casts/gr-simc-original-performed-action-and-condition-model.json
           test -s "$SRC"
-          SHA="$(sha256sum "$SRC" | cut -d ' ' -f1)"
+          echo "584819145ec6e51bd7596bd273da74402622adf7bd0ecf1ea25ce19b0f26c715  $SRC" | sha256sum -c -
           python -B tools/research/general_rotation_simc_readable_report_v1.py \
-            --input "$SRC" --expected-sha256 "$SHA" \
+            --input "$SRC" --expected-sha256 584819145ec6e51bd7596bd273da74402622adf7bd0ecf1ea25ce19b0f26c715 \
             --out /tmp/gr-general-rotation-source-and-native-actions.md
           python - <<'PY'
           from pathlib import Path
