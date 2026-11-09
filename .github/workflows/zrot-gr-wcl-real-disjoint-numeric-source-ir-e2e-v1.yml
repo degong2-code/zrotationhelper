@@ -1,0 +1,193 @@
+name: zrot-gr-wcl-real-disjoint-numeric-source-ir-e2e-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - .github/workflows/zrot-gr-wcl-real-disjoint-numeric-source-ir-e2e-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  real-existing-dual-cohort:
+    name: ORIGINAL two disjoint WCL raw reports -> numeric Strict PRE -> source IR UNKNOWN
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          run-id: 41463589665
+          github-token: ${{ github.token }}
+          path: /tmp/wcl-original-discovery
+      - uses: actions/download-artifact@v4
+        with:
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          run-id: 41473060401
+          github-token: ${{ github.token }}
+          path: /tmp/wcl-original-holdout
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-general-source-hypothesis-real-49-ir-v1
+          run-id: 42594344188
+          github-token: ${{ github.token }}
+          path: /tmp/wcl-real-source-hypothesis
+      - name: Pin original frozen discovery numeric lock and predeclared holdout source
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/wcl-real-dual-cohort-transports
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          from fresh_wcl_engine_v1 import sha
+          from wcl_disjoint_holdout_v1 import validate_contract,validate_frozen_lock
+          p=Path('docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HOLDOUT_PREDECLARED_SOURCE_AND_METRICS_V1.json')
+          contract=validate_contract(json.loads(p.read_bytes()))
+          raw=Path('/tmp/wcl-original-discovery/derived/blind_lock.json').read_bytes()
+          lock=validate_frozen_lock(raw,contract)
+          assert sha(raw)==contract['frozen_discovery']['blind_lock_sha256']
+          assert lock['candidate_n']==4
+          assert {x['action_spell_id'] for x in lock['candidates']}=={1,184367,335096,335097}
+          assert lock['holdout_validated'] is False
+          assert lock['threshold_retuned_after_discovery'] is False
+          assert lock['gameplay_rule_eligible'] is False
+          print('ORIGINAL_FROZEN_BLIND_NUMERIC_LOCK_AND_HOLDOUT_SOURCE_PIN_PASS')
+          PY
+      - name: Replay both official raw snapshots through same generic actor transport
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          python -B tools/engine_first/wcl_raw_actor_numeric_transport_v1.py \
+            --actor-root /tmp/wcl-original-discovery \
+            --out /tmp/wcl-real-dual-cohort-transports/discovery-original-numeric.json
+          python -B tools/engine_first/wcl_raw_actor_numeric_transport_v1.py \
+            --actor-root /tmp/wcl-original-holdout --role holdout \
+            --discovery-lock /tmp/wcl-original-discovery/derived/blind_lock.json \
+            --holdout-contract docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HOLDOUT_PREDECLARED_SOURCE_AND_METRICS_V1.json \
+            --out /tmp/wcl-real-dual-cohort-transports/holdout-original-numeric.json
+      - name: Independent cohort chain unchanged -> WCL numeric cast and strict PRE -> postlock source diagnostic
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          from wcl_raw_actor_numeric_transport_v1 import disjoint_numeric_fixture
+          from general_rotation_wcl_postlock_source_ir_bridge_v1 import (
+             numeric_frozen_boundary,postlock_source_probe,BINDING_SCHEMA
+          )
+          root=Path('/tmp/wcl-real-dual-cohort-transports')
+          discovery=json.loads((root/'discovery-original-numeric.json').read_bytes())
+          holdout=json.loads((root/'holdout-original-numeric.json').read_bytes())
+          raw=Path('/tmp/wcl-original-discovery/derived/blind_lock.json').read_bytes()
+          lock=json.loads(raw)
+          assert discovery['raw_event_count']==17083
+          assert discovery['actor_numeric_cast_count']==54
+          assert discovery['raw_aura_boolean_transitions']==159
+          assert discovery['source_cohort_role']=='DISCOVERY'
+          assert holdout['raw_event_count']==9101
+          assert holdout['actor_numeric_cast_count']==51
+          assert holdout['source_cohort_role']=='HOLDOUT'
+          assert holdout['prior_disjoint_report_holdout_recomputed'] is True
+          assert holdout['report_code']!=discovery['report_code']
+          assert discovery['source_replay_sha256'] in lock['source_replay_sha256']
+          # Neither the numeric lock nor the dual raw audit has ever imported
+          # a SimC source IF or class-specific spell name.
+          fixture=disjoint_numeric_fixture([discovery],holdout,lock,sha(raw))
+          numeric=numeric_frozen_boundary(
+              raw,sha(raw),fixture['discovery_roster'],
+              fixture['holdout'],fixture['cast_events'])
+          assert numeric['source_APL_injected_in_numeric_phase'] is False
+          assert len(numeric['numeric_casts'])==51
+          assert len(numeric['numeric_locked_spell_ids'])==4
+          assert numeric['ready_or_priority_proven'] is False
+          assert numeric['candidate_set_changed_after_lock'] is False
+          # Reuse real Fury SimC source IR as a postlock research reference;
+          # no numeric spell->source row mapping is audited, so no mapping.
+          source_files=list(Path('/tmp/wcl-real-source-hypothesis').rglob(
+             'warrior_fury-st-source-hypothesis-evidence.json'))
+          assert len(source_files)==1
+          source=json.loads(source_files[0].read_bytes())
+          assert source['source_full_READY_proven']==0
+          assert source['source_order_priority_proven']==0
+          binding={
+            'schema':BINDING_SCHEMA,
+            'policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+            'bound_numeric_lock_sha256':sha(raw),
+            'source_profile_git_blob':source['source_hypothesis_IR']['source_git_blob'],
+            'source_spec':source['source_spec'],
+            'source_target_count':source['target_count'],
+            'binding_stage':'POST_LOCK_ONLY',
+            'action_identity_and_mechanic_independently_audited':False,
+            'build_equivalence_independently_verified':False,
+            'WCL_target_count_at_cast_verified':False,
+            'numeric_to_source_rows':[]
+          }
+          result=postlock_source_probe(numeric,fixture,source,binding)
+          assert result['holdout_evidence_source_kind']=='ATTESTED_RAW_WCL_REPLAY'
+          assert result['real_WCL_holdout_validated'] is False
+          assert result['physical_READY_proven']==0
+          assert result['complete_source_priority_proven'] is False
+          assert result['real_General_Rotation_rule_promoted'] is False
+          assert result['dummy_training_error_proven'] is False
+          assert result['holdout_numeric_casts']==51
+          assert result['source_vs_WCL_hypothesis_at_PRE_counts']=={
+            'UNKNOWN_NO_POSTLOCK_SOURCE_BINDING':51}
+          assert result['WCL_target_count_at_action']=='UNKNOWN'
+          (root/'real-wcl-numeric-disjoint-bridge-input.json').write_bytes(canonical(fixture))
+          (root/'real-wcl-postlock-hypothesis-unknown.json').write_bytes(canonical(result))
+          summary={
+            'schema':'ZrotGenericWclOriginalDualRawToSourceIRReproductionV1',
+            'policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+            'evidence_type':'ACTUAL_PREVIOUSLY_COLLECTED_OFFICIAL_WCL_RAW_REPLAY',
+            'original_discovery_run_id':41463589665,
+            'original_independent_disjoint_holdout_run_id':41473060401,
+            'original_source_IR_run_id':42594344188,
+            'discovery_raw_event_count':discovery['raw_event_count'],
+            'discovery_actor_cast_count':discovery['actor_numeric_cast_count'],
+            'discovery_actor_aura_pre_transition_count':discovery['raw_aura_boolean_transitions'],
+            'holdout_raw_event_count':holdout['raw_event_count'],
+            'holdout_actor_cast_count':holdout['actor_numeric_cast_count'],
+            'holdout_actor_aura_pre_transition_count':holdout['raw_aura_boolean_transitions'],
+            'holdout_other_report_verified':discovery['report_code']!=holdout['report_code'],
+            'prior_immutable_discovery_lock_sha256':sha(raw),
+            'discovery_candidates_count':len(numeric['numeric_locked_spell_ids']),
+            'previous_source_profile_source_only_IF_matches':49,
+            'actual_WCL_numeric_to_source_spell_mapping_audited':False,
+            'real_WCL_build_to_SimC_profile_equivalence_proven':False,
+            'WCL_target_count_at_decision':'UNKNOWN',
+            'postlock_source_if_checked_against_real_WCL':0,
+            'WCL_real_player_priority_rules_promoted':0,
+            'WCL_candidate_causality_proven':False,
+            'WCL_competing_spell_READY_proven':0,
+            'dummy_wrong_cast_proven':0,
+            'actual_live_WCL_API_called_in_this_run':False,
+            'new_native_SimC_builds':0,
+            'MAIN_promoted':False
+          }
+          (root/'real-wcl-disjoint-source-ir-e2e-summary.json').write_bytes(canonical(summary))
+          print('REAL_ORIGINAL_TWO_DISJOINT_WCL_REPORTS_RAW_STRICT_PRE_NUMERIC_TO_SOURCE_IR_PASS')
+          print('REAL_WCL_DUAL_COHORT_ENGINE_COUNTS',json.dumps(summary,sort_keys=True))
+          PY
+          sha256sum /tmp/wcl-real-dual-cohort-transports/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-replayed-real-disjoint-wcl-numeric-source-ir-v1
+          path: /tmp/wcl-real-dual-cohort-transports/*.json
+          if-no-files-found: warn
+          retention-days: 7
