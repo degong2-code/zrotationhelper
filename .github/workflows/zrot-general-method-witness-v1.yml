@@ -102,6 +102,19 @@ jobs:
           assert s['same_seed_combat_parity']=='NOT_YET_TESTED'
           print('OFFICIAL_FURY_SOURCE_EXACT_READY_GUARD_STATIC_PASS')
           PY
+          # Adapter must validate its static rule via immutable HEAD,
+          # never via the already instrumented working-tree warrior C++.
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0,'tools/research')
+          from general_rotation_warrior_exact_ready_guard_replay_v1 import normalized_source_rule
+          r=normalized_source_rule(Path('simc-upstream'))
+          assert len(r)==1
+          assert r[0][1].source_sha256=='217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2'
+          assert r[0][2]=='rampage'
+          print('IMMUTABLE_SOURCE_WARRIOR_SPEC_ADAPTER_RULE_STATIC_PASS')
+          PY
           sha256sum /tmp/gr-fury-original-method-static-patch.json
       - uses: actions/upload-artifact@v4
         with:
@@ -254,5 +267,6 @@ jobs:
             /tmp/gr-fury-method-source-patch.json
             /tmp/gr-fury-exact-ready-sequence-parity.json
             /tmp/gr-fury-exact-ready-method-replay.json
+            /tmp/zrot-fury-method-instrumented/simc_native_log.txt
           if-no-files-found: warn
           retention-days: 7
