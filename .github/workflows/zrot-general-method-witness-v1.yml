@@ -48,3 +48,211 @@ jobs:
           print('GENERIC_EXACT_ACTION_METHOD_WITNESS_SYNTHETIC_PASS')
           PY
           sha256sum tools/research/general_rotation_original_method_witness_v1.py
+
+  official-source-fury:
+    name: Pinned original Fury ready weapon guard source validation
+    needs: [generic-synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Original Warrior C++ source pin, generic PRE and method pointer patch audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_native_warrior_exact_ready_guard_producer_v1.py \
+            tools/research/general_rotation_warrior_exact_ready_guard_replay_v1.py
+          python -B tools/research/simc_native_warrior_exact_ready_guard_producer_v1.py \
+            > /tmp/gr-fury-method-producer-synth.json
+          python -B tools/research/general_rotation_warrior_exact_ready_guard_replay_v1.py \
+            > /tmp/gr-fury-method-verifier-synth.json
+          python -B tools/research/general_rotation_source_pre_field_capture_v1.py \
+            --source-root simc-upstream \
+            --patch --patch-receipt /tmp/gr-fury-pre-static-patch.json
+          python -B tools/research/simc_native_warrior_exact_ready_guard_producer_v1.py \
+            --source-root simc-upstream \
+            --out /tmp/gr-fury-original-method-static-patch.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/gr-fury-method-producer-synth.json'))
+          a=json.load(open('/tmp/gr-fury-method-verifier-synth.json'))
+          s=json.load(open('/tmp/gr-fury-original-method-static-patch.json'))
+          assert p['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert a['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert a['generic_method_witness_used'] is True
+          assert a['class_specific_pointer_parser_written'] is False
+          assert s['schema']=='ZrotWarriorExactReadyWeaponGuardProducerV1'
+          assert s['original_weapon_slot_condition_preserved'] is True
+          assert s['original_action_ready_call_count_unchanged'] is True
+          assert s['added_virtual_ready_calls']==0
+          assert s['semantic_requirement']=='both_mainhand_and_offhand_slot_occupied'
+          assert s['runtime_ready']=='UNKNOWN'
+          assert s['same_seed_combat_parity']=='NOT_YET_TESTED'
+          print('OFFICIAL_FURY_SOURCE_EXACT_READY_GUARD_STATIC_PASS')
+          PY
+          sha256sum /tmp/gr-fury-original-method-static-patch.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-fury-original-method-static-patch
+          path: /tmp/gr-fury-original-method-static-patch.json
+          retention-days: 7
+          if-no-files-found: error
+
+  actual-original-fury:
+    # Real source data only on explicit bounded opt-in, not every edit.
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[warrior-method-native-e2e]')
+    name: Original Fury exact method entry with generic pointer replay
+    needs: [official-source-fury]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare one upstream compiler-cache lane
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: simc-ubuntu-gcc-b522cded8c26b97dac03fdf56e57a03ec7e8faa6-v1
+      - name: Pin original source and compile original Fury baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-fury-method-bld -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-fury-method-bld --target simc --parallel 3
+          python - <<'PY'
+          from pathlib import Path
+          from hashlib import sha1
+          raw=Path('simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc').read_bytes()
+          assert sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()==\
+              '3225992ed5b754ad5d61e8b785d9d859f1eed1be'
+          Path('/tmp/zrot-fury-witness-moving.simc').write_bytes(
+              raw+b'\nfight_style=LightMovement\n')
+          PY
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile /tmp/zrot-fury-witness-moving.simc --spec fury \
+            --simc-bin /tmp/zrot-fury-method-bld/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/zrot-fury-method-pristine --timeout 180
+      - name: Generate passive generic PRE then source-pinned Fury override guard witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_source_pre_field_capture_v1.py \
+            --source-root simc-upstream \
+            --patch --patch-receipt /tmp/gr-fury-method-field-patch.json
+          python -B tools/research/simc_native_warrior_exact_ready_guard_producer_v1.py \
+            --source-root simc-upstream \
+            --out /tmp/gr-fury-method-source-patch.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-fury-method-source-patch.json'))
+          assert x['original_action_ready_call_count_unchanged'] is True
+          assert x['original_weapon_slot_condition_preserved'] is True
+          assert x['added_virtual_ready_calls']==0
+          print('ACTUAL_FURY_EXACT_READY_SOURCE_PATCH_SAFE')
+          PY
+      - name: Recompile only modified source then compare executed ability sequences
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake --build /tmp/zrot-fury-method-bld --target simc --parallel 3
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile /tmp/zrot-fury-witness-moving.simc --spec fury \
+            --simc-bin /tmp/zrot-fury-method-bld/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/zrot-fury-method-instrumented --timeout 180
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          base=extract_json_sequence(Path('/tmp/zrot-fury-method-pristine'))
+          probe=extract_json_sequence(Path('/tmp/zrot-fury-method-instrumented'))
+          assert base['status']=='SEQUENCE_SNAPSHOTS_EXTRACTED'
+          assert base['source_profile_sha256']==probe['source_profile_sha256']
+          assert base['source_apl_sha256']==probe['source_apl_sha256']
+          assert base['combat_sequence']==probe['combat_sequence']
+          assert base['precombat_sequence']==probe['precombat_sequence']
+          assert base['combat_count']==probe['combat_count']
+          r={'schema':'ZrotFuryOriginalWeaponReadySequenceParityV1',
+             'official_source_rev':'b522cded8c26b97dac03fdf56e57a03ec7e8faa6',
+             'pristine_and_instrumented_precombat_equal':True,
+             'pristine_and_instrumented_combat_equal':True,
+             'original_combat_casts':base['combat_count'],
+             'original_native_CPP_compiled':True,'WCL_API_calls':0}
+          Path('/tmp/gr-fury-exact-ready-sequence-parity.json').write_text(
+              json.dumps(r,sort_keys=True,indent=2)+'\n')
+          print('ACTUAL_FURY_ORIGINAL_READY_WITNESS_NONPERTURBATION_PASS',
+                r['original_combat_casts'])
+          PY
+      - name: Independently replay real Fury original method entry and source-bound necessary slot rule
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_warrior_exact_ready_guard_replay_v1.py \
+            --source-root simc-upstream \
+            --raw-log /tmp/zrot-fury-method-instrumented/simc_native_log.txt \
+            --patch-receipt /tmp/gr-fury-method-source-patch.json \
+            --parity-receipt /tmp/gr-fury-exact-ready-sequence-parity.json \
+            --out /tmp/gr-fury-exact-ready-method-replay.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-fury-exact-ready-method-replay.json'))
+          assert x['schema']=='ZrotFuryExactOriginalMethodWeaponNecessaryGateReplayV1'
+          assert x['pristine_instrumented_combat_casts']==46
+          assert x['counts']['method_witnesses']>=1
+          assert x['full_positive_READY']==0
+          assert x['source_evidence_authenticated_by_independent_original_run'] is True
+          assert x['dummy_practice_error_permitted'] is False
+          assert x['actual_WCL_holdout_completed'] is False
+          assert x['source_requirement']=='both_main_hand_and_off_hand_weapon_slots_occupied'
+          assert all(x['full_positive_READY']==0
+                     for x in x['candidate_proofs'])
+          print('ACTUAL_FURY_GENERIC_EXACT_METHOD_WITNESS_E2E_PASS',
+                json.dumps(x['candidate_proofs'],sort_keys=True))
+          PY
+          sha256sum /tmp/gr-fury-method-source-patch.json \
+            /tmp/gr-fury-exact-ready-sequence-parity.json \
+            /tmp/gr-fury-exact-ready-method-replay.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-fury-generic-original-ready-method-witness
+          path: |
+            /tmp/gr-fury-method-field-patch.json
+            /tmp/gr-fury-method-source-patch.json
+            /tmp/gr-fury-exact-ready-sequence-parity.json
+            /tmp/gr-fury-exact-ready-method-replay.json
+          if-no-files-found: warn
+          retention-days: 7
