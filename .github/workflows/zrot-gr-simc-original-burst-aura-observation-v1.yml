@@ -1,0 +1,115 @@
+name: zrot-gr-simc-original-burst-aura-observation-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_simc_burst_snapshot_interval_v1.py
+      - tools/research/fixtures/general_rotation_simc_pinned_burst_aura_source_adapter_v1.json
+      - .github/workflows/zrot-gr-simc-original-burst-aura-observation-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile and verify conservative source-only aura observation
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_simc_burst_snapshot_interval_v1.py
+          python -B tools/research/general_rotation_simc_burst_snapshot_interval_v1.py > /tmp/gr-burst-synthetic.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/gr-burst-synthetic.json'))
+          assert d['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert d['positive']==3 and d['negative']==3
+          assert d['opener_end_inferred'] is False
+          assert d['full_READY_inferred'] is False
+          print('SIMC_GENERIC_BURST_INTERVAL_GUARDS_PASS')
+          PY
+          sha256sum tools/research/general_rotation_simc_burst_snapshot_interval_v1.py
+
+  original-source-and-native:
+    runs-on: ubuntu-latest
+    needs: [synthetic]
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-pinned
+          persist-credentials: false
+          sparse-checkout: |
+            engine/class_modules/sc_warrior.cpp
+            engine/class_modules/sc_mage.cpp
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse prior pristine Native action JSON2 samples; never recompile
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42562520191
+          name: zrot-general-rotation-first-real-cast-and-source-ir
+          path: /tmp/zrot-original-casts
+          github-token: ${{ github.token }}
+      - name: Independently check original native receipt SHA and pinned C++ buff identity
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-pinned rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          python -B tools/research/general_rotation_simc_burst_snapshot_interval_v1.py \
+            --source-root simc-pinned \
+            --captures-root /tmp/zrot-original-casts/gr-original-action-captures \
+            --adapter tools/research/fixtures/general_rotation_simc_pinned_burst_aura_source_adapter_v1.json \
+            --out /tmp/zrot-simc-burst-snapshot-intervals.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/zrot-simc-burst-snapshot-intervals.json'))
+          assert d['schema']=='ZrotGenericSimcBurstAuraSnapshotIntervalV1'
+          assert len(d['burst_aura_state_snapshot_intervals'])==2
+          expected={'warrior_fury':(23404,24159,23407,24160),
+                    'mage_arcane':(17295,18174,16693,18142)}
+          for p in d['burst_aura_state_snapshot_intervals']:
+              st,two=p['cases']
+              a,b,c,e=expected[p['spec_key']]
+              assert st['status']=='OBSERVED_BOUNDED_AURA_SNAPSHOT_EXIT'
+              assert two['status']=='OBSERVED_BOUNDED_AURA_SNAPSHOT_EXIT'
+              assert (st['last_seen_active_ms'],
+                      st['first_seen_absent_after_active_ms'])==(a,b)
+              assert (two['last_seen_active_ms'],
+                      two['first_seen_absent_after_active_ms'])==(c,e)
+              assert st['opener_end_certified'] is False
+              assert two['opener_end_certified'] is False
+              print('BURST_AURA_OBSERVED_BOUNDS',p['spec_key'],
+                    'ST',a,b,'TWO',c,e)
+          assert d['actual_opener_exit_condition']=='UNKNOWN'
+          assert d['actual_Native_buff_expiration_exact']=='UNKNOWN'
+          assert d['independent_full_READY']==0 and d['WCL_API_calls']==0
+          print('SOURCE_PINNED_NATIVE_BURST_OBSERVATION_ONLY_PASS')
+          PY
+          sha256sum /tmp/zrot-simc-burst-snapshot-intervals.json
+      - name: Retain compact observed initial burst snapshot candidate
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-simc-original-burst-snapshot-bounds-${{ github.sha }}
+          path: /tmp/zrot-simc-burst-snapshot-intervals.json
+          retention-days: 7
+          if-no-files-found: error
