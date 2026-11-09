@@ -36,7 +36,7 @@ jobs:
           import json
           d=json.load(open('/tmp/gr-burst-synthetic.json'))
           assert d['status']=='PASS_OFFLINE_SYNTHETIC'
-          assert d['positive']==3 and d['negative']==3
+          assert d['positive']==4 and d['negative']==3
           assert d['opener_end_inferred'] is False
           assert d['full_READY_inferred'] is False
           print('SIMC_GENERIC_BURST_INTERVAL_GUARDS_PASS')
