@@ -1,0 +1,96 @@
+{
+  "schema": "ZrotGeneralRotationSourceEvidenceToTrainerResearchDeliveryReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "implementation": {
+    "source": "tools/research/general_rotation_research_delivery_v1.py",
+    "workflow": ".github/workflows/zrot-general-rotation-research-delivery-v1.yml",
+    "reused_existing": "tools/research/general_rotation_simc_e2e_research_engine_v1.py",
+    "reused_apl_parser": "tools/research/simc_apl_semantic_ir_v2.py",
+    "hardcoded_specialization_or_spell_semantics": false,
+    "zero_argument_PyCharm_safe_selftest": true
+  },
+  "source": {
+    "simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "profiles": [
+      "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+      "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f"
+    ],
+    "original_e2e_run": 42195342553,
+    "original_e2e_artifact_id": 13491917041,
+    "input_json_member_sha256": "bd391e15e9cc7828c6b50714cfe64852dbdb8e42985355f0f24b9f748911a6b2"
+  },
+  "validation": {
+    "run_id": 42561334139,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42561334139",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs_total": 3,
+    "jobs_success": 3,
+    "python_versions": [
+      "3.12",
+      "3.14"
+    ],
+    "real_original_cpp_source_e2e_replay_input": true,
+    "new_CPP_build": false,
+    "WCL_API_calls": 0,
+    "WoW_addon_calls": 0
+  },
+  "coverage": {
+    "specs": 2,
+    "classes": 2,
+    "source_APL_priority_rows": 172,
+    "original_SimC_root_selections": 262,
+    "cases": [
+      {
+        "spec": "warrior_fury",
+        "targets": 1,
+        "source_returns": 100,
+        "first_10000ms_returns": 38
+      },
+      {
+        "spec": "warrior_fury",
+        "targets": 2,
+        "source_returns": 90,
+        "first_10000ms_returns": 38
+      },
+      {
+        "spec": "mage_arcane",
+        "targets": 1,
+        "source_returns": 35,
+        "first_10000ms_returns": 13
+      },
+      {
+        "spec": "mage_arcane",
+        "targets": 2,
+        "source_returns": 37,
+        "first_10000ms_returns": 15
+      }
+    ],
+    "priority_source_order_complete_for_pinned_profiles": true,
+    "opener_true_cast_order": "UNKNOWN",
+    "opener_end": "UNKNOWN",
+    "independent_full_READY": 0,
+    "independent_WCL_holdout": false,
+    "confirmed_dummy_player_mistakes": 0
+  },
+  "output": {
+    "json_sha256": "44fdfbe9bb41048bcda68150e9c5ae6fef1fe1e2cbbfec4676759c9c627681a1",
+    "artifact_id": 13649318572,
+    "artifact_name": "zrot-general-rotation-source-evidence-trainer-research-v1",
+    "artifact_zip_digest": "sha256:bd02c29451164409cf769d999ef6e0ef9dffd7480ddb2b0fa6334c0252e2f99a",
+    "artifact_expires_utc": "2026-11-16T04:21:20Z"
+  },
+  "evidence_lifecycle": "SOURCE_PINNED_INITIAL_HYPOTHESES_WITH_ACTUAL_NATIVE_SOURCE_SELECTION_NOT_VALIDATED_WCL_PRIORITY",
+  "WCL_blind_semantic_leakage_prevented": true,
+  "source_ready_boolean_not_independent_complete_READY": true,
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "product_exact_next": "WCL numeric blind discovery cohort and candidate/threshold lock; disjoint independent holdout; postlock SimC conditional priority replay; addon observability-gated target dummy feedback.",
+  "session_exact_next": "Use existing WCL collector and blind numeric lock/holdout scripts on fresh authorized source cohort, keep SimC source hypotheses isolated until lock. Avoid another generic parser or repeated official SimC C++ build."
+}

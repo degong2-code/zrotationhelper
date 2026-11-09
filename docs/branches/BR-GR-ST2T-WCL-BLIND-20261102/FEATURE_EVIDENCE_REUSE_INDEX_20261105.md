@@ -384,3 +384,15 @@ See permanent branch evidence `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evi
 | Temporary source artifacts | #13645637682 Native capture; #13645947210 corrected proof artifact; expire 2026-11-16 UTC | REUSE where available, never prereq fresh engine |
 
 Detailed source pins, contract, limitations and bridge design: GENERIC_ORIGINAL_METHOD_WITNESS_ARCHITECTURE_20261109.md. Permanent evidence receipt: active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_METHOD_WITNESS_CROSS_SPEC_REAL_20261109.json.
+
+## 2026-11-09 — 기존 SimC 4사례 E2E 재사용 → General Rotation 연구용 전달 IR 검증
+
+| 신규 산출물 / 기존 자료 | 근거 | 재사용 판정 |
+|---|---|---|
+| `general_rotation_simc_e2e_research_engine_v1.py`, original 4-case JSON (#42195342553) | 2 unrelated specs, ST+2T, 172 actual source APL rows, original SimC 262 source returns; source SHA 고정 | **REUSE**, 신규 파서/C++ 불필요; actual player cast/priority optimality **NOT PROVEN** |
+| `general_rotation_research_delivery_v1.py` | [#42561334139](https://github.com/degong2-code/zrotationhelper/actions/runs/42561334139) Python3.12+3.14 및 actual archived SimC input **3/3 PASS**, output IR SHA256 `44fdfbe9...` | **NEW INTEGRATION**, SOURCE_ONLY_RESEARCH, product-ready NO |
+| selected-source ST / 2T samples | Fury 100/90; Arcane 35/37 selected roots, initial 10s 38/38/13/15 | **OBSERVED SimC SOURCE ONLY**; opener ended UNKNOWN |
+| WCL numeric blind lock + independent holdout | `tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py`, `wcl_disjoint_holdout_v1.py`, `tools/research/wcl_simc_postlock_real_audit_v1.py` | **REUSE next**, never inject SimC source semantics before WCL candidate lock |
+| target dummy app judgement | Current exact game addon state readiness and target count not proven | **UNKNOWN**, no false errors |
+
+Permanent branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_SOURCE_RESEARCH_DELIVERY_IR_20261109.json`.
