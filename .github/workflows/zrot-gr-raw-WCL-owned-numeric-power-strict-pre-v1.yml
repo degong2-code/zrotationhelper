@@ -1,0 +1,168 @@
+name: zrot-gr-raw-WCL-owned-numeric-power-strict-pre-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/engine_first/wcl_raw_actor_numeric_power_pre_v1.py
+      - .github/workflows/zrot-gr-raw-WCL-owned-numeric-power-strict-pre-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic:
+    name: Numeric WCL resource owner and strict PRE Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - name: Compile and re-test source/target resource ownership safety
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/engine_first/wcl_raw_actor_numeric_power_pre_v1.py
+          python -B tools/engine_first/wcl_raw_actor_numeric_power_pre_v1.py > /tmp/wcl-power-pre-offline.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/wcl-power-pre-offline.json'))
+          assert x['status']=='PASS_SYNTHETIC_TWO_NUMERIC_POWER_TYPES'
+          assert x['reused_existing_actor_resource_owner_reconstruct'] is True
+          assert x['strictly_earlier_numeric_source_snapshots'] is True
+          assert x['same_time_cast_resource_rejected_as_PRE'] is True
+          assert x['negative_controls']>=4
+          assert x['source_APL_IF_rule_proven']==0
+          assert x['full_READY_proven']==x['dummy_wrong_cast_proven']==0
+          print('GENERIC_NUMERIC_WCL_OWNED_RESOURCE_STRICT_PRE_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/engine_first/wcl_raw_actor_numeric_power_pre_v1.py
+  actual-three-source-raw-replay:
+    name: Three official old/new WCL reports resource owner strict PRE, no new API
+    runs-on: ubuntu-latest
+    needs: [synthetic]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          run-id: 41463589665
+          github-token: ${{ github.token }}
+          path: /tmp/resource-original-discovery
+      - uses: actions/download-artifact@v4
+        with:
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          run-id: 41473060401
+          github-token: ${{ github.token }}
+          path: /tmp/resource-original-holdout
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-replayed-real-disjoint-wcl-numeric-source-ir-v1
+          run-id: 42599589497
+          github-token: ${{ github.token }}
+          path: /tmp/resource-original-numeric-transports
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-live-wcl-coldstart-raw-56c016ab41b2b161fa79675194f26ab7df3c6d1d
+          run-id: 42599352437
+          github-token: ${{ github.token }}
+          path: /tmp/resource-new-third-raw
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-live-wcl-coldstart-status-56c016ab41b2b161fa79675194f26ab7df3c6d1d
+          run-id: 42599352437
+          github-token: ${{ github.token }}
+          path: /tmp/resource-new-third-numeric
+      - name: Reuse raw resources and verify source-origin strict earlier PRE on all three reports
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-replayed-wcl-three-resource-matrices
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          from wcl_raw_actor_numeric_power_pre_v1 import from_existing_actor_root
+          def found(root,name):
+              x=list(Path(root).rglob(name))
+              assert len(x)==1,(root,name,x)
+              return x[0]
+          sources=[
+           ('discovery','/tmp/resource-original-discovery',
+            '/tmp/resource-original-numeric-transports','discovery-original-numeric.json',54),
+           ('holdout','/tmp/resource-original-holdout',
+            '/tmp/resource-original-numeric-transports','holdout-original-numeric.json',51),
+           ('third','/tmp/resource-new-third-raw',
+            '/tmp/resource-new-third-numeric','new-raw-numeric.json',55)
+          ]
+          out=Path('/tmp/zrot-replayed-wcl-three-resource-matrices')
+          summary={'schema':'ZrotWclThreeOfficialRawActorNumericResourcePreReceiptV1',
+                   'scope_policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+                   'sources':{},
+                   'actual_three_original_WCL_report_sources':3,
+                   'raw_source_WCL_API_calls_this_run':0,
+                   'positive_game_resource_units_conversion_proven':False,
+                   'full_competing_READY_proven':0,
+                   'general_rotation_rules_promoted':0,
+                   'dummy_errors_proven':0}
+          for name,root,transport_root,transport_name,cast_count in sources:
+              transport=json.loads(found(transport_root,transport_name).read_bytes())
+              assert transport['actor_numeric_cast_count']==cast_count
+              matrix=from_existing_actor_root(Path(root),transport)
+              assert matrix['actor_casts']==cast_count
+              assert matrix['raw_source_actor_numeric_transport_sha256']==transport['numeric_transport_sha256']
+              assert matrix['resource_pre_matrix_sha256']==sha(canonical({
+                k:v for k,v in matrix.items() if k!='resource_pre_matrix_sha256'}))
+              assert matrix['raw_power_unit_to_game_resource_scale']=='UNKNOWN'
+              assert matrix['gcd_cooldown_charge_competing_action_READY']=='UNKNOWN'
+              assert matrix['dummy_wrong_cast_proven']==0
+              for x in matrix['per_numeric_cast']:
+                  for power in x['numeric_resource_strict_pre'].values():
+                      assert power['strict_prior_at_ms']<x['t_ms']
+                      assert power['source_checkpoint_raw_receipt_sha256']==transport['raw_receipt_sha256']
+                      assert power['game_resource_units_conversion']=='UNKNOWN'
+              path=out/(name+'-original-raw-numeric-power-strict-pre.json')
+              path.write_bytes(canonical(matrix))
+              summary['sources'][name]={
+                'numeric_actor_casts':cast_count,
+                'actual_strict_PRE_prior_power_snapshots':
+                   matrix['casts_with_any_owned_strict_PRE_resource'],
+                'observed_raw_power_type_prior_counts':
+                   matrix['numeric_raw_power_type_prior_counts'],
+                'actor_owned_resource_snapshot_events':
+                   matrix['actor_owned_resource_snapshot_events'],
+                'wrong_owner_event_rejections':
+                   matrix['wrong_or_unproven_owner_events_rejected'],
+                'same_timestamp_cast_resource_not_used':
+                   matrix['casts_with_same_timestamp_owner_snapshot_excluded'],
+                'matrix_sha256':matrix['resource_pre_matrix_sha256']
+              }
+              print('REAL_WCL_OWNED_RESOURCE_STRICT_PRE_CASE',name,
+                    json.dumps(summary['sources'][name],sort_keys=True))
+          (out/'three-real-raw-resource-pre-summary.json').write_bytes(canonical(summary))
+          print('THREE_REAL_OFFICIAL_WCL_RAW_NUMERIC_RESOURCE_STRICT_PRE_REPLAY_PASS')
+          PY
+          sha256sum /tmp/zrot-replayed-wcl-three-resource-matrices/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-real-three-report-wcl-actor-owned-numeric-pre-v1
+          path: /tmp/zrot-replayed-wcl-three-resource-matrices/*.json
+          if-no-files-found: warn
+          retention-days: 7
