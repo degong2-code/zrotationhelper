@@ -69,6 +69,35 @@ class MethodMarker:
         )
 
 
+def extend_player_pointer(already_generic:bytes)->bytes:
+    """Passive same-action pointer marker before the single original call.
+
+    This is common to EVERY specialization. A SpecAdapter must not
+    duplicate this C++ producer or ask for another action_ready().
+    """
+    from general_rotation_original_pre_field_transport_v1 import (
+        MARK as GENERIC_PRE_MARK,ORIGINAL_CALL)
+    src=already_generic.decode("utf-8")
+    require(GENERIC_PRE_MARK in src and POINTER_MARK not in src and
+            src.count(ORIGINAL_CALL)==1 and
+            src.index(GENERIC_PRE_MARK)<src.index(ORIGINAL_CALL),
+            "GENERIC_PRE_FIELD_MARKER_REQUIRED")
+    code=(
+        "    // Same-process action_t* for exact source PRE guard matching.\n"
+        "    if ( sim->log && !is_pet() && !is_enemy() )\n"
+        '      sim->print_log( "'+POINTER_MARK+'{}|{}|{}",\n'
+        "        sim->current_time().total_millis(), a->name_str,\n"
+        "        static_cast<const void*>( a ) );\n"
+    )
+    out=src.replace(ORIGINAL_CALL,code+ORIGINAL_CALL,1)
+    require(out.count("a->action_ready()")==src.count("a->action_ready()") and
+            out.count(ORIGINAL_CALL)==1 and out.count(POINTER_MARK)==1 and
+            out.index(GENERIC_PRE_MARK)<out.index(POINTER_MARK)<
+                out.index(ORIGINAL_CALL),
+            "SOURCE_READY_CALL_OR_POINTER_ORDER_CHANGED")
+    return out.encode("utf-8")
+
+
 def parse_pointer(line:str)->dict|None:
     pos=line.find(POINTER_MARK)
     if pos<0:return None
@@ -284,6 +313,13 @@ def selftest()->dict:
         c=method.prefix+f"{time}|{method.method_key}|{action}|{ptr}|"+ "|".join(str(x) for x in gate)
         d=f"ZROT_NATIVE_SELECT_V1|ATTEMPT|{time}|{source}|{source}|{ordinal}|{action}|0"
         return "\n".join((a,b,c,d))
+    from general_rotation_original_pre_field_transport_v1 import (
+        MARK as SOURCE_MARK,ORIGINAL_CALL)
+    mock=("PRE\n"+SOURCE_MARK+"{}|{}|{}|{}|{}|{}|{}\n"+
+          ORIGINAL_CALL+"\nPOST").encode()
+    placed=extend_player_pointer(mock).decode()
+    assert placed.index(SOURCE_MARK)<placed.index(POINTER_MARK)<placed.index(ORIGINAL_CALL)
+    assert placed.count("a->action_ready()")==1
     raw="\n".join((
         row(10,"spells",1,"opaque_cast","0x100",m1,(1,0,0),(0,)),
         row(10,"weapon",1,"opaque_weapon","0x200",m2,(1,0,0),(1,0))))
@@ -329,7 +365,7 @@ def selftest()->dict:
         source_rules=source_rules,receipt_sha256=hashes,source_verified=True)
     assert absent["counts"]["scoped_NOT_READY"]==0
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":17,"different_source_method_adapters":2,
+            "checks":20,"different_source_method_adapters":2,
             "same_timestamp_cross_action_guard_theft":False,
             "unverified_external_json_can_certify_NOT_READY":False,
             "real_native_CXX_executed":False,"full_positive_READY":0,
