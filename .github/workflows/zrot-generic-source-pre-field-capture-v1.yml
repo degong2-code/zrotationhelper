@@ -274,6 +274,15 @@ jobs:
           assert f['WCL_API_calls']==m['WCL_API_calls']==0
           assert any(x['matched_original_PRE_attempts']>0 for x in f['source_bound_condition_results'])
           assert any(x['matched_original_PRE_attempts']>0 for x in m['source_bound_condition_results'])
+          # Actually recovered, typed PRE data must be usable by the generic
+          # numeric condition interpreter; UNKNOWN is valid for an absent
+          # target row or missing buff, but not for every sampled row here.
+          assert any(x.get('numeric_condition') in ('TRUE','FALSE')
+                     for x in f['source_bound_condition_results'])
+          assert any(x.get('numeric_condition') in ('TRUE','FALSE')
+                     for x in m['source_bound_condition_results'])
+          assert f['original_method_PRE_markers_paired']==f['original_native_attempt_count']
+          assert m['original_method_PRE_markers_paired']==m['original_native_attempt_count']
           print('ACTUAL_FURY_AND_MAGE_SOURCE_PRE_FIELD_TO_GENERIC_IR_PASS')
           print('FURY_NUMERIC',json.dumps(f['source_bound_condition_results'],sort_keys=True))
           print('MAGE_NUMERIC',json.dumps(m['source_bound_condition_results'],sort_keys=True))
