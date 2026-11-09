@@ -1,0 +1,163 @@
+name: zrot-gr-wcl-raw-actor-numeric-cold-replay-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/engine_first/wcl_raw_actor_numeric_transport_v1.py
+      - .github/workflows/zrot-gr-wcl-raw-actor-numeric-cold-replay-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  offline-coldstart:
+    name: Raw actor numeric strict PRE producer Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12","3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Cold-start checkpoint / actor identity / numeric lock / strict PRE selftests
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/engine_first/wcl_raw_actor_numeric_transport_v1.py
+          python -B tools/engine_first/wcl_raw_actor_numeric_transport_v1.py > /tmp/zrot-real-raw-transport-synthetic.json
+          python - <<'PY'
+          import json
+          obj=json.load(open('/tmp/zrot-real-raw-transport-synthetic.json'))
+          assert obj["selftest"]=="PASS_OFFLINE_SYNTHETIC"
+          assert obj["new_cold_start_snapshots"]==2
+          assert obj["generic_actor_scoped_transports"]==2
+          assert obj["strict_PRE_same_time_fence"]=="PASS"
+          assert obj["disjoint_lock_fixture"]=="PASS"
+          assert obj["negative_controls"]>=7
+          assert obj["real_wcl_api_requests"]==0
+          assert obj["real_wcl_holdout_completed"] is False
+          assert obj["full_ready_proven"]==obj["dummy_error_proven"]==0
+          print("WCL_RAW_ACTOR_COLDSTART_NUMERIC_STRICT_PRE_SYNTHETIC_PASS")
+          PY
+          sha256sum tools/engine_first/wcl_raw_actor_numeric_transport_v1.py
+  historical-real-raw-replay:
+    name: Previously collected official WCL raw -> reproducible numeric producer
+    needs: [offline-coldstart]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          run-id: 41463589665
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-wcl-real-original-archive
+      - name: Offline replay real previously captured raw WCL source; no new API
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-wcl-raw-actor-numeric-real
+          test -f /tmp/zrot-wcl-real-original-archive/derived/blind_lock.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          from wcl_disjoint_holdout_v1 import validate_contract,validate_frozen_lock
+          c=validate_contract(json.loads(Path(
+            'docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HOLDOUT_PREDECLARED_SOURCE_AND_METRICS_V1.json'
+            ).read_bytes()))
+          raw=Path('/tmp/zrot-wcl-real-original-archive/derived/blind_lock.json').read_bytes()
+          lock=validate_frozen_lock(raw,c)
+          assert sha(raw)=='c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e'
+          assert lock['candidate_n']==4 and lock['holdout_validated'] is False
+          assert lock['gameplay_rule_eligible'] is False
+          print('OFFICIAL_WCL_ORIGINAL_NUMERIC_LOCK_AND_SOURCE_CONTRACT_SHA_PASS')
+          PY
+          python -B tools/engine_first/wcl_raw_actor_numeric_transport_v1.py \
+            --actor-root /tmp/zrot-wcl-real-original-archive \
+            --out /tmp/zrot-wcl-raw-actor-numeric-real/real-raw-actor-numeric-transport.json
+      - name: Actual previously collected raw source is numeric-only and readiness-safe
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          from general_rotation_strict_pre_state_engine_v1 import (
+             Transition,StrictPreReplay,VERIFIED
+          )
+          import json
+          p=Path('/tmp/zrot-wcl-raw-actor-numeric-real/real-raw-actor-numeric-transport.json')
+          x=json.loads(p.read_bytes())
+          actual=len(x['cast_events'])
+          assert x['schema']=='ZrotWclRawActorStrictPreNumericTransportV1'
+          assert x['origin']=='ATTESTED_RAW_WCL_REPLAY'
+          assert x['source_replay_sha256'] and x['actor_gate_sha256']
+          assert x['raw_event_count']>=actual>0
+          assert x['actor_numeric_cast_count']==actual
+          assert x['numeric_transport_sha256']==sha(canonical({
+              k:v for k,v in x.items() if k!='numeric_transport_sha256'}))
+          assert x['independent_rank_or_holdout_proven'] is False
+          assert x['numeric_resource_READINESS']=='UNKNOWN'
+          assert x['target_count_at_cast']=='UNKNOWN'
+          assert x['source_gameplay_rule']=='UNKNOWN'
+          assert x['official_WCL_live_API_called_this_run'] is False
+          assert all(set(e)=={'event_id','t_ms','spell_id','source_kind'}
+                     for e in x['cast_events'])
+          assert all(set(e)=={
+              'source_event_id','signal','t_ms','value','valid_until_ms',
+              'raw_receipt_sha256','source_kind','quality'
+          } for e in x['transitions'])
+          coh='real-historical-source-replay'
+          scope=x['report_code']+'/'+str(x['fight_id'])
+          actor=str(x['actor_id'])
+          trans=[
+             Transition(e['source_event_id'],coh,scope,actor,e['signal'],
+                        e['t_ms'],e['value'],e['valid_until_ms'],
+                        e['raw_receipt_sha256'],
+                        source_kind=e['source_kind'],quality=e['quality'])
+             for e in x['transitions']]
+          engine=StrictPreReplay(trans)
+          if trans:
+              cast=x['cast_events'][0]
+              signals=(trans[0].signal,)
+              a=engine.snapshot(cohort_id=coh,scope=scope,actor_id=actor,
+                                at_ms=cast['t_ms'],signals=signals)
+              assert a['SimC_APL_answer_injected'] is False
+              assert a['state_is_not_full_spell_ready'] is True
+              item=a['signals'][signals[0]]
+              if item['status']=='KNOWN':
+                  assert item['event_t_ms']<cast['t_ms']
+          print('REAL_EXISTING_WCL_RAW_ACTOR_NUMERIC_STRICT_PRE_OFFLINE_REPLAY_PASS')
+          print('REAL_WCL_RAW_SOURCE_COUNTS',json.dumps({
+             'raw_events':x['raw_event_count'],
+             'actor_casts':x['actor_numeric_cast_count'],
+             'aura_transitions':x['raw_aura_boolean_transitions'],
+             'excluded_other_actor_casts':x['other_actor_casts_excluded']},sort_keys=True))
+          print('WCL_INDEPENDENT_HOLDOUT_NOT_RUN')
+          PY
+          sha256sum /tmp/zrot-wcl-raw-actor-numeric-real/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-real-existing-wcl-raw-numeric-transport-v1
+          path: /tmp/zrot-wcl-raw-actor-numeric-real/*.json
+          if-no-files-found: warn
+          retention-days: 7
