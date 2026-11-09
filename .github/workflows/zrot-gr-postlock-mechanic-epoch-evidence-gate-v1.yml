@@ -36,7 +36,7 @@ jobs:
           x=json.load(open('/tmp/zrot-mechanic-epoch-synthetic.json'))
           assert x["status"]=="PASS_GENERIC_SOURCE_MECHANIC_EPOCH_GATE"
           assert x["two_different_specializations_synthetic"]==2
-          assert x["negative_claim_controls"]>=14
+          assert x["negative_claim_controls"]>=16
           assert x["Blizzard_prose_does_not_assign_spell_ID"] is True
           assert x["current_Retail_source_IF_certified"]==0
           assert x["actual_WCL_API_calls"]==0
@@ -92,6 +92,14 @@ jobs:
                  'c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e')
               assert result['source_candidate_WCL_casts']==15
               assert result['candidate_source_IF_rows']==152
+              assert result['WCL_casts_with_UNCERTIFIED_expected_action']==51
+              assert result['wrong_casts_marked_as_user_mistake']==0
+              assert len(result['per_WCL_cast_dummy_safety_feedback_preview'])==51
+              assert sum(x['potential_source_APL_rows_not_selected_count']
+                         for x in result['per_WCL_cast_dummy_safety_feedback_preview'])==152
+              assert all(x['dummy_training_mistake_verdict']==
+                         'UNKNOWN_NOT_EVALUATED_AS_DUMMY'
+                         for x in result['per_WCL_cast_dummy_safety_feedback_preview'])
               assert result['raw_unmapped_source_operand_total']==76
               assert len(result['mechanic_symbol_frontier'])==8
               assert result['mechanic_coverage_stage_count']=={
@@ -114,6 +122,8 @@ jobs:
                   for x in result['mechanic_symbol_frontier']
                   if x['source_candidate_rows_missing_raw_mapping']>0
                 ],
+                'raw_WCL_casts_with_verdict_UNKNOWN':51,
+                'source_candidate_rows_in_cast_feedback':152,
                 'certified_source_mechanic_rules':0,
                 'eligible_user_dummy_errors':0}
               print('REAL_WCL_OFFICIAL_MECHANIC_EPOCH_FRONTIER',
