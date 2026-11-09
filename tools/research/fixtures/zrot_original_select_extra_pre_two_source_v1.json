@@ -78,6 +78,18 @@
       "symbol": "buff.bladestorm.up",
       "kind": "buff_up",
       "name": "bladestorm"
+    },
+    {
+      "owner_class": "warrior",
+      "symbol": "rage",
+      "kind": "actor_resource",
+      "name": "RESOURCE_RAGE"
+    },
+    {
+      "owner_class": "warrior",
+      "symbol": "buff.recklessness.up",
+      "kind": "buff_up",
+      "name": "recklessness"
     }
   ],
   "native_original_semantic_hints": {
@@ -85,7 +97,8 @@
     "player_variable": "player_t::create_expression(variable.X) returns action_variable_t::current_value_, after ordered APL variable operations",
     "buff_stack": "buff_t::create_expression(stack) returns buff_t::check()",
     "buff_react": "buff_t::create_expression(react) returns buff_t::stack_react(), distinct from raw stacks",
-    "buff_up": "buff_t::create_expression(up) returns buff_t::check()>0"
+    "buff_up": "buff_t::create_expression(up) returns buff_t::check()>0",
+    "actor_resource": "resources.current[RESOURCE_ENUM] native player resource state, pinned class/profile"
   },
   "observe_all_log_actor_classes_but_replay_only_matching_source_profile": true,
   "captured_values_without_valid_field": "UNKNOWN",
