@@ -52,8 +52,12 @@ def _numeric_build(event: dict) -> dict:
     tree = event.get("talentTree")
     require(type(gear) is list and type(tree) is list,
             "COMBATANT_GEAR_OR_TREE_UNOBSERVED")
-    require(all(type(g) is dict and _positive(g.get("id")) and
-                (g.get("setID") is None or _positive(g["setID"])) for g in gear),
+    # WCL represents an unequipped slot with id=0. It is an observed slot,
+    # not an equipped item and not evidence of any activated set bonus.
+    require(all(type(g) is dict and type(g.get("id")) is int and
+                g["id"] >= 0 and
+                (g.get("setID") is None or _positive(g["setID"])) and
+                (g["id"] != 0 or g.get("setID") is None) for g in gear),
             "COMBATANT_GEAR_INCOMPLETE")
     require(all(type(t) is dict and _positive(t.get("nodeID")) and
                 _positive(t.get("id")) and
@@ -66,7 +70,9 @@ def _numeric_build(event: dict) -> dict:
     sets = Counter(str(g["setID"]) for g in gear if g.get("setID") is not None)
     return {
         "observed_numeric_specID": event["specID"],
-        "observed_gear_item_count": len(gear),
+        "observed_gear_slot_count": len(gear),
+        "observed_gear_item_count": sum(g["id"] > 0 for g in gear),
+        "observed_gear_empty_slot_count": sum(g["id"] == 0 for g in gear),
         "observed_gear_item_ids": [g["id"] for g in gear],
         "observed_gear_setID_item_counts": dict(sorted(sets.items())),
         "observed_gear_numeric_sha256": sha(canonical(gear)),
@@ -195,6 +201,12 @@ def selftest() -> dict:
         assert report["actor_numeric_build_snapshot"]["observed_gear_setID_item_counts"] == {"7":2}
         assert report["actor_numeric_build_snapshot"]["observed_talent_unique_node_count"] == 1
         assert report["general_rotation_rule_certified"] is False
+        passed += 1
+        make([{**ci, "gear": ci["gear"] + [{"id": 0}]}, cast])
+        empty = produce(folder, gate)["actor_numeric_build_snapshot"]
+        assert empty["observed_gear_slot_count"] == 3
+        assert empty["observed_gear_item_count"] == 2
+        assert empty["observed_gear_empty_slot_count"] == 1
         passed += 1
         make([{**ci, "timestamp": 200}, cast])
         assert produce(folder, gate)["actor_numeric_build_snapshot"] is None
