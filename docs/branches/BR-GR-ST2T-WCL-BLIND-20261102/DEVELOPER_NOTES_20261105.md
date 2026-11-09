@@ -1,5 +1,11 @@
 # zRotationHelper — Developer Notes / Branch Local (2026-11-05)
 
+## 2026-11-10 — SimC source target scenarios development notes
+
+Source-first implementation added `tools/research/general_rotation_simc_target_count_projection_v1.py` and `tools/research/fixtures/general_rotation_simc_target_scenarios_v1.json`, with CI `.github/workflows/zrot-gr-simc-source-target-count-projection-v1.yml`. Uses existing exact Git-blob pinned parser and source ordered CALL/RUN, not a new APL parser. Runs only 9 target counts and 6 deliberately hypothetical build scenarios to make class-dependent thresholds visible; NEVER uses WCL numeric cohorts for source guard generation. `active_enemies` and `variable.aoe_count` are source expressions, **not target observations**. `target_if`, movement and other attributes are kept unasserted. Source guard TRUE does not imply ready, cast or optimal.
+
+Actual source CI [#42651150670](https://github.com/degong2-code/zrotationhelper/actions/runs/42651150670) 3/3 SUCCESS, original 172 APL rows; Py SHA256 `d365f94fd7df14872c0d0c0b3a3f8156f99fd4eebee1804d7405980ef189d13f`; source JSON SHA256 `8cbaabfaf357a68638e0ad2ce696b4511a5792343687ea86d5dd285e6ff2b3e4`. Artifact 13688674407, 7-day retention. Current source hypothesis can now describe 3+ *conditional eligibility* but not real Native selected spell, independent FULL READY or opener end. Next Native 3+/5 checks must be built from existing Native evidence source and done only if decision-impact warrants, not duplicate broad C++ compilation.
+
 ## 2026-11-10 — Numeric actor build PRE after fresh explicit '진행' (branch-only)
 
 - **Avoid duplicate implementation:** existing WCL snapshot/page ledger/actor gate is intact; new `tools/engine_first/wcl_actor_combatantinfo_pre_v1.py` consumes that same raw input and emits a **source-neutral** numeric combatantinfo certificate (not a second WCL collector, not a replacement for existing `wcl_simc_build_alignment_v1.py`).
