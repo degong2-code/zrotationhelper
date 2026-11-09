@@ -1,0 +1,94 @@
+{
+  "schema": "ZrotGen6ReadOnlyHandoffPreparationEvidenceV1",
+  "date": "2026-11-09",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "branch_head_at_preparation": "3786e69791803e8fd1eb29e90e9365e5a54e77f3",
+  "main_head": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "policy_blob": "14b9f5174a9d1652a56dcca03af1f2302b78c22d",
+  "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+  "old_scope_generation": 5,
+  "new_scope_generation": 6,
+  "old_handoff_sha1": "f64c509a0602a3d01b348493f99d5616ddaf88a9",
+  "old_handoff_bytes_sha256": "ab04457130b37bce8c55e359e60c77a75d9abcfd5f8806da952d8fc070742bd5",
+  "old_handoff_archive": "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN5_BEFORE_20261109.json",
+  "new_latest_handoff": "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json",
+  "new_chat_prompt": "handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_SCOPEGEN6_20261109.md",
+  "sources_prechecked": [
+    "scope lock + scope text + AGENTS + charter + continuity protocol",
+    "Gen5 handoff and Gen4 immutable archive",
+    "feature evidence reuse index + branch latest status + developer notes + worklog",
+    "source script general_rotation_mechanic_epoch_evidence_gate_v1.py SHA1 306de73...",
+    "mechanic public source registry and last evidence receipt",
+    "actual old WCL and source CI runs"
+  ],
+  "actual_verified_runs": [
+    {
+      "run": 42624671123,
+      "conclusion": "success",
+      "jobs": "3/3",
+      "artifact_id": 13677577367,
+      "artifact_zip_sha256": "1451f30c58f6f44ec70df52c24cf7aeaedbcb914f9c97a26fb8077684cf867f4",
+      "artifact_expires_UTC": "2026-11-16T13:21:12Z"
+    },
+    {
+      "run": 42618455023,
+      "conclusion": "success",
+      "jobs": "3/3"
+    },
+    {
+      "run": 42617968037,
+      "conclusion": "success",
+      "jobs": "3/3"
+    },
+    {
+      "run": 42573758563,
+      "conclusion": "success",
+      "jobs": "3/3"
+    },
+    {
+      "run": 41463589665,
+      "conclusion": "success",
+      "jobs": "3/3"
+    },
+    {
+      "run": 41473060401,
+      "conclusion": "success",
+      "jobs": "3/3"
+    }
+  ],
+  "latest_engine_status": "GENERIC MECHANIC PROVENANCE/PATCH EPOCH GATE IMPLEMENTED + SYNTHETIC/OFFLINE REAL WCL PASS, NOT CURRENT LIVE GAME RULE PROOF",
+  "actual_priority_ready_dummy": "UNKNOWN/NOT_VALIDATED",
+  "missing_evidence_vs_implementation_vs_product": {
+    "missing_evidence": [
+      "Pinned independent Blizzard client/patch-buff ID/source C++ effect parity for high-impact source symbols",
+      "Actual WCL actor talent, equipped 4-piece, gear, fight/client patch epoch and target-count equivalence to SimC profile",
+      "Complete Strict PRE readiness for each competing action incl GCD, charges, cooldown, proc and Enrage dynamic remains",
+      "Independently validated gameplay rule with prospectively locked candidate/threshold and applicable held-out WCL cohort",
+      "Actual Retail permitted own-spellcast/addon telemetry and own target dummy session"
+    ],
+    "missing_implementation": [
+      "Proven current Retail build-aware SpecAdapter ingestion and exact source spell/aura identity binding; existing exploratory adapters not ready",
+      "Reusable full alternative-READY/priority decision audit and opener-end/3+target breakpoint completion",
+      "Generic rule IR to target dummy own-cast feedback evaluator with truth/UNKNOWN gates"
+    ],
+    "missing_product_connection": [
+      "No user-facing validated General Rotation opener and complete conditional skill priority",
+      "No confirmed optimal player cast or genuine dummy mistake verdict",
+      "No in-game live addon feasibility/current client end-to-end test"
+    ],
+    "external_availability_issues": [
+      "GitHub Actions raw artifacts have limited retention; expiry is EXTERNAL_AVAILABILITY, not automatically an engine defect",
+      "Two referenced historical documents docs/ROTATION_RESEARCH_SYSTEM_CORE_CONTRACT_V1.md and docs/GENERAL_ROTATION_PLAYBOOK_DUAL_LANE_SUCCESSOR_PROPOSAL_v2.md were NOT_FOUND in this branch and must not be assumed present; uploaded successor proposal is supplemental, not canonical promotion"
+    ]
+  },
+  "source_mutation_this_handoff": false,
+  "new_WCL_SimC_runs_this_handoff": 0,
+  "MAIN_FROZEN_old_handoff_mutated": false,
+  "postcommit_governance_CI": "PENDING",
+  "new_chat_readonly_until_new_progress": true,
+  "scope_policy_snapshot_embedded_in_latest": true,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}

@@ -1,17 +1,18 @@
-name: ZRot General Rotation Branch Handoff Continuity (Scope Gen5)
+name: ZRot General Rotation Branch Handoff Continuity (Scope Gen6)
 on:
   push:
     branches:
       - work/gr-simc-st-2t-wcl-blind-20261102
     paths:
       - _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json
-      - _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN4_BEFORE_20261109.json
+      - _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN5_BEFORE_20261109.json
       - .github/workflows/zrot-gr-20261109-branch-handoff-continuity.yml
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   reuse-existing-scope-validator:
+    name: Scope Gen6 full policy and five-hop continuity Python ${{ matrix.python }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -24,7 +25,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: Reuse product scope and five-hop continuity gate
+      - name: Reuse fixed official policy and five-hop continuity validator
         shell: bash
         run: |
           set -euo pipefail
@@ -32,37 +33,74 @@ jobs:
           python -B tools/governance/validate_scope_continuity_v1.py \
             --validate --self-test \
             --handoff _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json \
-            > /tmp/gr-handoff-scope-validation.json
+            > /tmp/gr-scopegen6-validation.json
           python - <<'PY'
           import hashlib,json
           from pathlib import Path
+          sha=lambda b: hashlib.sha256(b).hexdigest()
           root=Path('_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102')
-          child=json.loads((root/'LATEST_HANDOFF.json').read_bytes())
-          parent=(root/'archive/LATEST_HANDOFF_SCOPEGEN4_BEFORE_20261109.json').read_bytes()
-          old=json.loads(parent)
-          receipt=json.loads(Path('/tmp/gr-handoff-scope-validation.json').read_bytes())
-          assert receipt['result']=='PASS_SCOPE_CONTINUITY'
-          assert receipt['active_real_generation']==5
-          assert receipt['negative_cases_passed']==14
-          assert len(receipt['five_hop_simulation']['simulated_successor_hops'])==5
-          assert receipt['five_hop_simulation']['actual_handoffs_created']==0
-          assert old['scope_continuity']['generation']==4
-          assert child['scope_continuity']['generation']==5
-          assert hashlib.sha256(parent).hexdigest()==child['scope_continuity']['parent_handoff_sha256']
-          assert hashlib.sha256(parent).hexdigest()=='84c15a489c7709bdbd24f4474f6665afc9cc9692ccc286cda1c1ce1e7a6a7a9e'
-          gen3_bytes=(root/'archive/LATEST_HANDOFF_SCOPEGEN3_BEFORE_20261109.json').read_bytes()
-          assert hashlib.sha256(gen3_bytes).hexdigest()==old['scope_continuity']['parent_handoff_sha256']
-          assert child['scope_continuity']['policy_snapshot']==old['scope_continuity']['policy_snapshot']
-          assert child['current_evidence']['latest_same_call_source_pre']['run']==42573758563
-          assert child['current_evidence']['latest_same_call_source_pre']['fury_source_AST_native_IF_matches']==60
-          assert child['current_evidence']['latest_same_call_source_pre']['original_pristine_vs_instrumented_JSON2_order_parity']=='149/149'
-          assert child['current_evidence']['latest_same_call_source_pre']['source_to_JSON2_emitter_call_identity']=='UNKNOWN'
-          assert child['current_evidence']['earlier_independent_IF']['add_to_latest_60'] is False
-          assert child['product_exact_next'].find('General Rotation')>=0
-          assert child['shared_authoritative_state_mutated'] is False
-          assert child['project_wide_FROZEN_changed'] is False
-          assert child['entry_gate']['user_explicit_progress_needed']=='진행'
-          assert child['entry_gate']['previous_chat_progress_approval_inherited'] is False
-          assert child['Seq578']=='FAILED_QUARANTINED' and child['Seq637']=='UNKNOWN'
-          print('GEN5_SCOPE_POLICY_PARENT_BYTE_SHA256_FIVE_HOP_READONLY_NEXT_CHAT_PASS')
+          handoff=json.loads((root/'LATEST_HANDOFF.json').read_bytes())
+          gen5_raw=(root/'archive/LATEST_HANDOFF_SCOPEGEN5_BEFORE_20261109.json').read_bytes()
+          gen5=json.loads(gen5_raw)
+          gen4_raw=(root/'archive/LATEST_HANDOFF_SCOPEGEN4_BEFORE_20261109.json').read_bytes()
+          gen4=json.loads(gen4_raw)
+          gen3_raw=(root/'archive/LATEST_HANDOFF_SCOPEGEN3_BEFORE_20261109.json').read_bytes()
+          policy_raw=Path('docs/PRODUCT_SCOPE_LOCK_V1.json').read_bytes()
+          policy=json.loads(policy_raw)
+          result=json.loads(Path('/tmp/gr-scopegen6-validation.json').read_bytes())
+          assert result['result']=='PASS_SCOPE_CONTINUITY'
+          assert result['active_real_generation']==6
+          assert result['negative_cases_passed']==14
+          assert len(result['five_hop_simulation']['simulated_successor_hops'])==5
+          assert result['five_hop_simulation']['actual_handoffs_created']==0
+          assert gen5['scope_continuity']['generation']==5
+          assert gen4['scope_continuity']['generation']==4
+          assert handoff['scope_continuity']['generation']==6
+          assert sha(policy_raw)=='157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295'
+          assert handoff['scope_continuity']['policy_snapshot']==policy
+          assert gen5['scope_continuity']['policy_snapshot']==policy
+          assert sha(gen5_raw)==handoff['scope_continuity']['parent_handoff_sha256']
+          assert sha(gen5_raw)=='ab04457130b37bce8c55e359e60c77a75d9abcfd5f8806da952d8fc070742bd5'
+          assert sha(gen4_raw)==gen5['scope_continuity']['parent_handoff_sha256']
+          assert sha(gen4_raw)=='84c15a489c7709bdbd24f4474f6665afc9cc9692ccc286cda1c1ce1e7a6a7a9e'
+          assert sha(gen3_raw)==gen4['scope_continuity']['parent_handoff_sha256']
+          assert handoff['previous_handoff_generation']==5
+          assert handoff['previous_handoff_original_blob_sha1']=='f64c509a0602a3d01b348493f99d5616ddaf88a9'
+          assert handoff['actual_branch_head_after_latest_handoff']=='MUST_REQUERY_LIVE_GITHUB_REF'
+          assert handoff['main_head_observed_read_only']=='4790f77f76a75f26ff0558d1d18c16cd9d630c4b'
+          assert handoff['entry_gate']['mode']=='READ_ONLY_RESTORE_REPORT_THEN_STOP'
+          assert handoff['entry_gate']['user_explicit_progress_needed']=='진행'
+          assert handoff['entry_gate']['previous_chat_progress_approval_inherited'] is False
+          assert handoff['entry_gate']['exact_final_sentence']=="복원 보고를 완료했습니다. 사용자의 '진행' 지시를 기다립니다."
+          assert handoff['shared_authoritative_state_mutated'] is False
+          assert handoff['project_wide_FROZEN_changed'] is False
+          assert handoff['FROZEN_modified'] is False and handoff['MAIN_promoted'] is False
+          assert handoff['Seq578']=='FAILED_QUARANTINED' and handoff['Seq637']=='UNKNOWN'
+          assert handoff['scope_continuity']['policy_snapshot']['out_of_scope']==policy['out_of_scope']
+          latest=handoff['current_evidence']['mechanic_epoch']
+          assert latest['latest_run']==42624671123
+          assert latest['conclusion']=='SUCCESS_3_OF_3'
+          assert latest['actual_WCL_holdout_casts']==51
+          assert latest['each_simc_model_row_probes']==152
+          assert latest['gameplay_priority_proven']==0
+          assert handoff['current_evidence']['postlock_source_IF']['real_game_source_IF_verified']==0
+          assert handoff['current_evidence']['WCL_raw']['third_is_predeclared_holdout'] is False
+          receipt=json.loads(Path(handoff['handoff_receipt']).read_bytes())
+          assert receipt['new_scope_generation']==6
+          assert receipt['old_handoff_bytes_sha256']==sha(gen5_raw)
+          assert receipt['new_chat_readonly_until_new_progress'] is True
+          real=json.loads(Path('active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_POSTLOCK_MECHANIC_EPOCH_EVIDENCE_FRONTIER_20261109.json').read_bytes())
+          assert real['validation']['last_final_CI_run']==42624671123
+          assert real['validation']['last_final_CI_status']=='SUCCESS_3_OF_3'
+          assert real['validation']['actual_raw_WCL_and_original_source_APL_frontier_offline']=='PASS'
+          assert real['original_real_st_2t_research_evidence']['General_Rotation_priority_rules_certified']==0
+          assert real['original_real_st_2t_research_evidence']['user_action_error_certified']==0
+          prompt=Path(handoff['new_chat_prompt']).read_text(encoding='utf-8')
+          assert "READ_ONLY" in prompt or "읽기 전용" in prompt
+          assert "복원 보고를 완료했습니다. 사용자의 '진행' 지시를 기다립니다." in prompt
+          assert "재사용 가능한" in prompt
+          assert "기존" in prompt and "REUSE" in prompt
+          assert handoff['chat_exact_next'].startswith('READ_ONLY_RESTORE_REPORT_THEN_STOP')
+          assert handoff['product_exact_next'].find('General Rotation')>=0
+          print('GEN6_SCOPE_LOCK_FULL_PARENT_BYTES_FIVE_HOPS_EXACT_READ_ONLY_PASS')
           PY

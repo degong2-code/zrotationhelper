@@ -1,6 +1,21 @@
 # zRotationHelper — Feature Evidence Reuse Index (2026-11-05)
 
-## Gen5 (2026-11-09) — current feature/evidence reuse decision
+## Scope Gen6 — 2026-11-09 latest evidence/engine reuse decision
+
+| Subsystem | Reuse/extension | Real proof vs gap |
+| --- | --- | --- |
+| Official product/scope and Gen5 continuation | **REUSE unchanged policy + immutable Gen5 archive** → Gen6 branch-local handoff | Policy SHA256 `157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295`; parent Gen5 bytes `ab04457130b37bce8c55e359e60c77a75d9abcfd5f8806da952d8fc070742bd5` |
+| SimC APL hypothesis + original Native/source row | **REUSE**, selective EXTEND real opener/alternatives/3+ target | 172 source APL, 203 emitter source rows, 149 JSON2 actions and 60 Fury same-call source IF; distinct evidence kinds and runs; full competing READY and opener-end **UNKNOWN** |
+| WCL fresh source, actor identity and independent blind numeric holdout | **REUSE** checkpoint/strict PRE/immutable lock; no new collection as prerequisite | 54 original discovery +51 independently-sourced numeric holdout +55 distinct third report; 3rd report **not** new predeclared holdout; gameplay priority **NOT VERIFIED** |
+| Generic aura/resource typed, temporal and explicit-stack state | **REUSE** `wcl_raw_actor_numeric_power_pre_v1.py`, `wcl_raw_actor_aura_temporal_pre_v1.py` | Real 160 cast state rows, 157 prior actor raw power; 3,254 Boolean aura known/2,095 UNKNOWN; 1,210 explicit stacks incl zero; raw aura age **not** buff.remains |
+| Typed Source IF AST and multirow Post-lock bridge | **REUSE** `general_rotation_postlock_typed_pre_scenario_v1.py` | 51 WCL casts, 15 action-token candidates, each Fury ST/2T has 152 source-row probes; 33 assumed-TRUE/16 unit-sensitive/43 UNKNOWN/60 no IF, **none** gameplay certified |
+| Mechanic/epoch/ID gate | **REUSE + focused EXTEND** `general_rotation_mechanic_epoch_evidence_gate_v1.py` and `FURY_MECHANIC_PATCH_EVIDENCE_REGISTRY_20261109.json` | [#42624671123](https://github.com/degong2-code/zrotationhelper/actions/runs/42624671123) 3/3: 1 official prose concept /3 public ID/name candidates /4 missing semantic sources; 51/51 safe UNKNOWN; source build/epoch/real READY **NOT CERTIFIED** |
+| Generic fully validated rules + practice feedback | **UNKNOWN / NOT PRODUCT-INTEGRATED** | No current Retail priority certified, opener-end/3+ targets and own real dummy telemetry not tested; never declare incorrect action from missing state |
+
+**Engineer self-check:** check this index and raw receipts before every new task. Prefer **REUSE → focused EXTEND** over duplicate WCL API, old archive resurrection, per-spec hard-coded core and repeated same contract CI. Classify **EVIDENCE vs IMPLEMENTATION vs PRODUCT-INTEGRATION** gaps before coding. Latest full audit receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_ENGINE_HANDOFF_SCOPEGEN6_20261109.json`. First new chat response is **READ-ONLY RESTORE THEN STOP**; no previous '진행' approval inherited.
+
+
+## Gen5 (2026-11-09) — historical feature/evidence reuse decision (superseded by Scope Gen6)
 
 | Feature | Actual evidence / proof boundary | Action |
 |---|---|---|

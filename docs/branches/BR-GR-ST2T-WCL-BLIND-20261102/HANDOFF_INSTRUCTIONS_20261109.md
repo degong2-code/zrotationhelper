@@ -1,5 +1,16 @@
 # zRotationHelper — Branch-local continuation instructions (2026-11-09)
 
+## Scope Gen6 branch-only operational handoff (2026-11-09, latest)
+
+Official policy remains `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`, full SHA256 `157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295`. Gen5 `LATEST_HANDOFF.json` is now archived byte-for-byte at `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN5_BEFORE_20261109.json`, SHA256 `ab04457130b37bce8c55e359e60c77a75d9abcfd5f8806da952d8fc070742bd5`; active branch-local handoff is **Scope Gen6**, not Gen5. Do not rewrite archived bytes, prior FROZEN, shared scope policy, MAIN state or global `LATEST_HANDOFF.json`.
+
+**Next chat first response is READ-ONLY and stops.** Independently fetch actual branch and main refs and CI receipts, verify full Gen6 policy snapshot / parent SHA chain, read latest Gen6 boot `handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_SCOPEGEN6_20261109.md` and feature index + source code/receipts. Report completion/gaps, REUSE/EXTEND/REPLACE/UNKNOWN, short/medium/long roadmap and Product/Session Exact Next; **do not start development, modify, run tests/API/Actions, commit, PR or promote until the user says a NEW '진행' in the NEW CHAT**. Prior progress approval is not inherited. Exact first response final line: `복원 보고를 완료했습니다. 사용자의 '진행' 지시를 기다립니다.`
+
+**After NEW '진행' only:** pre-read existing feature index and originals before every task; use previously verified code/data/receipts instead of duplicate investigations, batch independent work, reuse same contract success criteria. Self-audit effect on **generic reusable General Rotation opener/conditional IF/ELSE + truthful user dummy correction**. Separate evidence shortfall, implementation shortfall and product-integration shortfall, do not equate observed source cast and READY or numerical buff age and remains. SimC-first global, WCL blind pre-lock independent. Strict PRE `timestamp < t`, unknown readiness stays UNKNOWN. Current mechanism frontier #42624671123 is source-symbol provenance and future feedback reason only: 51 actual WCL casts are UNKNOWN, 0 certified priority or dummy errors. No real addon/client feedback validated.
+
+**Artifact availability distinction:** cited `docs/ROTATION_RESEARCH_SYSTEM_CORE_CONTRACT_V1.md` and `docs/GENERAL_ROTATION_PLAYBOOK_DUAL_LANE_SUCCESSOR_PROPOSAL_v2.md` were NOT_FOUND on current branch. User-uploaded successor playbook is supplemental; do not invent a GitHub source path. Gen6 parent archive is an actual GitHub file.
+
+
 This is a branch-local operational successor. **Do not edit or supersede** canonical `AGENTS.md`, shared architecture/semantic contract, MAIN pointers or immutable FROZEN. The latest user-approved policy remains `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`, policy SHA256 `157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295`. If any older roadmaps differ, latest user policy wins. Product is GENERAL ROTATION opener+IF/ELSE and target-dummy trainer, not encounter/raid/NSRT.
 
 ## Every new chat: immutable first-response READ_ONLY gate
@@ -22,7 +33,7 @@ This is a branch-local operational successor. **Do not edit or supersede** canon
 
 See `HANDOFF_STATUS_20261109.md` for measured scope and Product/Session Exact Next.
 
-## Gen5 read-only new-chat gate (2026-11-09)
+## Historical Gen5 read-only new-chat gate (2026-11-09; superseded by Gen6)
 
 Current branch-local handoff is scope Gen5, `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json`. Parent Gen4 archived exactly at `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN4_BEFORE_20261109.json`, SHA256 `84c15a489c7709bdbd24f4474f6665afc9cc9692ccc286cda1c1ce1e7a6a7a9e`. **Every new chat first response MUST independently re-read branch and MAIN actual refs and real receipts, give goal / gap categories / reuse strategy / short-medium-long roadmap and STOP until the user gives a new explicit '진행'.** Past chat progress is not inherited. See `handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_SCOPEGEN5_20261109.md` for the current boot prompt. Original Gen4 prompt is historical, not the latest.
 
