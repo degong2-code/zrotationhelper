@@ -81,6 +81,8 @@ def power_cast_matrix(events:list,actor_id:int,fight_start_ms:int,
     # Existing research engine is independently tested and enforces
     # same-timestamp exclusion before applying resource transitions.
     source=reconstruct(events,actor_id,raw_casts)
+    duplicate_keys=Counter((x["t_ms"],x["spell_id"]) for x in transported_casts)
+    ambiguous_keys={key for key,count in duplicate_keys.items() if count>1}
     need(source["actor_cast_count"]==len(transported_casts) and
          source["unobserved_resource_transitions_possible"] is True and
          source["resource_cost_cooldown_charge_or_gcd_readiness"]=="UNKNOWN",
@@ -137,6 +139,10 @@ def power_cast_matrix(events:list,actor_id:int,fight_start_ms:int,
            "t_ms":cast["t_ms"],
            "numeric_spell_id":cast["spell_id"],
            "numeric_resource_strict_pre":typed,
+           "cast_raw_event_ordinal_identity":(
+               "UNKNOWN_SAME_TIMESTAMP_SAME_SPELL"
+               if (cast["t_ms"],cast["spell_id"]) in ambiguous_keys
+               else "UNIQUE_TIMESTAMP_SPELL"),
            "full_GCD_cooldown_charge_resource_READY":"UNKNOWN",
            "source_spell_or_priority_injected":False,
            "target_count_at_action":"UNKNOWN",
@@ -145,6 +151,16 @@ def power_cast_matrix(events:list,actor_id:int,fight_start_ms:int,
     need(all(not value for value in sorted_casts.values()) and
          len(out)==len(transported_casts),
          "NUMERIC_PRE_ALL_ACTOR_CASTS_NOT_ACCOUNTED")
+    # At the same timestamp all PRE facts should be identical, regardless
+    # of original raw row order. A duplicated cast ID cannot be resolved
+    # by sorting its WCL page ordinal; refuse non-equivalent prior state.
+    for key in ambiguous_keys:
+        compared=[canonical(row["numeric_resource_strict_pre"])
+                  for row in out
+                  if (row["t_ms"],row["numeric_spell_id"])==key]
+        need(len(compared)==duplicate_keys[key] and
+             len(set(compared))==1,
+             "SAME_TIMESTAMP_SPELL_CASTS_HAVE_DIFFERENT_PRE_STATE")
     result={
         "schema":SCHEMA,"policy_id":POLICY,
         "status":"ACTOR_OWNED_RAW_RESOURCE_STRICT_PRE_OBSERVATION",
@@ -165,6 +181,10 @@ def power_cast_matrix(events:list,actor_id:int,fight_start_ms:int,
           source["casts_with_same_timestamp_owned_snapshot_not_used"],
         "per_cast_status":dict(sorted(statuses.items())),
         "per_numeric_cast":out,
+        "same_timestamp_same_spell_casts_with_ambiguous_event_identity":
+          sum(duplicate_keys[key] for key in ambiguous_keys),
+        "ambiguous_identity_groups_with_identical_strict_PRE":
+          len(ambiguous_keys),
         "raw_power_unit_to_game_resource_scale":"UNKNOWN",
         "observed_resource_snapshot_may_be_stale":True,
         "gcd_cooldown_charge_competing_action_READY":"UNKNOWN",
@@ -271,10 +291,20 @@ def join_numeric_strict_pre(transport:dict,aura_matrix:dict,
          len(by_aura)==len(by_resource)==len(ids) and
          set(by_aura)==set(by_resource)==set(ids),
          "NUMERIC_RESOURCE_AURA_CAST_IDENTITY_AMBIGUOUS")
-    # Same-clock same-spell duplicates are indistinguishable without an
-    # independently proven raw source event ordinal join. Refuse to guess.
-    need(len(set((x["t_ms"],x["spell_id"]) for x in casts))==len(casts),
-         "AMBIGUOUS_SAME_TIMESTAMP_IDENTICAL_SPELL_CASTS")
+    # Same-clock same-spell duplicates cannot establish exact WCL raw
+    # event ordinal identity. Their PRE state can still be used if both
+    # independently reconstructed channels are identical for the group.
+    groups=Counter((x["t_ms"],x["spell_id"]) for x in casts)
+    ambiguous={key for key,count in groups.items() if count>1}
+    for key in ambiguous:
+        linked=[cast for cast in casts
+                if (cast["t_ms"],cast["spell_id"])==key]
+        astate={canonical(by_aura[x["event_id"]]["strict_pre_signals"])
+                for x in linked}
+        rstate={canonical(by_resource[x["event_id"]]["numeric_resource_strict_pre"])
+                for x in linked}
+        need(len(astate)==len(rstate)==1,
+             "AMBIGUOUS_SAME_TIMESTAMP_SPELL_HAS_NON_EQUIVALENT_PRE")
     summary=Counter();rows=[];typed=Counter()
     for cast in casts:
         idnum=cast["event_id"];t=cast["t_ms"];spell=cast["spell_id"]
@@ -317,6 +347,9 @@ def join_numeric_strict_pre(transport:dict,aura_matrix:dict,
              "RAW_NUMERIC_OBSERVED_NOT_SOURCE_UNIT_PROOF"
              if res["numeric_resource_strict_pre"] else "UNKNOWN",
           "raw_source_cast_not_manual_proof":True,
+          "source_event_ordinal_identity":(
+              "UNKNOWN_EQUIVALENT_STRICT_PRE"
+              if (t,spell) in ambiguous else "UNIQUE_TIMESTAMP_SPELL"),
           "source_APL_candidate_row":"UNKNOWN_UNTIL_POSTLOCK_ADAPTER",
           "source_class_build_equivalence":"UNKNOWN",
           "complete_spell_READY":"UNKNOWN",
@@ -331,6 +364,10 @@ def join_numeric_strict_pre(transport:dict,aura_matrix:dict,
       "owned_resource_pre_matrix_sha256":
         resource_matrix["resource_pre_matrix_sha256"],
       "actor_cast_rows":len(rows),
+      "same_timestamp_spell_event_identity_ambiguous_cast_rows":
+        sum(groups[key] for key in ambiguous),
+      "same_timestamp_spell_ambiguous_groups_with_equivalent_PRE":
+        len(ambiguous),
       "numeric_power_types_observed":dict(sorted(typed.items())),
       "cast_coverage":dict(sorted(summary.items())),
       "per_numeric_cast":rows,
@@ -431,6 +468,7 @@ def selftest():
         k:v for k,v in matrix.items() if k!="resource_pre_matrix_sha256"}))
     joined=join_numeric_strict_pre(transport,aura,matrix)
     need(joined["actor_cast_rows"]==2 and
+         joined["same_timestamp_spell_event_identity_ambiguous_cast_rows"]==0 and
          joined["cast_coverage"]["CASTS_WITH_PRIOR_ACTOR_RESOURCE"]==2 and
          joined["complete_and_competing_READY_proven"]==0 and
          joined["per_numeric_cast"][0]["raw_aura_strict_pre"][
@@ -475,6 +513,7 @@ def selftest():
        "wrong_owner_event_excluded":True,
        "negative_controls":n,
        "raw_aura_numeric_resource_join":"PASS_SYNTHETIC",
+       "same_time_same_spell_casts_guarded_by_equivalent_PRE":True,
        "raw_resource_semantic_units":"UNKNOWN",
        "real_WCL_new_collection":"NOT_RUN",
        "source_APL_IF_rule_proven":0,
