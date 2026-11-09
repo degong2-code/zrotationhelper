@@ -310,7 +310,7 @@ def selftest()->dict:
         FieldRequest("equipment.off_hand.equipped","actor_weapon_slot_equipped","off_hand"),
         FieldRequest("buff.example.active","actor_named_buff_active","example"),
     )
-    m1=MethodMarker("ZROT_DEMO|","opaque_cast",("buff.example.active",))
+    m1=MethodMarker("ZROT_DEMO|","cast_override_v2",("buff.example.active",))
     m2=MethodMarker("ZROT_DEMO|","opaque_weapon",
                      ("equipment.main_hand.equipped","equipment.off_hand.equipped"))
     def row(time,source,ordinal,action,ptr,method,values,gate):
@@ -331,12 +331,13 @@ def selftest()->dict:
         row(10,"weapon",1,"opaque_weapon","0x200",m2,(1,0,0),(1,0))))
     parsed=pair_original_attempts(raw,fields=fields,method_markers=(m1,m2))
     assert parsed["original_native_attempts"]==2
+    assert parsed["rows"][0]["witnesses"].get("cast_override_v2") is not None
     cast_rule=rule("buff.required",eq("buff.example.active",True),"d"*64)
     weapon_rule=rule("two.equipped",{"op":"all","children":[
         eq("equipment.main_hand.equipped",True),
         eq("equipment.off_hand.equipped",True)]},"e"*64)
     source_rules=[
-        (cast_rule,Identity("spells::opaque_cast","d"*64,10,0,0),"opaque_cast"),
+        (cast_rule,Identity("spells::opaque_cast","d"*64,10,0,0),"cast_override_v2"),
         (weapon_rule,Identity("weapon::opaque_weapon","e"*64,10,0,0),"opaque_weapon"),
     ]
     hashes={"raw_log":"1"*64,"patch":"2"*64,"parity":"3"*64}
