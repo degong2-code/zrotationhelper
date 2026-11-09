@@ -1,0 +1,93 @@
+{
+  "schema": "ZrotOriginalSourceCompetitorGenericFrontierReceiptV1",
+  "date": "2026-11-10",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "research_claim": "ORIGINAL_SOURCE_APL_ROW_LOCAL_NEGATIVE_GATE_REPLAY_NOT_ENTIRE_PHYSICAL_READY_OR_CAUSAL_PRIORITIZATION",
+  "reused_evidence": {
+    "original_specific_native_source_run": 42186013774,
+    "original_specific_decision_ledger_run": 42186794065,
+    "source_ledger_artifact_id": 13487477840,
+    "source_ledger_artifact_member_sha256": "323939228eddea328e1d74eb38c293caf3c866a1dbbfa95c946d59a4ce8a9c7e",
+    "source_ledger_zip_digest_sha256": "3e1bc6b910da04cee4e080bdeeb4f2579c731a444321e0a87b577652cd0e04d5",
+    "source_simc_original_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "source_original_profile_git_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+    "source_original_mage_cpp_git_blob": "306d835f2db5f7418da221ce155d32e81c53f45c",
+    "source_case": "Two independently observed 2-target original SimC Arcane Orb source choices in Spellslinger list; excludes earlier rows at same exact original root only."
+  },
+  "generic_engine": {
+    "source": "tools/research/general_rotation_source_competitor_frontier_v1.py",
+    "source_python_sha256": "d1bd25d0eac610482240debf179320437fd4e99ef5fa8554a02131bbaa31345b",
+    "declarative_adapter": "tools/research/fixtures/general_rotation_simc_competitor_arcane_source_adapter_v1.json",
+    "workflow": ".github/workflows/zrot-gr-original-source-competing-ready-frontier-v1.yml",
+    "reuses": [
+      "simc_apl_semantic_ir_v2.py",
+      "general_rotation_decision_proof_engine_v1.py",
+      "general_rotation_source_if_minimal_witness_v1.py"
+    ],
+    "no_specialization_or_action_priority_hardcoded_in_generic_core": true,
+    "original_legacy_source_ledger_property_names_declared_by_adapter": true,
+    "root_identity_and_source_list_rank_verified": true,
+    "source_original_APL_sha256_and_native_CPP_source_blob_pinned": true,
+    "source_IF_false_computed_independently_from_AST": true,
+    "necessary_local_source_ready_negative_from_original_verified_pre": true,
+    "native_POST_comparator_is_not_independent_PRE": true,
+    "source_Calls_RUN_and_other_lists_not_proven": true,
+    "source_row_local_NOT_READY_does_NOT_claim_globally_unusable_skill": true
+  },
+  "actual_validation": {
+    "final_run_id": 42723323648,
+    "final_run_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42723323648",
+    "CI": "SUCCESS_3_OF_3",
+    "Python_312_compile_synthetic": "PASS",
+    "Python_314_compile_synthetic": "PASS",
+    "generic_synthetic_two_unrelated_specialization_fixtures": 2,
+    "synthetic_tamper_mutations_rejected": 10,
+    "real_legacy_original_CPP_arcane_2t_decision_replay": "PASS",
+    "original_two_target_source_Orb_winner_occurrences": 2,
+    "original_prior_source_rows": 10,
+    "original_native_post_FALSE_total": 10,
+    "independently_proven_source_row_local_negative": 8,
+    "source_APL_IF_FALSE_independent_AST": 2,
+    "source_CPP_local_necessary_guard_FALSE_independent": 6,
+    "remaining_native_POST_only_source_IF_unknown": 2,
+    "per_case_earlier_candidate_decision_not_ready": 4,
+    "per_case_earlier_candidate_decision_UNKNOWN": 1,
+    "per_case_chosen_full_READY": "UNKNOWN",
+    "full_general_rotation_priority": "UNKNOWN",
+    "real_result_JSON_sha256": "510c08f443d590490f96f9656aeced68bd01ab9a613a8fe655d2251bc36aa272",
+    "artifact_id": 13720593706,
+    "artifact_zip_sha256": "1504cd24cd3131c80d79d90299900eea7b67e7ee66e83c59d06033cd828447bb",
+    "artifact_expires_at_utc": "2026-11-16T23:48:09Z",
+    "new_original_CXX_builds": 0,
+    "new_WCL_API_calls": 0
+  },
+  "actual_missing_source_PRE_capture_upper_bounds": {
+    "original_candidate_action": "arcane_barrage",
+    "earlier_source_list_rank_one_based": 3,
+    "prior_same_candidate_each_winner": 1,
+    "two_original_source_occurrence_missing": {
+      "talent.orb_barrage": 2,
+      "prev_gcd.1.arcane_surge": 2,
+      "buff.arcane_salvo.react": 2
+    },
+    "other_source_AST_symbols": "Retained in generic result JSON, no automatic zero imputations.",
+    "unknown_symbol_count_is_NOT_proof_each_required": true,
+    "exact_original_root_PRE_required_not_later_same_clock_selected_root": true
+  },
+  "product_limits": {
+    "native_source_row_exclusion_not_whole_ability_NOT_READY": true,
+    "complete_competing_READY_proven": 0,
+    "source_candidate_selected_not_actual_player_cast": true,
+    "current_retail_general_rotation_complete": false,
+    "general_rotation_opener_end": "UNKNOWN",
+    "WCL_blind_postlock_validation_performed_this_step": false,
+    "dummy_wrong_cast": "UNKNOWN",
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "session_exact_next": "Use generic prior-candidate frontier to isolate the two original Arcane Barrage APL IF-false roots. Source-pin a minimal same-run Native PRE capture of the required APL operands (talent/orb and prev_gcd/buff/aoe variable), and independently recompute source false where possible; do not join different SimC runs or impute root state. Then extend generic provenance to more class/spec builds and retest complete source-local competition."
+}
