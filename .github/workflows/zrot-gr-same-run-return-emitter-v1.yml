@@ -80,6 +80,22 @@ jobs:
             --source-root simc-upstream \
             --prior-receipt /tmp/zrot-original-same-call-prior.json \
             --patch-receipt /tmp/zrot-selected-return-emitter-patch.json
+      - name: Verify exact SimC specialization field before costly C++ build
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_apl_source_engine import _profile_fields,_text
+          for filename,spec in [('MID2_Warrior_Fury.simc','fury'),
+                                ('MID2_Mage_Arcane.simc','arcane')]:
+              p=Path('simc-upstream/profiles/MID2')/filename
+              actual=_profile_fields(_text(p.read_bytes()))
+              assert actual['spec']==spec and actual['actor_count']==1, actual
+              print('PINNED_PROFILE_SPEC_PRECHECK',filename,spec)
+          PY
       - name: Compile one pinned original SimC with passive witnesses
         shell: bash
         run: |
@@ -96,7 +112,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for row in "warrior_fury:warrior_fury:MID2_Warrior_Fury.simc" "mage_arcane:mage_arcane:MID2_Mage_Arcane.simc"; do
+          for row in "warrior_fury:fury:MID2_Warrior_Fury.simc" "mage_arcane:arcane:MID2_Mage_Arcane.simc"; do
             IFS=: read -r spec actor profile <<< "$row"
             for n in 1 2; do
               key=st
