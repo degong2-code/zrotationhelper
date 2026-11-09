@@ -34,7 +34,7 @@ jobs:
           python - <<'PY'
           import json
           x=json.load(open('/tmp/actor-ci-selftest.json'))
-          assert x['status']=='PASS_OFFLINE_SYNTHETIC' and x['checks']==6
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC' and x['checks']==7
           assert x['independent_gameplay_PRIORITY_proven'] is False
           assert x['WCL_API_called'] is False
           print('ACTOR_COMBATANTINFO_STRICT_PRE_SYNTHETIC_PASS',x['checks'])
@@ -77,7 +77,9 @@ jobs:
           assert b['combatantinfo_at_ms']==1
           assert b['strictly_before_first_actor_action'] is True
           assert b['observed_numeric_specID']==72
-          assert b['observed_gear_item_count']==18
+          assert b['observed_gear_slot_count']==18
+          assert b['observed_gear_item_count']==17
+          assert b['observed_gear_empty_slot_count']==1
           assert b['observed_talent_entry_count']==76
           assert b['observed_gear_setID_item_counts'].get('2067')==4
           assert b['observed_gear_setID_item_counts'].get('2070')==2
@@ -90,7 +92,9 @@ jobs:
           assert x['new_WCL_API_calls']==0
           print('REAL_WCL_NUMERIC_COMBATANTINFO',json.dumps({
               'actor_specID': b['observed_numeric_specID'],
-              'gear_entries':b['observed_gear_item_count'],
+              'gear_slots':b['observed_gear_slot_count'],
+              'equipped_items':b['observed_gear_item_count'],
+              'empty_slots':b['observed_gear_empty_slot_count'],
               'set_counts':b['observed_gear_setID_item_counts'],
               'talent_entries':b['observed_talent_entry_count'],
               'source_semantics':'UNKNOWN',
