@@ -1,5 +1,20 @@
 # zRotationHelper — General Rotation / Dummy Trainer current status (2026-11-09)
 
+## 2026-11-09 Gen5 continuation — Original SELECT-PRE 12-field SpecAdapter expansion, 49 source IF matches
+
+**Original SimC native E2E:** [Actions #42589894203](https://github.com/degong2-code/zrotationhelper/actions/runs/42589894203), **3/3 SUCCESS** (Python 3.12/3.14 static synthetic + one official original C++ build + four Fury/Arcane ST/2T real source cases). Previous [gap planner #42588693756](https://github.com/degong2-code/zrotationhelper/actions/runs/42588693756) 3/3 PASS, zero C++ build, ranked 78 missing PRE actual selected IF by source operand demand.
+
+**Observed change (same seed/profile, different native source run with 149/149 action parity):** independently evaluated original source IF vs original same-call native comparator **15→49** (+34); original IF UNKNOWN missing selected PRE **78→44** (-34). Original 147 APL foreground causal selected→JSON2 preserved, 91 native same-call IF comparator positions unchanged, original 203 emitter total = 149 COMBAT (including two alternative-route UNKNOWN) +54 PRECOMBAT. 49 matches by case: Fury ST23/2T7; Arcane ST8/2T11. 54 source APL rows no explicit IF are NOT full READY.
+
+**Minimal adapter fields:** source-specified `active_enemies`, **actual original APL `variable.aoe_count` current value**, buffs with original `check()` up/stack or original `stack_react()` react semantics, Fury rage. All in external two-spec source-pinned adapter; generic C++ producer and source evaluator contain no class action hardcoding. Same original SELECT PRE call id and pointer, new ready/queue/JSON2 calls 0.
+
+**Do not promote:** independent IF match ≠ complete physical READY ≠ mandatory priority; competing skills not observed, 44 selected source IF remain UNKNOWN; WCL blind holdout NOT_RUN; dummy wrong cast UNKNOWN. Two prior Arcane `touch_of_the_magi` COMBAT records have source `use_off_gcd=1` but exact actual off-GCD native route not confirmed. Opener termination UNKNOWN.
+
+**Evidence/retention:** receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_PRE_12_FIELD_ORIGINAL_IF_SUCCESSOR_20261109.json`; original summary SHA256 `41349b1c80dad80119f02f5e92dc71c8a99293d6c45cf6091855a6cf8219c380`; raw native log + reports Actions artifact #13660659299, expires 2026-11-16 UTC. Scope policy `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`. MAIN, Gen5 handoff and FROZEN unchanged.
+
+**Session Exact Next:** reuse 49 narrow source IF proofs in typed General Rotation hypothesis IR and safely retain UNKNOWN 44/competing readiness. Rank residual 44 by decision impact before any further C++ build. Independently lock WCL blind candidates before replay / holdout, only then evaluate which inferred priority warrants training feedback.
+
+
 ## 2026-11-09 Gen5 continuation — independently replayed original selected source IF (no new C++)
 
 - **Actual offline E2E:** [Actions #42587480633](https://github.com/degong2-code/zrotationhelper/actions/runs/42587480633), **3/3 SUCCESS** (Python 3.12/3.14 compile+synth and four original native log+source profile replays). Reuses [original #42584765533](https://github.com/degong2-code/zrotationhelper/actions/runs/42584765533) C++ single-build and its 149/149 pristine JSON2 parity, zero new C++ builds and zero WCL API.

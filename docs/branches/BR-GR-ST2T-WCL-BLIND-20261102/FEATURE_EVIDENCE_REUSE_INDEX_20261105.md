@@ -505,3 +505,16 @@ Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL
 | Full READY/mandatory priority/dummy | 0 / NOT_PROVEN / UNKNOWN | **BLOCK** product feedback promotion until independent evidence + holdout |
 
 Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_DISPATCH_SOURCE_IF_REPLAY_20261109.json`. Output artifact #13659663059, summary SHA256 `03c035dc6e7d28c4247c8756b427da317cce9965932f2e4caf23234dc3bb99f4`. No new native C++ or WCL calls this step.
+
+## Original same-call PRE source expansion 2026-11-09 (reuse before further native compile)
+
+| Asset | Actual evidence | Boundary |
+| --- | --- | --- |
+| `general_rotation_original_if_gap_priority_v1.py` | [#42588693756](https://github.com/degong2-code/zrotationhelper/actions/runs/42588693756) 3/3 PASS, reuse 78 missing source IF | rank operand demands, overlapping symbol counts; never infer physical READY |
+| `fixtures/zrot_original_select_extra_pre_two_source_v1.json` | 12 source-pinned field declarations (Fury/Arcane) separate from Generic Engine | type/class/profile/blob binding |
+| `general_rotation_original_select_extra_pre_v1.py` | source CPP one original select scope, 0 new ready calls; [#42589894203](https://github.com/degong2-code/zrotationhelper/actions/runs/42589894203) 3/3 PASS | source PRE value only |
+| `general_rotation_original_select_extra_pre_replay_v1.py` | **49** same-call source IF AST/native IF matches (prior 15), **44** IF missing PRE (prior 78); 147 direct APL foreground | source IF is NOT original full physical READY or WCL optimality |
+| Raw native proof | #13660659299, SHA256 `d14e1bc622e07db8204ebf95a19c3a52c91620bb90c19247e03fcf1dbe86a48b` | offline reuse; expires 2026-11-16 UTC |
+| Alternative off-GCD combat | two `touch_of_the_magi` records, pinned APL row has `use_off_gcd=1` | **candidate only**; original execution cause not yet proven |
+
+Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_PRE_12_FIELD_ORIGINAL_IF_SUCCESSOR_20261109.json`. Product scope, unknown readiness, WCL blind and dummy training safety not promoted. Future: typed General Rotation source hypothesis IR from 49; selectively close 44 only by impact; independent WCL candidate and holdout.
