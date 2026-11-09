@@ -43,7 +43,7 @@ jobs:
           import json
           x=json.load(open('/tmp/minimal-source-synthetic.json'))
           y=json.load(open('/tmp/original-frontier-synthetic.json'))
-          assert x['status']=='PASS_OFFLINE_SYNTHETIC' and x['checks']==12
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC' and x['checks']==13
           assert x['independent_full_READY_proven']==0
           assert y['status']=='PASS_OFFLINE_SYNTHETIC'
           assert y['synthetic_new_class_source_witness']==1
