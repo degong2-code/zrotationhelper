@@ -1,5 +1,13 @@
 # zRotationHelper — Feature Evidence Reuse Index (2026-11-05)
 
+## 2026-11-10 — SimC source target-count projection / cross-spec original profile (REUSE + EXTEND)
+
+**REUSE:** `simc_apl_semantic_ir_v2.py` typed AST, `general_rotation_simc_e2e_research_engine_v1.py` ordered source IF/ELSE with CALL/RUN, and `general_rotation_simc_multi_spec_cold_start_v1.py` exact pinned original source manifest. **EXTEND:** new generic `general_rotation_simc_target_count_projection_v1.py` projects *only* source IF eligibility across 1,2,3,4,5,6,7,8,10 targets under externally supplied *hypothetical* talent assumptions; actual READY, opener end and WoW advice remain UNKNOWN. Generic engine has no Fury/Arcane spell or target threshold hardcoding.
+
+[CI #42651150670](https://github.com/degong2-code/zrotationhelper/actions/runs/42651150670) **3/3 SUCCESS**: 2 synthetic Python versions plus real original Fury+Arcane source 172 APL rows, 6 explicit source-build scenarios, source-owned Arcane threshold `2+3*talent.spellfire_spheres` -> hypothetical 2 or 5, Fury Slayer/Thane `active_enemies=1` or `>1`. Output SHA256 `8cbaabfaf357a68638e0ad2ce696b4511a5792343687ea86d5dd285e6ff2b3e4`, artifact 13688674407; receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_SOURCE_3PLUS_TARGET_AND_TALENT_PROJECTION_20261110.json`.
+
+**DO NOT repeat** source parser/1-2 target original C++ validation. **REMAINING**: real Native 3+ selection, source operand parity/competing action READY, empirical opener end, eventual WCL independent postlock review; still NOT complete General Rotation/target-dummy model.
+
 ## 2026-11-10 — Raw actor combatantinfo PRE and pinned source lookup (branch-only)
 
 **REUSE / EXTEND result:** Reused the existing official WCL checkpoint/page SHA and identity gate rather than duplicating the collector or APL parser. New generic `tools/engine_first/wcl_actor_combatantinfo_pre_v1.py` extracts actual numeric actor build only when one player's `combatantinfo.timestamp < first actor cast/begincast`, preserving multi-entry talents and empty gear slots (`id=0`). [CI #42642973309](https://github.com/degong2-code/zrotationhelper/actions/runs/42642973309) **4/4 SUCCESS**: Python 3.12/3.14 synthetic and **real original 51-cast WCL holdout + distinct third report**, without new API/SimC native calls.
