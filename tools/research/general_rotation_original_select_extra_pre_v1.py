@@ -65,7 +65,7 @@ def valid_plan(p:dict,root:Path|None=None)->None:
     for x in p.get("profiles",[]):
         cls=x.get("actor_class");src=x.get("path");cpp=x.get("class_cpp")
         need(type(cls)==str and FIELD_NAME.fullmatch(cls) is not None and
-             type(src)==str and re.fullmatch(r"profiles/MID2/MID2_[A-Za-z0-9_]+\\.simc",src) is not None and
+             type(src)==str and re.fullmatch(r"profiles/MID2/MID2_[A-Za-z0-9_]+\.simc",src) is not None and
              cpp==f"engine/class_modules/sc_{cls}.cpp" and
              GIT40.fullmatch(x.get("profile_git_blob","")) is not None and
              GIT40.fullmatch(x.get("class_cpp_git_blob","")) is not None and
