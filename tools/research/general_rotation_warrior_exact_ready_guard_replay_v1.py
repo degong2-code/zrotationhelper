@@ -22,7 +22,7 @@ from simc_apl_semantic_ir_v2 import git_blob
 from general_rotation_condition_ir_v1 import validate_expression
 from general_rotation_equipment_source_fixture_v1 import (
     source_rule as original_weapon_rule,PROFILE_BLOB,WARRIOR_BLOB)
-from general_rotation_source_pre_field_capture_v1 import FIELDS, make_plan
+from general_rotation_source_pre_field_capture_v1 import FIELDS
 from general_rotation_original_method_witness_v1 import (
     MethodMarker,pair_original_attempts,evaluate_bound_cases)
 from simc_native_warrior_exact_ready_guard_producer_v1 import (
@@ -86,13 +86,15 @@ def verify_run(root:Path,patch:bytes,parity:bytes)->dict:
             "FURY_ORIGINAL_INSTRUMENTED_ACTION_SEQUENCE_NOT_REPRODUCED")
     require(git_blob((root/PROFILE_PATH).read_bytes())==PROFILE_BLOB,
             "ORIGINAL_FURY_PROFILE_NOT_IDENTICAL")
-    # The official fixed source pins and original semantic rule are
-    # re-derived, not copied from the producer's receipt text.
-    plan=make_plan(root)
-    require(plan["original_revision"]==SIMC_COMMIT and
-            plan["field_requests"][0]["key"]=="equipment.main_hand.equipped" and
-            plan["field_requests"][1]["key"]=="equipment.off_hand.equipped",
-            "PINNED_GENERIC_SOURCE_PLAN_DIFFERENT")
+    # The modified working tree cannot be passed to make_plan(), whose
+    # source-rule fixture intentionally requires unmodified C++. Re-derive
+    # rules from immutable HEAD blobs and inspect the generic field tuple.
+    rules=normalized_source_rule(root)
+    require(len(rules)==1 and rules[0][1].source_sha256==
+            "217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2" and
+            FIELDS[0].key=="equipment.main_hand.equipped" and
+            FIELDS[1].key=="equipment.off_hand.equipped",
+            "PINNED_GENERIC_ORIGINAL_RULE_SOURCE_DIFFERENT")
     return q
 
 def audit(root:Path,trace:bytes,patch:bytes,parity:bytes)->dict:
