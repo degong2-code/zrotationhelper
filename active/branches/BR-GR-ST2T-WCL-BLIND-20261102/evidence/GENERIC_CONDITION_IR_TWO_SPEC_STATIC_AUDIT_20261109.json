@@ -1,0 +1,86 @@
+{
+  "schema": "ZrotBranchTwoSpecSourceBoundConditionalIRAuditV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "github_repo": "degong2-code/zrotationhelper",
+  "source_engine": "tools/research/general_rotation_condition_ir_v1.py",
+  "source_engine_sha256": "7b57cfb327ac3dad66c522ca93dde58a45ee85d65996358dab54d0ead56d9cbd",
+  "spec_fixtures": [
+    {
+      "spec": "Warrior Fury",
+      "source_file": "tools/research/general_rotation_equipment_source_fixture_v1.py",
+      "file_sha256": "548fa15fe1614329613af0ca18d87a815e589167fdf093787207726a8b096b54",
+      "CXX_git_blob": "38ee3dd0d5943eb9227ec55aefb21e7d47244f96",
+      "profile_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+      "apl_source_row_sha256": "217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2",
+      "necessary_condition": "main hand and offhand weapon type not WEAPON_NONE",
+      "status": "SOURCE_STATIC_VERIFIED_REAL_PRE_EQUIPMENT_UNKNOWN",
+      "receipt_sha256": "7d4706286e224369a9484d97c95f9e77e648f1affb9db1453dd6fc729c66125a"
+    },
+    {
+      "spec": "Mage Arcane",
+      "source_file": "tools/research/general_rotation_mage_source_fixture_v1.py",
+      "file_sha256": "e7ef740c92040ed1ec3d08c0ffc1f11f417767803cb666f36e0324bde57aaa54",
+      "CXX_git_blob": "306d835f2db5f7418da221ce155d32e81c53f45c",
+      "profile_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+      "necessary_conditions": [
+        "arcane_blast requires not prismatic_bolt buff",
+        "prismatic_bolt requires prismatic_bolt buff"
+      ],
+      "status": "TWO_SOURCE_STATIC_VERIFIED_REAL_PRE_BUFF_UNKNOWN",
+      "receipt_sha256": "6731889e593d5b3add8b9abd8901ed96bb6fcc476c40c457fe02df28c9a177d3"
+    }
+  ],
+  "synthetic_only_condition": "main and offhand equipped, both weapon subclasses DAGGER, arbitrary other ability identity",
+  "CI": {
+    "run_id": 42543426130,
+    "head_sha": "e6ed530a860b07c162ef46c3914ccc3256c0b4e7",
+    "conclusion": "success",
+    "jobs": 3,
+    "python": [
+      "3.12",
+      "3.14"
+    ],
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42543426130",
+    "real_source_audit_for_both_specs": true,
+    "original_simc_CXX_build": false,
+    "live_API_calls": 0,
+    "real_PVT_PRE_state_observed": false
+  },
+  "source_binding_contract": {
+    "identity": [
+      "source_profile_git_blob",
+      "source_row_sha256",
+      "source_method_git_blob",
+      "source_guard_sha256"
+    ],
+    "interprets_only": [
+      "all",
+      "any",
+      "not",
+      "compare(eq/ne/in/not_in/gte/lte/gt/lt)"
+    ],
+    "three_valued_truth": [
+      "TRUE",
+      "FALSE",
+      "UNKNOWN"
+    ],
+    "wcl_STRICT_PRE": "timestamp < action t",
+    "simc_method_PRE": "timestamp == original method call t",
+    "trust_boundary": "numeric hypothetical rule evaluation never directly creates trusted Fact; open GateContract UNKNOWN",
+    "dynamic_dispatch_exhaustively_verified": false
+  },
+  "product_implications": {
+    "specific_spell_names_hardcoded_in_generic_engine": false,
+    "cross_spec_source_rule_recoding_required_in_generic": false,
+    "complete_READY_claims": 0,
+    "validated_general_rotation_priority": false,
+    "dummy_evaluator_error_permitted": false
+  },
+  "next_exact": "Add source-authenticated generic PRE field capture and dynamic action-variant binding across Warrior equipment and Mage buff, then independently prove necessary gates; keep entire READY UNKNOWN pending route closure.",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}

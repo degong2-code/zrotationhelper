@@ -325,3 +325,14 @@ Full branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GEN
 | `EXACT Native produced artifact` / source audit source marker | producer audit SHA `c1cec740...`, parity `b01edea8...`, consumer `9d756607...`, artifacts expiry 2026-11-16 | **REUSE** locked scoped receipt; **NOT** prerequisite for new source collection or cross-specialization support. Routine push tests remain offline synthetic; optional manual artifact validation. |
 
 Permanent branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_FURY_ORIGINAL_SOURCE_MOVEMENT_CAST_REAL_E2E_20261109.json`.
+
+## 2026-11-09 범용 조건 IR 및 2전문화 원본 소스 선언 검증
+
+| 기능 자산 | 검증 증거 | REUSE / EXTEND / UNKNOWN |
+|---|---|---|
+| Spec-neutral `general_rotation_condition_ir_v1.py` | [#42543426130](https://github.com/degong2-code/zrotationhelper/actions/runs/42543426130) Python 3.12,3.14 PASS (20 synthetic assertions selftest, op-budget and WCL strict-before boundary) | **EXTEND** existing DecisionProofEngine open GateContract; **DO NOT** promote standalone numeric claims. Reuse across equipment, buffs, talents, resources, target count. |
+| Pinned Warrior two distinct weapon-slot guard | Original `sc_warrior.cpp@38ee3dd0...`, Fury profile `3225992...`, source row `217c49...`; real source guard audit PASS | **REUSE** static mechanic; **UNKNOWN** original t=20031ms both slot type PRE. Not a single 2H weapon guard. |
+| Pinned Arcane Blast vs Prismatic Bolt opposite buff guard | `sc_mage.cpp@306d835...`, official Arcane profile blob `8d06eda...`; official two action rows audited in same 3/3 PASS | **EXTEND** actual second spec source semantics without changing common interpreter; **UNKNOWN** original buff PRE and full action READY. |
+| Hypothetical dual DAGGER equipped subtype condition | Cross-name synthetic true/false/unknown + typed equality PASS | **REUSE** generic operator, no real class mechanics claim. |
+
+For producer/semantic normalization and exact next, see branch architecture note and `GENERIC_CONDITION_IR_TWO_SPEC_STATIC_AUDIT_20261109.json`.
