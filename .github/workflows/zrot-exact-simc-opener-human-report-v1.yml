@@ -1,0 +1,94 @@
+name: zrot-exact-simc-opener-human-report-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_exact_source_opener_report_v1.py
+      - .github/workflows/zrot-exact-simc-opener-human-report-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  safe-report-synthetic:
+    name: Generic source-exact SimC opener report Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and verify no false source IF/readiness promotions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_exact_source_opener_report_v1.py
+          python -B tools/research/general_rotation_exact_source_opener_report_v1.py > /tmp/simc-exact-source-report-synth.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/simc-exact-source-report-synth.json'))
+          assert r['schema']=='ZrotGeneralRotationExactNativeSourceRowOpenerReadableReportV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['specs']==2 and r['cases']==4
+          assert r['full_READY_proven']==0 and r['WCL_API_calls']==0
+          print('GENERIC_EXACT_SOURCE_ROW_OPENER_REPORT_SYNTHETIC_PASS')
+          PY
+
+  actual-source-report:
+    name: Render existing 203 exact SimC source rows without rebuilding C++
+    needs: [safe-report-synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-simc-original-json2-exact-apl-row-research-v1
+          run-id: 42564537815
+          github-token: ${{ github.token }}
+          path: /tmp/gr-simc-exact-apl-row
+      - name: Exact pinned real native original SimC row replay to readable source IF opener
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC=/tmp/gr-simc-exact-apl-row/gr-actual-json2-exact-source-rows-v1.json
+          test -s "$SRC"
+          echo "c6ff2f3c9aeff1eb6d6cfc2b9791fc2ad26e656edb1d3fba152da24cac18569b  $SRC" | sha256sum -c -
+          python -B tools/research/general_rotation_exact_source_opener_report_v1.py \
+            --input "$SRC" \
+            --expected-sha256 c6ff2f3c9aeff1eb6d6cfc2b9791fc2ad26e656edb1d3fba152da24cac18569b \
+            --out /tmp/gr-exact-simc-source-opener-conditions-report.md
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('/tmp/gr-exact-simc-source-opener-conditions-report.md').read_text()
+          assert '## warrior_fury — 1 target(s)' in s
+          assert '## warrior_fury — 2 target(s)' in s
+          assert '## mage_arcane — 1 target(s)' in s
+          assert '## mage_arcane — 2 target(s)' in s
+          assert 'SOURCE_POINTER_SIGNATURE_EXACT' in s
+          assert 'buff.clearcasting.react' in s
+          assert 'spellslinger' in s and 'slayer' in s
+          assert 'Target dummy mistake verdict: UNKNOWN' in s
+          print('ACTUAL_EXACT_NATIVE_SIMC_APL_ROW_READABLE_REPORT_PASS',len(s.splitlines()))
+          PY
+          sha256sum /tmp/gr-exact-simc-source-opener-conditions-report.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-exact-simc-opener-source-if-readable-v1
+          path: /tmp/gr-exact-simc-source-opener-conditions-report.md
+          retention-days: 7
+          if-no-files-found: error
