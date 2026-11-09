@@ -65,7 +65,7 @@
       "TRUE": 1,
       "UNKNOWN_NO_POSTLOCK_SOURCE_BINDING": 1
     },
-    "synthetic_num_guard_probe_results_not_actual_WCL": false,
+    "synthetic_num_guard_probe_results_not_actual_WCL": true,
     "actual_complete_READY_proven": 0,
     "actual_competing_action_priority_proven": 0,
     "actual_dummy_wrong_cast_proven": 0,
