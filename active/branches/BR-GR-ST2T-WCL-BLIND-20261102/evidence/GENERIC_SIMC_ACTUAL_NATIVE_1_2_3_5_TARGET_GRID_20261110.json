@@ -1,0 +1,126 @@
+{
+  "schema": "ZrotGenericSimcOriginalNativeTargetGridResearchReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-10",
+  "role": "BRANCH_ONLY_SIMC_FIRST_HYPOTHESIS_NATIVE_ACTION_OBSERVATION",
+  "source": {
+    "repository": "simulationcraft/simc",
+    "revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "profiles": {
+      "warrior_fury": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+      "mage_arcane": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f"
+    },
+    "target_counts": [
+      1,
+      2,
+      3,
+      5
+    ],
+    "fixed_seed": 31459,
+    "fight_seconds": 30,
+    "same_native_binary_per_eight_cases": true,
+    "same_native_APL_within_spec_per_target": true
+  },
+  "reused": [
+    "tools/research/simc_native_reference_capture.py",
+    "tools/research/simc_native_json_sequence.py",
+    "tools/research/general_rotation_simc_e2e_research_engine_v1.py",
+    "tools/research/simc_apl_semantic_ir_v2.py"
+  ],
+  "new_engine": "tools/research/general_rotation_simc_native_target_grid_v1.py",
+  "new_workflow": ".github/workflows/zrot-gr-simc-original-native-3plus-target-grid-v1.yml",
+  "CI": {
+    "run": 42716911610,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42716911610",
+    "conclusion": "SUCCESS_3_OF_3",
+    "python_312": "PASS_COMPILE_AND_SYNTHETIC",
+    "python_314": "PASS_COMPILE_AND_SYNTHETIC",
+    "native_original_pinned_8_cases": "PASS",
+    "earlier_fail_run": 42716788258,
+    "earlier_fail_cause": "SYNTHETIC_TEST_REVEALED_NEGATIVE_TIMESTAMP_ACCEPTED",
+    "resolved": true,
+    "member_json_sha256": "964d5a2a8bd6714d6a538cae71f6f3892a6052aebb5056488f3c4485e8b2a11a",
+    "artifact_id": 13718461970,
+    "artifact_zip_sha256": "3c3728924a276683431c5bccd6e89f32458e0d5cd009f9a15dc898c6e6028350",
+    "artifact_expires_utc": "2026-11-16T23:06:38Z"
+  },
+  "observed_native_JSON2_actions": {
+    "warrior_fury": [
+      {
+        "targets": 1,
+        "actions": 43,
+        "first_10s": 18,
+        "source_action_token_candidate_matches": 41
+      },
+      {
+        "targets": 2,
+        "actions": 44,
+        "first_10s": 18,
+        "source_action_token_candidate_matches": 42
+      },
+      {
+        "targets": 3,
+        "actions": 44,
+        "first_10s": 18,
+        "source_action_token_candidate_matches": 42
+      },
+      {
+        "targets": 5,
+        "actions": 44,
+        "first_10s": 18,
+        "source_action_token_candidate_matches": 42
+      }
+    ],
+    "mage_arcane": [
+      {
+        "targets": 1,
+        "actions": 30,
+        "first_10s": 12,
+        "source_action_token_candidate_matches": 30
+      },
+      {
+        "targets": 2,
+        "actions": 32,
+        "first_10s": 13,
+        "source_action_token_candidate_matches": 32
+      },
+      {
+        "targets": 3,
+        "actions": 34,
+        "first_10s": 12,
+        "source_action_token_candidate_matches": 34
+      },
+      {
+        "targets": 5,
+        "actions": 33,
+        "first_10s": 12,
+        "source_action_token_candidate_matches": 33
+      }
+    ]
+  },
+  "source_APL_rows_total": 172,
+  "sampled_early_name_sequence_examples": {
+    "warrior_fury_1t_versus_2t": "DIFFERENT",
+    "warrior_fury_1t_versus_3t": "DIFFERENT",
+    "warrior_fury_1t_versus_5t": "DIFFERENT",
+    "mage_arcane_1t_versus_3t": "SAME_NAME_SEQUENCE_WITH_POSSIBLY_DIFFERENT_TIMESTAMPS",
+    "mage_arcane_1t_versus_5t": "DIFFERENT"
+  },
+  "evidence_claims": {
+    "native_3plus_SimC_action_sample_observed": true,
+    "source_action_name_candidate_NOT_exact_source_row": true,
+    "sample_before_10s_NOT_proven_opener_end": true,
+    "all_competing_ready_proven": 0,
+    "unique_opener_exit": "UNKNOWN",
+    "current_Retail_gameplay_priority": "NOT_VALIDATED",
+    "user_dummy_wrong_cast": "UNKNOWN"
+  },
+  "new_WCL_API_calls": 0,
+  "Native_builds_in_new_run": 1,
+  "WCL_blind_lock_unmodified": true,
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "session_exact_next": "Use original SimC source and native aura snapshot observation to identify only bounded initial burst endpoints, explicitly NOT complete opener-end. Then source state-conditioned IF/ELSE READY gating; WCL blind numeric candidate lock remains independent."
+}
