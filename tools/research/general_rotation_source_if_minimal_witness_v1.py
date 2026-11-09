@@ -68,6 +68,54 @@ def sufficient_source_witness(expression:str, facts:dict,
         "gameplay_priority_optimality_proven":False,
     }
 
+def sufficient_partial_source_witness(expression:str, facts:dict,
+                                      *, expected:bool)->dict:
+    """Inclusion-minimal sufficient IF facts even with some source symbols missing.
+
+    A TRUE/FALSE claim must follow from the original partial PRE facts using
+    three-valued AST evaluation, with all missing symbols remaining UNKNOWN.
+    The witness is sufficient for THIS occurrence only, never general READY.
+    """
+    require(isinstance(expression,str) and bool(expression) and
+            type(facts) is dict and type(expected) is bool,
+            "PARTIAL_SOURCE_IF_INPUT_REQUIRED")
+    ast=Expression(expression).parse()
+    names=sorted(ast_symbols(ast))
+    known={s:facts[s] for s in names if s in facts}
+    require(all(type(v) in (int,float,bool) for v in known.values()),
+            "NON_NUMERIC_PARTIAL_PRE_FACT")
+    result=truth(evaluate_ast(ast,known))
+    require(result is expected,
+            "PARTIAL_PRE_DOES_NOT_SUFFICE_FOR_ASSERTED_IF")
+    minimal=dict(known)
+    for symbol in sorted(known):
+        without={k:v for k,v in minimal.items() if k!=symbol}
+        if truth(evaluate_ast(ast,without)) is expected:
+            minimal=without
+    require(truth(evaluate_ast(ast,minimal)) is expected,
+            "PARTIAL_MINIMAL_WITNESS_NOT_SUFFICIENT")
+    for symbol in minimal:
+        smaller={k:v for k,v in minimal.items() if k!=symbol}
+        require(truth(evaluate_ast(ast,smaller)) is not expected,
+                "PARTIAL_MINIMAL_WITNESS_REDUCIBLE")
+    return {
+        "schema":"ZrotGeneralRotationPartialSourceIFWitnessV1",
+        "source_expression":expression,
+        "source_all_operand_names":names,
+        "observed_source_operand_names":sorted(known),
+        "unobserved_source_operand_names":
+            sorted(set(names)-set(known)),
+        "minimal_sufficient_PRE_facts":
+            {k:minimal[k] for k in sorted(minimal)},
+        "not_needed_for_this_occurrence":
+            sorted(set(names)-set(minimal)),
+        "source_IF_result":expected,
+        "witness_inclusion_minimal_not_global_unique":True,
+        "missing_symbols_are_not_assumed_zero":True,
+        "source_IF_is_not_full_READY_or_priority":True,
+    }
+
+
 def selftest()->dict:
     examples=(
       ("a&b",{"a":0,"b":1},False,{"a":0}),
@@ -79,6 +127,22 @@ def selftest()->dict:
     for expr,facts,expected,witness in examples:
         got=sufficient_source_witness(expr,facts,expected=expected)
         assert got["sufficient_fact_witness"]==witness,(expr,got)
+    # A TRUE OR arm does not require unobserved alternatives.
+    partial=sufficient_partial_source_witness(
+        "a|(b&c)",{"a":1},expected=True)
+    assert partial["minimal_sufficient_PRE_facts"]=={"a":1}
+    assert partial["unobserved_source_operand_names"]==["b","c"]
+    partial_false=sufficient_partial_source_witness(
+        "a&b",{"a":0},expected=False)
+    assert partial_false["minimal_sufficient_PRE_facts"]=={"a":0}
+    for expr,facts,expected in (
+        ("a&b",{"a":1},True),
+        ("a|b",{"a":0},False),
+        ("a|b",{"a":0,"b":0},True),
+    ):
+        try:sufficient_partial_source_witness(expr,facts,expected=expected)
+        except MinimalIFWitnessError:pass
+        else:raise AssertionError("UNSOUND_PARTIAL_SOURCE_IF_WITNESS")
     for expr,facts,val in (
         ("a&b",{"a":1},True),
         ("a|b",{"a":0,"b":0},True),
@@ -87,7 +151,7 @@ def selftest()->dict:
         except MinimalIFWitnessError:pass
         else:raise AssertionError("UNPROVEN_SOURCE_IF_FACT_SET_ACCEPTED")
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":7,"independent_full_READY_proven":0,
+            "checks":12,"independent_full_READY_proven":0,
             "WCL_API_calls":0}
 
 if __name__=="__main__":
