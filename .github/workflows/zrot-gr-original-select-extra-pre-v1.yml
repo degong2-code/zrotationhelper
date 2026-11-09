@@ -1,0 +1,217 @@
+name: zrot-gr-original-select-extra-pre-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_select_extra_pre_v1.py
+      - tools/research/general_rotation_original_select_extra_pre_replay_v1.py
+      - tools/research/fixtures/zrot_original_select_extra_pre_two_source_v1.json
+      - .github/workflows/zrot-gr-original-select-extra-pre-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic:
+    name: Generic extra PRE producer/replay Python ${{ matrix.py }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.py }}'
+      - name: Compile, static source patch selftest and wrong-source negative controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_original_select_extra_pre_v1.py tools/research/general_rotation_original_select_extra_pre_replay_v1.py
+          python -B tools/research/general_rotation_original_select_extra_pre_v1.py >/tmp/gr-pre-extra-producer-synthetic.json
+          python -B tools/research/general_rotation_original_select_extra_pre_replay_v1.py >/tmp/gr-pre-extra-replay-synthetic.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/gr-pre-extra-producer-synthetic.json'))
+          b=json.load(open('/tmp/gr-pre-extra-replay-synthetic.json'))
+          assert a['result']==b['status']=='PASS_SYNTHETIC_STATIC'
+          assert a['negative_controls']>=6 and b['negative_controls']>=5
+          assert a['new_ready_calls']==0 and b['physical_READY_proven']==0
+          assert a['new_CXX_builds']==0 and b['WCL_calls']==0
+          print('GENERIC_ORIGINAL_EXTRA_PRE_PYTHON_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_original_select_extra_pre_v1.py \
+            tools/research/general_rotation_original_select_extra_pre_replay_v1.py
+  native:
+    name: Original source pinned Fury/Arcane PRE same-call four-case one build
+    needs: [synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-general-rotation-first-real-cast-and-source-ir
+          run-id: 42562520191
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-pristine-json2
+      - name: Official original source / class / typed profiles and all original producer receipt pins before CXX
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          echo "584819145ec6e51bd7596bd273da74402622adf7bd0ecf1ea25ce19b0f26c715  /tmp/zrot-pristine-json2/gr-simc-original-performed-action-and-condition-model.json" | sha256sum -c -
+          python -B tools/research/simc_original_select_if_pre_witness_v1.py \
+            --source-root simc-upstream \
+            --plan tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json \
+            --receipt /tmp/gr-native-if-prior.json
+          python -B tools/research/general_rotation_same_run_return_emitter_v1.py \
+            --source-root simc-upstream \
+            --prior-receipt /tmp/gr-native-if-prior.json \
+            --patch-receipt /tmp/gr-native-return-emitter-prior.json
+          python -B tools/research/general_rotation_original_foreground_dispatch_v1.py \
+            --simc-root simc-upstream \
+            --prior-receipt /tmp/gr-native-return-emitter-prior.json \
+            --patch-receipt /tmp/gr-foreground-dispatch-prior.json
+          python -B tools/research/general_rotation_original_select_extra_pre_v1.py \
+            --source-root simc-upstream \
+            --plan tools/research/fixtures/zrot_original_select_extra_pre_two_source_v1.json \
+            --prior-receipt /tmp/gr-foreground-dispatch-prior.json \
+            --out-receipt /tmp/gr-original-extra-pre-patch.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/gr-original-extra-pre-patch.json'))
+          assert r['original_action_ready_cxx_call_added']==0
+          assert r['original_queue_and_JSON2_methods_added']==0
+          assert r['original_if_native_comparator_calls_added']==0
+          assert r['claims_complete_physical_READY'] is False
+          assert len(r['captured_fields'])==12
+          print('PINNED_ORIGINAL_EXTRA_PRE_CXX_STATIC_PREFLIGHT_PASS')
+          PY
+      - name: Native official original SimC single build, no parallel recompute
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-gr-original-extra-pre-native -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-gr-original-extra-pre-native --target simc --parallel 3
+          test -x /tmp/zrot-gr-original-extra-pre-native/simc
+      - name: Native four source-matched cases and independent original IF AST
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-original-extra-pre
+          for row in "warrior_fury:fury:MID2_Warrior_Fury.simc" "mage_arcane:arcane:MID2_Mage_Arcane.simc"; do
+            IFS=: read -r label spec profile <<< "$row"
+            for n in 1 2; do
+              case=st
+              if [ "$n" = 2 ]; then case=2t; fi
+              out="/tmp/zrot-original-extra-pre/$label-$case"
+              python -B tools/research/simc_native_reference_capture.py \
+                --profile "simc-upstream/profiles/MID2/$profile" --spec "$spec" \
+                --simc-bin /tmp/zrot-gr-original-extra-pre-native/simc \
+                --targets "$n" --seed 31459 --fight-seconds 30 \
+                --out-dir "$out" --timeout 180
+              python -B tools/research/general_rotation_original_select_extra_pre_replay_v1.py \
+                --native-log "$out/simc_native_log.txt" \
+                --profile "simc-upstream/profiles/MID2/$profile" \
+                --plan tools/research/fixtures/zrot_original_select_extra_pre_two_source_v1.json \
+                --legacy-plan tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json \
+                --source-label "$label" --targets "$n" \
+                --out "$out/exact-selected-extra-pre-if.json"
+            done
+          done
+      - name: Original pristine native action 149/149 parity and source IF gain without READY
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,collections,sys,hashlib
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          from general_rotation_native_sequence_row_replay_v1 import compare_pristine
+          original=json.loads(Path('/tmp/zrot-pristine-json2/gr-simc-original-performed-action-and-condition-model.json').read_bytes())
+          cases={(x['source_spec_key'],x['case']):x for x in original['research_cases']}
+          total=collections.Counter()
+          old_if=0
+          native=0
+          directly=0
+          emitters=0
+          for spec in ('warrior_fury','mage_arcane'):
+            for mode in ('st','2t'):
+              folder=Path('/tmp/zrot-original-extra-pre')/(spec+'-'+mode)
+              actual=extract_json_sequence(folder)
+              compare_pristine(cases[(spec,mode)],actual)
+              r=json.loads((folder/'exact-selected-extra-pre-if.json').read_bytes())
+              assert r['source_if_comparator_not_replay_input'] is True
+              assert r['full_physical_READY_proven']==0
+              assert r['competitor_ready_proven']==0
+              assert r['actual_spell_execution_complete']=='UNKNOWN'
+              assert r['opener_end']=='UNKNOWN'
+              assert r['WCL_blind_holdout']=='NOT_RUN'
+              assert r['dummy_wrong_cast']=='UNKNOWN'
+              emitters+=r['original_json2_emitter_records']
+              directly+=r['original_selected_direct_foreground']
+              native+=r['native_if_comparator_count']
+              total.update(r['source_independent_IF_triage'])
+              print('ORIGINAL_EXTRA_PRE_SOURCE_IF_CASE',spec,mode,
+                    json.dumps(r['source_independent_IF_triage'],sort_keys=True),
+                    'sha256='+hashlib.sha256((folder/'exact-selected-extra-pre-if.json').read_bytes()).hexdigest())
+          assert emitters==203 and directly==147 and native==91
+          assert sum(total.values())==147
+          assert total['SOURCE_IF_EXTRA_ORIGINAL_PRE_AST_MATCH_NATIVE_COMPARATOR']>=15
+          assert total['UNKNOWN_SOURCE_IF_EXTRA_PRE_INCOMPLETE']<=78
+          assert total['SOURCE_APL_NO_EXPLICIT_IF_NOT_READY_PROOF']==54
+          print('ORIGINAL_EXTRA_PRE_FOUR_CASE_PRISTINE_NATIVE_ACTIONS_149_OF_149_PASS')
+          print('ORIGINAL_EXTRA_PRE_FOUR_CASE_CAUSAL_CALLS_147_OF_147_PASS')
+          print('ORIGINAL_EXTRA_PRE_FOUR_CASE_NATIVE_IF_COMPARATORS_91_OF_91_PASS')
+          print('ORIGINAL_EXTRA_PRE_SOURCE_IF_COUNTS',json.dumps(total,sort_keys=True))
+          summary={
+            'schema':'ZrotOriginalSimCSelectedExtraPRENativeFourCaseSummaryV1',
+            'policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+            'source_revision':'b522cded8c26b97dac03fdf56e57a03ec7e8faa6',
+            'original_selected_APL_dispatch':directly,'original_JSON2_emitters':emitters,
+            'native_same_call_IF_comparator_count':native,
+            'source_if_counts':dict(sorted(total.items())),
+            'new_class_specific_rules_in_generic_engine':False,
+            'physical_action_READY_proven':0,'WCL_blind_holdout':'NOT_RUN',
+            'dummy_error':'UNKNOWN','new_SimC_CXX_builds':1,'new_WCL_API_calls':0}
+          path=Path('/tmp/zrot-original-extra-pre/native-four-case-summary.json')
+          path.write_text(json.dumps(summary,sort_keys=True,indent=2)+'\n')
+          print('ORIGINAL_EXTRA_PRE_FOUR_CASE_SUMMARY_SHA256='+hashlib.sha256(path.read_bytes()).hexdigest())
+          PY
+          sha256sum /tmp/gr-original-extra-pre-patch.json \
+            /tmp/zrot-original-extra-pre/*/exact-selected-extra-pre-if.json \
+            /tmp/zrot-original-extra-pre/native-four-case-summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-original-selected-extra-pre-native-v1
+          path: |
+            /tmp/gr-original-extra-pre-patch.json
+            /tmp/zrot-original-extra-pre/native-four-case-summary.json
+            /tmp/zrot-original-extra-pre/*/exact-selected-extra-pre-if.json
+            /tmp/zrot-original-extra-pre/*/simc_native_log.txt
+            /tmp/zrot-original-extra-pre/*/simc_reference_receipt.json
+          if-no-files-found: warn
+          retention-days: 7
