@@ -135,9 +135,7 @@ def check_registry(r:dict):
              item.get("source_implementation_patch_parity")=="UNKNOWN" and
              type(item.get("required_next_proof"))==str and
              bool(item["required_next_proof"]) and
-             type(item.get("signal_kind"))==str and
-             item.get("raw_numeric_id") is None or
-             False,
+             type(item.get("signal_kind"))==str,
              "MECHANIC_SYMBOL_SEMANTICS_INVALID")
         # Explicit grouping above is intentionally rechecked separately:
         # we never allow a numeric ID from Blizzard prose-only references.
