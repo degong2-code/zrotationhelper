@@ -125,11 +125,14 @@ def audit(root:Path,trace:bytes,patch:bytes,parity:bytes)->dict:
         "pristine_instrumented_combat_casts":q["original_combat_casts"],
         "original_native_attempts":decoded["original_native_attempts"],
         "unattributed_method_events":decoded["unattributed_method_events"],
+        **report,
+        # Generic replay's schema names the shared algorithm, but the
+        # output artifact is this independently pinned Fury adapter receipt.
+        "schema":SCHEMA,
         "source_scope_method":"rampage_parent_t::ready",
         "source_requirement":"both_main_hand_and_off_hand_weapon_slots_occupied",
         "source_original_PRE_provenance":"SIMC_ORIGINAL_METHOD_PRE",
         "source_evidence_authenticated_by_independent_original_run":True,
-        **report,
         "actual_WCL_holdout_completed":False,
         "actual_WoW_dummy_practice_observed":False,
         "MAIN_promoted":False,
