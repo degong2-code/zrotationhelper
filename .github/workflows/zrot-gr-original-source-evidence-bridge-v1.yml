@@ -85,18 +85,22 @@ jobs:
           assert r['actual_validation']['original_unchanged_combat_action_order_time_ID_ordinal']=='149/149'
           assert r['actual_validation']['original_APL_foreground_select_to_JSON2_causal_callsite']=='147/147'
           assert r['scientific_claim_limits']['original_full_physical_READY_proven']==0
-          p=Path('/tmp/gr-real-native-selected-pre/native-four-case-summary.json')
-          assert p.exists()
+          summaries=list(Path('/tmp/gr-real-native-selected-pre').rglob('native-four-case-summary.json'))
+          assert len(summaries)==1, summaries
+          p=summaries[0]
           assert hashlib.sha256(p.read_bytes()).hexdigest()==r['actual_validation']['original_summary_sha256']
+          print('PINNED_NATIVE_ARTIFACT_ROOT',p.parent)
           print('ORIGINAL_FOUR_CASE_RAW_IF_AND_APL_SOURCE_PINNED_PASS')
           PY
       - name: Compile full source APL graph with exact original selection IF witnesses
         shell: bash
         run: |
           set -euo pipefail
+          reports_root="$(dirname "$(find /tmp/gr-real-native-selected-pre -name native-four-case-summary.json -print -quit)")"
+          test -n "$reports_root"
           python -B tools/research/general_rotation_original_source_evidence_bridge_v1.py \
             --source-root simc-upstream \
-            --reports-root /tmp/gr-real-native-selected-pre \
+            --reports-root "$reports_root" \
             --adapter tools/research/fixtures/zrot_original_select_extra_pre_two_source_v1.json \
             --verified-receipt active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_PRE_12_FIELD_ORIGINAL_IF_SUCCESSOR_20261109.json \
             --out-root /tmp/gr-generic-source-hypothesis-bridge-v1
