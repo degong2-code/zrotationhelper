@@ -1,0 +1,143 @@
+name: zrot-gr-fresh-live-wcl-coldstart-numeric-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - .github/workflows/zrot-gr-fresh-live-wcl-coldstart-numeric-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fresh-live-bounded:
+    name: Fresh official WCL ranker -> actor numeric lock -> Strict PRE
+    if: ${{ github.repository == 'degong2-code/zrotationhelper' && github.ref == 'refs/heads/work/gr-simc-st-2t-wcl-blind-20261102' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline producer preflight
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/engine_first/wcl_official_ranker_discovery_v1.py tools/engine_first/wcl_raw_actor_numeric_transport_v1.py
+          python -B tools/engine_first/wcl_official_ranker_discovery_v1.py --self-test >/tmp/gr-ranker-preflight.json
+          python -B tools/engine_first/wcl_raw_actor_numeric_transport_v1.py >/tmp/gr-raw-transport-preflight.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/gr-ranker-preflight.json'))
+          b=json.load(open('/tmp/gr-raw-transport-preflight.json'))
+          assert a['status']=='PASS_OFFLINE_SYNTHETIC' and a['live_wcl_api_calls']==0
+          assert b['selftest']=='PASS_OFFLINE_SYNTHETIC' and b['strict_PRE_all_cast_numeric_matrix']=='PASS'
+          print('FRESH_WCL_ENGINE_COLDSTART_PREFLIGHT_PASS')
+          PY
+      - name: Official WCL bounded live cold-start; no secrets logged
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+          WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
+          WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-fresh-live/result
+          if [ -z "$WCL_CLIENT_ID" ] || [ -z "$WCL_CLIENT_SECRET" ]; then
+            echo '{"status":"SKIPPED_MISSING_WCL_OAUTH_SECRETS","live_WCL":"NOT_RUN","priority":"UNKNOWN"}' > /tmp/zrot-fresh-live/result/status.json
+            echo 'FRESH_WCL_OFFICIAL_SOURCE_SKIPPED_NO_AUTH_CONFIG'
+            exit 0
+          fi
+          set +e
+          python -B tools/engine_first/wcl_official_ranker_discovery_v1.py \
+            --live --encounter-id 3420 --class-name Warrior \
+            --spec-name Fury --difficulty 4 --max-rank 50 \
+            --max-age-days 45 --max-pages 5 --opener-window-ms 15000 \
+            --out-dir /tmp/zrot-fresh-live/raw-collector \
+            > /tmp/zrot-fresh-live/result/status.json
+          rc=$?
+          set -e
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('/tmp/zrot-fresh-live/result/status.json').read_bytes())
+          print('FRESH_OFFICIAL_WCL_NEW_SOURCE_STATUS='+x['status'])
+          print('FRESH_OFFICIAL_WCL_NEW_WINDOW_COMPLETE='+str(x.get('window_completed',False)))
+          PY
+          if [ "$rc" -ne 0 ]; then
+            echo 'FRESH_WCL_SOURCE_OR_EXTERNAL_API_BLOCKED_NO_GAMEPLAY_CLAIM'
+          fi
+      - name: New real raw actor snapshot -> strict PRE matrix only when live source exists
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/zrot-fresh-live/result')
+          s=json.loads((root/'status.json').read_bytes())
+          if s.get('status')=='LIVE_WCL_ACTOR_SCOPED_NUMERIC_DISCOVERY_ONLY':
+              print('FRESH_NEW_WCL_REAL_SOURCE_AVAILABLE')
+          else:
+              (root/'e2e.json').write_text(json.dumps({
+                'schema':'ZrotWclNewLiveColdStartStageV1',
+                'status':'NOT_RUN_OR_BLOCKED',
+                'source_status':s.get('status'),'strict_PRE':'NOT_RUN',
+                'independent_holdout':'NOT_RUN','priority':'UNKNOWN'})+'\n')
+              print('FRESH_NEW_WCL_E2E_NO_REAL_SOURCE')
+          PY
+          if [ -f /tmp/zrot-fresh-live/result/e2e.json ]; then exit 0; fi
+          python -B tools/engine_first/wcl_raw_actor_numeric_transport_v1.py \
+            --actor-root /tmp/zrot-fresh-live/raw-collector \
+            --out /tmp/zrot-fresh-live/result/new-raw-numeric.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical
+          from wcl_raw_actor_numeric_transport_v1 import strict_pre_numeric_matrix
+          root=Path('/tmp/zrot-fresh-live/result')
+          src=json.loads((root/'new-raw-numeric.json').read_bytes())
+          assert src['source_cohort_role']=='DISCOVERY'
+          assert src['actor_numeric_cast_count']>0
+          matrix=strict_pre_numeric_matrix(src)
+          assert matrix['cast_rows']==src['actor_numeric_cast_count']
+          assert matrix['all_known_facts_strictly_before_cast'] is True
+          assert matrix['complete_READY_proven']==0
+          (root/'new-every-cast-pre.json').write_bytes(canonical(matrix))
+          rec={'schema':'ZrotWclNewLiveColdStartStageV1',
+               'status':'PASS_FRESH_OFFICIAL_RAW_NUMERIC_STRICT_PRE',
+               'actual_WCL_API':'EXECUTED_EXISTING_OFFICIAL_COLLECTOR',
+               'raw_event_count':src['raw_event_count'],
+               'actor_cast_count':src['actor_numeric_cast_count'],
+               'aura_transition_count':src['raw_aura_boolean_transitions'],
+               'known_PRE_facts':matrix['signal_status_summary'].get('KNOWN',0),
+               'unknown_PRE_facts':matrix['signal_status_summary'].get('UNKNOWN',0),
+               'raw_transport_sha256':src['numeric_transport_sha256'],
+               'strict_PRE_matrix_sha256':matrix['matrix_sha256'],
+               'independent_holdout':'NOT_RUN',
+               'complete_action_READY':'UNKNOWN',
+               'general_rotation_priority':'UNKNOWN',
+               'dummy_wrong_cast':'UNKNOWN','MAIN_promoted':False}
+          (root/'e2e.json').write_bytes(canonical(rec))
+          print('NEW_FRESH_OFFICIAL_WCL_COLDSTART_ACTOR_NUMERIC_STRICT_PRE_E2E_PASS')
+          print('NEW_FRESH_OFFICIAL_WCL_E2E_SUMMARY',json.dumps(rec,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-live-wcl-coldstart-status-${{ github.sha }}
+          path: /tmp/zrot-fresh-live/result/*.json
+          if-no-files-found: warn
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: zrot-gr-live-wcl-coldstart-raw-${{ github.sha }}
+          path: /tmp/zrot-fresh-live/raw-collector/
+          if-no-files-found: ignore
+          retention-days: 7
