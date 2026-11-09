@@ -5,6 +5,7 @@ on:
     paths:
       - tools/research/general_rotation_condition_ir_v1.py
       - tools/research/general_rotation_equipment_source_fixture_v1.py
+      - tools/research/general_rotation_mage_source_fixture_v1.py
       - .github/workflows/zrot-general-rotation-condition-ir-v1.yml
   workflow_dispatch:
 
@@ -32,15 +33,19 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile tools/research/general_rotation_condition_ir_v1.py \
-            tools/research/general_rotation_equipment_source_fixture_v1.py
+            tools/research/general_rotation_equipment_source_fixture_v1.py \
+            tools/research/general_rotation_mage_source_fixture_v1.py
           python -B tools/research/general_rotation_condition_ir_v1.py \
             > /tmp/gr-generic-condition-ir-synthetic.json
           python -B tools/research/general_rotation_equipment_source_fixture_v1.py \
             > /tmp/gr-equip-source-fixture-synthetic.json
+          python -B tools/research/general_rotation_mage_source_fixture_v1.py \
+            > /tmp/gr-mage-source-fixture-synthetic.json
           python - <<'PY'
           import json
           g=json.load(open('/tmp/gr-generic-condition-ir-synthetic.json'))
           f=json.load(open('/tmp/gr-equip-source-fixture-synthetic.json'))
+          m=json.load(open('/tmp/gr-mage-source-fixture-synthetic.json'))
           assert g['schema']=='ZrotGeneralRotationSourceBoundConditionalEligibilityIRV1'
           assert g['status']=='PASS_OFFLINE_SYNTHETIC'
           assert g['checks']>=20
@@ -52,10 +57,14 @@ jobs:
           assert f['status']=='PASS_OFFLINE_SYNTHETIC'
           assert f['actual_official_CPP_files_read'] is False
           assert f['full_positive_READY']==0
+          assert m['schema']=='ZrotMageSourcePinnedOppositeBuffGuardAdapterFixtureV1'
+          assert m['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert m['full_positive_READY']==0
           print('GENERIC_CONDITIONAL_IR_SYNTHETIC_CROSS_SPEC_FAIL_CLOSED_PASS')
           PY
           sha256sum tools/research/general_rotation_condition_ir_v1.py \
-            tools/research/general_rotation_equipment_source_fixture_v1.py
+            tools/research/general_rotation_equipment_source_fixture_v1.py \
+            tools/research/general_rotation_mage_source_fixture_v1.py
 
   official-source-equipment-guard:
     name: Pin original Warrior source guard without Native rebuild
@@ -102,10 +111,32 @@ jobs:
           assert x['MAIN_promoted'] is False
           print('ACTUAL_WARRIOR_SOURCE_PINNED_DUAL_WEAPON_REQUIREMENT_STATIC_VALIDATION_PASS')
           PY
-          sha256sum /tmp/gr-original-equipment-source-bound-rule.json
+          python -B tools/research/general_rotation_mage_source_fixture_v1.py \
+            --official-mage-source simc-upstream/engine/class_modules/sc_mage.cpp \
+            --official-profile simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc \
+            --out /tmp/gr-original-mage-opposite-buff-guards.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-original-mage-opposite-buff-guards.json'))
+          assert x['schema']=='ZrotMageSourcePinnedOppositeBuffGuardAdapterFixtureV1'
+          assert x['two_source_guard_rules_verified'] is True
+          assert x['both_physically_distinct_spells_same_generic_condition_IR'] is True
+          assert x['real_original_mage_buff_PRE_count']==0
+          assert x['full_arcane_ready']=='UNKNOWN'
+          e=x['synthetic_opposite_buff_examples']
+          assert len(e)==2
+          assert (e[0]['arcane_blast_condition'],e[0]['prismatic_bolt_condition'])==('TRUE','FALSE')
+          assert (e[1]['arcane_blast_condition'],e[1]['prismatic_bolt_condition'])==('FALSE','TRUE')
+          assert x['WCL_holdout_completed'] is False
+          print('PINNED_MAGE_TWO_OPPOSITE_BUFF_SOURCE_GUARDS_PASS')
+          PY
+          sha256sum /tmp/gr-original-equipment-source-bound-rule.json \
+            /tmp/gr-original-mage-opposite-buff-guards.json
       - uses: actions/upload-artifact@v4
         with:
           name: zrot-general-rotation-equipment-source-rule-static-audit
-          path: /tmp/gr-original-equipment-source-bound-rule.json
+          path: |
+            /tmp/gr-original-equipment-source-bound-rule.json
+            /tmp/gr-original-mage-opposite-buff-guards.json
           if-no-files-found: error
           retention-days: 7
