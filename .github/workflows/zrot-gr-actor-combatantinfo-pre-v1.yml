@@ -108,3 +108,70 @@ jobs:
           path: /tmp/actor-numeric-build-evidence.json
           retention-days: 7
           if-no-files-found: error
+
+  independent-original-holdout-build:
+    runs-on: ubuntu-latest
+    needs: [synthetic]
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse original disjoint WCL 51-cast holdout (no new API)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 41473060401
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          path: /tmp/wcl-actor-original-holdout
+          github-token: ${{ github.token }}
+      - name: Exact held-out player combatantinfo and strict PRE numeric build
+        run: |
+          set -euo pipefail
+          RAW_ROOT=$(find /tmp/wcl-actor-original-holdout/raw -name checkpoint.json -print -quit)
+          test -n "$RAW_ROOT"
+          RAW_ROOT=$(dirname "$RAW_ROOT")
+          python -B tools/engine_first/wcl_actor_combatantinfo_pre_v1.py \
+            --raw-root "$RAW_ROOT" \
+            --actor-gate /tmp/wcl-actor-original-holdout/derived/identity_gate.json \
+            --out /tmp/heldout-actor-numeric-build-evidence.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/heldout-actor-numeric-build-evidence.json'))
+          b=x['actor_numeric_build_snapshot']
+          assert x['combatantinfo_pre_status']=='OBSERVED_STRICT_PRE'
+          assert x['combatantinfo_actor_row_count']==1
+          assert b['combatantinfo_at_ms']==0
+          assert b['strictly_before_first_actor_action'] is True
+          assert b['observed_numeric_specID']==72
+          assert b['observed_gear_slot_count']==18
+          assert b['observed_gear_item_count']==18
+          assert b['observed_gear_empty_slot_count']==0
+          assert b['observed_talent_entry_count']==76
+          assert b['observed_talent_unique_node_count']==74
+          assert b['observed_gear_setID_item_counts']=={'2067':4,'2070':2}
+          assert x['source_SimC_profile_build_equivalence']=='UNKNOWN'
+          assert x['equipped_set_bonus_activated']=='UNKNOWN'
+          assert x['current_Retail_patch_or_client_build']=='UNKNOWN'
+          assert x['competing_action_READY']=='UNKNOWN'
+          assert x['general_rotation_rule_certified'] is False
+          assert x['dummy_wrong_cast_certified'] is False
+          assert x['new_WCL_API_calls']==0
+          print('ORIGINAL_51_CAST_HOLDOUT_RAW_BUILD_PASS',json.dumps({
+              'gear_slots':b['observed_gear_slot_count'],
+              'gear_items':b['observed_gear_item_count'],
+              'raw_set_counts':b['observed_gear_setID_item_counts'],
+              'talent_entries':b['observed_talent_entry_count'],
+              'source_equivalence':'UNKNOWN',
+              'priority':'NOT_CERTIFIED'},sort_keys=True))
+          PY
+          sha256sum /tmp/heldout-actor-numeric-build-evidence.json
+      - name: Retain compact original holdout actor certificate
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-original-holdout-actor-build-${{ github.sha }}
+          path: /tmp/heldout-actor-numeric-build-evidence.json
+          retention-days: 7
+          if-no-files-found: error
