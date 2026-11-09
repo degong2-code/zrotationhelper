@@ -1,0 +1,254 @@
+name: zrot-mage-exact-ready-guard-source-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_native_mage_exact_ready_guard_producer_v1.py
+      - tools/research/general_rotation_mage_exact_ready_guard_replay_v1.py
+      - .github/workflows/zrot-mage-exact-ready-guard-source-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic:
+    name: Original Mage guard witness Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile, source-guard call counts, reject forged object correlation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/simc_native_mage_exact_ready_guard_producer_v1.py \
+            tools/research/general_rotation_mage_exact_ready_guard_replay_v1.py
+          python -B tools/research/simc_native_mage_exact_ready_guard_producer_v1.py \
+            > /tmp/gr-mage-guard-producer-synthetic.json
+          python -B tools/research/general_rotation_mage_exact_ready_guard_replay_v1.py \
+            > /tmp/gr-mage-guard-replay-synthetic.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/gr-mage-guard-producer-synthetic.json'))
+          r=json.load(open('/tmp/gr-mage-guard-replay-synthetic.json'))
+          assert p['schema']=='ZrotMageOriginalReadyMethodGuardWitnessProducerV1'
+          assert p['status']=='PASS_OFFLINE_SYNTHETIC' and p['checks']>=12
+          assert p['existing_original_ready_and_buff_check_counts_preserved'] is True
+          assert p['exact_same_action_pointer_for_method_pairing'] is True
+          assert p['independent_full_READY']==0
+          assert r['schema']=='ZrotOriginalSimcMageExactReadyGuardIndependentReplayV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC' and r['checks']>=10
+          assert r['negative_necessary_gate_without_full_READY'] is True
+          assert r['strict_action_object_pointer_link'] is True
+          assert r['synthetic_authorized_as_real'] is False
+          assert r['full_positive_READY']==0 and r['WCL_API_calls']==0
+          print('MAGE_EXACT_READY_SOURCE_PRODUCER_REPLAY_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_native_mage_exact_ready_guard_producer_v1.py \
+            tools/research/general_rotation_mage_exact_ready_guard_replay_v1.py
+
+  static-original-source:
+    name: Official pinned Mage source exact method patch preflight
+    needs: [synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Patch original PRE source and exact Mage method guard once each
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          python -B tools/research/general_rotation_source_pre_field_capture_v1.py \
+            --source-root simc-upstream \
+            --patch --patch-receipt /tmp/gr-mage-static-field-producer.json
+          python -B tools/research/simc_native_mage_exact_ready_guard_producer_v1.py \
+            --simc-root simc-upstream \
+            --receipt /tmp/gr-mage-static-original-guard-patch.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/gr-mage-static-original-guard-patch.json'))
+          assert p['schema']=='ZrotMageOriginalReadyMethodGuardWitnessProducerV1'
+          assert p['original_buff_check_count_preserved'] is True
+          assert p['original_delegate_call_count_preserved'] is True
+          assert p['original_action_ready_call_count_preserved'] is True
+          assert p['new_independent_ready_method_calls']==0
+          assert p['original_and_instrumented_behavior_parity']=='NOT_YET_TESTED'
+          assert p['instrumented_method_names']==['arcane_blast','prismatic_bolt']
+          print('OFFICIAL_MAGE_EXACT_ORIGINAL_READY_OVERRIDE_SOURCE_PATCH_PASS')
+          PY
+          sha256sum /tmp/gr-mage-static-original-guard-patch.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-mage-ready-guard-static-original-source
+          path: /tmp/gr-mage-static-original-guard-patch.json
+          if-no-files-found: error
+          retention-days: 7
+
+  real-original-mage:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[mage-ready-native-e2e]')
+    name: Real original Mage source ready guard and exact-action parity
+    needs: [static-original-source]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore compiler cache from pinned upstream revision
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: simc-ubuntu-gcc-b522cded8c26b97dac03fdf56e57a03ec7e8faa6-v1
+      - name: Compile official original Mage once; collect pristine same-seed baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/gr-mage-exact-ready-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/gr-mage-exact-ready-build --target simc --parallel 3
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc \
+            --spec arcane --simc-bin /tmp/gr-mage-exact-ready-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/gr-mage-original-pristine --timeout 180
+      - name: Insert existing generic PRE and exact source method guard marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_source_pre_field_capture_v1.py \
+            --source-root simc-upstream \
+            --patch --patch-receipt /tmp/gr-mage-field-pre-patch-receipt.json
+          python -B tools/research/simc_native_mage_exact_ready_guard_producer_v1.py \
+            --simc-root simc-upstream \
+            --receipt /tmp/gr-mage-method-guard-patch-receipt.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-mage-method-guard-patch-receipt.json'))
+          assert x['original_buff_check_count_preserved'] is True
+          assert x['original_action_ready_call_count_preserved'] is True
+          assert x['new_independent_ready_method_calls']==0
+          print('ACTUAL_MAGE_SOURCE_EXACT_READY_GUARD_PATCHED_NO_EXTRA_CALL')
+          PY
+      - name: Compile modified original source; compare exactly the same performed sequence
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake --build /tmp/gr-mage-exact-ready-build --target simc --parallel 3
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc \
+            --spec arcane --simc-bin /tmp/gr-mage-exact-ready-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/gr-mage-original-guard-witness --timeout 180
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          original=extract_json_sequence(Path('/tmp/gr-mage-original-pristine'))
+          instrumented=extract_json_sequence(Path('/tmp/gr-mage-original-guard-witness'))
+          assert original['status']=='SEQUENCE_SNAPSHOTS_EXTRACTED'
+          assert original['source_profile_sha256']==instrumented['source_profile_sha256']
+          assert original['source_apl_sha256']==instrumented['source_apl_sha256']
+          assert original['precombat_sequence']==instrumented['precombat_sequence']
+          assert original['combat_sequence']==instrumented['combat_sequence']
+          assert original['combat_count']==instrumented['combat_count']
+          result={
+              'schema':'ZrotOriginalMageMethodGuardSequenceParityV1',
+              'official_source_sha':'b522cded8c26b97dac03fdf56e57a03ec7e8faa6',
+              'precombat_equal':True,'combat_equal':True,
+              'combat_cast_count':original['combat_count'],
+              'native_build_executed':True,
+              'selected_ready_return_used_as_gate_proof':False,
+              'WCL_API_calls':0,
+          }
+          Path('/tmp/gr-mage-exact-ready-parity.json').write_text(
+              json.dumps(result,sort_keys=True,indent=2)+'\n')
+          print('ORIGINAL_MAGE_EXACT_READY_GUARD_NONPERTURBATION_PASS',
+                result['combat_cast_count'])
+          PY
+      - name: Independent actual raw PRE / exact action pointer / C++ ready method replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_mage_exact_ready_guard_replay_v1.py \
+            --simc-root simc-upstream \
+            --raw-log /tmp/gr-mage-original-guard-witness/simc_native_log.txt \
+            --patch-receipt /tmp/gr-mage-method-guard-patch-receipt.json \
+            --parity-receipt /tmp/gr-mage-exact-ready-parity.json \
+            --out /tmp/gr-mage-ready-guard-exact-replay.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-mage-ready-guard-exact-replay.json'))
+          assert x['schema']=='ZrotOriginalSimcMageExactReadyGuardIndependentReplayV1'
+          assert x['Mage_original_combat_casts_preserved']==31
+          assert x['counts']['source_rows_visited']>=2
+          assert x['counts']['guard_entries_proven']>=2
+          assert x['counts']['scoped_NOT_READY']>=1
+          assert x['full_positive_READY']==0
+          assert x['dummy_practice_mistake_proven'] is False
+          assert x['native_selected_action_is_post_comparator_only'] is True
+          for p in x['candidate_proofs']:
+              assert p['full_positive_READY']==0
+              assert p['source_row_sha256'] and len(p['source_row_sha256'])==64
+          bolt=next(y for y in x['candidate_proofs'] if y['action']=='prismatic_bolt')
+          assert bolt['status_distribution'].get('NOT_READY',0)>=1
+          assert all(y['candidate_readiness']=='NOT_READY' and
+                     y['method_entry_pointer_equal_to_original_action'] is True
+                     for y in bolt['examples'])
+          print('ACTUAL_MAGE_PRISMATIC_EXACT_READY_NEGATIVE_INDEPENDENT_PASS')
+          print('SCOPED_PROOF_SUMMARY',json.dumps(x['candidate_proofs'],sort_keys=True))
+          PY
+          sha256sum /tmp/gr-mage-method-guard-patch-receipt.json \
+            /tmp/gr-mage-exact-ready-parity.json \
+            /tmp/gr-mage-ready-guard-exact-replay.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-original-mage-exact-override-negative-gate
+          path: |
+            /tmp/gr-mage-field-pre-patch-receipt.json
+            /tmp/gr-mage-method-guard-patch-receipt.json
+            /tmp/gr-mage-exact-ready-parity.json
+            /tmp/gr-mage-ready-guard-exact-replay.json
+          if-no-files-found: warn
+          retention-days: 7
