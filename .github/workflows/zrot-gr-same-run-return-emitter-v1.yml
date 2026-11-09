@@ -96,7 +96,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for row in "warrior_fury:warrior:MID2_Warrior_Fury.simc" "mage_arcane:mage:MID2_Mage_Arcane.simc"; do
+          for row in "warrior_fury:warrior_fury:MID2_Warrior_Fury.simc" "mage_arcane:mage_arcane:MID2_Mage_Arcane.simc"; do
             IFS=: read -r spec actor profile <<< "$row"
             for n in 1 2; do
               key=st
