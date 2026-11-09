@@ -213,7 +213,7 @@ def select_verified(query, rankings_data, *, encounter, class_name, spec_name,
 
 def run_live(*, encounter, class_name, spec_name, difficulty, max_pages,
              max_rank, max_age_days, out_dir, min_observations=2,
-             opener_window_ms=15000):
+             opener_window_ms=15000, excluded_report_codes=()):
     """One bounded live run. Never overwrites a lock or silently grows cohort."""
     client, secret = credentials(None)
     token = oauth_token(client, secret)
@@ -224,7 +224,8 @@ def run_live(*, encounter, class_name, spec_name, difficulty, max_pages,
     candidate, meta, gate, selection = select_verified(
         query, rank, encounter=encounter, class_name=class_name,
         spec_name=spec_name, difficulty=difficulty,
-        max_rank=max_rank, max_age_days=max_age_days)
+        max_rank=max_rank, max_age_days=max_age_days,
+        excluded_report_codes=tuple(excluded_report_codes))
     # No actor- or ranking-source name in stored numeric blind evidence.
     if any((out_dir / "derived" / name).exists() for name in
            ("selection.json", "identity.json", "blind_replay.json",
@@ -277,6 +278,7 @@ def run_live(*, encounter, class_name, spec_name, difficulty, max_pages,
             "window_completed": True,
             "full_fight_completed": False,
             "candidate_count": lock["candidate_n"],
+            "excluded_previously_seen_reports":len(excluded_report_codes),
             "blind_lock_sha256": sha(canonical(lock)),
             "readiness": "UNKNOWN",
             "holdout": "NOT_RUN",
@@ -330,6 +332,16 @@ def selftest():
     except RankSourceError as exc:
         assert "NO_ELIGIBLE_RANKING" in str(exc)
     else: raise AssertionError("DISCOVERY_REPORT_REUSED_AS_HOLDOUT")
+    assert len(queries)==before
+    # Reusing the exact same report for Cold Start must be blocked before
+    # additional report metadata calls, not mistaken for new source data.
+    try:
+        select_verified(query, ranking, encounter=enc, class_name="Warrior",
+                        spec_name="Fury", difficulty=4, now=mock_now,
+                        excluded_report_codes=(code,))
+    except RankSourceError as exc:
+        assert "NO_ELIGIBLE_RANKING" in str(exc)
+    else: raise AssertionError("FRESH_COLDSTART_DUPLICATE_REPORT_ACCEPTED")
     assert len(queries)==before
     import copy
     tested = 4
@@ -441,15 +453,22 @@ def main():
     ap.add_argument("--max-rank", type=int, default=50)
     ap.add_argument("--max-age-days", type=int, default=45)
     ap.add_argument("--out-dir", type=Path)
+    ap.add_argument("--exclude-report-code", action="append", default=[],
+                    help="Previously seen numeric WCL report code to reject BEFORE metadata/events; repeatable")
     args = ap.parse_args()
     if args.self_test or not args.live:
+        if args.exclude_report_code:
+            ap.error("exclusions are only used with explicit --live")
         print(json.dumps(selftest(), sort_keys=True))
         return
     if (not _positive(args.encounter_id) or not _positive(args.difficulty)
             or not 1 <= args.max_pages <= 5 or not 1 <= args.max_rank <= 100
             or not 1 <= args.max_age_days <= 60
             or not 1000 <= args.opener_window_ms <= 60000
-            or not args.out_dir or not args.class_name or not args.spec_name):
+            or not args.out_dir or not args.class_name or not args.spec_name
+            or len(args.exclude_report_code)>100
+            or len(set(args.exclude_report_code))!=len(args.exclude_report_code)
+            or any(CODE_RE.fullmatch(x) is None for x in args.exclude_report_code)):
         ap.error("live requires bounded encounter, difficulty, ranking and output arguments")
     try:
         result = run_live(
@@ -457,7 +476,8 @@ def main():
             spec_name=args.spec_name, difficulty=args.difficulty,
             max_pages=args.max_pages, max_rank=args.max_rank,
             max_age_days=args.max_age_days, out_dir=args.out_dir,
-            opener_window_ms=args.opener_window_ms)
+            opener_window_ms=args.opener_window_ms,
+            excluded_report_codes=tuple(args.exclude_report_code))
     except Exception as exc:
         # Never print transport responses, credentials, names or report bodies.
         print(json.dumps({"status": "BLOCKED_OR_FAILED", "category":
