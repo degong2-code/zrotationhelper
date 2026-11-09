@@ -1,0 +1,166 @@
+name: zrot-gr-wcl-aura-temporal-stack-strict-pre-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/engine_first/wcl_raw_actor_aura_temporal_pre_v1.py
+      - .github/workflows/zrot-gr-wcl-aura-temporal-stack-strict-pre-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic:
+    name: Generic raw aura stack/time Strict PRE Python ${{ matrix.py }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ["3.12","3.14"]
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+      - name: Compile / synthetic / negative cross-timestamp controls
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/engine_first/wcl_raw_actor_aura_temporal_pre_v1.py
+          python -B tools/engine_first/wcl_raw_actor_aura_temporal_pre_v1.py >/tmp/wcl-aura-temporal-synthetic.json
+          python - <<'PY'
+          import json
+          o=json.load(open('/tmp/wcl-aura-temporal-synthetic.json'))
+          assert o["status"]=="PASS_SOURCE_NEUTRAL_AURA_TEMPORAL_SYNTHETIC"
+          assert o["casts"]==6 and o["negative_controls"]>=3
+          assert o["same_timestamp_changes_not_PRE"] is True
+          assert o["same_timestamp_contradictory_events_UNKNOWN"] is True
+          assert o["last_apply_or_refresh_age_not_remains"] is True
+          assert o["source_APl_source_IF_proven"]==o["full_READY_proven"]==0
+          print("GENERIC_WCL_RAW_TEMPORAL_STACK_STRICT_PRE_SYNTHETIC_PASS")
+          PY
+          sha256sum tools/engine_first/wcl_raw_actor_aura_temporal_pre_v1.py
+  original-three-sources:
+    name: Original two disjoint + fresh third official WCL raw replay (no API)
+    needs: [synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - uses: actions/download-artifact@v4
+        with:
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          run-id: 41463589665
+          github-token: ${{ github.token }}
+          path: /tmp/original-discovery
+      - uses: actions/download-artifact@v4
+        with:
+          name: wcl-disjoint-report-holdout-f2cb1e0f7f48e2978d1bce31e5c4eeeff303f54a
+          run-id: 41473060401
+          github-token: ${{ github.token }}
+          path: /tmp/original-holdout
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-replayed-real-disjoint-wcl-numeric-source-ir-v1
+          run-id: 42599589497
+          github-token: ${{ github.token }}
+          path: /tmp/original-two-numeric
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-live-wcl-coldstart-raw-56c016ab41b2b161fa79675194f26ab7df3c6d1d
+          run-id: 42599352437
+          github-token: ${{ github.token }}
+          path: /tmp/fresh-third-raw
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-live-wcl-coldstart-status-56c016ab41b2b161fa79675194f26ab7df3c6d1d
+          run-id: 42599352437
+          github-token: ${{ github.token }}
+          path: /tmp/fresh-third-numeric
+      - name: Reverify raw checkpoints and produce all-cast aura time/stack observations
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/wcl-aura-temporal-real
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          from wcl_raw_actor_aura_temporal_pre_v1 import from_verified_raw_actor_root
+          def exactly(root,pattern):
+              files=list(Path(root).rglob(pattern))
+              assert len(files)==1,(root,pattern,files)
+              return files[0]
+          inputs=[
+           ('discovery','/tmp/original-discovery',
+            '/tmp/original-two-numeric','discovery-original-numeric.json',54,17083),
+           ('holdout','/tmp/original-holdout',
+            '/tmp/original-two-numeric','holdout-original-numeric.json',51,9101),
+           ('third','/tmp/fresh-third-raw',
+            '/tmp/fresh-third-numeric','new-raw-numeric.json',55,12393)
+          ]
+          root=Path('/tmp/wcl-aura-temporal-real')
+          summary={
+           'schema':'ZrotOriginalThreeWclSourceRawAuraTemporalStackSummaryV1',
+           'policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+           'actual_independent_original_WCL_report_sources':3,
+           'all_casts':0,'source_event_replay':'RECALCULATED_CHECKPOINT_PAGE_ACTOR',
+           'source_APL_semantics_used_in_production':False,
+           'new_official_WCL_API_calls':0,
+           'real_WCL_buff_remaining_time_proven':0,
+           'full_READY_proven':0,
+           'dummy_wrong_cast_proven':0,
+           'sources':{}
+          }
+          for name,source,trans_root,trans_file,casts,raw in inputs:
+              transport=json.loads(exactly(trans_root,trans_file).read_bytes())
+              assert transport['actor_numeric_cast_count']==casts
+              assert transport['raw_event_count']==raw
+              m=from_verified_raw_actor_root(Path(source),transport)
+              assert m['actual_cast_rows']==casts
+              assert m['aura_remains_known']==0
+              assert m['full_GCD_cooldown_charge_READY_proven']==0
+              assert m['raw_last_aura_event_age_never_promoted_to_remaining_duration'] is True
+              assert m['source_numeric_transport_sha256']==transport['numeric_transport_sha256']
+              assert m['temporal_matrix_sha256']==sha(canonical({
+                   k:v for k,v in m.items() if k!='temporal_matrix_sha256'}))
+              for cast in m['per_numeric_cast']:
+                  for spell,aura in cast['per_numeric_aura_spell'].items():
+                      assert aura['last_transition_t_ms']<cast['at_ms']
+                      assert aura['source_checkpoint_raw_receipt_sha256']==transport['raw_receipt_sha256']
+                      assert aura['aura_remaining_duration_ms']=='UNKNOWN'
+                      if aura['explicit_stack'] is not None:
+                          assert aura['explicit_stack_status']=='EXACT_RAW_STACK_OBSERVED'
+              dest=root/(name+'-raw-aura-temporal-strict-pre.json')
+              dest.write_bytes(canonical(m))
+              info={
+                'raw_events':raw,'cast_rows':casts,
+                'raw_aura_event_count':m['target_actor_raw_buff_event_rows'],
+                'distinct_numeric_aura_ids':m['distinct_raw_numeric_aura_spell_ids'],
+                'aura_event_type_counts':m['actor_raw_buff_event_type_counts'],
+                'strict_pre_aura_statuses':m['strict_prior_raw_aura_observability'],
+                'aura_remaining_duration_verified':0,
+                'matrix_sha256':m['temporal_matrix_sha256']
+              }
+              summary['sources'][name]=info;summary['all_casts']+=casts
+              print('REAL_WCL_AURA_TEMPORAL_CASE',name,json.dumps(info,sort_keys=True))
+          assert summary['all_casts']==160
+          (root/'three-real-source-aura-temporal-summary.json').write_bytes(canonical(summary))
+          print('THREE_REAL_WCL_RAW_AURA_STACK_TEMPORAL_STRICT_PRE_PASS')
+          PY
+          sha256sum /tmp/wcl-aura-temporal-real/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-real-wcl-three-report-aura-temporal-pre-v1
+          path: /tmp/wcl-aura-temporal-real/*.json
+          if-no-files-found: warn
+          retention-days: 7
