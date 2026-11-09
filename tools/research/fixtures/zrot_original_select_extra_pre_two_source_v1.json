@@ -1,0 +1,102 @@
+{
+  "schema": "ZrotOriginalSimCSelectExtraPREBoundedSourceAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "purpose": "Same original SELECT_PRE call ID, actor/source-bound fields, no READY inference",
+  "profiles": [
+    {
+      "actor_class": "warrior",
+      "path": "profiles/MID2/MID2_Warrior_Fury.simc",
+      "profile_git_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+      "class_cpp": "engine/class_modules/sc_warrior.cpp",
+      "class_cpp_git_blob": "38ee3dd0d5943eb9227ec55aefb21e7d47244f96"
+    },
+    {
+      "actor_class": "mage",
+      "path": "profiles/MID2/MID2_Mage_Arcane.simc",
+      "profile_git_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+      "class_cpp": "engine/class_modules/sc_mage.cpp",
+      "class_cpp_git_blob": "306d835f2db5f7418da221ce155d32e81c53f45c"
+    }
+  ],
+  "fields": [
+    {
+      "owner_class": "mage",
+      "symbol": "active_enemies",
+      "kind": "sim_active_enemies"
+    },
+    {
+      "owner_class": "mage",
+      "symbol": "variable.aoe_count",
+      "kind": "player_variable",
+      "name": "aoe_count"
+    },
+    {
+      "owner_class": "mage",
+      "symbol": "buff.arcane_salvo.stack",
+      "kind": "buff_stack",
+      "name": "arcane_salvo"
+    },
+    {
+      "owner_class": "mage",
+      "symbol": "buff.arcane_salvo.react",
+      "kind": "buff_react",
+      "name": "arcane_salvo"
+    },
+    {
+      "owner_class": "mage",
+      "symbol": "buff.clearcasting.react",
+      "kind": "buff_react",
+      "name": "clearcasting"
+    },
+    {
+      "owner_class": "mage",
+      "symbol": "buff.arcane_charge.stack",
+      "kind": "buff_stack",
+      "name": "arcane_charge"
+    },
+    {
+      "owner_class": "mage",
+      "symbol": "buff.arcane_surge.up",
+      "kind": "buff_up",
+      "name": "arcane_surge"
+    },
+    {
+      "owner_class": "warrior",
+      "symbol": "buff.hack_and_slash.up",
+      "kind": "buff_up",
+      "name": "hack_and_slash"
+    },
+    {
+      "owner_class": "warrior",
+      "symbol": "buff.sudden_death.up",
+      "kind": "buff_up",
+      "name": "sudden_death"
+    },
+    {
+      "owner_class": "warrior",
+      "symbol": "buff.bladestorm.up",
+      "kind": "buff_up",
+      "name": "bladestorm"
+    }
+  ],
+  "native_original_semantic_hints": {
+    "active_enemies": "sim->active_enemies original field used as SimC source expression, not estimated enemy count",
+    "player_variable": "player_t::create_expression(variable.X) returns action_variable_t::current_value_, after ordered APL variable operations",
+    "buff_stack": "buff_t::create_expression(stack) returns buff_t::check()",
+    "buff_react": "buff_t::create_expression(react) returns buff_t::stack_react(), distinct from raw stacks",
+    "buff_up": "buff_t::create_expression(up) returns buff_t::check()>0"
+  },
+  "observe_all_log_actor_classes_but_replay_only_matching_source_profile": true,
+  "captured_values_without_valid_field": "UNKNOWN",
+  "excluded_semantic_rules": [
+    "talent",
+    "cooldown",
+    "prev_gcd",
+    "fight_remains",
+    "pooling",
+    "action READY",
+    "optimal gameplay decision"
+  ],
+  "WCL_api_calls": 0
+}
