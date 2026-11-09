@@ -220,6 +220,133 @@ def from_existing_actor_root(root:Path,transport:dict)->dict:
          k:v for k,v in output.items() if k!="resource_pre_matrix_sha256"}))
     return output
 
+
+def join_numeric_strict_pre(transport:dict,aura_matrix:dict,
+                            resource_matrix:dict)->dict:
+    """Merge RAW numeric aura and owner-proven resource PRE by exact cast ID.
+
+    This is a transport join only, not a game-semantic WCL/SimC IF replay.
+    The aura half is recomputed from immutable actor transitions. The power
+    half must be independently recomputed via from_existing_actor_root,
+    not supplied by an untrusted producer as a certificate of gameplay.
+    """
+    from wcl_raw_actor_numeric_transport_v1 import strict_pre_numeric_matrix
+    _check_transport(transport)
+    expected_aura=strict_pre_numeric_matrix(transport)
+    need(aura_matrix==expected_aura,
+         "NUMERIC_AURA_MATRIX_NOT_REGENERATED_FROM_RAW_TRANSPORT")
+    need(type(resource_matrix)==dict and
+         resource_matrix.get("schema")==SCHEMA and
+         resource_matrix.get("policy_id")==POLICY and
+         resource_matrix.get("status")==
+           "ACTOR_OWNED_RAW_RESOURCE_STRICT_PRE_OBSERVATION" and
+         resource_matrix.get("raw_source_actor_numeric_transport_sha256")==
+           transport["numeric_transport_sha256"] and
+         resource_matrix.get("raw_actor_numeric_receipt_sha256")==
+           transport["raw_receipt_sha256"] and
+         resource_matrix.get("raw_source_page_sha256")==
+           transport["raw_source_page_sha256"] and
+         resource_matrix.get("source_report_scope")=="PINNED_NUMERIC_WCL_ONLY" and
+         resource_matrix.get("resource_pre_matrix_sha256")==
+           sha(canonical({k:v for k,v in resource_matrix.items()
+                          if k!="resource_pre_matrix_sha256"})) and
+         resource_matrix.get("raw_power_unit_to_game_resource_scale")==
+           "UNKNOWN" and
+         resource_matrix.get("gcd_cooldown_charge_competing_action_READY")==
+           "UNKNOWN" and
+         resource_matrix.get("General_Rotation_rule_promoted") is False and
+         resource_matrix.get("dummy_wrong_cast_proven")==0,
+         "NUMERIC_RESOURCE_MATRIX_RAW_PROVENANCE_OR_AUTHORITY_INVALID")
+    aura_rows=aura_matrix["per_numeric_cast"]
+    res_rows=resource_matrix.get("per_numeric_cast")
+    casts=transport["cast_events"]
+    need(type(res_rows)==list and
+         len(casts)==len(aura_rows)==len(res_rows)==
+           transport["actor_numeric_cast_count"],
+         "RAW_AURA_RESOURCE_CAST_COUNT_DIVERGED")
+    by_aura={x["raw_cast_event_id"]:x for x in aura_rows}
+    by_resource={x["numeric_raw_cast_event_id"]:x for x in res_rows}
+    ids=[x["event_id"] for x in casts]
+    need(len(set(ids))==len(ids) and
+         len(by_aura)==len(by_resource)==len(ids) and
+         set(by_aura)==set(by_resource)==set(ids),
+         "NUMERIC_RESOURCE_AURA_CAST_IDENTITY_AMBIGUOUS")
+    # Same-clock same-spell duplicates are indistinguishable without an
+    # independently proven raw source event ordinal join. Refuse to guess.
+    need(len(set((x["t_ms"],x["spell_id"]) for x in casts))==len(casts),
+         "AMBIGUOUS_SAME_TIMESTAMP_IDENTICAL_SPELL_CASTS")
+    summary=Counter();rows=[];typed=Counter()
+    for cast in casts:
+        idnum=cast["event_id"];t=cast["t_ms"];spell=cast["spell_id"]
+        aura=by_aura[idnum];res=by_resource[idnum]
+        need(aura["t_ms"]==t and aura["numeric_spell_id"]==spell and
+             res["t_ms"]==t and res["numeric_spell_id"]==spell and
+             aura["complete_spell_READY"]=="UNKNOWN" and
+             res["full_GCD_cooldown_charge_resource_READY"]=="UNKNOWN",
+             "MIXED_RAW_RESOURCE_AURA_CAST_CONTEXT")
+        for fact in aura["strict_pre_signals"].values():
+            need(fact.get("status") in ("KNOWN","UNKNOWN"),
+                 "AURA_PRE_STATE_UNDECLARED")
+            if fact["status"]=="KNOWN":
+                need(type(fact["event_t_ms"])==int and
+                     fact["event_t_ms"]<t and
+                     fact["raw_receipt_sha256"]==
+                       transport["raw_receipt_sha256"],
+                     "AURA_PRE_SOURCE_EVENT_NOT_STRICT_EARLIER")
+        for kind,fact in res["numeric_resource_strict_pre"].items():
+            need(str(fact["raw_power_type"])==kind and
+                 type(fact["strict_prior_at_ms"])==int and
+                 fact["strict_prior_at_ms"]<t and
+                 fact["source_checkpoint_raw_receipt_sha256"]==
+                     transport["raw_receipt_sha256"] and
+                 fact["status"]=="OBSERVED_PRIOR_NUMERIC_RAW_ONLY" and
+                 fact["game_resource_units_conversion"]=="UNKNOWN",
+                 "RESOURCE_PRE_SOURCE_EVENT_NOT_STRICT_EARLIER")
+            typed[kind]+=1
+        summary["RAW_WCL_CASTS"]+=1
+        if res["numeric_resource_strict_pre"]:
+            summary["CASTS_WITH_PRIOR_ACTOR_RESOURCE"]+=1
+        else:
+            summary["CASTS_WITH_UNKNOWN_RESOURCE"]+=1
+        rows.append({
+          "numeric_raw_cast_event_id":idnum,
+          "spell_id":spell,"at_ms":t,
+          "raw_aura_strict_pre":aura["strict_pre_signals"],
+          "raw_numeric_power_owned_strict_pre":res["numeric_resource_strict_pre"],
+          "resource_known_status":
+             "RAW_NUMERIC_OBSERVED_NOT_SOURCE_UNIT_PROOF"
+             if res["numeric_resource_strict_pre"] else "UNKNOWN",
+          "raw_source_cast_not_manual_proof":True,
+          "source_APL_candidate_row":"UNKNOWN_UNTIL_POSTLOCK_ADAPTER",
+          "source_class_build_equivalence":"UNKNOWN",
+          "complete_spell_READY":"UNKNOWN",
+          "other_ready_actions":"UNKNOWN",
+          "dummy_wrong_cast":"UNKNOWN"
+        })
+    result={
+      "schema":"ZrotWclNumericAuraResourceStrictPreJoinV1",
+      "policy_id":POLICY,
+      "source_numeric_transport_sha256":transport["numeric_transport_sha256"],
+      "aura_strict_pre_matrix_sha256":aura_matrix["matrix_sha256"],
+      "owned_resource_pre_matrix_sha256":
+        resource_matrix["resource_pre_matrix_sha256"],
+      "actor_cast_rows":len(rows),
+      "numeric_power_types_observed":dict(sorted(typed.items())),
+      "cast_coverage":dict(sorted(summary.items())),
+      "per_numeric_cast":rows,
+      "WCL_raw_to_source_semantic_spell_map":"UNKNOWN",
+      "WCL_actor_resource_units_to_SimC_rage":"UNKNOWN",
+      "WCL_build_talents_and_target_at_cast":"UNKNOWN",
+      "complete_and_competing_READY_proven":0,
+      "General_Rotation_priority_promoted":False,
+      "dummy_training_error_proven":False,
+      "new_WCL_API_calls":0,
+      "MAIN_promoted":False
+    }
+    result["joined_numeric_pre_sha256"]=sha(canonical(result))
+    return result
+
+
 def selftest():
     actor=42;start=1000
     def res(t,owner,source,target,typ,amount,maxi):
@@ -265,6 +392,50 @@ def selftest():
          b["per_numeric_cast"][2]["numeric_resource_strict_pre"][
              "1"]["raw_amount"]==200,
          "CAST_TIMESTAMP_RESOURCE_WAS_USED_AS_PRE")
+    # Join separately typed raw PRE channels without semantic promotion.
+    from wcl_raw_actor_numeric_transport_v1 import (
+        SCHEMA as RAW_TRANSPORT_SCHEMA,ORIGIN as RAW_TRANSPORT_ORIGIN,
+        strict_pre_numeric_matrix
+    )
+    transport={
+       "schema":RAW_TRANSPORT_SCHEMA,"policy_id":POLICY,
+       "origin":RAW_TRANSPORT_ORIGIN,
+       "source_cohort_role":"DISCOVERY",
+       "prior_disjoint_report_holdout_recomputed":False,
+       "report_code":"SynthOne","fight_id":1,"actor_id":actor,
+       "raw_receipt_sha256":"c"*64,
+       "raw_source_page_sha256":"d"*64,
+       "actor_numeric_cast_count":2,"raw_aura_boolean_transitions":1,
+       "cast_events":casts,
+       "transitions":[{
+          "source_event_id":"raw-aura-1",
+          "signal":"raw_aura_101_active",
+          "t_ms":120,"value":True,"valid_until_ms":None,
+          "raw_receipt_sha256":"c"*64,
+          "source_kind":RAW_SOURCE,
+          "quality":"VERIFIED_SOURCE_TRANSITION"
+       }],
+       "build_equivalent_to_SimC":"UNKNOWN",
+       "independent_rank_or_holdout_proven":False,
+       "target_count_at_cast":"UNKNOWN",
+       "source_gameplay_rule":"UNKNOWN"
+    }
+    transport["numeric_transport_sha256"]=sha(canonical(transport))
+    aura=strict_pre_numeric_matrix(transport)
+    matrix=dict(a)
+    matrix["raw_source_actor_numeric_transport_sha256"]=(
+        transport["numeric_transport_sha256"])
+    matrix["raw_source_page_sha256"]=transport["raw_source_page_sha256"]
+    matrix["source_report_scope"]="PINNED_NUMERIC_WCL_ONLY"
+    matrix["resource_pre_matrix_sha256"]=sha(canonical({
+        k:v for k,v in matrix.items() if k!="resource_pre_matrix_sha256"}))
+    joined=join_numeric_strict_pre(transport,aura,matrix)
+    need(joined["actor_cast_rows"]==2 and
+         joined["cast_coverage"]["CASTS_WITH_PRIOR_ACTOR_RESOURCE"]==2 and
+         joined["complete_and_competing_READY_proven"]==0 and
+         joined["per_numeric_cast"][0]["raw_aura_strict_pre"][
+            "raw_aura_101_active"]["value"] is True,
+         "GENERIC_RAW_AURA_POWER_CAST_JOIN_FAILED")
     n=0
     def fail(fn):
         nonlocal n
@@ -276,7 +447,25 @@ def selftest():
     fail(lambda:power_cast_matrix(bad,actor,start,casts,"c"*64))
     fail(lambda:power_cast_matrix(rows,actor,start,casts[:-1],"c"*64))
     fail(lambda:power_cast_matrix(rows,actor,2000,casts,"c"*64))
-    need(n==4,"EXPECTED_RESOURCE_PRE_NEGATIVE_CONTROLS")
+    bad_matrix=json.loads(json.dumps(matrix))
+    bad_matrix["per_numeric_cast"][0]["t_ms"]=201
+    # Integrity hash cannot be unconditionally trusted even when edited.
+    bad_matrix["resource_pre_matrix_sha256"]=sha(canonical({
+        k:v for k,v in bad_matrix.items() if k!="resource_pre_matrix_sha256"}))
+    fail(lambda:join_numeric_strict_pre(transport,aura,bad_matrix))
+    bad_aura=json.loads(json.dumps(aura))
+    bad_aura["per_numeric_cast"][0]["strict_pre_signals"][
+        "raw_aura_101_active"]["value"]=False
+    bad_aura["matrix_sha256"]=sha(canonical({
+        k:v for k,v in bad_aura.items() if k!="matrix_sha256"}))
+    fail(lambda:join_numeric_strict_pre(transport,bad_aura,matrix))
+    bad_matrix=json.loads(json.dumps(matrix))
+    bad_matrix["per_numeric_cast"][0]["numeric_resource_strict_pre"][
+        "1"]["strict_prior_at_ms"]=200
+    bad_matrix["resource_pre_matrix_sha256"]=sha(canonical({
+        k:v for k,v in bad_matrix.items() if k!="resource_pre_matrix_sha256"}))
+    fail(lambda:join_numeric_strict_pre(transport,aura,bad_matrix))
+    need(n==7,"EXPECTED_RESOURCE_PRE_NEGATIVE_CONTROLS")
     return {
        "schema":SCHEMA,"status":"PASS_SYNTHETIC_TWO_NUMERIC_POWER_TYPES",
        "reused_existing_actor_resource_owner_reconstruct":True,
@@ -285,6 +474,8 @@ def selftest():
        "source_and_target_owner_paths_tested":True,
        "wrong_owner_event_excluded":True,
        "negative_controls":n,
+       "raw_aura_numeric_resource_join":"PASS_SYNTHETIC",
+       "raw_resource_semantic_units":"UNKNOWN",
        "real_WCL_new_collection":"NOT_RUN",
        "source_APL_IF_rule_proven":0,
        "full_READY_proven":0,
