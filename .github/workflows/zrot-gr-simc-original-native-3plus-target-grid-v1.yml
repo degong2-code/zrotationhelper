@@ -1,0 +1,149 @@
+name: zrot-gr-simc-original-native-3plus-target-grid-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_simc_native_target_grid_v1.py
+      - .github/workflows/zrot-gr-simc-original-native-3plus-target-grid-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-neutral-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile delivered script and verify same-time/action-queue safeguards
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_simc_native_target_grid_v1.py
+          python -B tools/research/general_rotation_simc_native_target_grid_v1.py > /tmp/target-grid-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/target-grid-synthetic.json'))
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert x['positive_synthetic_contracts']==1
+          assert x['negative_fail_closed_cases']==3
+          assert x['full_READY_inferred'] is False
+          assert x['opener_end_inferred'] is False
+          assert x['WCL_API_calls']==0
+          print('GENERIC_NATIVE_SOURCE_TARGET_GRID_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_simc_native_target_grid_v1.py
+
+  actual-native-grid:
+    runs-on: ubuntu-latest
+    needs: [source-neutral-regression]
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-pinned
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify pinned original source identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-pinned rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          python - <<'PY'
+          from hashlib import sha1
+          from pathlib import Path
+          pairs=[('MID2_Warrior_Fury.simc','3225992ed5b754ad5d61e8b785d9d859f1eed1be'),
+                 ('MID2_Mage_Arcane.simc','8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f')]
+          for name,expected in pairs:
+              raw=(Path('simc-pinned/profiles/MID2')/name).read_bytes()
+              actual=sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+              assert actual==expected,(name,actual)
+          print('PINNED_ORIGINAL_SIMC_TWO_PROFILE_BLOBS_PASS')
+          PY
+      - name: Single pristine pinned C++ build, bounded multi-target JSON2 capture
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          cmake -S simc-pinned -B /tmp/zrot-target-grid-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-target-grid-build --target simc --parallel 3
+          test -x /tmp/zrot-target-grid-build/simc
+          for spec in 'fury:warrior_fury:MID2_Warrior_Fury.simc' 'arcane:mage_arcane:MID2_Mage_Arcane.simc'; do
+            IFS=: read -r actor key profile <<< "$spec"
+            for count in 1 2 3 5; do
+              python -B tools/research/simc_native_reference_capture.py \
+                --profile "simc-pinned/profiles/MID2/$profile" --spec "$actor" \
+                --simc-bin /tmp/zrot-target-grid-build/simc \
+                --targets "$count" --seed 31459 --fight-seconds 30 \
+                --out-dir "/tmp/zrot-target-grid-captures/$key-${count}t" \
+                --timeout 180
+            done
+          done
+      - name: Verify eight native captures against exact source/Native/seed fingerprints
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_simc_native_target_grid_v1.py \
+            --source-root simc-pinned \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
+            --captures-root /tmp/zrot-target-grid-captures \
+            --out /tmp/zrot-original-native-1-2-3-5-target-grid.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/zrot-original-native-1-2-3-5-target-grid.json'))
+          assert x['schema']=='ZrotSimcNativeCrossSpecTargetGridEvidenceV1'
+          assert x['source_profiles']==2 and x['source_APL_rows_total']==172
+          assert x['target_counts']==[1,2,3,5]
+          assert len(x['source_native_cases'])==2
+          assert x['native_JSON2_sample_action_validated'] is True
+          for spec in x['source_native_cases']:
+              assert spec['same_native_build_apl_seed_and_fight_window'] is True
+              assert spec['3plus_native_action_sequence_observed'] is True
+              assert len(spec['target_cases'])==4
+              assert all(c['sample_actions']>0 and
+                         c['opener_termination_timestamp']=='UNKNOWN'
+                         for c in spec['target_cases'])
+              assert len(spec['comparisons_to_ST'])==3
+              print('NATIVE_1_2_3_5_TARGET_ACTION_SAMPLES',
+                    spec['source_spec_key'],json.dumps([
+                        {'targets':c['target_count'],'actions':c['sample_actions'],
+                         'early_10s':c['first_10sec_sample_count'],
+                         'source_matched':c['source_token_match_sample_count']}
+                        for c in spec['target_cases']],sort_keys=True))
+          assert x['opener_end_condition']=='UNKNOWN'
+          assert x['full_competing_action_READY_proven']==0
+          assert x['dummy_training_expected_player_cast']=='UNKNOWN'
+          assert x['WCL_API_calls']==0 and x['MAIN_promoted'] is False
+          print('ACTUAL_ORIGINAL_NATIVE_3PLUS_TARGET_GRID_PASS')
+          PY
+          sha256sum /tmp/zrot-original-native-1-2-3-5-target-grid.json
+      - name: Retain derived target-grid receipt without private raw logs
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-simc-original-1-2-3-5-target-grid-${{ github.sha }}
+          path: /tmp/zrot-original-native-1-2-3-5-target-grid.json
+          retention-days: 7
+          if-no-files-found: error
