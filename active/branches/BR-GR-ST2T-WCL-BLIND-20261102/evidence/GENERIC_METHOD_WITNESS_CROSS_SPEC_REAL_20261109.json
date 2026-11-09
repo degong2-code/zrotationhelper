@@ -1,0 +1,99 @@
+{
+  "schema": "ZrotGenericOriginalMethodWitnessTwoSpecRealEvidenceV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "repository": "degong2-code/zrotationhelper",
+  "engine": {
+    "source": "tools/research/general_rotation_original_method_witness_v1.py",
+    "sha256": "786a63e81897318b206f85f8b23c4b53c36e99196b974035a8cac1c8e9cc50f9",
+    "source_method_key_independent_of_action_name": true,
+    "shared_prefix_multiple_methods_supported": true,
+    "pointer_correlator": "same-process action_t*",
+    "pre_phase": "SIMC_ORIGINAL_METHOD_PRE",
+    "external_json_facts_not_trusted": true
+  },
+  "source": {
+    "simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "warrior_cpp_blob": "38ee3dd0d5943eb9227ec55aefb21e7d47244f96",
+    "fury_profile_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+    "mage_cpp_blob": "306d835f2db5f7418da221ce155d32e81c53f45c",
+    "arcane_profile_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f"
+  },
+  "mage": {
+    "real_native_producer_run": 42548160936,
+    "conclusion": "success",
+    "jobs_success": 4,
+    "jobs_total": 4,
+    "combat_casts_unchanged": 31,
+    "source_prismatic_bolt": {
+      "original_attempts": 5,
+      "method_entries_confirmed": 4,
+      "scoped_NOT_READY": 4,
+      "UNKNOWN": 1
+    },
+    "source_arcane_blast": {
+      "original_attempts": 4,
+      "method_entries_confirmed": 4,
+      "scoped_NOT_READY": 0,
+      "UNKNOWN": 4
+    },
+    "successor_generic_pointer_and_legacy_crosscheck_run": 42550864960,
+    "successor_generic_crosscheck_status": "PASS_SYNTHETIC_AND_STATIC_NOT_NEW_NATIVE"
+  },
+  "fury": {
+    "first_native_attempt_run": 42550364212,
+    "run_conclusion": "failure",
+    "cause": "source verifier result schema overwritten by generic nested report",
+    "original_combat_casts_unchanged": 46,
+    "second_native_attempt_run": 42551182559,
+    "actual_native_cpp_executed": true,
+    "replayed_original_native_source_run": 42552086543,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42552086543",
+    "final_run_conclusion": "success",
+    "jobs_total": 4,
+    "jobs_success": 4,
+    "new_cpp_build_in_final_replay": false,
+    "source_apl": {
+      "list": "slayer",
+      "source_index_zero_based": 6,
+      "action": "rampage",
+      "source_row_sha256": "217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2"
+    },
+    "method": "rampage_parent_t::ready()",
+    "source_necessary_condition": "main_hand_slot_occupied_AND_off_hand_slot_occupied",
+    "source_row_attempts": 47,
+    "exact_action_pointer_method_matches": 47,
+    "necessary_TRUE": 47,
+    "necessary_FALSE": 0,
+    "full_READY_UNKNOWN": 47,
+    "positive_full_READY": 0,
+    "scoped_NOT_READY": 0,
+    "raw_trace_sha256": "0afa12c5ec376d74ee26af8f53739323b3583d028f46958a593f45c92f41c507",
+    "source_patch_json_sha256": "08c6407af018396f96b120334fc96a2d8c0d65aea37099c7cee21adad57e0a6e",
+    "same_seed_pristine_instrumented_parity_json_sha256": "9c938fea0a16ef24853f07eb34e0a8d251e18bdf58b24a775161f9b6ff3b8a69",
+    "corrected_source_proof_json_sha256": "0407c01562efa7e618328632f1bd1ae784985fe7961dac3f80020cd3976eae2b",
+    "native_archive": {
+      "id": 13645637682,
+      "zip_digest": "sha256:4fc6d2e5e373b14aa84a33a0be7e627ca711cd39a7418d54f4ec98e574cc3c7d",
+      "expires_utc": "2026-11-16T02:36:40Z"
+    },
+    "corrected_offline_artifact": {
+      "id": 13645947210,
+      "zip_digest": "sha256:f43ca554d1f6d7019732f25a97ebce398a768bf5ae20a693804878a0730fb39e",
+      "expires_utc": "2026-11-16T02:39:34Z"
+    }
+  },
+  "common_scope": {
+    "FROZEN_mutated": false,
+    "MAIN_promoted": false,
+    "WCL_API_calls": 0,
+    "actual_WoW_addon_client_verified": false,
+    "WCL_blind_holdout_done": false,
+    "complete_general_rotation_opener_done": false,
+    "dummy_error_permitted": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "session_exact_next": "Reuse SimC APL source IR + verified PRE/MethodWitness + open-world priority proof to produce a scoped General Rotation opener and post-opener IF/ELSE priority successor, then WCL blind candidate lock and disjoint holdout. Stop redundant original C++ readiness rebuilds."
+}

@@ -34,3 +34,10 @@ The raw original method trace and receipt digests should be retained with short 
 After one successful cross-spec actual method E2E, prioritize source-Apl-led General Rotation opener and conditional priority (ST, 2-target, AoE, proc/resource/CD/build), WCL blind candidate/threshold lock, independent holdout and target-dummy feedback with UNKNOWN for unobserved states. Do not build a universal C++ AST compiler or another specialization-specific generic replay engine.
 
 Seq578 stays FAILED_QUARANTINED, Seq637 stays UNKNOWN. MAIN/FROZEN unchanged.
+
+
+## 2026-11-09 Cross-spec Generic Original MethodWitness source E2E — final verified receipt
+
+**Final source result:** Mage source oracle has 4 exact necessary-negative Bolt guards, proven from original 31 unchanged casts in run #42548160936; Fury source adapter now uses the shared generic matcher on real original source PRE with 47 exact same action_t* witness entries/47 both-weapon-slot necessary TRUE; full positive READY remains 0. Fury validation job #42551182559 produced original/modified 46 identical casts but ultimately FAILED from result schema overlay. Successor [#42552086543](https://github.com/degong2-code/zrotationhelper/actions/runs/42552086543) uses that saved authentic raw original trace, regenerate actual modified original source bytes, and independently replay through corrected adapter, achieving 4/4 SUCCESS **without new C++ compilation**. Result JSON SHA256 0407c01562efa7e618328632f1bd1ae784985fe7961dac3f80020cd3976eae2b. This is scoped original-source condition verification, not complete READY or WCL optimality.
+
+Next development priority is SimC-first opener and general IF/ELSE priority IR with existing source-state fixtures and WCL blind postlock holdout, not further generic method-witness infrastructure unless an actual priority decision requires a new missing input.

@@ -371,3 +371,16 @@ Permanent successor evidence: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evi
 | #42547938744 failed initial synthetic | wrong `MAGE_PROFILE_BLOB` import, corrected in successor | **FAIL record preserved**, not source mechanics conflict |
 
 See permanent branch evidence `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/MAGE_EXACT_READY_GUARD_SCOPED_NOT_READY_REAL_20261109.json`.
+
+
+## 2026-11-09 Cross-spec Generic Original MethodWitness source E2E — final verified receipt
+
+| Reusable feature / receipt | Evidence | State / reuse |
+| --- | --- | --- |
+| Generic original method pointer pairing and necessary gate engine | Source neutral tools/research/general_rotation_original_method_witness_v1.py, Python3.12/3.14 source/test run #42552086543 PASS; source SHA256 786a63e81897318b206f85f8b23c4b53c36e99196b974035a8cac1c8e9cc50f9 | REUSE generic, do not duplicate per-spec parser; external JSON cannot self-certify provenance |
+| Actual Mage original method guard oracle | #42548160936 4/4 real Native C++ PASS; 4 scoped Bolt NOT_READY/1 UNKNOWN; Blast 4 UNKNOWN | REUSE real source truth; successor generic comparison CI #42550864960 synthetic/static PASS only |
+| Actual Fury source producer and original performance parity | #42551182559 source field/override method trace, original 46 combat casts unchanged; end-job FAIL schema collision; older #42550364212 final replay FAIL incorrect patched source pin | PRESERVE original actual source snapshots and historical FAIL classification |
+| Fury independent exact method replay | #42552086543 4/4 SUCCESS, replayed real raw PRE without recompiling C++; 47/47 source-override pointer matches, 47 necessary weapon slot TRUE, 47 full UNKNOWN | INDEPENDENTLY_VALIDATED scoped necessary positive, no full positive READY; raw trace SHA 0afa12c5..., proof SHA 0407c015... |
+| Temporary source artifacts | #13645637682 Native capture; #13645947210 corrected proof artifact; expire 2026-11-16 UTC | REUSE where available, never prereq fresh engine |
+
+Detailed source pins, contract, limitations and bridge design: GENERIC_ORIGINAL_METHOD_WITNESS_ARCHITECTURE_20261109.md. Permanent evidence receipt: active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_METHOD_WITNESS_CROSS_SPEC_REAL_20261109.json.
