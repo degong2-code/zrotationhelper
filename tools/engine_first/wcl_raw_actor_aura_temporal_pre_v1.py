@@ -127,6 +127,7 @@ def matrix_from_numeric_casts(transport:dict,rows:list)->dict:
              "RAW_AURA_EVENT_WRONG_ACTOR_SCHEMA_OR_PROVENANCE")
         ids.add(e["source_event_id"])
         event_count[e["event_type"]]+=1
+    all_raw_aura_spell_ids={e["spell_id"] for e in rows}
     groups=[]
     for (_,spell),iterator in groupby(
         sorted(rows,key=lambda x:(x["t_ms"],x["spell_id"],
@@ -173,6 +174,11 @@ def matrix_from_numeric_casts(transport:dict,rows:list)->dict:
             else:
                 prior_count["KNOWN_AURA_ACTIVE_PRE"]+=1
             snapshot[str(spell)]=snap
+        # The lack of any earlier raw event does NOT imply buff absence.
+        # Account for every spell-ID ever seen in this bounded raw source,
+        # including those with no preceding transition at the decision.
+        prior_count["UNKNOWN_NO_PRIOR_AURA_EVENT"]+=(
+            len(all_raw_aura_spell_ids)-len(snapshot))
         output.append({
            "numeric_raw_cast_event_id":cast["event_id"],
            "at_ms":t,"spell_id":cast["spell_id"],
@@ -190,7 +196,9 @@ def matrix_from_numeric_casts(transport:dict,rows:list)->dict:
       "actual_cast_rows":len(output),
       "actor_raw_buff_event_type_counts":dict(sorted(event_count.items())),
       "target_actor_raw_buff_event_rows":len(rows),
-      "distinct_raw_numeric_aura_spell_ids":len({e["spell_id"] for e in rows}),
+      "distinct_raw_numeric_aura_spell_ids":len(all_raw_aura_spell_ids),
+      "all_raw_aura_ID_x_cast_state_slots":
+          len(all_raw_aura_spell_ids)*len(output),
       "strict_prior_raw_aura_observability":dict(sorted(prior_count.items())),
       "per_numeric_cast":output,
       "raw_stack_value_not_source_SimC_buff_stack_without_mechanic_binding":True,
@@ -203,6 +211,11 @@ def matrix_from_numeric_casts(transport:dict,rows:list)->dict:
       "new_WCL_API_calls":0,
       "MAIN_promoted":False
     }
+    need(prior_count["KNOWN_AURA_ACTIVE_PRE"]+
+         prior_count["UNKNOWN_AURA_ACTIVE_PRE"]+
+         prior_count["UNKNOWN_NO_PRIOR_AURA_EVENT"]==
+            result["all_raw_aura_ID_x_cast_state_slots"],
+         "OPEN_WORLD_AURA_NO_PRIOR_STATE_COVERAGE_LOST")
     result["temporal_matrix_sha256"]=sha(canonical(result))
     return result
 
@@ -269,7 +282,10 @@ def selftest():
     rows=_events_to_rows([("e"*64,events)],42,1000,"d"*64,"c"*64)
     out=matrix_from_numeric_casts(transport,rows)
     one=[r["per_numeric_aura_spell"].get("81") for r in out["per_numeric_cast"]]
-    need(one[0] is None and
+    need(out["strict_prior_raw_aura_observability"][
+           "UNKNOWN_NO_PRIOR_AURA_EVENT"]==1 and
+         out["all_raw_aura_ID_x_cast_state_slots"]==6 and
+         one[0] is None and
          one[1]["active"] is True and one[1]["explicit_stack"] is None and
          one[2]["active"] is False and one[2]["explicit_stack"]==0 and
          one[3]["active"] is True and one[3]["explicit_stack"]==3 and
@@ -308,6 +324,7 @@ def selftest():
       "same_timestamp_contradictory_events_UNKNOWN":True,
       "explicit_numeric_stacks_not_guess_from_apply":True,
       "last_apply_or_refresh_age_not_remains":True,
+      "no_prior_raw_event_not_interpreted_as_buff_absent":True,
       "source_APl_source_IF_proven":0,"full_READY_proven":0,
       "dummy_wrong_cast_proven":0,"new_WCL_API_calls":0
     }
