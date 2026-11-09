@@ -38,6 +38,20 @@ from simc_native_mage_exact_ready_guard_producer_v1 import (
     SIMC_COMMIT,verify_pristine_root)
 from general_rotation_condition_ir_v1 import (
     ObservedField,inspect_requirement)
+from general_rotation_original_method_witness_v1 import (
+    MethodMarker, pair_original_attempts, evaluate_bound_cases)
+
+# Transitional independent dual-route audit: the existing validated Mage
+# oracle remains unchanged, while the reusable bridge must yield identical
+# scoped original-source decisions. A successor can remove duplication.
+def generic_mage_markers():
+    return (
+        MethodMarker(METHOD_MARK,"arcane_blast",
+                     ("buff.prismatic_bolt.active",),"stack_nonnegative"),
+        MethodMarker(METHOD_MARK,"prismatic_bolt",
+                     ("buff.prismatic_bolt.active",),"stack_nonnegative"),
+    )
+
 
 SCHEMA="ZrotOriginalSimcMageExactReadyGuardIndependentReplayV1"
 POLICY="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
@@ -283,6 +297,26 @@ def audit(root:Path,trace_bytes:bytes,patch_bytes:bytes,
         source["rows"],rules,trace_sha256=sha(trace_bytes),
         source_patch_sha256=sha(patch_bytes),
         parity_sha256=sha(parity_bytes))
+    # This exact same pinned Native run is independently replayed by the
+    # generic source-agnostic witness bridge. Old and new implementations
+    # must agree before this adapter can eventually retire its own parser.
+    bound=pair_original_attempts(
+        trace,fields=FIELDS,method_markers=generic_mage_markers())
+    generic=evaluate_bound_cases(
+        rows=bound["rows"],fields=FIELDS,
+        source_rules=[(r,i,i.scope.split("::",1)[1]) for r,i in rules],
+        receipt_sha256={"raw_log":sha(trace_bytes),
+                        "patch":sha(patch_bytes),
+                        "parity":sha(parity_bytes)},
+        source_verified=True)
+    ensure(generic["counts"].get("scoped_NOT_READY",0)==
+           outcome["counts"].get("scoped_NOT_READY",0) and
+           generic["counts"].get("method_witnesses",0)==
+           outcome["counts"].get("guard_entries_proven",0) and
+           generic["counts"].get("UNKNOWN",0)==
+           outcome["counts"].get("UNKNOWN",0) and
+           generic["full_positive_READY"]==0,
+           "GENERIC_MAGE_SOURCE_GUARD_PARITY_MISMATCH")
     # Some original rows can fail other early gates before this override.
     # Proof is accepted ONLY for rows where the actual method was entered.
     return {
@@ -296,6 +330,8 @@ def audit(root:Path,trace_bytes:bytes,patch_bytes:bytes,
         "source_patch_receipt_sha256":sha(patch_bytes),
         "same_seed_parity_receipt_sha256":sha(parity_bytes),
         "Mage_original_combat_casts_preserved":parity["combat_cast_count"],
+        "generic_method_witness_matched_legacy_source_proof":True,
+        "generic_method_witness_counts":generic["counts"],
         **outcome,
         "native_selected_action_is_post_comparator_only":True,
         "producer_claims_not_trustworthy_without_same_run_CI":True,
@@ -360,6 +396,20 @@ def selftest():
     assert two["counts"]["scoped_NOT_READY"]==1
     assert two["counts"]["UNKNOWN"]==1
     assert two["full_positive_READY"]==0
+    generic_rows=pair_original_attempts(
+        "\n".join((pre,ptr,guard,attempt,
+                   blast_pre,blast_ptr,blast_guard,blast_attempt)),
+        fields=FIELDS,method_markers=generic_mage_markers())
+    generic_two=evaluate_bound_cases(
+        rows=generic_rows["rows"],fields=FIELDS,
+        source_rules=[(fake,ident,"prismatic_bolt"),
+                      (blast_rule,blast_ident,"arcane_blast")],
+        receipt_sha256={"raw_log":"a"*64,"patch":"b"*64,
+                        "parity":"c"*64},
+        source_verified=True)
+    assert generic_two["counts"]["scoped_NOT_READY"]==two["counts"]["scoped_NOT_READY"]
+    assert generic_two["counts"]["UNKNOWN"]==two["counts"]["UNKNOWN"]
+    assert generic_two["counts"]["method_witnesses"]==two["counts"]["guard_entries_proven"]
     for changed in (
         guard.replace("0x1111","0x2222"),
         guard.replace("|0","|1"),
@@ -377,7 +427,7 @@ def selftest():
         except MageGuardReplayError:
             pass
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":17,"synthetic_authorized_as_real":False,
+            "checks":21,"synthetic_authorized_as_real":False,
             "strict_action_object_pointer_link":True,
             "negative_necessary_gate_without_full_READY":True,
             "real_CPP_executed":False,"WCL_API_calls":0,
