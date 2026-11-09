@@ -39,7 +39,8 @@ jobs:
           assert x['reused_existing_actor_resource_owner_reconstruct'] is True
           assert x['strictly_earlier_numeric_source_snapshots'] is True
           assert x['same_time_cast_resource_rejected_as_PRE'] is True
-          assert x['negative_controls']>=7
+          assert x['negative_controls']>=8
+          assert x['same_time_same_spell_casts_guarded_by_equivalent_PRE'] is True
           assert x['raw_aura_numeric_resource_join']=='PASS_SYNTHETIC'
           assert x['raw_resource_semantic_units']=='UNKNOWN'
           assert x['source_APL_IF_rule_proven']==0
@@ -163,7 +164,11 @@ jobs:
                    matrix['casts_with_same_timestamp_owner_snapshot_excluded'],
                 'matrix_sha256':matrix['resource_pre_matrix_sha256'],
                 'joined_aura_numeric_power_PRE_sha256':joined['joined_numeric_pre_sha256'],
-                'joined_cast_rows':joined['actor_cast_rows']
+                'joined_cast_rows':joined['actor_cast_rows'],
+                'duplicated_timestamp_spell_casts_with_unknown_event_ordinal':
+                    joined['same_timestamp_spell_event_identity_ambiguous_cast_rows'],
+                'equivalent_PRE_confirmed_duplicate_groups':
+                    joined['same_timestamp_spell_ambiguous_groups_with_equivalent_PRE']
               }
               print('REAL_WCL_OWNED_RESOURCE_STRICT_PRE_CASE',name,
                     json.dumps(summary['sources'][name],sort_keys=True))
