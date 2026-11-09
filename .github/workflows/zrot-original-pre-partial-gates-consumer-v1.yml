@@ -1,0 +1,134 @@
+name: zrot-original-source-pre-partial-gates-consumer-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_source_partial_gate_consumer_v1.py
+      - .github/workflows/zrot-original-pre-partial-gates-consumer-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  offline-generic:
+    name: Independent source-gate interpreter Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and recompute independent synthetic source predicates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_original_source_partial_gate_consumer_v1.py
+          python -B tools/research/general_rotation_original_source_partial_gate_consumer_v1.py \
+            > /tmp/partial-gates-generic-synthetic.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/partial-gates-generic-synthetic.json'))
+          assert r['schema']=='ZrotGenericOriginalSourcePREPartialGateConsumerV1'
+          assert r['checks']>=12 and r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['full_positive_READY']==0 and r['WCL_API_calls']==0
+          print('GENERIC_REAL_SOURCE_PRE_PARTIAL_GATE_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_original_source_partial_gate_consumer_v1.py
+
+  real-pinned-consumer:
+    name: Independently replay source-pinned actual passive PRE artifact
+    needs: [offline-generic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-focused-original-source-direction-cast-pre-evidence
+          path: /tmp/focused-original-pre
+          run-id: 42540080769
+          github-token: ${{ github.token }}
+      - name: Verify exact original C++ source, pinned raw evidence and standalone GateContract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = "b522cded8c26b97dac03fdf56e57a03ec7e8faa6"
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          def blob(p):
+              raw=Path(p).read_bytes()
+              return hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          assert blob('simc-upstream/engine/action/action.cpp')=='399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4'
+          assert blob('simc-upstream/engine/player/player.cpp')=='88e03a01ca87ff66fd3902c9d6e047fe1a03ecb8'
+          assert blob('simc-upstream/engine/player/player.hpp')=='f2648bec55750fce281e52185966d0424961a5c6'
+          assert blob('simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc')=='3225992ed5b754ad5d61e8b785d9d859f1eed1be'
+          print('UPSTREAM_PROFILE_CPP_BASE_GATE_SOURCE_PIN_PASS')
+          PY
+          sha256sum /tmp/focused-original-pre/focused-source-direction-cast-real-audit.json \
+            /tmp/focused-original-pre/focused-source-direction-cast-patch.json \
+            /tmp/focused-original-pre/focused-source-sequence-parity.json
+          PARITY_SHA=$(sha256sum /tmp/focused-original-pre/focused-source-sequence-parity.json | cut -d' ' -f1)
+          python -B tools/research/general_rotation_original_source_partial_gate_consumer_v1.py \
+            --official-profile simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc \
+            --expected-profile-git-blob 3225992ed5b754ad5d61e8b785d9d859f1eed1be \
+            --audit-json /tmp/focused-original-pre/focused-source-direction-cast-real-audit.json \
+            --audit-sha256 c1cec740870610cf039cc953be3c9ec183c99828ba971fe9781593ba458620ec \
+            --patch-json /tmp/focused-original-pre/focused-source-direction-cast-patch.json \
+            --patch-sha256 ab7bfd505194f691ea3338bdf1fb1bda8f1eda8dfa6051b9db23f7fd261ade7f \
+            --parity-json /tmp/focused-original-pre/focused-source-sequence-parity.json \
+            --parity-sha256 "$PARITY_SHA" \
+            --focus-time-ms 20031 --focus-list slayer --focus-ordinal 7 --focus-action rampage \
+            --out /tmp/fury-source-pre-independent-partial-gates.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/fury-source-pre-independent-partial-gates.json'))
+          assert r['schema']=='ZrotGenericOriginalSourcePREPartialGateConsumerV1'
+          assert r['source_row_sha256']=='217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2'
+          assert r['partial_gates_positive_count']==2
+          assert {f['gate'] for f in r['actual_original_source_PRE_independent_subgates']} == {
+              'MOVEMENT_DIRECTIONALITY_BASE_CLEAR',
+              'CAST_BASE_WHILE_CASTING_BRANCH_BYPASS'}
+          assert all(f['value'] is True and f['basis']=='INDEPENDENT_SOURCE_REPLAY'
+                     and f['captured']=='SIMC_ORIGINAL_METHOD_PRE'
+                     and f['at_ms']==20031 for f in
+                     r['actual_original_source_PRE_independent_subgates'])
+          assert r['selected_candidate_status']=='UNKNOWN'
+          assert r['full_movement_cast_or_spec_route']=='UNKNOWN'
+          assert r['remaining_full_gates']==[
+              'MOVEMENT','CAST_GCD','NECESSARY_ELIGIBILITY',
+              'SPEC_OVERRIDE_TOTAL','BASE_VIRTUAL_COMPLETE']
+          assert r['original_combat_casts_preserved']==46
+          assert r['WCL_strict_PRE_observed'] is False
+          assert r['dummy_trainer_error_permitted'] is False
+          assert r['WCL_API_calls']==0
+          print('ACTUAL_ORIGINAL_RAMPAGE_SOURCE_PRE_TWO_NEW_PARTIAL_GATES_TYPED_PASS',
+                r['raw_source_values_recomputed'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-source-pre-typed-partial-gate-receipt
+          path: /tmp/fury-source-pre-independent-partial-gates.json
+          retention-days: 7
+          if-no-files-found: error
