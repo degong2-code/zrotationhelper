@@ -1,0 +1,132 @@
+{
+  "schema": "ZrotGenericSimcTwoSpecOriginalPRERealE2ECompletionV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "repository": "degong2-code/zrotationhelper",
+  "scope": "GENERAL_ROTATION_OPENER_DUMMY_TRAINER_NOT_ENCOUNTER_SPECIFIC",
+  "official_source_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "github_run": {
+    "id": 42545789084,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42545789084",
+    "source_commit": "25b8ce17c2f75f38c408f52cb42d916b3e41de1e",
+    "conclusion": "success",
+    "jobs_total": 4,
+    "jobs_success": 4,
+    "original_cpp_pristine_build": true,
+    "patched_CPP_rebuild": true,
+    "same_compiled_binary_for_both_specs": true,
+    "new_original_action_ready_calls": 0,
+    "WCL_API_calls": 0,
+    "WoW_client_addon_tested": false
+  },
+  "source_programs": [
+    {
+      "path": "tools/research/general_rotation_original_pre_field_transport_v1.py",
+      "sha256": "91b6bc0c5395d067c5eb094de879c956d63e1e562574b72a22160e762f671ba5",
+      "generic_spec_names_hardcoded": false
+    },
+    {
+      "path": "tools/research/general_rotation_source_pre_field_capture_v1.py",
+      "sha256": "9f8cabd981cb98474c483cde036374fbe29bc3c34a274f078a37b136514086e3",
+      "purpose": "Source-pinned dual-spec integration harness, not generic core"
+    }
+  ],
+  "plan": {
+    "source_rule_count": 3,
+    "capture_field_requests": 3,
+    "types": [
+      "weapon_slot_equipped",
+      "actor_named_buff_active"
+    ],
+    "plan_json_sha256": "c8eaa6a9aabe4cb692e7bfdec2cf4deed8e1a4666bbd975c97ad222b1899e81e",
+    "producer_json_sha256": "07c2c5f4a11fad88aaec59e4494d5ed40ef572af96bae84b78e562181f5aacd8",
+    "capture_phase": "SIMC_ORIGINAL_METHOD_PRE",
+    "wcl_strict_PRE_distinct": true
+  },
+  "pristine_instrumented_sequence_parity": {
+    "sha256": "ea8b95194650f8d93445c9884eb8525e5fdc7c15ebb99b361563b79f85296532",
+    "Fury_combat_casts": 46,
+    "Mage_combat_casts": 31,
+    "all_equal_precombat_and_combat": true
+  },
+  "actual_cases": [
+    {
+      "specialization": "warrior_fury",
+      "profile_blob_sha1": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+      "source_list": "slayer",
+      "source_index_zero_based": 6,
+      "action": "rampage",
+      "first_original_PRE_time_ms": 1681,
+      "matching_source_row_attempts": 47,
+      "raw_fields": {
+        "main_hand_equipped": true,
+        "off_hand_equipped": true,
+        "prismatic_buff_lookup": "UNKNOWN_UNREGISTERED"
+      },
+      "numeric_gate_hypothesis": "TRUE",
+      "source_gate_name": "NECESSARY_ELIGIBILITY",
+      "source_row_sha256": "217c49dcce32cbc0d975679ed09e0a79c71f05e2615e6566f46bffc9b1ffece2",
+      "audit_json_sha256": "5aa431d091ffe166e453ef8008ae0a588e36e61ff6627ba5c77c929a5a014679",
+      "full_ready": "UNKNOWN"
+    },
+    {
+      "specialization": "mage_arcane",
+      "profile_blob_sha1": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+      "source_list": "spellslinger",
+      "source_index_zero_based": 7,
+      "action": "arcane_blast",
+      "first_original_PRE_time_ms": 2414,
+      "matching_source_row_attempts": 4,
+      "raw_fields": {
+        "main_hand_equipped": true,
+        "off_hand_equipped": false,
+        "buff_prismatic_bolt_active": false
+      },
+      "numeric_gate_hypothesis": "TRUE",
+      "source_row_sha256": "fbf6148c3295da1a2378f0ba9f077dd2f5c2c5261f8dad9f1aad573645264cd2",
+      "audit_json_sha256": "a0e224b8167af70deac2dd28f104eb7436ec161c5db7fd483f8b6cf3d43d11a5",
+      "full_ready": "UNKNOWN"
+    },
+    {
+      "specialization": "mage_arcane",
+      "profile_blob_sha1": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+      "source_list": "spellslinger",
+      "source_index_zero_based": 4,
+      "action": "prismatic_bolt",
+      "first_original_PRE_time_ms": 2414,
+      "matching_source_row_attempts": 5,
+      "raw_fields": {
+        "main_hand_equipped": true,
+        "off_hand_equipped": false,
+        "buff_prismatic_bolt_active": false
+      },
+      "numeric_gate_hypothesis": "FALSE",
+      "source_row_sha256": "db3f16cb19b4dbc4405a2a2ae3f683039f6dfb1ede034cc5eb57392f804fa738",
+      "audit_json_sha256": "a0e224b8167af70deac2dd28f104eb7436ec161c5db7fd483f8b6cf3d43d11a5",
+      "full_ready": "UNKNOWN"
+    }
+  ],
+  "archive": {
+    "run_artifact_id": 13643622261,
+    "digest": "sha256:d330da0d91f13e1872c911372e8627076dc799d28c6cc3d856bdc755dc6a4adf",
+    "expires_at_utc": "2026-11-16T01:36:44Z",
+    "archive_is_product_critical_dependency": false
+  },
+  "evidence_state": "ACTUAL_NATIVE_SOURCE_PRE_OBSERVED_AND_NUMERIC_HYPOTHESES_REPLAYED",
+  "dynamics": {
+    "Fury_rampage_ready_guard_entry_independently_observed": false,
+    "Mage_arcane_blast_ready_guard_entry_independently_observed": false,
+    "Mage_prismatic_bolt_ready_guard_entry_independently_observed": false,
+    "verified_complete_virtual_route": false,
+    "independent_positive_READY": 0,
+    "WCL_blind_candidate_holdout": false,
+    "trainer_mistake_verdict_allowed": false
+  },
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "session_exact_next": "Source-verify actual target action implementation dispatch at original SIMC PRE without injecting extra ready calls; bind Mage prismatic_bolt observed FALSE to exact ready override necessary gate and distinguish numeric hypothesis from source-authenticated NOT_READY. Keep complete READY UNKNOWN and WCL strict PRE separate.",
+  "product_exact_next": "General rotation opener and conditional priority via SimC initial APL, independent WCL locked candidates/postlock holdout, and lightweight dummy trainer coverage."
+}

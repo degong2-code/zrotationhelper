@@ -35,3 +35,9 @@ Scope: `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`. Branch-only. MA
 ## Product Exact Next
 
 Validate the fresh two-spec original C++ performance/field evidence; move independently authenticated source PRE necessary gate facts into the open-world proof without positive READY until dynamic dispatch and exhaustive guards established. Extend generic reader families only when a concrete specialization needs them (weapon subclass, buff stack, cost/cooldown). After SimC-first General Rotation hypotheses, use WCL blind candidate lock and post-lock holdout to verify general ST/2T/AoE priorities and tie them to lightweight dummy training with game API observability checks.
+
+## 2026-11-09 후속: 동일 Generic PRE Producer의 실제 Fury·Arcane 원본 E2E
+
+Actual verified E2E [#42545789084](https://github.com/degong2-code/zrotationhelper/actions/runs/42545789084) (4/4 PASS) complements the earlier source static test. Original 46 Fury and 31 Mage combat casts invariant under one generic passive PRE field generator, with no duplicated per-spec C++ patch. Actual raw scoped fields are now available for Fury equipment presence and Arcane buff up/down. Numeric condition evaluation used `ObservedField` and still does **not** emit independently trusted READY/NOT_READY GateContract facts; dispatch must be proven. In particular the Mage `prismatic_bolt` source condition FALSE when buff=0 is an interesting negative candidate, not yet an audited actual class override invocation. Keep original build/pin, raw SHA evidence and future addon/WCL data layers separate.
+
+See successor real E2E JSON receipt for actual numeric values, per-spec counts and hash IDs. Prior original SimC (t=20031ms) source frontier and this newly sampled (t=1681/2414ms) do not represent the same action occurrence.

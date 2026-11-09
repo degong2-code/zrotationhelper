@@ -348,3 +348,14 @@ For producer/semantic normalization and exact next, see branch architecture note
 | #42545789084 | explicit actual original SimC Fury/Mage source field sample/parity workflow | **IN_PROGRESS at this evidence checkpoint**, verdict requires real jobs status |
 
 See design note + `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_PRE_FIELD_CAPTURE_ENGINE_STATIC_20261109.json`.
+
+## 2026-11-09 후속: 동일 Generic PRE Producer의 실제 Fury·Arcane 원본 E2E
+
+| 신규 생산·판정 자산 | 독립 원본 수치 | 재사용 평가 |
+|---|---|---|
+| Generic source PRE reader + Warrior/Mage source-binding integration, CI #42545789084 | **4/4 SUCCESS**; 동일 바이너리 pristine/instrumented Fury 46 casts, Mage 31 casts exact (precombat/combat) | **REUSE** generic transport/core; **EXTEND** future field readers via source adapter |
+| Fury equipment 2 independent raw field reads | first `slayer[6] rampage` original PRE 1681ms, 47 row attempts, `[main=1,off=1,buff=-1]`, numeric predicate TRUE | **OBSERVED RAW PRE**, no dynamic route closure/full READY |
+| Arcane buff 1 independent raw field read | first `spellslinger` Arcane Blast 2414ms 4 attempts, Prismatic Bolt 2414ms 5 attempts. Same buff=0 -> Blast absent TRUE/Bolt present FALSE | **OBSERVED RAW PRE**, no independent `prismatic_bolt_t::ready()` entry yet; false is hypothesis until validated |
+| Hash-pinned real evidence | audit Fury `5aa431d0...`, Mage `a0e224b8...`, action parity `ea8b9519...`; artifact #13643622261 expires Nov16 UTC | **REUSE** source-pinned permanent receipt, ephemeral raw CI artifact non-prerequisite |
+
+Permanent successor evidence: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_PRE_FIELD_CAPTURE_TWO_SPEC_REAL_E2E_20261109.json`. Earlier static-only checkpoint remains historical truth, not edited to retroactively claim live result.
