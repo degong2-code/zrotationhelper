@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 
 from simc_apl_semantic_ir_v2 import Expression, ast_symbols, evaluate_ast, truth
 
@@ -82,8 +83,9 @@ def sufficient_partial_source_witness(expression:str, facts:dict,
     ast=Expression(expression).parse()
     names=sorted(ast_symbols(ast))
     known={s:facts[s] for s in names if s in facts}
-    require(all(type(v) in (int,float,bool) for v in known.values()),
-            "NON_NUMERIC_PARTIAL_PRE_FACT")
+    require(all(type(v) in (int,float,bool) and math.isfinite(float(v))
+                for v in known.values()),
+            "NON_FINITE_OR_NON_NUMERIC_PARTIAL_PRE_FACT")
     result=truth(evaluate_ast(ast,known))
     require(result is expected,
             "PARTIAL_PRE_DOES_NOT_SUFFICE_FOR_ASSERTED_IF")
@@ -139,6 +141,7 @@ def selftest()->dict:
         ("a&b",{"a":1},True),
         ("a|b",{"a":0},False),
         ("a|b",{"a":0,"b":0},True),
+        ("a|b",{"a":1,"b":float("nan")},True),
     ):
         try:sufficient_partial_source_witness(expr,facts,expected=expected)
         except MinimalIFWitnessError:pass
@@ -151,7 +154,7 @@ def selftest()->dict:
         except MinimalIFWitnessError:pass
         else:raise AssertionError("UNPROVEN_SOURCE_IF_FACT_SET_ACCEPTED")
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":12,"independent_full_READY_proven":0,
+            "checks":13,"independent_full_READY_proven":0,
             "WCL_API_calls":0}
 
 if __name__=="__main__":
