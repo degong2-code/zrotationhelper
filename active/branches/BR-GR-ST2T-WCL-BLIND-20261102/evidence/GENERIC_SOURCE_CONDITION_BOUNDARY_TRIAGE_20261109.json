@@ -1,0 +1,115 @@
+{
+  "schema": "ZrotGeneralRotationOfflineSourceConditionBoundaryTriageReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "date": "2026-11-09",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "original_run": 42581326058,
+  "original_receipt_git_blob": "f6c43d408952a9ea90ebfa17297e3244a9de05be",
+  "source_code_path": "tools/research/general_rotation_same_run_source_triage_v1.py",
+  "source_code_git_blob": "a046de724c291614482acad3f49dab6045c58dd4",
+  "source_code_sha256": "08699adcbe129ce0075a0747f797f11bc1f9b27e4bbda7f5b64e5e46e9fb8cfe",
+  "workflow": ".github/workflows/zrot-gr-offline-source-boundary-triage-v1.yml",
+  "real_CI_run_id": 42583232533,
+  "real_CI_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42583232533",
+  "CI_status": "completed",
+  "CI_conclusion": "success",
+  "CI_jobs": {
+    "python312": "success",
+    "python314": "success",
+    "pinned_offline_replay": "success"
+  },
+  "output_triage_sha256": "ee9d35b01ca66de84578cc84a62e0a6e663c597e56783c7fad79cd801241ac9c",
+  "output_artifact": {
+    "id": 13657469612,
+    "digest": "sha256:88ded3e6912e4088c683224e015c1982aa0d19cd59290b139ef24aa932e2a6fd",
+    "expires_utc": "2026-11-16T08:03:54Z"
+  },
+  "scope": {
+    "source_spec_count": 2,
+    "case_count": 4,
+    "targets": [
+      1,
+      2
+    ],
+    "official_source_profiles": "pinned original MID2 Fury and Arcane",
+    "first_window_ms": 10000,
+    "first_window_is_not_proven_opener": true
+  },
+  "actual_original_emitter_records": 203,
+  "phase": {
+    "combat": 149,
+    "precombat": 54
+  },
+  "source_if": {
+    "explicit_if_missing_original_same_call_select_pre": 95,
+    "no_explicit_if_still_not_ready_proof": 108
+  },
+  "same_run_return_identity": {
+    "combat_unique_temporal_row_identity": 139,
+    "combat_multiple_root_returns": 10,
+    "combat_no_root": 0,
+    "precombat_without_root_return": 54,
+    "precombat_unique_temporal_row_identity": 0,
+    "selection_to_emission_causal_dispatch_proven": 0
+  },
+  "first_window": {
+    "combat_emitter_records": 61,
+    "source_if_needs_same_call_pre": 41,
+    "unique_temporal_with_source_if": 38,
+    "ambiguous_multiple_root_with_source_if": 3,
+    "unique_temporal_without_explicit_if": 20,
+    "top_unobserved_symbols": [
+      {
+        "symbol": "active_enemies",
+        "emitted_rows": 13
+      },
+      {
+        "symbol": "buff.recklessness.up",
+        "emitted_rows": 13
+      },
+      {
+        "symbol": "variable.aoe_count",
+        "emitted_rows": 13
+      },
+      {
+        "symbol": "buff.arcane_salvo.stack",
+        "emitted_rows": 11
+      },
+      {
+        "symbol": "buff.clearcasting.react",
+        "emitted_rows": 7
+      }
+    ],
+    "highest_observed_source_context": {
+      "spec": "warrior_fury",
+      "targets": 2,
+      "source_list": "slayer_aoe",
+      "source_action": "rampage",
+      "emitted_rows": 7,
+      "if_present": false,
+      "selected_priority_proven": false
+    },
+    "first_window_is_not_confirmed_opener_end": true
+  },
+  "scientific_guards": {
+    "observed_same_run_pointer_match_is_causality": false,
+    "native_original_if_truth_joined_to_this_run": false,
+    "cross_run_IF_60_joined": false,
+    "independent_full_positive_READY_proven": 0,
+    "competition_priority_optimality_proven": false,
+    "generic_IF_ELSE_final_completed": false,
+    "current_WCL_blind_holdout": "NOT_RUN",
+    "actual_Retail_addon_API_validated": false,
+    "trainer_wrong_skill": "UNKNOWN",
+    "no_new_SimC_CXX_compilation": true,
+    "no_new_WCL_API_calls": true,
+    "no_specialization_action_hardcoded_in_generic_code": true
+  },
+  "next_product": "General ST/2T/AoE/build opener and conditional source-priority model, then independent locked WCL comparison and safe target dummy evaluation.",
+  "next_session": "Reuse pinned 61 first-window source rows and 139/10 combat return witnesses. Identify minimal generic original dispatch execution-token boundary and same-call select PRE for high-impact 41 IF-bearing observed actions; restore variable.aoe_count with original ordered APL effects rather than WCL guessed values. Synthetic preflight before any necessary single original SimC build.",
+  "main_promoted": false,
+  "frozen_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}

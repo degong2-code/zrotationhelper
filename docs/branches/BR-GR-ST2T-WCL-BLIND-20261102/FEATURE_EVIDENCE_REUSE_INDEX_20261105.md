@@ -470,3 +470,14 @@ Canonical branch evidence receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102
 
 Permanent branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SAME_RUN_RETURN_EMITTER_BOUNDARY_20261109.json`. Failed CI wrappers #42579688909/#42579822119/#42580709508 are separately preserved as pipeline mistakes, not gameplay evidence.
 
+## 2026-11-09 offline source condition triage reuse addition
+
+| Reusable asset | Verified capability | Next |
+| --- | --- | --- |
+| `general_rotation_same_run_source_triage_v1.py` | [#42583232533](https://github.com/degong2-code/zrotationhelper/actions/runs/42583232533), 3/3 SUCCESS, Python 3.12/3.14 compile+synth, pinned original 203 emitter source AST replay, 0 C++ builds | **REUSE** for all specialties; source tokens only in profiles, not Generic Engine |
+| Original return/emitter prior 203 | 149 combat split 139 unique-temporal/10 multiple, 54 precombat absent-root | **REUSE**; phase determines whether no-root is actionable, not blanket missing data |
+| Strict source PRE obligations | first 10s 61 combat: 41 explicit IF, 20 without; missing `active_enemies`, `variable.aoe_count` and buffs | **EXTEND** original select-call PRE and APL variable replay, do not invent IF truth |
+| True dispatch causality / full READY | 0; same pointer/time and original select return are only contextual witnesses | **UNKNOWN**; explicitly block product/dummy promotions |
+| WCL current independent validation | not run this step | **NOT_RUN**; preserve blind candidate lock then holdout |
+
+Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_CONDITION_BOUNDARY_TRIAGE_20261109.json`. Relevant output SHA256 `ee9d35b01ca66de84578cc84a62e0a6e663c597e56783c7fad79cd801241ac9c`. New original SimC rebuilds 0. No historical evidence status changed.
