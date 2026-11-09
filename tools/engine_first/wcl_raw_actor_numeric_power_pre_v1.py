@@ -474,6 +474,42 @@ def selftest():
          joined["per_numeric_cast"][0]["raw_aura_strict_pre"][
             "raw_aura_101_active"]["value"] is True,
          "GENERIC_RAW_AURA_POWER_CAST_JOIN_FAILED")
+    # Real WCL can include identical spell IDs at the same integer
+    # timestamp. Retain a usable strictly-earlier state only if all such
+    # raw events have equivalent PRE, never assert which ordinal is which.
+    duplicate_casts=casts+[{
+        "event_id":"dup","t_ms":200,"spell_id":2001,"source_kind":RAW_SOURCE
+    }]
+    duplicate_events=rows+[cast(1200,2001)]
+    resource_duplicate=power_cast_matrix(
+        duplicate_events,actor,start,duplicate_casts,"c"*64)
+    need(resource_duplicate[
+         "same_timestamp_same_spell_casts_with_ambiguous_event_identity"]==2
+         and resource_duplicate[
+         "ambiguous_identity_groups_with_identical_strict_PRE"]==1,
+         "DUPLICATE_SAME_TIMESTAMP_SPELL_PRE_NOT_EQUIVALENT")
+    transport_duplicate=json.loads(json.dumps(transport))
+    transport_duplicate["cast_events"]=duplicate_casts
+    transport_duplicate["actor_numeric_cast_count"]=3
+    transport_duplicate["numeric_transport_sha256"]=sha(canonical({
+        k:v for k,v in transport_duplicate.items()
+        if k!="numeric_transport_sha256"}))
+    aura_duplicate=strict_pre_numeric_matrix(transport_duplicate)
+    resource_duplicate["raw_source_actor_numeric_transport_sha256"]=(
+        transport_duplicate["numeric_transport_sha256"])
+    resource_duplicate["raw_source_page_sha256"]=(
+        transport_duplicate["raw_source_page_sha256"])
+    resource_duplicate["source_report_scope"]="PINNED_NUMERIC_WCL_ONLY"
+    resource_duplicate["resource_pre_matrix_sha256"]=sha(canonical({
+        k:v for k,v in resource_duplicate.items()
+        if k!="resource_pre_matrix_sha256"}))
+    joined_duplicate=join_numeric_strict_pre(
+        transport_duplicate,aura_duplicate,resource_duplicate)
+    need(joined_duplicate["actor_cast_rows"]==3 and
+         joined_duplicate[
+          "same_timestamp_spell_event_identity_ambiguous_cast_rows"]==2 and
+         joined_duplicate["complete_and_competing_READY_proven"]==0,
+         "DUPLICATE_SPELL_WCL_AURA_NUMERIC_PRE_JOIN_FORCED_ORDINAL")
     n=0
     def fail(fn):
         nonlocal n
@@ -503,7 +539,16 @@ def selftest():
     bad_matrix["resource_pre_matrix_sha256"]=sha(canonical({
         k:v for k,v in bad_matrix.items() if k!="resource_pre_matrix_sha256"}))
     fail(lambda:join_numeric_strict_pre(transport,aura,bad_matrix))
-    need(n==7,"EXPECTED_RESOURCE_PRE_NEGATIVE_CONTROLS")
+    altered_duplicate=json.loads(json.dumps(resource_duplicate))
+    one_duplicate=next(row for row in altered_duplicate["per_numeric_cast"]
+                       if row["numeric_raw_cast_event_id"]=="dup")
+    one_duplicate["numeric_resource_strict_pre"]["1"]["raw_amount"]=101
+    altered_duplicate["resource_pre_matrix_sha256"]=sha(canonical({
+        k:v for k,v in altered_duplicate.items()
+        if k!="resource_pre_matrix_sha256"}))
+    fail(lambda:join_numeric_strict_pre(
+        transport_duplicate,aura_duplicate,altered_duplicate))
+    need(n==8,"EXPECTED_RESOURCE_PRE_NEGATIVE_CONTROLS")
     return {
        "schema":SCHEMA,"status":"PASS_SYNTHETIC_TWO_NUMERIC_POWER_TYPES",
        "reused_existing_actor_resource_owner_reconstruct":True,
