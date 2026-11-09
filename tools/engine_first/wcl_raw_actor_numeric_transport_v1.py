@@ -1,0 +1,468 @@
+#!/usr/bin/env python3
+"""Generic verified-checkpoint WCL raw actor -> numeric casts / strict PRE.
+
+This is an independent WCL producer: NO SimC source/APL/guide/ability names.
+Consumes one *already* collected official WCL raw checkpoint, its actor
+identity-gate and actor-scoped blind replay; regenerates the raw page replay,
+verifies the actor view and recorded receipt hashes, and extracts immutable
+numeric casts and aura-active transitions. All times are normalized to
+fight-start-relative ms. It never infers cooldown, resource, target count or
+complete action READY from an observed WCL cast.
+
+A separate producer function bridges *two disjoint* verified actor snapshots
+plus the numeric candidate lock. WCL holdout provenance remains subject to
+ranker/raw audits: report disjointness alone is not independent validation.
+
+No flags -> fully synthetic test, no OAuth or WCL requests.
+CLI --actor-root ... --out ... -> read-only existing snapshot conversion.
+"""
+from __future__ import annotations
+import argparse
+from collections import Counter
+from hashlib import sha256
+import json
+from pathlib import Path
+import re
+import tempfile
+
+from fresh_wcl_engine_v1 import (
+    replay,checked_pages,_ability,_num,_aura_transition,
+    canonical,sha,EngineError,write_atomic
+)
+from wcl_actor_scoped_cohort_v1 import (
+    identity_gate,scope_replay,ActorGateError
+)
+from wcl_blind_numeric_candidate_lock_v1 import (
+    lock_candidates,LOCK_SCHEMA,BlindInputError
+)
+
+SCHEMA="ZrotWclRawActorStrictPreNumericTransportV1"
+FIXTURE_SCHEMA="ZrotGenericWclPostlockSourceBridgeInputV1"
+POLICY="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
+RAW_SOURCE="WCL_NORMALIZED_RAW_EVENT"
+VERIFIED="VERIFIED_SOURCE_TRANSITION"
+ORIGIN="ATTESTED_RAW_WCL_REPLAY"
+HASH=re.compile(r"^[0-9a-f]{64}$")
+NAME=re.compile(r"^[A-Za-z_][A-Za-z0-9_.:-]*$")
+
+class TransportError(ValueError):pass
+
+def need(ok,code):
+    if not ok:raise TransportError(code)
+
+def read_json(path:Path)->dict:
+    need(path.is_file() and not path.is_symlink(),"FILE_MISSING_OR_SYMLINK")
+    raw=path.read_bytes()
+    need(0<len(raw)<15_000_000,"JSON_INPUT_OUT_OF_BOUNDS")
+    def unique(pairs):
+        obj={}
+        for k,v in pairs:
+            need(k not in obj,"DUPLICATE_JSON_KEYS")
+            obj[k]=v
+        return obj
+    def nonfinite(_):raise TransportError("NONFINITE_JSON")
+    obj=json.loads(raw,object_pairs_hook=unique,parse_constant=nonfinite)
+    need(type(obj)==dict,"JSON_ROOT_NOT_OBJECT")
+    return obj
+
+def _as_relative_ms(timestamp:int|float,start:int|float)->int:
+    need(type(timestamp) in (int,float) and
+         type(start) in (int,float) and
+         float(timestamp).is_integer() and float(start).is_integer() and
+         timestamp>=start,
+         "NONINTEGRAL_OR_BEFORE_FIGHT_WCL_TIMESTAMP")
+    diff=int(timestamp)-int(start)
+    need(0<=diff<=3_600_000,"BOUNDED_WCL_FIGHT_RELATIVE_TIME_INVALID")
+    return diff
+
+def _raw_event_id(page_sha:str,ordinal:int,ev:dict)->str:
+    return "raw_"+sha(canonical([page_sha,ordinal,ev]))[:40]
+
+def actor_snapshot(raw_folder:Path,gate:dict,blind_view:dict,
+                   original_receipt:dict)->dict:
+    """Independent raw-page replay; no SimC meaning or post-lock mapping."""
+    need(gate.get("schema")=="ZrotWclActorIdentityGateV1" and
+         gate.get("status")=="ACTOR_FIGHT_SPEC_CLASS_MATCH" and
+         gate.get("rank_source_verified") is False and
+         gate.get("spec_build_equivalence_to_SimC")=="UNKNOWN" and
+         isinstance(gate.get("source_metadata_sha256"),str) and
+         HASH.fullmatch(gate["source_metadata_sha256"]),
+         "ORIGINAL_ACTOR_GATE_PROVENANCE_NOT_VERIFIED")
+    need(original_receipt.get("schema")==
+         "ZrotWclActorScopedDiscoveryReceiptV1" and
+         original_receipt.get("status")=="NUMERIC_DISCOVERY_ONLY" and
+         original_receipt.get("scope_policy_id")==POLICY and
+         original_receipt.get("actor_gate_sha256")==sha(canonical(gate)) and
+         original_receipt.get("blind_actor_view_sha256")==sha(canonical(blind_view)) and
+         original_receipt.get("readiness")=="UNKNOWN" and
+         original_receipt.get("independent_holdout")=="NOT_RUN",
+         "WCL_PRIOR_ACTOR_RECEIPT_OR_IDENTITY_CHANGED")
+    raw=replay(raw_folder)
+    view=scope_replay(raw,gate)
+    need(view==blind_view and
+         view.get("numeric_actor_scope_only") is True and
+         view.get("cooldown_or_resource_readiness")=="UNKNOWN" and
+         view.get("candidate_lock")=="NOT_IMPLEMENTED",
+         "WCL_ACTOR_VIEW_NOT_REGENERATED_FROM_RAW_PAGES")
+    identity=raw["identity"]
+    need(identity.get("evidence_window")=="FIGHT_START_BOUNDED" and
+         type(identity.get("requested_window_ms")) is int and
+         1000<=identity["requested_window_ms"]<=60000,
+         "WCL_RAW_NOT_FIGHT_START_BOUNDED")
+    start=identity["start"]
+    checkpoint=read_json(raw_folder/"checkpoint.json")
+    pages=checked_pages(raw_folder,checkpoint)
+    casts=[];transitions=[];events_seen=set();observed_counter=Counter()
+    total=0;excluded_casts=0;skipped_unknown_aura=0
+    actor=gate["actor_id"]
+    for p in pages:
+        source=read_json(raw_folder/p["file"])
+        need(sha(canonical(source))==p["sha256"] and
+             source.get("schema")=="FreshWCLPageV1" and
+             source.get("start")==p["start"] and
+             source.get("next")==p["next"] and
+             len(source["events"])==p["event_count"],
+             "PAGE_REPLAY_HASH_OR_COUNTS_CHANGED")
+        for n,e in enumerate(source["events"]):
+            need(type(e)==dict,"INVALID_RAW_EVENT_OBJECT")
+            event_id=_raw_event_id(p["sha256"],n,e)
+            need(event_id not in events_seen,"RAW_PAGE_EVENT_ID_COLLISION")
+            events_seen.add(event_id)
+            t=_as_relative_ms(e.get("timestamp"),start)
+            total+=1
+            typ=str(e.get("type","")).casefold()
+            if typ in ("cast","begincast"):
+                observed_actor=_num(e.get("sourceID"))
+                spell=_ability(e)
+                if observed_actor!=actor:
+                    excluded_casts+=1
+                elif spell is None or spell<=0:
+                    # Do not turn a missing numeric ID into a spell name.
+                    skipped_unknown_aura+=1
+                else:
+                    casts.append({
+                      "event_id":event_id,"t_ms":t,
+                      "spell_id":spell,"source_kind":RAW_SOURCE
+                    })
+                    observed_counter[(e["timestamp"],actor,spell)]+=1
+            aura=_aura_transition(e)
+            if aura is None or _num(e.get("targetID"))!=actor:
+                continue
+            spell=_ability(e)
+            if spell is None or spell<=0:
+                skipped_unknown_aura+=1
+                continue
+            value=aura["active"]
+            need(value is None or type(value) is bool,
+                 "RAW_AURA_BOOLEAN_TRI_STATE_INVALID")
+            transitions.append({
+              "source_event_id":event_id,
+              "signal":"raw_aura_"+str(spell)+"_active",
+              "t_ms":t,"value":value,
+              "valid_until_ms":None,
+              "raw_receipt_sha256":"__BOUND_AFTER_EVENTS__",
+              "source_kind":RAW_SOURCE,"quality":VERIFIED
+            })
+    replay_counter=Counter(
+      (x["timestamp"],x["source_actor_id"],x["ability_id"])
+      for x in blind_view["decisions"])
+    need(replay_counter==observed_counter,
+         "ACTOR_CAST_EVENTS_DIVERGE_FROM_INDEPENDENT_REPLAY")
+    need(len(casts)==blind_view["decision_count"] and
+         len(casts)>0 and total==raw["event_count"],
+         "ACTOR_SCOPED_REPLAY_COUNTS_NOT_CONSERVED")
+    casts.sort(key=lambda x:(x["t_ms"],x["event_id"]))
+    transitions.sort(key=lambda x:(x["t_ms"],x["source_event_id"]))
+    raw_receipt_sha256=sha(canonical({
+      "identity":identity,
+      "actor_id":actor,
+      "source_page_sha256":raw["source_page_sha256"],
+      "actor_blind_view_sha256":sha(canonical(blind_view))
+    }))
+    for t in transitions:t["raw_receipt_sha256"]=raw_receipt_sha256
+    # This numeric payload is blind by construction; class/spec strings,
+    # source action names or SimC hypothesis do not cross this boundary.
+    result={
+      "schema":SCHEMA,"policy_id":POLICY,
+      "origin":ORIGIN,
+      "report_code":gate["report_code"],
+      "fight_id":gate["fight_id"],
+      "actor_id":actor,
+      "fight_start_abs_ms":int(start),
+      "fight_end_abs_ms":int(gate["fight_end_ms"]),
+      "evidence_window":"FIGHT_START_BOUNDED",
+      "requested_window_ms":identity["requested_window_ms"],
+      "raw_source_page_sha256":raw["source_page_sha256"],
+      "source_replay_sha256":view["replay_sha256"],
+      "raw_receipt_sha256":raw_receipt_sha256,
+      "actor_gate_sha256":sha(canonical(gate)),
+      "prior_original_actor_receipt_sha256":sha(canonical(original_receipt)),
+      "raw_event_count":total,"actor_numeric_cast_count":len(casts),
+      "other_actor_casts_excluded":excluded_casts,
+      "unknown_numeric_id_events_excluded":skipped_unknown_aura,
+      "raw_aura_boolean_transitions":len(transitions),
+      "cast_events":casts,"transitions":transitions,
+      "time_basis":"FIGHT_START_RELATIVE_INTEGER_MILLISECONDS",
+      "strict_PRE_state_not_claimed_here":True,
+      "same_timestamp_order_not_used_as_PRE":True,
+      "numeric_resource_READINESS":"UNKNOWN",
+      "target_count_at_cast":"UNKNOWN",
+      "build_equivalent_to_SimC":"UNKNOWN",
+      "independent_rank_or_holdout_proven":False,
+      "official_WCL_live_API_called_this_run":False,
+      "source_gameplay_rule":"UNKNOWN",
+      "MAIN_promoted":False,
+    }
+    result["numeric_transport_sha256"]=sha(canonical(result))
+    return result
+
+def _check_transport(t:dict)->None:
+    need(type(t)==dict and t.get("schema")==SCHEMA and
+         t.get("policy_id")==POLICY and t.get("origin")==ORIGIN and
+         isinstance(t.get("numeric_transport_sha256"),str) and
+         t["numeric_transport_sha256"]==sha(canonical({
+          k:v for k,v in t.items() if k!="numeric_transport_sha256"})) and
+         t.get("build_equivalent_to_SimC")=="UNKNOWN" and
+         t.get("independent_rank_or_holdout_proven") is False and
+         t.get("target_count_at_cast")=="UNKNOWN" and
+         t.get("source_gameplay_rule")=="UNKNOWN",
+         "WCL_RAW_TRANSPORT_INTEGRITY_OR_CLAIM_BOUNDARY_CHANGED")
+
+def disjoint_numeric_fixture(discovery:list[dict],holdout:dict,
+                             frozen_lock:dict,frozen_lock_sha256:str)->dict:
+    """Post-lock transport only. No source APL allowed in this signature."""
+    need(type(discovery)==list and bool(discovery) and
+         len(discovery)<=100,"BOUNDED_DISCOVERY_SNAPSHOTS_REQUIRED")
+    for x in discovery:_check_transport(x)
+    _check_transport(holdout)
+    need(frozen_lock.get("schema")==LOCK_SCHEMA and
+         frozen_lock.get("source_kind")==ORIGIN and
+         frozen_lock.get("status")=="LOCKED_NUMERIC_ONLY" and
+         frozen_lock.get("threshold_retuned_after_discovery") is False and
+         frozen_lock.get("semantic_names_attached") is False and
+         frozen_lock.get("gameplay_rule_claim") is False and
+         sha(canonical(frozen_lock))==frozen_lock_sha256,
+         "FROZEN_NUMERIC_DISCOVERY_LOCK_NOT_REUSABLE")
+    replay_hashes=sorted(x["source_replay_sha256"] for x in discovery)
+    need(replay_hashes==frozen_lock.get("source_replay_sha256") and
+         len(set(replay_hashes))==len(discovery),
+         "LOCK_NOT_GENERATED_FROM_THESE_DISCOVERY_ACTORS")
+    reports=[x["report_code"] for x in discovery]
+    need(len(set(reports))==len(reports) and
+         holdout["report_code"] not in reports,
+         "DISCOVERY_AND_HOLDOUT_REPORT_NOT_DISJOINT")
+    roster={
+      "source_kind":ORIGIN,
+      "source_replay_sha256":replay_hashes,
+      "frozen_min_observations":frozen_lock["prelocked_min_observations"],
+      "report_fights":[{
+         "report_code":x["report_code"],
+         "fight_id":x["fight_id"],
+         "source_replay_sha256":x["source_replay_sha256"]}
+         for x in discovery]
+    }
+    return {
+      "schema":FIXTURE_SCHEMA,"policy_id":POLICY,
+      "discovery_roster":roster,
+      "holdout":{
+         "source_kind":ORIGIN,"cohort_id":"wcl_holdout_"+
+           holdout["raw_receipt_sha256"][:16],
+         "report_code":holdout["report_code"],
+         "fight_id":holdout["fight_id"],
+         "actor_id":str(holdout["actor_id"]),
+         "raw_receipt_sha256":holdout["raw_receipt_sha256"]},
+      "cast_events":holdout["cast_events"],
+      "transitions":holdout["transitions"],
+      "source_APL_or_SimC_present":False,
+      "official_live_WCL_API_called_in_this_transport":False,
+      "independent_WCL_holdout_proven":False,
+      "general_rotation_rule_proven":False,
+      "dummy_training_error_proven":False,
+    }
+
+
+def selftest()->dict:
+    # Validate *actual producer format* with new cold-start files: a full
+    # fake transport WCL report -> checkpoint -> replay -> actor gate -> lock.
+    from pathlib import Path
+    with tempfile.TemporaryDirectory(prefix="zrot-wcl-numeric-") as d:
+        root=Path(d)
+        def actor_bundle(code:str,modifier:int):
+            actor=42
+            start=1000
+            window=3000
+            full_end=7000
+            info={
+              "report_code":code,"fight_id":1,"revision":2,
+              "start":start,"end":start+window,
+              "full_fight_end":full_end,
+              "requested_window_ms":window,
+              "evidence_window":"FIGHT_START_BOUNDED",
+              "encounter_id":1,"difficulty":4
+            }
+            data={
+              "reportData":{"report":{
+               "code":code,"revision":2,
+               "fights":[{"id":1,"startTime":start,
+                         "endTime":full_end,"inProgress":False,
+                         "friendlyPlayers":[42],
+                         "friendlySpecs":["SpecA"],
+                         "encounterID":1,"difficulty":4}],
+               "masterData":{"actors":[{
+                 "id":42,"name":"Synthetic","type":"Player",
+                 "subType":"ClassA"}]}
+              }}
+            }
+            gate=identity_gate(data,code,1,actor,"SpecA","ClassA")
+            assert gate["fight_start_ms"]==start
+            rows=[
+              {"timestamp":1100,"type":"applybuff",
+               "sourceID":actor,"targetID":actor,"abilityGameID":1001},
+              {"timestamp":1500,"type":"cast",
+               "sourceID":actor,"targetID":33,"abilityGameID":2001},
+              {"timestamp":1500,"type":"removebuff",
+               "sourceID":actor,"targetID":actor,"abilityGameID":1001},
+              {"timestamp":1600,"type":"cast",
+               "sourceID":99,"targetID":33,"abilityGameID":2001},
+              {"timestamp":2000,"type":"cast",
+               "sourceID":actor,"targetID":33,"abilityGameID":2001},
+              {"timestamp":2500,"type":"applybuff",
+               "sourceID":actor,"targetID":actor,"abilityGameID":1001},
+            ]
+            folder=root/code/"fight_1"
+            folder.mkdir(parents=True)
+            page={"schema":"FreshWCLPageV1","start":start,"next":None,
+                  "events":rows}
+            page_bytes=canonical(page)
+            write_atomic(folder/"page_00000.json",page_bytes)
+            state={
+              "schema":"FreshWCLCheckpointV1","identity":info,
+              "cursor":None,"pages":[{
+                "file":"page_00000.json","sha256":sha(page_bytes),
+                "start":start,"next":None,
+                "event_count":len(rows)}],"complete":True}
+            write_atomic(folder/"checkpoint.json",canonical(state))
+            proof=replay(folder)
+            view=scope_replay(proof,gate)
+            lock=lock_candidates([view],min_observations=2,
+                                 source_kind=ORIGIN)
+            original_receipt={
+               "schema":"ZrotWclActorScopedDiscoveryReceiptV1",
+               "status":"NUMERIC_DISCOVERY_ONLY",
+               "scope_policy_id":POLICY,
+               "actor_gate_sha256":sha(canonical(gate)),
+               "blind_actor_view_sha256":sha(canonical(view)),
+               "readiness":"UNKNOWN","independent_holdout":"NOT_RUN"}
+            transp=actor_snapshot(folder,gate,view,original_receipt)
+            return folder,gate,view,original_receipt,lock,transp
+        f1,g1,v1,r1,lock1,d1=actor_bundle("ReportABC1",0)
+        f2,g2,v2,r2,lock2,d2=actor_bundle("ReportABC2",1)
+        need(d1["actor_numeric_cast_count"]==2 and
+             d1["raw_aura_boolean_transitions"]==3 and
+             d1["other_actor_casts_excluded"]==1 and
+             d1["fight_start_abs_ms"]==1000 and
+             d1["cast_events"][0]["t_ms"]==500,
+             "RAW_TO_FIGHT_RELATIVE_WCL_ACTOR_NORMALIZATION_FAILED")
+        need(d1["source_replay_sha256"]==v1["replay_sha256"],
+             "NUMERIC_TRANSPORT_SOURCE_REPLAY_DRIFT")
+        # The transported same-time remove is present; StrictPreReplay
+        # (not this producer) must exclude it at the 500ms cast.
+        from general_rotation_strict_pre_state_engine_v1 import (
+            Transition,StrictPreReplay
+        )
+        t=[Transition(x["source_event_id"],"holdout","r/f","42",
+              x["signal"],x["t_ms"],x["value"],None,
+              x["raw_receipt_sha256"],quality=VERIFIED)
+           for x in d1["transitions"]]
+        replayer=StrictPreReplay(t)
+        a=replayer.snapshot(cohort_id="holdout",scope="r/f",
+                 actor_id="42",at_ms=500,signals=("raw_aura_1001_active",))
+        b=replayer.snapshot(cohort_id="holdout",scope="r/f",
+                 actor_id="42",at_ms=1000,signals=("raw_aura_1001_active",))
+        need(a["signals"]["raw_aura_1001_active"]["value"] is True and
+             b["signals"]["raw_aura_1001_active"]["value"] is False,
+             "STRICT_PRE_SAME_TIMESTAMP_OR_FIGHT_CLOCK_MISALIGNED")
+        # Exact identity, original report list and source view SHA are pinned
+        # before constructing this separately reported research fixture.
+        fixture=disjoint_numeric_fixture([d1],d2,lock1,
+                                        sha(canonical(lock1)))
+        need(fixture["holdout"]["report_code"]=="ReportABC2" and
+             fixture["independent_WCL_holdout_proven"] is False and
+             fixture["source_APL_or_SimC_present"] is False,
+             "DISCOVERY_LOCK_DISJOINT_HOLDOUT_TRANSPORT_FAILED")
+        negatives=0
+        import copy
+        def rejects(op):
+            nonlocal negatives
+            try:op()
+            except (TransportError,EngineError,ActorGateError,BlindInputError):
+                negatives+=1
+            else:raise AssertionError("INVALID_RAW_WCL_TRANSPORT_WAS_ACCEPTED")
+        rejects(lambda:actor_snapshot(f1,g1,v2,r1))
+        rejects(lambda:actor_snapshot(f1,g1,v1,{**r1,
+                 "blind_actor_view_sha256":"0"*64}))
+        fake=copy.deepcopy(lock1);fake["semantic_names_attached"]=True
+        rejects(lambda:disjoint_numeric_fixture(
+            [d1],d2,fake,sha(canonical(fake))))
+        rejects(lambda:disjoint_numeric_fixture(
+            [d1],d2,lock1,"0"*64))
+        rejects(lambda:disjoint_numeric_fixture(
+            [d1],d1,lock1,sha(canonical(lock1))))
+        rejects(lambda:disjoint_numeric_fixture(
+            [d2],d1,lock1,sha(canonical(lock1))))
+        orig=(f1/"page_00000.json").read_bytes()
+        (f1/"page_00000.json").write_bytes(orig.replace(b"2001",b"2002",1))
+        rejects(lambda:actor_snapshot(f1,g1,v1,r1))
+        need(negatives==7,"EXPECTED_ALL_NEGATIVE_CONTROLS")
+        return {
+            "schema":SCHEMA,"selftest":"PASS_OFFLINE_SYNTHETIC",
+            "new_cold_start_snapshots":2,
+            "generic_actor_scoped_transports":2,
+            "strict_PRE_same_time_fence":"PASS",
+            "disjoint_lock_fixture":"PASS",
+            "negative_controls":negatives,
+            "real_wcl_api_requests":0,
+            "real_wcl_holdout_completed":False,
+            "full_ready_proven":0,"dummy_error_proven":0
+        }
+
+
+def main()->None:
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--actor-root",type=Path)
+    p.add_argument("--out",type=Path)
+    a=p.parse_args()
+    if a.actor_root is None and a.out is None:
+        print(json.dumps(selftest(),sort_keys=True))
+        return
+    need(a.actor_root is not None and a.out is not None,
+         "ACTUAL_RAW_ACTOR_ROOT_AND_OUTPUT_REQUIRED")
+    root=a.actor_root.resolve(strict=True)
+    derived=root/"derived"
+    selection=read_json(derived/"selection.json")
+    gate=read_json(derived/"identity.json")
+    view=read_json(derived/"blind_replay.json")
+    receipt=read_json(derived/"receipt.json")
+    rawpath=(root/"raw"/selection["report_code"]/
+            ("fight_"+str(selection["fight_id"]))).resolve(strict=True)
+    need(rawpath.is_relative_to(root) and
+         gate["report_code"]==selection["report_code"] and
+         gate["fight_id"]==selection["fight_id"],
+         "ACTOR_SOURCE_SELECTION_PATH_OR_IDENTITY_MISMATCH")
+    result=actor_snapshot(rawpath,gate,view,receipt)
+    a.out.parent.mkdir(parents=True,exist_ok=True)
+    need(not a.out.exists(),"OUTPUT_EXISTS_NO_SILENT_OVERWRITE")
+    with a.out.open("xb") as f:f.write(canonical(result))
+    print("WCL_ACTOR_REAL_RAW_NUMERIC_STRICT_PRE_SOURCE_SHA256="+
+          sha(a.out.read_bytes()))
+    print("WCL_ACTOR_REAL_RAW_TRANSPORT_COUNTS="+json.dumps({
+        "raw_events":result["raw_event_count"],
+        "actor_casts":result["actor_numeric_cast_count"],
+        "actor_aura_transitions":result["raw_aura_boolean_transitions"],
+        "other_actors_excluded":result["other_actor_casts_excluded"]
+    },sort_keys=True))
+    print("WCL_REAL_HOLDOUT_INDEPENDENT_VERIFIED=False")
+
+
+if __name__=="__main__":
+    main()
