@@ -1,0 +1,140 @@
+name: zrot-gr-original-source-evidence-bridge-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_source_evidence_bridge_v1.py
+      - .github/workflows/zrot-gr-original-source-evidence-bridge-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic:
+    name: Reusable two-class source/ready proof bridge Python ${{ matrix.py }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.py }}'
+      - name: Source IR reuse, exact PRE and dummy no-error negative controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_original_source_evidence_bridge_v1.py
+          python -B tools/research/general_rotation_original_source_evidence_bridge_v1.py > /tmp/gr-hypothesis-evidence-bridge-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-hypothesis-evidence-bridge-synthetic.json'))
+          assert x['status']=='PASS_SYNTHETIC_TWO_CLASS_GENERIC_IR'
+          assert x['generic_classes_exercised']==2 and x['distinct_targets_exercised']==2
+          assert x['negative_controls']>=9
+          assert x['source_priority_rules_promoted']==0
+          assert x['positive_READY_promoted']==0
+          assert x['dummy_wrong_cast_promoted']==0
+          assert x['WCL_API_calls']==0 and x['new_SimC_CXX_builds']==0
+          print('GENERIC_SOURCE_IF_HYPOTHESIS_IR_INTEGRATION_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_original_source_evidence_bridge_v1.py
+  actual:
+    name: Source hypothesis/priority IR compile from prior real 49 IF without CXX
+    needs: [synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-original-selected-extra-pre-native-v1
+          run-id: 42589894203
+          github-token: ${{ github.token }}
+          path: /tmp/gr-real-native-selected-pre
+      - name: Pin original source, 49 proof receipt and raw native case SHA before model compile
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          test "$(git hash-object active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_PRE_12_FIELD_ORIGINAL_IF_SUCCESSOR_20261109.json)" = 4331f803f29754975b950bbd0a814d0de62436e0
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          r=json.loads(Path('active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_PRE_12_FIELD_ORIGINAL_IF_SUCCESSOR_20261109.json').read_bytes())
+          assert r['actual_validation']['run_id']==42589894203
+          assert r['actual_validation']['conclusion']=='success'
+          assert r['actual_validation']['selected_source_IF_independent_match']==49
+          assert r['actual_validation']['missing_valid_original_PRE_for_source_IF']==44
+          assert r['actual_validation']['original_unchanged_combat_action_order_time_ID_ordinal']=='149/149'
+          assert r['actual_validation']['original_APL_foreground_select_to_JSON2_causal_callsite']=='147/147'
+          assert r['scientific_claim_limits']['original_full_physical_READY_proven']==0
+          p=Path('/tmp/gr-real-native-selected-pre/native-four-case-summary.json')
+          assert p.exists()
+          assert hashlib.sha256(p.read_bytes()).hexdigest()==r['actual_validation']['original_summary_sha256']
+          print('ORIGINAL_FOUR_CASE_RAW_IF_AND_APL_SOURCE_PINNED_PASS')
+          PY
+      - name: Compile full source APL graph with exact original selection IF witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_original_source_evidence_bridge_v1.py \
+            --source-root simc-upstream \
+            --reports-root /tmp/gr-real-native-selected-pre \
+            --adapter tools/research/fixtures/zrot_original_select_extra_pre_two_source_v1.json \
+            --verified-receipt active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_PRE_12_FIELD_ORIGINAL_IF_SUCCESSOR_20261109.json \
+            --out-root /tmp/gr-generic-source-hypothesis-bridge-v1
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/gr-generic-source-hypothesis-bridge-v1')
+          cases=[p for p in root.glob('*-source-hypothesis-evidence.json')]
+          assert len(cases)==4
+          x=json.loads((root/'generic-general-rotation-source-conditional-portfolio.json').read_bytes())
+          assert x['schema']=='ZrotGeneralRotationOriginalSourceConditionalHypothesisPortfolioV1'
+          assert x['selected_samples_total']==147
+          assert x['independent_original_source_IF_true_total']==49
+          assert x['source_IF_UNKNOWN_total']==44
+          assert x['no_explicit_source_IF_total']==54
+          assert x['unresolved_nonforeground_combat_total']==2
+          assert x['source_ready_closed'] is False
+          assert x['full_positive_ready_proven']==0
+          assert x['WCL_independent_holdout']=='NOT_RUN'
+          assert x['dummy_wrong_cast']=='UNKNOWN'
+          assert x['new_SimC_CXX_builds']==x['WCL_API_calls']==0
+          for p in cases:
+              case=json.loads(p.read_bytes())
+              assert case['source_hypothesis_IR']['schema']=='ZrotGeneralRotationSourceHypothesisIRV1'
+              assert case['source_full_READY_proven']==0
+              assert case['source_order_priority_proven']==0
+              for row in case['exact_selected_occurrence_proofs']:
+                  assert row['source_ready_proof']['decision']=='UNKNOWN'
+                  assert row['source_order_frontier']['decision']=='UNKNOWN'
+                  assert row['dummy_wrong_cast']=='UNKNOWN'
+                  assert row['actual_spell_execution_completion']=='UNKNOWN'
+          print('REAL_GENERIC_SOURCE_HYPOTHESIS_IR_49_SAME_CALL_IF_READY_OPEN_SAFE_PASS')
+          PY
+          sha256sum /tmp/gr-generic-source-hypothesis-bridge-v1/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-general-source-hypothesis-real-49-ir-v1
+          path: /tmp/gr-generic-source-hypothesis-bridge-v1/*.json
+          if-no-files-found: warn
+          retention-days: 7
