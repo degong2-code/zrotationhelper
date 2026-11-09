@@ -1,0 +1,22 @@
+{
+  "schema": "ZrotSimcPinnedSourceBurstAuraAdapterV1",
+  "source_repo": "simulationcraft/simc",
+  "source_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "purpose": "Pinned source numeric spell lookups for first observed Native action-snapshot aura exit. Not actual opener end.",
+  "specs": [
+    {
+      "spec_key": "warrior_fury",
+      "native_spec": "fury",
+      "aura_id": 1719,
+      "source_cpp": "engine/class_modules/sc_warrior.cpp",
+      "source_anchor": "spell.recklessness_buff       = find_spell( 1719 ); // lookup to allow Warlord to use Reck"
+    },
+    {
+      "spec_key": "mage_arcane",
+      "native_spec": "arcane",
+      "aura_id": 365362,
+      "source_cpp": "engine/class_modules/sc_mage.cpp",
+      "source_anchor": "buffs.arcane_surge              = make_buff( this, \"arcane_surge\", find_spell( 365362 ) )"
+    }
+  ]
+}
