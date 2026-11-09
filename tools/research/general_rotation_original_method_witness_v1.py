@@ -111,11 +111,17 @@ def parse_pointer(line:str)->dict|None:
 
 
 def parse_method(line:str, declarations:tuple[MethodMarker,...])->dict|None:
-    matched=[d for d in declarations if d.prefix in line]
-    require(len(matched)<=1,"MULTIPLE_OR_AMBIGUOUS_METHOD_MARKERS")
-    if not matched:return None
-    d=matched[0]
-    p=line[line.find(d.prefix):].strip().split("|")
+    # Several source-method override guards may share one producer prefix.
+    prefixes={d.prefix for d in declarations if d.prefix in line}
+    require(len(prefixes)<=1,"MULTIPLE_OR_AMBIGUOUS_METHOD_MARKERS")
+    if not prefixes:return None
+    prefix=next(iter(prefixes))
+    p=line[line.find(prefix):].strip().split("|")
+    require(len(p)>=6,"METHOD_MARKER_FIELD_COUNT_DRIFT")
+    matching=[d for d in declarations
+              if d.prefix==prefix and d.method_key==p[2]]
+    require(len(matching)==1,"UNKNOWN_OR_DUPLICATE_METHOD_IDENTITY")
+    d=matching[0]
     require(len(p)==5+len(d.fields),"METHOD_MARKER_FIELD_COUNT_DRIFT")
     try:
         t=int(p[1])
@@ -141,8 +147,8 @@ def pair_original_attempts(trace:str,*,fields:tuple[FieldRequest,...],
                            method_markers:tuple[MethodMarker,...])->dict:
     require(0<len(fields)<=12 and len(method_markers)>0,
             "METHOD_WITNESS_NEEDS_BOUNDED_SOURCE_FIELDS")
-    require(len(set(d.prefix for d in method_markers))==len(method_markers),
-            "METHOD_WITNESS_PREFIX_NOT_UNIQUE")
+    require(len(set((d.prefix,d.method_key) for d in method_markers))
+            ==len(method_markers),"METHOD_WITNESS_METHOD_KEY_NOT_UNIQUE")
     pending=None;rows=[];unattributed=0;calls=0
     for line in trace.splitlines():
         raw=parse_marker(line,fields)
@@ -304,8 +310,8 @@ def selftest()->dict:
         FieldRequest("equipment.off_hand.equipped","actor_weapon_slot_equipped","off_hand"),
         FieldRequest("buff.example.active","actor_named_buff_active","example"),
     )
-    m1=MethodMarker("ZROT_DEMO1|","opaque_cast",("buff.example.active",))
-    m2=MethodMarker("ZROT_DEMO2|","opaque_weapon",
+    m1=MethodMarker("ZROT_DEMO|","opaque_cast",("buff.example.active",))
+    m2=MethodMarker("ZROT_DEMO|","opaque_weapon",
                      ("equipment.main_hand.equipped","equipment.off_hand.equipped"))
     def row(time,source,ordinal,action,ptr,method,values,gate):
         a=MARK+f"{time}|{source}|{ordinal}|{action}|"+ "|".join(str(x) for x in values)
@@ -344,16 +350,16 @@ def selftest()->dict:
     assert authenticated["counts"]["method_witnesses"]==2
     assert authenticated["full_positive_READY"]==0
     # Same time, different pointers: one can never steal the other guard.
-    damaged=raw.replace("ZROT_DEMO2|10|opaque_weapon|opaque_weapon|0x200",
-                         "ZROT_DEMO2|10|opaque_weapon|opaque_weapon|0x100")
+    damaged=raw.replace("ZROT_DEMO|10|opaque_weapon|opaque_weapon|0x200",
+                         "ZROT_DEMO|10|opaque_weapon|opaque_weapon|0x100")
     unlinked=pair_original_attempts(damaged,fields=fields,method_markers=(m1,m2))
     checked=evaluate_bound_cases(rows=unlinked["rows"],fields=fields,
         source_rules=source_rules,receipt_sha256=hashes,source_verified=True)
     assert checked["counts"]["scoped_NOT_READY"]==1
     assert checked["counts"]["UNKNOWN"]==1
     # Mismatching actual raw source state and method guard must fail closed.
-    wrong=raw.replace("ZROT_DEMO2|10|opaque_weapon|opaque_weapon|0x200|1|0",
-                      "ZROT_DEMO2|10|opaque_weapon|opaque_weapon|0x200|1|1")
+    wrong=raw.replace("ZROT_DEMO|10|opaque_weapon|opaque_weapon|0x200|1|0",
+                      "ZROT_DEMO|10|opaque_weapon|opaque_weapon|0x200|1|1")
     try:
         bad=pair_original_attempts(wrong,fields=fields,method_markers=(m1,m2))
         evaluate_bound_cases(rows=bad["rows"],fields=fields,
@@ -364,8 +370,15 @@ def selftest()->dict:
     absent=evaluate_bound_cases(rows=[],fields=fields,
         source_rules=source_rules,receipt_sha256=hashes,source_verified=True)
     assert absent["counts"]["scoped_NOT_READY"]==0
+    # Invalid method identity is rejected even when the envelope is shared.
+    unrecognized=raw.replace("ZROT_DEMO|10|opaque_cast|",
+                             "ZROT_DEMO|10|foreign_method|")
+    try:pair_original_attempts(
+        unrecognized,fields=fields,method_markers=(m1,m2))
+    except MethodWitnessError:pass
+    else:raise AssertionError("UNDECLARED_SOURCE_METHOD_ACCEPTED")
     return {"schema":SCHEMA,"status":"PASS_OFFLINE_SYNTHETIC",
-            "checks":20,"different_source_method_adapters":2,
+            "checks":25,"different_source_method_adapters":2,
             "same_timestamp_cross_action_guard_theft":False,
             "unverified_external_json_can_certify_NOT_READY":False,
             "real_native_CXX_executed":False,"full_positive_READY":0,
