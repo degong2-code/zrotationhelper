@@ -1,0 +1,163 @@
+{
+  "schema": "ZrotGenericWclCombatantinfoPreBuildAndSourceLookupEvidenceV1",
+  "date": "2026-11-10",
+  "authority_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "scope": "POSTLOCK_SOURCE_NEUTRAL_NUMERIC_BUILD_EVIDENCE_AND_PINNED_SOURCE_LOOKUP_CANDIDATES",
+  "new_generic_engine": "tools/engine_first/wcl_actor_combatantinfo_pre_v1.py",
+  "source_reuse": {
+    "wcl_collector": "tools/engine_first/fresh_wcl_engine_v1.py",
+    "use_existing_verified_checkpoint_pages": true,
+    "use_existing_actor_gate_identity": true,
+    "strict_PRE": "combatantinfo.timestamp < first_actor_cast_or_begincast.timestamp",
+    "no_new_WCL_API_calls": true,
+    "no_new_SimC_native_CXX_builds": true,
+    "no_prelock_simc_semantic_injection": true
+  },
+  "real_observation": {
+    "original_heldout_report": {
+      "source_run": 41473060401,
+      "source_artifact": 13156445742,
+      "source_artifact_sha256": "f4ee1992e71a2fc32e4dc8e4eb53ec578403997d7f82fa3bb7939257e7b9cda1",
+      "first_own_action_ms": 464,
+      "strict_pre_combatantinfo_at_ms": 0,
+      "specID": 72,
+      "talent_entries": 76,
+      "unique_talent_nodes": 74,
+      "numeric_talent_entry_sha256": "7d52c5ca073f78b894b816d78b6dc0248239bd20b0dda4eafe7b0cd3697074f1",
+      "gear_slots": 18,
+      "occupied_slots": 18,
+      "observed_gear_setID_item_counts": {
+        "2067": 4,
+        "2070": 2
+      },
+      "certificate_json_sha256": "fa8ff25079a117a2b72929eb70f2864ed4a194bcd2e5d9090ff538ee66e99d0b",
+      "generated_artifact_id": 13685927180,
+      "generated_zip_sha256": "3951a8f1067f61bb96438cd7cf3650fc2f839faea9478d7922cb6bfe104df8e1",
+      "raw_actor_aura_id_counts_observed_only": {
+        "1719": {
+          "applybuff": 1
+        },
+        "184362": {
+          "applybuff": 10,
+          "removebuff": 9
+        }
+      }
+    },
+    "distinct_third_report": {
+      "source_run": 42599352437,
+      "source_artifact": 13664219230,
+      "source_artifact_sha256": "28252780f26dfcfbefc6143cbc07467a1b165e74f8cb79d25639629b28acd755",
+      "first_own_action_ms": 1483,
+      "strict_pre_combatantinfo_at_ms": 1,
+      "specID": 72,
+      "talent_entries": 76,
+      "unique_talent_nodes": 74,
+      "numeric_talent_entry_sha256": "a7e8d1c65e4d9efeb7e395f4bf697351d6c2596f782b96f6d64c3b1a6bbde5d2",
+      "gear_slots": 18,
+      "occupied_slots": 17,
+      "empty_slot_numeric_item_ID": 0,
+      "observed_gear_setID_item_counts": {
+        "2067": 4,
+        "2070": 2
+      },
+      "certificate_json_sha256": "08f8165058c9d85afb2f881cca152afd61ec4653d8b335fe90e5dd242da987c3",
+      "generated_artifact_id": 13686601630,
+      "generated_zip_sha256": "134ae0e0a7a9176db44765bb277450f55107e75bbb9591f8b7c956d0a54c1762",
+      "raw_actor_aura_id_counts_observed_only": {
+        "1719": {
+          "applybuff": 1
+        },
+        "184362": {
+          "applybuff": 11,
+          "removebuff": 10
+        }
+      }
+    },
+    "cross_report": "TALENT_ENTRY_SHA_DIFFERENT__NEVER_ASSUME_IDENTICAL_BUILDS",
+    "third_is_new_prospectively_locked_holdout": false
+  },
+  "independently_read_pinned_SimC_CXX": {
+    "repo": "simulationcraft/simc",
+    "revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "path": "engine/class_modules/sc_warrior.cpp",
+    "Git_blob_sha1": "38ee3dd0d5943eb9227ec55aefb21e7d47244f96",
+    "source_numeric_buff_lookup_candidates": [
+      {
+        "CXX_line": 8405,
+        "SimC_symbol": "buff.enrage",
+        "spell_id": 184362,
+        "method": "make_buff(...find_spell(184362))",
+        "WCL_same_numeric_id_observed": true,
+        "proof": "PINNED_SIMC_SOURCE_AND_WCL_NUMERIC_ID_CONCORDANCE_ONLY"
+      },
+      {
+        "CXX_line": 7463,
+        "SimC_symbol": "spell.recklessness_buff",
+        "spell_id": 1719,
+        "method": "find_spell(1719)",
+        "WCL_same_numeric_id_observed": true,
+        "proof": "PINNED_SIMC_SOURCE_AND_WCL_NUMERIC_ID_CONCORDANCE_ONLY"
+      }
+    ],
+    "high_impact_qualifications": [
+      {
+        "CXX_line": 2734,
+        "code_role": "Enrage duration may be extended by talent/crit events; raw aura age is not duration remaining."
+      },
+      {
+        "CXX_line": 5602,
+        "code_role": "Hack and Slash depends on talent, proc, internal cooldown and source game version; buff spell ID indirect through talent effect trigger."
+      },
+      {
+        "CXX_line": 8557,
+        "code_role": "Fury MID2 4pc crit buff uses set spell effects and version condition; raw WCL setID does not establish MID2 4pc activation or Blizzard hotfix DBC parity."
+      }
+    ],
+    "current_source_DBC_effect_and_actor_patch_parity": "UNKNOWN"
+  },
+  "official_Blizzard_mechanic_note": {
+    "url": "https://worldofwarcraft.blizzard.com/en-us/news/24296142/hotfixes",
+    "note_date": "2026-09-10",
+    "general_scope": "Fury Venomous Abyss 4-piece crit stack under Recklessness changed from 5% to 3% each, cap 10% to 6%.",
+    "does_not_supply_player_setID_or_numeric_aura_ID": true
+  },
+  "validation": {
+    "final_CI_run": 42642973309,
+    "CI_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42642973309",
+    "final_CI": "SUCCESS_4_OF_4",
+    "python312_synthetic": "PASS",
+    "python314_synthetic": "PASS",
+    "distinct_third_original_checkpoint_replay": "PASS",
+    "original_51_cast_holdout_checkpoint_replay": "PASS",
+    "regressions": "Same-time, duplicate combatantinfo, wrong actor, mismatched fight and tampered original page rejected or UNKNOWN; empty equipment slot itemID 0 supported without inventing equipped item.",
+    "prior_failures": [
+      {
+        "run": 42642004718,
+        "classification": "INPUT_SCHEMA_ASSUMPTION_0_ITEM_ID_EMPTY_SLOT"
+      },
+      {
+        "run": 42642271084,
+        "classification": "STALE_WORKFLOW_ASSERTIONS_PRIOR_TO_NEW_EMPTY_SLOT_CONTRACT"
+      }
+    ],
+    "full_numeric_build_snapshot_from_original_holdout_observed": true,
+    "source_CPP_spell_ID_concordance_only_not_gameplay_effect_certification": true,
+    "old_FROZEN_changed": false,
+    "MAIN_promoted": false
+  },
+  "missing_evidence": [
+    "Map raw WCL setID 2067 to actual versioned item tier set and prove Fury MID2 B4 equip/effect if relevant.",
+    "Independently compare original holdout talent selections to pinned SimC profile and verify hero/target context.",
+    "Obtain report absolute UTC patch epoch and current client mechanic DBC effect; code revision timestamp is insufficient.",
+    "Find raw WCL numeric identity for Hack and Slash proc and MID2 4pc stack, or retain UNKNOWN.",
+    "Complete competing action READY including GCD, cooldown, charges, dynamic Enrage remains; no future/same timestamp leakage."
+  ],
+  "gameplay_priority_rules_promoted": 0,
+  "actual_user_dummy_mistakes_certified": 0,
+  "Session_Exact_Next": "Reuse this raw 51-cast holdout actor numeric build plus existing talent alignment and source-code lookup. Pin setID/actual talent/patch equivalence and separately source cooldown/READY truth where independently observable. Then re-run existing post-lock typed IF replay; do not re-collect WCL or rebuild generic parser.",
+  "Product_Exact_Next": "Cross-spec current General Rotation opener and evidence-bounded ST/2T/cleave/AoE conditional IF/ELSE, then truthful own target dummy practice feedback.",
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
