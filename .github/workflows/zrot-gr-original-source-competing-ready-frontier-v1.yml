@@ -1,0 +1,139 @@
+name: zrot-gr-original-source-competing-ready-frontier-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_source_competitor_frontier_v1.py
+      - tools/research/fixtures/general_rotation_simc_competitor_arcane_source_adapter_v1.json
+      - .github/workflows/zrot-gr-original-source-competing-ready-frontier-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and test cross-specialization source-local negative proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_source_competitor_frontier_v1.py
+          python -B tools/research/general_rotation_source_competitor_frontier_v1.py >/tmp/simc-source-competitor-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/simc-source-competitor-synthetic.json'))
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert x['arbitrary_specialization_fixtures']==2
+          assert x['forge_cases_rejected']==10
+          assert x['source_FULL_READY_proven']==0
+          assert x['WCL_API_calls']==0
+          print('GENERIC_CROSS_SPEC_COMPETITOR_FRONTIER_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_source_competitor_frontier_v1.py
+
+  original-exact-source-ready:
+    runs-on: ubuntu-latest
+    needs: [generic-regression]
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: pinned-simc
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Mage_Arcane.simc
+            engine/class_modules/sc_mage.cpp
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse earlier independently proven two Orb original source decisions (no Native execution)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42186794065
+          name: zrot-arcane-2t-competitor-reason-ledger
+          path: /tmp/exact-original-simc
+          github-token: ${{ github.token }}
+      - name: Pin original SimC source, Mage class code and source ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C pinned-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          a=json.loads(Path('tools/research/fixtures/general_rotation_simc_competitor_arcane_source_adapter_v1.json').read_bytes())
+          p=Path('pinned-simc')/a['source_implementation_pin']['source_cpp_path']
+          assert p.is_file()
+          b=p.read_bytes()
+          h=hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+          assert h==a['source_implementation_pin']['original_blob_sha1']
+          assert a['source_revision']=='b522cded8c26b97dac03fdf56e57a03ec7e8faa6'
+          print('ORIGINAL_PINNED_SIMC_CLASS_CPP_AND_APL_SOURCE_MATCH')
+          PY
+      - name: Verify original physical competitor source-negative and selected IF, preserve UNKNOWN
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_source_competitor_frontier_v1.py \
+            --original-ledger /tmp/exact-original-simc/zrot-arcane-2t-competitor-reason-ledger.json \
+            --source-profile pinned-simc/profiles/MID2/MID2_Mage_Arcane.simc \
+            --adapter tools/research/fixtures/general_rotation_simc_competitor_arcane_source_adapter_v1.json \
+            --out /tmp/gr-original-competitor-proof-frontier.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-original-competitor-proof-frontier.json'))
+          assert x['schema']=='ZrotGenericOriginalSimCSourceCompetitorExclusionFrontierV1'
+          assert x['verified_native_source_cases']==2
+          assert x['target_count']==2
+          assert x['earlier_competing_local_APL_rows']==10
+          assert x['source_local_independent_EXCLUDED_occurrences']==8
+          assert x['source_IF_FALSE_counts']==2
+          assert x['source_necessary_ready_FALSE_counts']==6
+          assert x['original_native_POST_ONLY_UNKNOWN_counts']==2
+          for y in x['source_only_case_frontiers']:
+              assert y['prior_APL_rows_contiguous_from_first'] is True
+              assert len(y['prior_competitors'])==5
+              assert y['source_list_local_evidence_frontier']['decision']=='UNKNOWN'
+              assert y['source_list_local_evidence_frontier']['earlier_NOT_READY']==4
+              assert y['source_list_local_evidence_frontier']['earlier_UNKNOWN']==1
+              assert y['selected_physical_READY']=='UNKNOWN'
+              assert y['current_Retail_general_rotation_priority']=='UNKNOWN'
+          assert x['general_rotation_source_order_choice_proven'] is False
+          assert x['real_WoW_dummy_mistake']=='UNKNOWN'
+          assert x['WCL_API_calls']==0 and x['new_SimC_CXX_builds']==0
+          print('ORIGINAL_SIMC_8_PROVEN_SOURCE_LOCAL_EXCLUSIONS_2_UNKNOWN',json.dumps({
+              'cases':x['verified_native_source_cases'],
+              'earlier_APL_rows':x['earlier_competing_local_APL_rows'],
+              'independent_source_local_exclusions':x['source_local_independent_EXCLUDED_occurrences'],
+              'unresolved_native_only':x['original_native_POST_ONLY_UNKNOWN_counts'],
+              'overall_PRIORITY':'UNKNOWN',
+          },sort_keys=True))
+          PY
+          sha256sum /tmp/gr-original-competitor-proof-frontier.json
+      - name: Preserve portable generic evidence receipt not full Native original
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-source-competing-ready-frontier-${{ github.sha }}
+          path: /tmp/gr-original-competitor-proof-frontier.json
+          retention-days: 7
+          if-no-files-found: error
