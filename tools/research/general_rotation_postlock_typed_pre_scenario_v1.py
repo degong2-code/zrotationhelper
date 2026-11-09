@@ -242,10 +242,14 @@ def _map_checks(mapping,numeric,source_case,compiled):
     need(0<len(scenarios)<=16,"NUMERIC_POWER_SCENARIOS_UNBOUNDED")
     return indexes,scenarios
 
-def _facts(row, mapping, scenario):
+def _facts(row, mapping, scenario, required_symbols):
     values={};evidence={};unknown=[]
     t=row["at_ms"]
-    for symbol,contract in mapping.items():
+    for symbol in required_symbols:
+        contract=mapping.get(symbol)
+        if contract is None:
+            unknown.append(symbol)
+            continue
         if contract["raw_kind"]=="WCL_RAW_AURA_BOOL":
             raw_signal=contract["raw_signal"]
             prior=row["raw_aura_strict_pre"].get(raw_signal)
@@ -285,6 +289,9 @@ def evaluate(numeric,transport,joint,source_case,compiled,mapping):
     rows=_source_checks(numeric,source_case,compiled)
     operand_map,scenarios=_map_checks(mapping,numeric,source_case,compiled)
     stats=Counter();raw_fact_stats=Counter()
+    required_source_symbols=Counter()
+    unmapped_source_symbols=Counter()
+    raw_status_unknown=Counter()
     source_rows=[];per_cast=[]
     for cast in numeric["numeric_casts"]:
         idnum=cast["event_id"]
@@ -293,10 +300,17 @@ def evaluate(numeric,transport,joint,source_case,compiled,mapping):
         matches=[]
         for node in linked:
             if_cond=node["conditions"].get("if")
+            required=sorted(set(if_cond["symbols"])) if if_cond else []
+            for symbol in required:
+                required_source_symbols[symbol]+=1
+                if symbol not in operand_map:
+                    unmapped_source_symbols[symbol]+=1
             statuses=[];scenario_examples=[]
             for scenario in scenarios:
-                facts,evidence,missing=_facts(pre,operand_map,scenario)
+                facts,evidence,missing=_facts(
+                    pre,operand_map,scenario,required)
                 for symbol in evidence:raw_fact_stats[symbol]+=1
+                for symbol in missing:raw_status_unknown[symbol]+=1
                 if if_cond is None:
                     status="NO_EXPLICIT_IF"
                 else:
@@ -368,6 +382,12 @@ def evaluate(numeric,transport,joint,source_case,compiled,mapping):
       "individual_source_IF_candidate_row_probes":len(source_rows),
       "source_conditional_scenario_counts":dict(sorted(stats.items())),
       "source_operand_scenario_usage_counts":dict(sorted(raw_fact_stats.items())),
+      "required_source_IF_operand_occurrence_counts":
+          dict(sorted(required_source_symbols.items())),
+      "unmapped_source_IF_operand_occurrence_counts":
+          dict(sorted(unmapped_source_symbols.items())),
+      "unobserved_source_IF_operand_scenario_counts":
+          dict(sorted(raw_status_unknown.items())),
       "explored_unit_conversion_scenarios":scenarios,
       "source_operand_semantics_independently_certified":False,
       "WCL_actor_build_and_target_source_equivalent":False,
@@ -504,6 +524,10 @@ def selftest():
         }
         res=evaluate(numeric,transport,joint,case,compiled,mapping)
         need(res["numeric_observed_casts"]==1 and
+             res["required_source_IF_operand_occurrence_counts"]==
+                {"buff.ready.up":1,"energy":2} and
+             res["source_operand_scenario_usage_counts"]==
+                {"buff.ready.up":2,"energy":4} and
              res["raw_WCL_candidate_casts_with_source_token"]==1 and
              res["individual_source_IF_candidate_row_probes"]==2 and
              res["source_conditional_scenario_counts"][
