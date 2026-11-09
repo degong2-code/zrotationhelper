@@ -1,0 +1,144 @@
+name: zrot-gr-original-source-if-partial-minimal-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_source_if_minimal_witness_v1.py
+      - tools/research/general_rotation_original_simc_if_minimal_frontier_v1.py
+      - tools/research/fixtures/general_rotation_simc_original_if49_pinned_archive_v1.json
+      - .github/workflows/zrot-gr-original-source-if-partial-minimal-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Existing source-IF minimality plus new partial and original occurrence proof contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_source_if_minimal_witness_v1.py \
+            tools/research/general_rotation_original_simc_if_minimal_frontier_v1.py
+          python -B tools/research/general_rotation_source_if_minimal_witness_v1.py \
+            > /tmp/minimal-source-synthetic.json
+          python -B tools/research/general_rotation_original_simc_if_minimal_frontier_v1.py \
+            > /tmp/original-frontier-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/minimal-source-synthetic.json'))
+          y=json.load(open('/tmp/original-frontier-synthetic.json'))
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC' and x['checks']==12
+          assert x['independent_full_READY_proven']==0
+          assert y['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert y['synthetic_new_class_source_witness']==1
+          assert y['fail_closed_mutations']==5
+          assert y['source_FULL_READY_proven']==0 and y['WCL_API_calls']==0
+          print('GENERAL_SOURCE_IF_PARTIAL_MINIMAL_SYNTHETIC_PASS',x['checks'])
+          print('ORIGINAL_SOURCE_IF_FRONTIER_SYNTHETIC_PASS',y['fail_closed_mutations'])
+          PY
+          sha256sum \
+            tools/research/general_rotation_source_if_minimal_witness_v1.py \
+            tools/research/general_rotation_original_simc_if_minimal_frontier_v1.py
+
+  original-four-real-case-replay:
+    runs-on: ubuntu-latest
+    needs: [generic-synthetic]
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse exact original 49-source-IF evidence, zero new Native build
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42594344188
+          name: zrot-gr-general-source-hypothesis-real-49-ir-v1
+          github-token: ${{ github.token }}
+          path: /tmp/gr-original-source-if
+      - name: Create deterministic whitelist transport from old artifact members
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,zipfile
+          from pathlib import Path
+          m=json.loads(Path('tools/research/fixtures/general_rotation_simc_original_if49_pinned_archive_v1.json').read_bytes())
+          files=[m['portfolio'],*m['case_files']]
+          with zipfile.ZipFile('/tmp/gr-original-if-pinned-transport.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+              for entry in files:
+                  name=entry['path']
+                  file=Path('/tmp/gr-original-source-if')/name
+                  assert file.is_file() and file.stat().st_size>1000, name
+                  z.write(file,arcname=name)
+          print('ORIGINAL_PINNED_ARTIFACT_MEMBERS',len(files))
+          PY
+      - name: Independently rescore all 147 source decisions under existing original PRE
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_original_simc_if_minimal_frontier_v1.py \
+            --artifact-zip /tmp/gr-original-if-pinned-transport.zip \
+            --manifest tools/research/fixtures/general_rotation_simc_original_if49_pinned_archive_v1.json \
+            --out /tmp/gr-source-if-real-minimal-frontier.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-source-if-real-minimal-frontier.json'))
+          assert x['schema']=='ZrotGeneralRotationOriginalPartialSourceIFEvidenceFrontierV1'
+          assert x['source_case_count']==4
+          assert x['original_source_selected_occurrences']==147
+          assert x['independently_verified_source_IF_true']==49
+          assert x['source_IF_unknown']==44
+          assert x['source_if_absent']==54
+          assert len(x['case_research_witnesses'])==4
+          assert x['inclusion_minimal_operand_instances_for_verified_true_IF'] <= x['original_observed_operand_instances_in_verified_true_IF']
+          for c in x['case_research_witnesses']:
+              assert c['all_full_physical_READY']=='UNKNOWN'
+              assert c['causal_competing_priority']=='UNKNOWN'
+              assert len(c['source_IF_confirmed_true_minimal_records'])==c['source_IF_status_counts']['IF_ORIGINAL_PRE_MATCH']
+              for e in c['source_IF_confirmed_true_minimal_records']:
+                  assert e['IF_true_native_comparator_independently_correlated'] is True
+                  assert e['full_READY']=='UNKNOWN'
+                  assert e['simultaneous_alternatives_READY']=='UNKNOWN'
+          assert x['independent_complete_action_READY']==0
+          assert x['opener_end']=='UNKNOWN'
+          assert x['selected_action_optimality']=='UNKNOWN'
+          assert x['dummy_wrong_cast']=='UNKNOWN'
+          assert x['WCL_API_calls']==0 and x['new_SimC_CXX_builds']==0
+          print('REAL_ORIGINAL_147_SOURCE_DECISIONS_49_PARTIAL_MINIMAL_IF_PASS',
+                json.dumps({'selected':x['original_source_selected_occurrences'],
+                'original_IF_true':x['independently_verified_source_IF_true'],
+                'IF_unknown':x['source_IF_unknown'],
+                'IF_absent':x['source_if_absent'],
+                'observed_source_operand_instances':x['original_observed_operand_instances_in_verified_true_IF'],
+                'minimal_sufficient_operand_instances':x['inclusion_minimal_operand_instances_for_verified_true_IF'],
+                'unneeded_operand_instances':x['observed_operand_instances_provably_unneeded_for_these_IF']},
+                sort_keys=True))
+          PY
+          sha256sum /tmp/gr-source-if-real-minimal-frontier.json
+      - name: Retain compact certified source-only witness and UNKNOWN frontier
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: zrot-gr-source-if-49-minimal-witness-${{ github.sha }}
+          path: /tmp/gr-source-if-real-minimal-frontier.json
+          retention-days: 7
+          if-no-files-found: error
