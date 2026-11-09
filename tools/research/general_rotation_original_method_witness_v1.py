@@ -372,8 +372,9 @@ def selftest()->dict:
         source_rules=source_rules,receipt_sha256=hashes,source_verified=True)
     assert absent["counts"]["scoped_NOT_READY"]==0
     # Invalid method identity is rejected even when the envelope is shared.
-    unrecognized=raw.replace("ZROT_DEMO|10|opaque_cast|",
+    unrecognized=raw.replace("ZROT_DEMO|10|cast_override_v2|",
                              "ZROT_DEMO|10|foreign_method|")
+    assert unrecognized != raw
     try:pair_original_attempts(
         unrecognized,fields=fields,method_markers=(m1,m2))
     except MethodWitnessError:pass
