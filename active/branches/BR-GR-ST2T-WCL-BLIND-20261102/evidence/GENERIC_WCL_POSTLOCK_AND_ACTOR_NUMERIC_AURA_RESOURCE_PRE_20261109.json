@@ -1,0 +1,193 @@
+{
+  "schema": "ZrotGenericWclPostlockSourceAdapterNumericResourceStrictPreReceiptV1",
+  "date": "2026-11-09",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "product_goal": "Generic SimC-first General Rotation opener and conditional IF/ELSE priority model, independently verified with WCL and used in a lightweight target dummy trainer.",
+  "scope_excluded": [
+    "Encounter-specific rotation plan",
+    "NSRT",
+    "boss guide",
+    "raid timeline"
+  ],
+  "source_evidence_basis": {
+    "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "original_SimC_four_case_IR_run_id": 42594344188,
+    "original_SimC_apl_IF_true_at_selected_count": 49,
+    "real_WCL_discovery_run_id": 41463589665,
+    "real_WCL_separate_report_holdout_run_id": 41473060401,
+    "real_WCL_new_distinct_third_report_run_id": 42599352437,
+    "original_numeric_lock_sha256": "c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e",
+    "locked_numeric_candidate_count": 4,
+    "third_report_frozen_numeric_candidates_reobserved": 4,
+    "third_report_is_predeclared_holdout": false
+  },
+  "generic_postlock_numeric_spell_source_candidate_engine": {
+    "path": "tools/research/general_rotation_postlock_numeric_spell_adapter_v1.py",
+    "code_git_blob": "3f1f514677b3d8a4be88e0dfe1a8f853c4a75a4e",
+    "final_verified_sha256": "b6058d697777b84c209e288500bf954c83b7f0d4a33bdf948484b2223198d458",
+    "CI_final_run_id": 42604456025,
+    "CI_final_status": "SUCCESS_3_OF_3",
+    "real_WCL_original_holdout_actor_casts": 51,
+    "exact_source_APL_token_candidate_spell_ID_count": 3,
+    "conditional_candidate_APL_rows_per_ST_or_2T": 25,
+    "WCL_real_casts_with_exact_postlock_token_hypothesis": 15,
+    "WCL_real_casts_unmapped_or_not_scored": 36,
+    "multiple_APL_rows_per_spell_preserved": true,
+    "original_runtime_selected_APL_row_for_real_WCL": "UNKNOWN",
+    "WCL_to_source_action_game_spell_id_independently_certified": false,
+    "source_apl_operand_inventory": {
+      "unique_symbols": 8,
+      "raw_aura_1719_event_count": 1,
+      "raw_aura_184362_event_count": 19,
+      "these_aura_ID_to_source_buff_semantics_certified": false,
+      "source_conditional_IF_positive_crosscheck_proven": 0
+    },
+    "downstream_full_READY_or_priority_proven": 0
+  },
+  "generic_numeric_resource_PRE_engine": {
+    "path": "tools/engine_first/wcl_raw_actor_numeric_power_pre_v1.py",
+    "git_blob": "78de13314c4a02ae9a7727fa420aa0a696a53728",
+    "final_verified_sha256": "8be52485590dbc3a03f88e2577e3d025e0a5263f8da3d2080a969d4f88ede03a",
+    "reuse_of_existing_engine": [
+      "tools/research/wcl_actor_resource_owner_strict_pre_v1.py",
+      "tools/engine_first/wcl_raw_actor_numeric_transport_v1.py",
+      "tools/research/general_rotation_strict_pre_state_engine_v1.py"
+    ],
+    "generic_functions": [
+      "power_cast_matrix",
+      "from_existing_actor_root",
+      "join_numeric_strict_pre"
+    ],
+    "raw_WCL_power_type_to_game_resource_units": "UNKNOWN",
+    "record_raw_power_values_without_mechanic_conversion": true,
+    "require_actor_owned_resourceActor_source_or_target": true,
+    "reject_unowned_wrong_target_resource": true,
+    "reject_nonfinite_owner_resource_before_any_CAST": true,
+    "raw_time_basis": "FIGHT_START_RELATIVE_INTEGER_MILLISECONDS",
+    "last_resource_timestamp_strictly_less_than_cast": true,
+    "same_timestamp_source_state_not_used": true,
+    "exact_raw_cast_event_id_join_when_unique": true,
+    "same_timestamp_and_spell_duplicate_ordinal_is_UNKNOWN": true,
+    "duplicate_source_event_PRE_equivalence_checked": true,
+    "differing_duplicate_PRE_fails_closed": true,
+    "aura_matrix_independently_regenerated_from_RAW_transport": true,
+    "power_matrix_raw_source_hash_and_actor_scope_verified": true,
+    "final_CI": {
+      "run_id": 42608104162,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42608104162",
+      "conclusion": "SUCCESS_3_OF_3",
+      "Python_3_12_compile_synthetic_negative": "PASS",
+      "Python_3_14_compile_synthetic_negative": "PASS",
+      "actual_replayed_official_WCL_raw_three_reports": "PASS",
+      "no_new_WCL_API_calls": true,
+      "no_new_SimC_CXX_builds": true,
+      "negative_controls": 8,
+      "actual_replay_cases": [
+        {
+          "role": "ORIGINAL_DISCOVERY",
+          "raw_events": 17083,
+          "casts": 54,
+          "casts_with_strict_prior_owned_power": 53,
+          "raw_actor_owned_resource_events": 121,
+          "wrong_owner_rejections": 133,
+          "same_timestamp_owned_cast_resource_ignored": 54,
+          "double_same_timestamp_spell_ambiguous_casts": 0,
+          "raw_numeric_power_type_counts": {
+            "1": 53
+          },
+          "power_matrix_sha256": "96e756089832a4d779748d0d4e976dcd4edeabc47466c549f14e1448206234aa",
+          "joined_raw_aura_power_matrix_sha256": "4f6b7feab16e98996827b090737ffe05573a4a9f5d5fcc23c1bad821f8090047"
+        },
+        {
+          "role": "ORIGINAL_SEPARATE_HOLDOUT",
+          "raw_events": 9101,
+          "casts": 51,
+          "casts_with_strict_prior_owned_power": 50,
+          "raw_actor_owned_resource_events": 104,
+          "wrong_owner_rejections": 125,
+          "same_timestamp_owned_cast_resource_ignored": 51,
+          "double_same_timestamp_spell_ambiguous_casts": 0,
+          "raw_numeric_power_type_counts": {
+            "1": 50
+          },
+          "power_matrix_sha256": "612876ee15e7f0e05328c00ef67508c1df20bfec13a31592124a525e0fd0f22a",
+          "joined_raw_aura_power_matrix_sha256": "748684095e3f14238d2595686a5321e2e908f3"
+        },
+        {
+          "role": "NEW_DISTINCT_THIRD_DISCOVERY",
+          "raw_events": 12393,
+          "casts": 55,
+          "casts_with_strict_prior_owned_power": 54,
+          "raw_actor_owned_resource_events": 173,
+          "wrong_owner_rejections": 135,
+          "same_timestamp_owned_cast_resource_ignored": 54,
+          "double_same_timestamp_spell_ambiguous_casts": 2,
+          "equivalent_PRE_duplicate_groups": 1,
+          "raw_numeric_power_type_counts": {
+            "1": 54
+          },
+          "power_matrix_sha256": "bd8a924850d85091002f08ec8f6392bd91159695fd3a94cab246b20c68950f90",
+          "joined_raw_aura_power_matrix_sha256": "4a42193c2d7b1c2f916e83b68333e3720875333e7e4c03cd7b095240c336c5c0"
+        }
+      ],
+      "total_WCL_casts": 160,
+      "strict_prior_actor_power_casts": 157,
+      "casts_without_prior_actor_resource": 3,
+      "raw_power_type_observed": "1_NOT_YET_GIVEN_GAME_RESOURCE_SEMANTIC_ID",
+      "artifact_id": 13669700190,
+      "artifact_zip_sha256": "3cabc5e938d3df607bdc45e1813f80c5513303dd0a81f20fb27b22c3e47ace4d",
+      "artifact_bytes": 48081,
+      "artifact_expires_UTC": "2026-11-16T11:19:50Z",
+      "summary_json_sha256": "2d71cd328528c6f5c833f5738139277d4ced1f33e15439e27a676a5cc341b582"
+    }
+  },
+  "known_failures_not_promoted": {
+    "run_42605357987": "FAILED syntax in initial new producer, corrected",
+    "run_42605493548": "FAILED nonfinite owned resource negative control, corrected by ingestion finite check",
+    "run_42607530256": "FAILED real duplicate same-time spell cast source event identity, resolved with equivalent PRE + unknown ordinal",
+    "run_42608006144": "FAILED synthetic fixture chronological source cast ordering, test corrected",
+    "all_final_success_requires_run_42608104162": true,
+    "hypothesis_failed_due_to_live_game": "NOT_OBSERVED",
+    "data_producer_security_bypass": false
+  },
+  "evidence_boundaries": {
+    "old_WCL_holdout": "INDEPENDENT_REPORT_NUMERIC_OBSERVATION_NOT_OPTIMALITY",
+    "newer_third": "FRESH_DISTINCT_SOURCE_NOT_PREDECLARED_HOLDOUT",
+    "source_action_spell_ID_to_live_game_certified": false,
+    "source_buff_ID_semantics_externally_certified": false,
+    "resource_raw_units_to_game_stat_conversion": "UNKNOWN",
+    "resource_snapshot_omission_or_staleness_may_be_present": true,
+    "current_SimC_source_to_actual_WCL_talents_gear_build_equivalent": "UNKNOWN",
+    "target_count_at_each_WCL_cast": "UNKNOWN",
+    "missing_prior_resource": "UNKNOWN",
+    "enough_mechanic_and_simultaneous_competitor_READY_proven": 0,
+    "full_General_Rotation_priority_promoted": 0,
+    "opener_end": "UNKNOWN",
+    "dummy_wrong_cast_proven": 0,
+    "no_encounter_specific_product_output": true
+  },
+  "engine_first_self_audit": {
+    "new_independent_WCL_producer_fork_created": false,
+    "existing_numeric_blind_candidate_lock_reused": true,
+    "existing_original_WCL_actor_resource_engine_reused": true,
+    "original_source_49_IF_not_upgraded_to_WCL_truth": true,
+    "no_spec_spell_ids_hardcoded_in_generic_producer": true,
+    "two_python_versions_automatically_validated": true,
+    "real_new_and_historical_WCL_coldstart_inputs_validated": true,
+    "new_native_SimC_builds": 0,
+    "API_calls_during_new_PRE_evidence_run": 0,
+    "meaningful_product_capability": "WCL same-event numeric cast + verified aura PRE + typed actor-owned resource PRE with explicit unknown causal gates",
+    "validation_pass_count_not_equivalent_to_finished_product": true
+  },
+  "next": {
+    "product_exact_next": "Complete General Rotation opener and conditional priorities across ST/2T/cleave/AoE and safely grade player dummy practice.",
+    "session_exact_next": "Use the existing externally pinned Fury SpecAdapter and independently verify WCL raw-power type 1 scaling, current Blizzard spell ID action identity, buffs, WCL talent/build equivalence and action timestamps; then connect only verified typed PRE operands to source IF AST with source-row multiplicity preserved. Test cross-report locked candidate/conflict/holdout without same-time state leaks; maintain READY/dummy UNKNOWN until competing readiness and state are complete."
+  },
+  "branch_only": true,
+  "MAIN_promoted": false,
+  "Gen5_handoff_modified": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}

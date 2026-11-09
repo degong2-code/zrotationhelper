@@ -559,3 +559,14 @@ Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_BLIN
 | Research product rules & dummy trainer | Real numeric→SourceRow audit NOT_RUN, build/target/READY UNKNOWN | **NOT PROMOTED** |
 
 Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_REAL_COLDSTART_DISJOINT_REPLAY_THIRD_REPORT_20261109.json`. Raw evidence artifacts expire in 7 days, compact branch receipt persistent. Engine-first now proven on legitimate new/old real WCL snapshots, still not gameplay truth.
+
+## 2026-11-09 Generic postlock spell IDs + actor-owned numeric PRE engine
+
+| Reused or new component | Evidence | Bound |
+| --- | --- | --- |
+| `general_rotation_postlock_numeric_spell_adapter_v1.py` | #42604456025 PASS 3/3, real WCL separate-report holdout 51 casts, 3 candidate spell IDs → 25 original Fury APL rows for each ST/2T; 15 actual casts map to multiple rows and remain UNKNOWN, 36 not scored | **NEW generic postlock source-hypothesis linker**, current WoW action/spell equivalence and READY not proven |
+| `wcl_actor_resource_owner_strict_pre_v1.py` | Existing proven resourceActor source/target attribution, strict < t, wrong-owner rejection | **REUSE, no clone** |
+| `wcl_raw_actor_numeric_power_pre_v1.py` | #42608104162 PASS 3/3: actual WCL 160 casts (54+51+55), 157 with prior actor-owned numeric resource; 3 unknown; 2 third-report duplicate same-time spell casts have equivalent PRE but ordinal UNKNOWN | **NEW generic typed numerical PRE and joint Boolean aura record**, raw power type 1 not game Rage until validated |
+| WCL independent source-hypothesis truth | 8 source IF operands, raw candidate buff aura 1719/184362 present but semantic identity and actual actor build/target equivalence UNKNOWN | **No causal priorities, cooldown READY or dummy errors promoted** |
+
+Retained receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_POSTLOCK_AND_ACTOR_NUMERIC_AURA_RESOURCE_PRE_20261109.json`, code SHA `8be52485590dbc3a03f88e2577e3d025e0a5263f8da3d2080a969d4f88ede03a`, artifact #13669700190 (expires 2026-11-16).
