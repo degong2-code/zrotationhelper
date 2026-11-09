@@ -153,6 +153,39 @@ jobs:
                      and len(y['bundle']['candidates'])==1
                      and y['bundle']['candidates'][0]['route']['closed'] is False
                      for y in x['claims'])
+          # Exact observed original SimC PRE (not fabricated WCL PRE):
+          # prove source-numeric necessary subguards for the selected
+          # rampage action, while MOVEMENT/CAST_GCD total remain open.
+          selected=[
+              y for y in x['claims']
+              if y['bundle']['candidates'][0]['source_list']=='slayer'
+              and y['bundle']['candidates'][0]['source_index']==6
+              and y['bundle']['candidates'][0]['action']=='rampage'
+          ]
+          assert len(selected)==1
+          proof=selected[0]
+          required={
+              'MOVEMENT_BASE_GUARD_PASS','MOVEMENT_APL_OPTION_CLEAR',
+              'CAST_REPEAT_CLEAR',
+          }
+          facts=proof['bundle']['candidates'][0]['facts']
+          for gate in required:
+              witnesses=[f for f in facts if f['gate']==gate]
+              assert len(witnesses)==1
+              f=witnesses[0]
+              assert f['value'] is True
+              assert f['basis']=='INDEPENDENT_SOURCE_REPLAY'
+              assert f['captured']=='SIMC_ORIGINAL_METHOD_PRE'
+              assert f['event_t_ms']==20031
+          assert set(proof['missing_or_unverified']) >= {
+              'MOVEMENT:MISSING','CAST_GCD:MISSING',
+              'NECESSARY_ELIGIBILITY:MISSING',
+              'SPEC_OVERRIDE_TOTAL:MISSING',
+          }
+          assert proof['independent_local_ready_decision']=='UNKNOWN'
+          assert proof['bundle']['candidates'][0]['route']['closed'] is False
+          print('FURY_RAMPAGE_REAL_SOURCE_PRE_THREE_PARTIAL_GATES_PROVEN_NO_FULL_READY')
+
           print('ACTUAL_SOURCE_GATES_EXACT_PRE_SPEC_ADAPTER_BRIDGE_PASS',
                 x['claim_count'],x['ready_status_counts'])
           assert r['source_IR_source_action_rows']==121
