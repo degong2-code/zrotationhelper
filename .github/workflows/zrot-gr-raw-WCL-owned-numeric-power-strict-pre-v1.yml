@@ -39,7 +39,9 @@ jobs:
           assert x['reused_existing_actor_resource_owner_reconstruct'] is True
           assert x['strictly_earlier_numeric_source_snapshots'] is True
           assert x['same_time_cast_resource_rejected_as_PRE'] is True
-          assert x['negative_controls']>=4
+          assert x['negative_controls']>=7
+          assert x['raw_aura_numeric_resource_join']=='PASS_SYNTHETIC'
+          assert x['raw_resource_semantic_units']=='UNKNOWN'
           assert x['source_APL_IF_rule_proven']==0
           assert x['full_READY_proven']==x['dummy_wrong_cast_proven']==0
           print('GENERIC_NUMERIC_WCL_OWNED_RESOURCE_STRICT_PRE_SYNTHETIC_PASS')
@@ -98,7 +100,8 @@ jobs:
           import json
           from pathlib import Path
           from fresh_wcl_engine_v1 import canonical,sha
-          from wcl_raw_actor_numeric_power_pre_v1 import from_existing_actor_root
+          from wcl_raw_actor_numeric_power_pre_v1 import from_existing_actor_root,join_numeric_strict_pre
+          from wcl_raw_actor_numeric_transport_v1 import strict_pre_numeric_matrix
           def found(root,name):
               x=list(Path(root).rglob(name))
               assert len(x)==1,(root,name,x)
@@ -139,6 +142,13 @@ jobs:
                       assert power['game_resource_units_conversion']=='UNKNOWN'
               path=out/(name+'-original-raw-numeric-power-strict-pre.json')
               path.write_bytes(canonical(matrix))
+              aura=strict_pre_numeric_matrix(transport)
+              joined=join_numeric_strict_pre(transport,aura,matrix)
+              assert joined['actor_cast_rows']==cast_count
+              assert joined['complete_and_competing_READY_proven']==0
+              assert joined['General_Rotation_priority_promoted'] is False
+              assert joined['dummy_training_error_proven'] is False
+              (out/(name+'-actor-numeric-joint-aura-power-pre.json')).write_bytes(canonical(joined))
               summary['sources'][name]={
                 'numeric_actor_casts':cast_count,
                 'actual_strict_PRE_prior_power_snapshots':
@@ -151,12 +161,15 @@ jobs:
                    matrix['wrong_or_unproven_owner_events_rejected'],
                 'same_timestamp_cast_resource_not_used':
                    matrix['casts_with_same_timestamp_owner_snapshot_excluded'],
-                'matrix_sha256':matrix['resource_pre_matrix_sha256']
+                'matrix_sha256':matrix['resource_pre_matrix_sha256'],
+                'joined_aura_numeric_power_PRE_sha256':joined['joined_numeric_pre_sha256'],
+                'joined_cast_rows':joined['actor_cast_rows']
               }
               print('REAL_WCL_OWNED_RESOURCE_STRICT_PRE_CASE',name,
                     json.dumps(summary['sources'][name],sort_keys=True))
           (out/'three-real-raw-resource-pre-summary.json').write_bytes(canonical(summary))
           print('THREE_REAL_OFFICIAL_WCL_RAW_NUMERIC_RESOURCE_STRICT_PRE_REPLAY_PASS')
+          print('THREE_REAL_OFFICIAL_WCL_AURA_AND_POWER_NUMERIC_STRICT_PRE_CAST_JOIN_PASS')
           PY
           sha256sum /tmp/zrot-replayed-wcl-three-resource-matrices/*.json
       - uses: actions/upload-artifact@v4
