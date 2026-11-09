@@ -1,0 +1,98 @@
+name: zrot-simc-general-rotation-readable-report-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_simc_readable_report_v1.py
+      - .github/workflows/zrot-simc-general-rotation-readable-report-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-report:
+    name: Safe readable research report Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and check source priority and observed SimC sample separation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_simc_readable_report_v1.py
+          python -B tools/research/general_rotation_simc_readable_report_v1.py > /tmp/gr-readable-report-synth.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/gr-readable-report-synth.json'))
+          assert r['schema']=='ZrotGeneralRotationSourceWithObservedSimCCastsReportV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=12
+          assert r['source_APL_reparsed'] is False
+          assert r['WCL_API_calls']==0
+          assert r['full_READY_proven']==0
+          print('GENERIC_READABLE_SOURCE_AND_OBSERVED_SIMC_ACTION_REPORT_PASS')
+          PY
+          sha256sum tools/research/general_rotation_simc_readable_report_v1.py
+
+  real-action-report:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[render-real-casts]')
+    name: Existing real original Native action model to complete readable conditional APL report
+    needs: [generic-report]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-general-rotation-first-real-cast-and-source-ir
+          run-id: 42562520191
+          github-token: ${{ github.token }}
+          path: /tmp/simc-real-native-first-casts
+      - name: Validate actual source JSON and generate readable all-APL report
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC=/tmp/simc-real-native-first-casts/gr-simc-original-performed-action-and-condition-model.json
+          test -s "$SRC"
+          SHA="$(sha256sum "$SRC" | cut -d ' ' -f1)"
+          python -B tools/research/general_rotation_simc_readable_report_v1.py \
+            --input "$SRC" --expected-sha256 "$SHA" \
+            --out /tmp/gr-general-rotation-source-and-native-actions.md
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/gr-general-rotation-source-and-native-actions.md')
+          s=p.read_text()
+          assert s.startswith('# SimC-first General Rotation research report')
+          assert '## warrior_fury' in s and '## mage_arcane' in s
+          assert '#### Source list: default' in s
+          assert 'source IF/ELSE' in s
+          assert 'Actual WoW' not in s or 'player' in s
+          assert 'not a proven opener ending' in s
+          assert 'No independent WCL holdout' in s
+          print('ACTUAL_SIMC_CONDITIONAL_ROTATION_WITH_RECORDED_OPENERS_READABLE_PASS')
+          print('READABLE_REPORT_LINES',len(s.splitlines()))
+          PY
+          sha256sum /tmp/gr-general-rotation-source-and-native-actions.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-simc-general-rotation-readable-source-and-openers-v1
+          path: /tmp/gr-general-rotation-source-and-native-actions.md
+          if-no-files-found: error
+          retention-days: 7
