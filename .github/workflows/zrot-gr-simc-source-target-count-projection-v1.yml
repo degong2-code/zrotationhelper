@@ -1,0 +1,126 @@
+name: zrot-gr-simc-source-target-count-projection-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_simc_target_count_projection_v1.py
+      - tools/research/fixtures/general_rotation_simc_target_scenarios_v1.json
+      - .github/workflows/zrot-gr-simc-source-target-count-projection-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Final file compile and source-only bounded counterfactuals
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_simc_target_count_projection_v1.py
+          python -B tools/research/general_rotation_simc_target_count_projection_v1.py >/tmp/simc-target-selftest.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/simc-target-selftest.json'))
+          assert x['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert x['positive_source_target_scenarios']==3
+          assert x['negative_fail_closed_checks']==4
+          assert x['actual_native_READY_proven']==0
+          assert x['WCL_API_calls']==0
+          print('SIMC_TARGET_SOURCE_SYNTHETIC_PASS',x)
+          PY
+          sha256sum tools/research/general_rotation_simc_target_count_projection_v1.py
+
+  exact-pinned-simc-profile:
+    runs-on: ubuntu-latest
+    needs: [offline-contract]
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+            profiles/MID2/MID2_Mage_Arcane.simc
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Six model scenarios, nine target counts, all original ordered APL rows
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_simc_target_count_projection_v1.py \
+            --source-root original-simc \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
+            --scenarios tools/research/fixtures/general_rotation_simc_target_scenarios_v1.json \
+            --out /tmp/simc-target-source-only-projections.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/simc-target-source-only-projections.json'))
+          assert x['schema']=='ZrotGenericSimCSourceTargetCountProjectionV1'
+          assert x['official_simc_commit']=='b522cded8c26b97dac03fdf56e57a03ec7e8faa6'
+          assert x['source_profiles']==2 and x['source_scenarios']==6
+          assert x['target_counts']==[1,2,3,4,5,6,7,8,10]
+          cases={(s['spec_key'],s['scenario_name']):s for s in x['all_scenarios']}
+          assert sum(cases[(spec,'unknown_build')]['source_APL_action_rows']
+                     for spec in ('warrior_fury','mage_arcane'))==172
+          def control(spec,scenario,n,destination):
+              c=cases[(spec,scenario)]['source_target_count_contexts']
+              row=next(v for v in c if v['target_count_hypothesis']==n)
+              return next(v['guard_at_count_under_assumptions']
+                          for v in row['source_control_candidates_not_actual_routing']
+                          if v['destination']==destination)
+          assert control('warrior_fury','slayer_hypothesis',1,'slayer')=='TRUE'
+          assert control('warrior_fury','slayer_hypothesis',2,'slayer')=='FALSE'
+          assert control('warrior_fury','slayer_hypothesis',2,'slayer_aoe')=='TRUE'
+          assert control('warrior_fury','thane_hypothesis',1,'thane')=='TRUE'
+          assert control('warrior_fury','thane_hypothesis',3,'thane_aoe')=='TRUE'
+          assert control('warrior_fury','unknown_build',1,'slayer')=='UNKNOWN'
+          def threshold(case,n):
+              row=next(q for q in cases[('mage_arcane',case)]['source_target_count_contexts']
+                       if q['target_count_hypothesis']==n)
+              return next((v['source_expression_result'] for v in
+                          row['source_precombat_variable_expressions_not_native_executions']
+                          if v['name']=='aoe_count'),None)
+          assert threshold('sphere_talent_off_hypothesis',1)==2
+          assert threshold('sphere_talent_on_hypothesis',1)==5
+          assert threshold('unknown_build',1) is None
+          assert all(s['full_alternative_action_READY_proven']==0 and
+                     s['opener_end_condition']=='UNKNOWN' and
+                     s['user_target_dummy_wrong_cast_verdict']=='UNKNOWN' and
+                     s['independent_WCL_priority_validated'] is False
+                     for s in x['all_scenarios'])
+          assert x['real_WCL_API_calls']==0 and x['new_native_CXX_builds']==0
+          assert x['current_Retail_rotation_complete'] is False
+          print('REAL_PINNED_TWO_SPEC_3PLUS_TARGET_SOURCE_PASS',json.dumps({
+              'source_profiles':2,'target_count_contexts':9,
+              'hypothesis_build_cases':6,'source_APL_rows':172,
+              'arcane_aoe_count_when_talent_off':2,
+              'arcane_aoe_count_when_talent_on':5,
+              'ready_certified':0,'opener_end':'UNKNOWN'},sort_keys=True))
+          PY
+          sha256sum /tmp/simc-target-source-only-projections.json
+      - name: Archive compact exact source scenario receipt only
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-original-simc-1to10-source-contexts-${{ github.sha }}
+          path: /tmp/simc-target-source-only-projections.json
+          retention-days: 7
+          if-no-files-found: error
