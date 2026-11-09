@@ -279,16 +279,14 @@ def audit(base:dict,root:Path,manifest:dict,producer:dict)->dict:
              capture.get("controlled_fight_seconds")==30 and
              capture.get("simc_spec")==entry["actor_spec"] and
              capture.get("profile_sha256")==sha(original_blob) and
-             seq["source_apl_sha256"]==orig["source_simc_executable_sha256"] if False else True,
-             "REAL_CAPTURE_SOURCE_OR_TARGET_DRIFT")
+             seq["simc_spec"]==entry["actor_spec"] and
+             seq["source_profile_sha256"]==capture["profile_sha256"] and
+             seq["source_apl_sha256"]==entry["effective_apl_sha256"] and
+             entry["effective_apl_sha256"]==capture["effective_apl_sha256"],
+             "REAL_CAPTURE_SOURCE_TARGET_SEED_OR_APL_DRIFT")
         # The pristine original baseline from #42562520191 is a DIFFERENT
-        # binary; source/profile match, executable hash must differ from
-        # patched executable, yet all sampled action order/times must match.
-        need(seq["source_profile_sha256"]==orig["source_profile_git_blob_sha1"] if False else True,
-             "OPAQUE_PROFILE_COMPARISON_NOT_CLAIMED")
-        need(seq["simc_spec"]==entry["actor_spec"] and
-             seq["source_profile_sha256"]==capture["profile_sha256"],
-             "PROBE_CAPTURE_ACTOR_OR_PROFILE_MISMATCH")
+        # binary, but the pinned profile/APL and original cast sequence are
+        # required to agree. No binary-hash equivalence is claimed.
         binaries.add(seq["source_simc_executable_sha256"])
         case=reconcile_case(orig,seq,raw_log.decode("utf-8"))
         case["raw_instrumented_native_log_sha256"]=sha(raw_log)
