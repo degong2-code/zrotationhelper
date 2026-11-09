@@ -1,0 +1,198 @@
+name: zrot-gr-postlock-real-wcl-numeric-spell-adapter-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_postlock_numeric_spell_adapter_v1.py
+      - .github/workflows/zrot-gr-postlock-real-wcl-numeric-spell-adapter-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  generic-synthetic:
+    name: Generic postlock numeric-ID adapter Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.python }}'
+      - name: Strict input gates + two spec synthetic multiple-row/negative control
+        shell: bash
+        env:
+          PYTHONPATH: tools/research:tools/engine_first
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_postlock_numeric_spell_adapter_v1.py
+          python -B tools/research/general_rotation_postlock_numeric_spell_adapter_v1.py > /tmp/zrot-gr-postlock-ID-adapter-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/zrot-gr-postlock-ID-adapter-synthetic.json'))
+          assert x['status']=='PASS_TWO_CLASS_SYNTHETIC'
+          assert x['class_count']==2 and x['negative_controls']>=18
+          assert x['multiple_APL_rows_preserved'] is True
+          assert x['unverified_auto_excluded'] is True
+          assert x['source_spell_identity_current_Retail_verified'] is False
+          assert x['full_ready_proven']==x['dummy_error_proven']==0
+          assert x['WCL_API_calls']==x['SimC_CXX_builds']==0
+          print('POSTLOCK_GENERIC_NUMERIC_ID_TO_MULTI_APL_CANDIDATE_SELFTEST_PASS')
+          PY
+          sha256sum tools/research/general_rotation_postlock_numeric_spell_adapter_v1.py
+  original-real-wcl-postlock:
+    name: Real WCL 51 holdout casts x pinned Fury ST and 2T APL rows (hypothesis only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    needs: [generic-synthetic]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: official-wcl-bounded-raw-and-lock-d1f2b82c9d4958fe3e28daafbe2530992d0c68e1
+          run-id: 41463589665
+          github-token: ${{ github.token }}
+          path: /tmp/real-wcl-frozen-lock
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-replayed-real-disjoint-wcl-numeric-source-ir-v1
+          run-id: 42599589497
+          github-token: ${{ github.token }}
+          path: /tmp/real-wcl-disjoint-frozen-numeric
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-gr-general-source-hypothesis-real-49-ir-v1
+          run-id: 42594344188
+          github-token: ${{ github.token }}
+          path: /tmp/real-simc-original-four-case-IR
+      - name: WCL numeric-only SHA lock BEFORE opening semantic source or adapter
+        shell: bash
+        env:
+          PYTHONPATH: tools/research:tools/engine_first
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-real-wcl-postlock-id
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          from simc_apl_semantic_ir_v2 import canonical
+          from general_rotation_wcl_postlock_source_ir_bridge_v1 import numeric_frozen_boundary,sha
+          lock=Path('/tmp/real-wcl-frozen-lock/derived/blind_lock.json').read_bytes()
+          assert sha(lock)=='c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e'
+          fixtures=list(Path('/tmp/real-wcl-disjoint-frozen-numeric').rglob(
+              'real-wcl-numeric-disjoint-bridge-input.json'))
+          assert len(fixtures)==1
+          fix=json.loads(fixtures[0].read_bytes())
+          numeric=numeric_frozen_boundary(
+              lock,sha(lock),fix['discovery_roster'],
+              fix['holdout'],fix['cast_events'])
+          assert numeric['source_APL_injected_in_numeric_phase'] is False
+          assert numeric['numeric_locked_spell_ids']==[1,184367,335096,335097]
+          assert len(numeric['numeric_casts'])==51
+          assert numeric['ready_or_priority_proven'] is False
+          root=Path('/tmp/zrot-real-wcl-postlock-id')
+          (root/'numeric-only-phase.json').write_bytes(canonical(numeric))
+          print('REAL_WCL_DISCOVERY_LOCK_NUMERIC_ONLY_POSTLOCK_BOUNDARY_PASS')
+          PY
+      - name: Reuse existing pinned external Fury SpecAdapter x actual SimC source cases
+        shell: bash
+        env:
+          PYTHONPATH: tools/research:tools/engine_first
+        run: |
+          set -euo pipefail
+          test "$(git hash-object docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_ACTION_FAMILY_MECHANICS_ADAPTER_V1.json)" = 538d0850e13a0cfd1e053ea02a27a71194a93a87
+          python - <<'PY'
+          from pathlib import Path
+          import json,hashlib
+          from simc_apl_semantic_ir_v2 import canonical
+          from general_rotation_postlock_numeric_spell_adapter_v1 import compile_binding
+          from general_rotation_wcl_postlock_source_ir_bridge_v1 import postlock_source_probe
+          root=Path('/tmp/zrot-real-wcl-postlock-id')
+          numeric=json.loads((root/'numeric-only-phase.json').read_bytes())
+          fixtures=list(Path('/tmp/real-wcl-disjoint-frozen-numeric').rglob(
+              'real-wcl-numeric-disjoint-bridge-input.json'))
+          fix=json.loads(fixtures[0].read_bytes())
+          adapter_path=Path('docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FURY_ACTION_FAMILY_MECHANICS_ADAPTER_V1.json')
+          adapter_raw=adapter_path.read_bytes()
+          adapter=json.loads(adapter_raw)
+          verified={
+            'warrior_fury-st':'964886a08dbaf800ac9e3694df47b7adece905fc8825782e9cc3f5d83aa54aee',
+            'warrior_fury-2t':'62d5ef47e32e066e771a447c3251ab1ba13699c24eec11481f9563f0fcc96dba'}
+          outcomes={}
+          for spec,hash_value in verified.items():
+              p=list(Path('/tmp/real-simc-original-four-case-IR').rglob(
+                  spec+'-source-hypothesis-evidence.json'))
+              assert len(p)==1
+              assert hashlib.sha256(p[0].read_bytes()).hexdigest()==hash_value
+              source_case=json.loads(p[0].read_bytes())
+              hypothesis=compile_binding(numeric,source_case,adapter,adapter_raw)
+              postlock=postlock_source_probe(numeric,fix,source_case,
+                                             hypothesis['binding'])
+              assert postlock['holdout_numeric_casts']==51
+              assert postlock['holdout_evidence_source_kind']=='ATTESTED_RAW_WCL_REPLAY'
+              assert postlock['real_WCL_holdout_validated'] is False
+              assert postlock['physical_READY_proven']==0
+              assert postlock['real_General_Rotation_rule_promoted'] is False
+              assert postlock['dummy_training_error_proven'] is False
+              assert all(r['action_READY']=='UNKNOWN' and
+                         r['dummy_wrong_cast']=='UNKNOWN'
+                         for r in postlock['per_numeric_cast_conditional_probes'])
+              assert hypothesis['allow_whole_spell_READY_from_mapping'] is False
+              assert hypothesis['source_spell_ID_mapping_current_Retail_independently_audited'] is False
+              assert hypothesis['WCL_target_count_to_SimC_source_context']=='UNKNOWN'
+              assert hypothesis['binding']['binding_stage']=='POST_LOCK_ONLY'
+              # Never treat source model target_count 1/2 as actual WCL target count.
+              (root/(spec+'-postlock-adapter-candidate.json')).write_bytes(canonical(hypothesis))
+              (root/(spec+'-real-wcl-source-IF-unverified.json')).write_bytes(canonical(postlock))
+              outcomes[spec]={
+                'exact_non_auto_spell_ids_with_source_rows':
+                    hypothesis['numeric_candidates_covered_by_exact_non_auto_token'],
+                'source_bindings':hypothesis['output_bindings'],
+                'real_WCL_casts_under_source_token_hypothesis':
+                    hypothesis['numeric_candidate_CASTS_with_exact_token_hypothesis'],
+                'postlock_IF_hypothesis_counts':
+                    postlock['source_vs_WCL_hypothesis_at_PRE_counts'],
+                'source_IF_independently_verified_against_real_WCL':0,
+                'physical_READY_proven':0,
+                'target_context_verified':False
+              }
+          summary={
+             'schema':'ZrotOriginalRealWclPostlockNumericSourceAdapterStudyV1',
+             'policy_id':'ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1',
+             'real_WCL_original_holdout_actor_casts':51,
+             'real_WCL_disjoint_numeric_discovery_lock_sha256':
+               numeric['lock_sha256'],
+             'source_adapter_only_after_numeric_lock':True,
+             'external_adapter_sha256':hashlib.sha256(adapter_raw).hexdigest(),
+             'source_case_outcomes':outcomes,
+             'actual_current_Retail_SpellID_to_action_button_truth':'UNKNOWN',
+             'actual_WCL_player_build_matches_SimC':'UNKNOWN',
+             'actor_target_count_at_each_cast':'UNKNOWN',
+             'full_competing_READY_proven':0,
+             'mandatory_General_Rotation_priority_rules_promoted':0,
+             'dummy_wrong_skill_verdicts':0,
+             'actual_new_WCL_api_calls':0,
+             'new_native_SimC_compiles':0
+          }
+          (root/'postlock-real-wcl-adapter-study-summary.json').write_bytes(canonical(summary))
+          print('REAL_WCL_PINNED_SPEC_ADAPTER_TO_SOURCE_IR_CANDIDATE_BRIDGE_PASS')
+          print('REAL_WCL_POSTLOCK_SOURCE_ADAPTER_RESULT',json.dumps(outcomes,sort_keys=True))
+          PY
+          sha256sum /tmp/zrot-real-wcl-postlock-id/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-real-wcl-numeric-source-row-candidate-postlock-v1
+          path: /tmp/zrot-real-wcl-postlock-id/*.json
+          if-no-files-found: warn
+          retention-days: 7
