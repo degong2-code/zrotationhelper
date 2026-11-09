@@ -1,0 +1,192 @@
+name: zrot-gr-original-foreground-dispatch-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_foreground_dispatch_v1.py
+      - .github/workflows/zrot-gr-original-foreground-dispatch-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic:
+    name: Original foreground method causal patch contract Python ${{ matrix.py }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '${{ matrix.py }}'
+      - name: Offline compile and negative source-attribution regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_original_foreground_dispatch_v1.py
+          python -B tools/research/general_rotation_original_foreground_dispatch_v1.py > /tmp/gr-foreground-synthetic.json
+          python - <<'PY'
+          import json
+          o=json.load(open('/tmp/gr-foreground-synthetic.json'))
+          assert o['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert o['negative_controls']>=9 and o['full_READY_proven']==0
+          assert o['new_CXX_builds']==0 and o['WCL_API_calls']==0
+          print('GENERIC_FOREGROUND_CAUSAL_DATAFLOW_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_original_foreground_dispatch_v1.py
+
+  native:
+    name: Official pinned original SimC one build Fury/Arcane ST/2T causal proof
+    needs: [synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-general-rotation-first-real-cast-and-source-ir
+          run-id: 42562520191
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-pristine-json2
+      - name: Preflight pinned source, exact profile identity and three passive patch contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          echo "584819145ec6e51bd7596bd273da74402622adf7bd0ecf1ea25ce19b0f26c715  /tmp/zrot-pristine-json2/gr-simc-original-performed-action-and-condition-model.json" | sha256sum -c -
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+          sys.path.insert(0,'tools/research')
+          from simc_apl_source_engine import _profile_fields,_text
+          for name,spec in [('MID2_Warrior_Fury.simc','fury'),
+                            ('MID2_Mage_Arcane.simc','arcane')]:
+              p=Path('simc-upstream/profiles/MID2')/name
+              observed=_profile_fields(_text(p.read_bytes()))
+              assert observed['spec']==spec and observed['actor_count']==1, observed
+              print('PINNED_SOURCE_PROFILE_PRECHECK_PASS',name,spec)
+          PY
+          python -B tools/research/simc_original_select_if_pre_witness_v1.py \
+            --source-root simc-upstream \
+            --plan tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json \
+            --receipt /tmp/gr-native-if-prior.json
+          python -B tools/research/general_rotation_same_run_return_emitter_v1.py \
+            --source-root simc-upstream \
+            --prior-receipt /tmp/gr-native-if-prior.json \
+            --patch-receipt /tmp/gr-native-return-emitter-prior.json
+          python -B tools/research/general_rotation_original_foreground_dispatch_v1.py \
+            --simc-root simc-upstream \
+            --prior-receipt /tmp/gr-native-return-emitter-prior.json \
+            --patch-receipt /tmp/gr-foreground-dispatch-patch.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/gr-foreground-dispatch-patch.json'))
+          assert p['new_ready_or_RNG_or_queue_calls']==0
+          assert p['native_queue_and_JSON2_append_original_call_count_preserved']
+          assert p['actual_queued_action_was_executed_proven'] is False
+          print('ORIGINAL_CPP_FOREGROUND_DISPATCH_STATIC_PREFLIGHT_PASS')
+          PY
+      - name: Build exactly one official pinned SimC with passive foreground witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-gr-foreground-native -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-gr-foreground-native --target simc --parallel 3
+          test -x /tmp/zrot-gr-foreground-native/simc
+      - name: Capture real native original SimC four cases and replay exact callsite
+        shell: bash
+        run: |
+          set -euo pipefail
+          for row in "warrior_fury:fury:MID2_Warrior_Fury.simc" "mage_arcane:arcane:MID2_Mage_Arcane.simc"; do
+            IFS=: read -r label spec profile <<< "$row"
+            for n in 1 2; do
+              case=st
+              if [ "$n" = 2 ]; then case=2t; fi
+              out="/tmp/zrot-foreground-native/$label-$case"
+              python -B tools/research/simc_native_reference_capture.py \
+                --profile "simc-upstream/profiles/MID2/$profile" --spec "$spec" \
+                --simc-bin /tmp/zrot-gr-foreground-native/simc \
+                --targets "$n" --seed 31459 --fight-seconds 30 \
+                --out-dir "$out" --timeout 180
+              python -B tools/research/general_rotation_original_foreground_dispatch_v1.py \
+                --log "$out/simc_native_log.txt" \
+                --out "$out/foreground-source-to-JSON2.json"
+            done
+          done
+      - name: Check original behavior parity 149/149 and cross-spec path partition
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import sys,json,collections
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          from general_rotation_native_sequence_row_replay_v1 import compare_pristine
+          base=json.loads(Path('/tmp/zrot-pristine-json2/gr-simc-original-performed-action-and-condition-model.json').read_bytes())
+          cases={(r['source_spec_key'],r['case']):r for r in base['research_cases']}
+          combined=collections.Counter();return_counts=collections.Counter()
+          original=0;emitters=0;causal=0
+          for spec in ['warrior_fury','mage_arcane']:
+            for case in ['st','2t']:
+              p=Path('/tmp/zrot-foreground-native')/(spec+'-'+case)
+              c=cases[(spec,case)]
+              actual=extract_json_sequence(p)
+              compare_pristine(c,actual)
+              x=json.loads((p/'foreground-source-to-JSON2.json').read_bytes())
+              assert x['source_evidence_level']=='PINNED_ACTUAL_CPP_FOREGROUND_APL_SELECT_TO_JSON2_CALLSITE'
+              assert x['physical_action_execute_event_proven'] is False
+              assert x['complete_source_physical_READY_proven']==0
+              assert x['opener_end']=='UNKNOWN' and x['WCL_blind_holdout']=='NOT_RUN'
+              assert x['emitter_total']>0
+              original+=c['simc_JSON2_observed_combat_action_count']
+              emitters+=x['emitter_total']
+              counts=x['path_counts']
+              causal+=counts.get('ORIGINAL_APL_FOREGROUND_SELECT_TO_JSON2_CALLSITE_PROVEN',0)
+              combined.update(counts)
+              return_counts.update(x['original_selected_IF_witness_counts'])
+              print('FOREGROUND_SOURCE_CASE',spec,case,json.dumps(counts,sort_keys=True),
+                    'selected_if',json.dumps(x['original_selected_IF_witness_counts'],sort_keys=True))
+          assert original==149 and emitters==203
+          assert causal>0
+          print('PINNED_ORIGINAL_JSON2_PARITY_149_OF_149_PASS')
+          print('FOREIGN_SOURCE_EMITTER_TOTAL_203_OF_203_PASS')
+          print('FOREIGN_SOURCE_CAUSAL_APL_CALLSITE_TOTAL',causal)
+          print('FOREIGN_SOURCE_PATH_COUNTERS',json.dumps(combined,sort_keys=True))
+          print('FOREIGN_SOURCE_ORIGINAL_SELECTED_IF_COUNTERS',json.dumps(return_counts,sort_keys=True))
+          PY
+          sha256sum /tmp/gr-foreground-dispatch-patch.json \
+            /tmp/zrot-foreground-native/*/foreground-source-to-JSON2.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-original-foreground-dispatch-proof-v1
+          path: |
+            /tmp/gr-foreground-dispatch-patch.json
+            /tmp/zrot-foreground-native/**/foreground-source-to-JSON2.json
+            /tmp/zrot-foreground-native/**/simc_reference_receipt.json
+            /tmp/zrot-foreground-native/**/simc_native_log.txt
+          if-no-files-found: warn
+          retention-days: 7
