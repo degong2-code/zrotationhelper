@@ -493,3 +493,15 @@ Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_C
 | Native output artifact | `zrot-gr-original-foreground-dispatch-proof-v1` #13658762910, SHA256 `14f2986d02988f45aa930aa73f0272db3b0c143b5e9004b3bb60629680463544` | **REUSE raw logs offline ASAP**; 7-day retention until 2026-11-16; no redundant broad native rebuild |
 
 Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_FOREGROUND_DISPATCH_CAUSAL_20261109.json`. Full trained gameplay rules, WCL current model holdout, confirmed opener end and practice verdict still UNKNOWN.
+
+## 2026-11-09 independent original source IF replay reuse
+
+| Component / evidence | PASS boundary | Next |
+| --- | --- | --- |
+| `general_rotation_original_dispatch_if_replay_v1.py` | #42587480633 3/3 offline, 147 exact source callsites, 91 comparator cross-check, 15 independent source IF match | **REUSE** exact row+call source-IF observations as narrow evidence; do not upgrade source physical READY |
+| Fury original plan `rage` and `buff.recklessness.up` | 15 selected actual source IF evaluated and matched comparator; class-specific adapter facts stay outside generic interpreter | **REUSE** verified adapter; do not leak to Mage |
+| Mage Arcane actual selected source IF | 54 no explicit IF (combined Fury/Mage), 78 PRE missing (combined), Mage adapter not enabled | **EXTEND** original raw-source PRE class adapter; high-impact 2T/ST first |
+| Distinct original combat route | 2 `touch_of_the_magi` rows, same source list/rank but not APL foreground callsite | **UNKNOWN** until generic alternative path provenance supported |
+| Full READY/mandatory priority/dummy | 0 / NOT_PROVEN / UNKNOWN | **BLOCK** product feedback promotion until independent evidence + holdout |
+
+Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_DISPATCH_SOURCE_IF_REPLAY_20261109.json`. Output artifact #13659663059, summary SHA256 `03c035dc6e7d28c4247c8756b427da317cce9965932f2e4caf23234dc3bb99f4`. No new native C++ or WCL calls this step.

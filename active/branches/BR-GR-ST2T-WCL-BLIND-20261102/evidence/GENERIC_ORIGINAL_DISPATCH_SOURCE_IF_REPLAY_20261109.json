@@ -1,0 +1,139 @@
+{
+  "schema": "ZrotGenericOriginalDispatchSameCallSourceIFReplayReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "date": "2026-11-09",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "upstream_original_source_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_foreground_artifact_run_id": 42584765533,
+  "source_foreground_receipt_git_blob": "358dde50f3e8c37e48b2897e5c53198e2abcace9",
+  "source_foreground_proof_scope": "ORIGINAL_CPP_SAME_METHOD_APL_ROOT_TO_JSON2_CALLSITE_ONLY",
+  "implementation": {
+    "code_path": "tools/research/general_rotation_original_dispatch_if_replay_v1.py",
+    "code_git_blob": "bb55caf40494a1f6a22f0836668ded84b46034d2",
+    "code_sha256": "bde3719aaecb29886d74db229dbf0ca2dcaa77e25463a31c79f7aa2afb198754",
+    "workflow": ".github/workflows/zrot-gr-original-dispatch-if-offline-v1.yml",
+    "reuses": [
+      "general_rotation_original_foreground_dispatch_v1.py",
+      "general_rotation_same_run_return_emitter_v1.py",
+      "simc_original_select_if_pre_witness_v1.py",
+      "simc_apl_semantic_ir_v2.py",
+      "original prior native artifact, four cases",
+      "pinned source profile MID2 Warrior Fury and Mage Arcane"
+    ],
+    "no_spec_spell_hardcoded_in_generic_engine": true,
+    "no_cross_class_adapter_PRE_substitution": true
+  },
+  "validation": {
+    "actions_id": 42587480633,
+    "actions_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42587480633",
+    "tested_head": "3e80a059965ec8095fceee1a6fad97a3d56d8dcc",
+    "conclusion": "success",
+    "jobs_total": 3,
+    "jobs_success": 3,
+    "py312_compile_synthetic": "PASS",
+    "py314_compile_synthetic": "PASS",
+    "four_case_raw_original_offline_replay": "PASS",
+    "prior_dispatch_sha256_revalidated_per_case": true,
+    "original_source_action_149_of_149_pristine_parity_in_prior_CI": true,
+    "target_count_cases": [
+      1,
+      2
+    ],
+    "spec_count": 2,
+    "result_summary_sha256": "03c035dc6e7d28c4247c8756b427da317cce9965932f2e4caf23234dc3bb99f4",
+    "case_report_sha256": {
+      "warrior_fury_st": "95aa858e61164682941cc2b9b49ec3775b35fcc973c7443a3fc626d0fdbdae86",
+      "warrior_fury_2t": "584d5133cb607749fec3aea8826ad9e6e689794b186a310f6f1bc13788e9ba2b",
+      "mage_arcane_st": "20bd82842b3e28b8707a48be1cc0d19bf4dac5728a7365ad8cd37e6c7dc4cd3a",
+      "mage_arcane_2t": "24a52710b3f80509e574444dd6915b059a78e78cc273715d514dae4aa994fa93"
+    },
+    "artifact_id": 13659663059,
+    "artifact_name": "zrot-gr-original-selected-source-if-offline-v1",
+    "artifact_sha256": "4cfef323cfb1e25c2d30e41aeceff45bb3d45e60787586a89afd01dcdee6371b",
+    "expires_utc": "2026-11-16T08:39:23Z",
+    "new_SimC_native_CXX_builds": 0,
+    "new_WCL_API_calls": 0
+  },
+  "original_same_run_evidence": {
+    "source_emitter_records": 203,
+    "combat": 149,
+    "precombat": 54,
+    "original_APL_foreground_dispatch_to_JSON2_record_count": 147,
+    "other_combat_paths": 2,
+    "selected_native_same_call_IF_comparator_count": 91,
+    "independently_replayed_source_if_matching_original_native": {
+      "total": 15,
+      "warrior_fury_ST": 13,
+      "warrior_fury_2T": 2,
+      "mage_arcane_ST": 0,
+      "mage_arcane_2T": 0
+    },
+    "source_APL_no_explicit_if": 54,
+    "source_if_missing_valid_original_select_PRE": 78,
+    "separate_PRECOMBAT_original_path": 54,
+    "nonforeground_combat_emitter_evidence": [
+      {
+        "source_spec": "mage_arcane",
+        "targets": 1,
+        "source_action": "touch_of_the_magi",
+        "source_list": "cooldowns",
+        "rank": 2,
+        "t_ms": 4971,
+        "JSON2_ordinal": 8,
+        "route": "UNKNOWN"
+      },
+      {
+        "source_spec": "mage_arcane",
+        "targets": 2,
+        "source_action": "touch_of_the_magi",
+        "source_list": "cooldowns",
+        "rank": 2,
+        "t_ms": 4819,
+        "JSON2_ordinal": 8,
+        "route": "UNKNOWN"
+      }
+    ],
+    "exact_partition": {
+      "original_APL_foreground": 147,
+      "source_if_independent_true_or_matched": 15,
+      "source_if_no_explicit_if": 54,
+      "source_if_unknown_missing_pre": 78,
+      "other_combat_route_unknown": 2,
+      "precombat_separate": 54
+    },
+    "source_adapter": {
+      "source_file": "tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json",
+      "pinned_class_cpp": "engine/class_modules/sc_warrior.cpp",
+      "captured_resource": "RESOURCE_RAGE",
+      "captured_source_resource_symbol": "rage",
+      "captured_buff": "recklessness",
+      "captured_source_buff_symbol": "buff.recklessness.up",
+      "allowed_for_mage": false,
+      "dynamically_rejected_for_other_class": true
+    }
+  },
+  "limits": {
+    "source_IF_proven_at_15_selected_original_decisions": true,
+    "source_ready_proven": 0,
+    "native_IF_observations_not_upgraded_to_source_truth": 76,
+    "actual_combat_execution_completion_proven": false,
+    "same_cast_competitor_readiness_proven": 0,
+    "rule_mandatory_priority_proven": false,
+    "opener_end": "UNKNOWN",
+    "independent_WCL_current_IR_holdout": "NOT_RUN",
+    "Blizzard_official_mechanic_truth_newly_reverified": false,
+    "dummy_wrong_skill": "UNKNOWN",
+    "first_10_seconds_not_exact_opener_boundary": true
+  },
+  "next": {
+    "product": "General Rotation opener and conditional ST/2T/cleave/AoE/build IF/ELSE rules, independently WCL tested, then safe lightweight target dummy trainer.",
+    "session": "Reuse source-pinned logs and new 15 independently replayed selected-row IF facts as General Rotation source evidence; add generic SpecAdapter class-specific original PRE capture for high-impact Arcane conditions (and the missing 78) with strict source provenance. Identify the nonforeground execution route of 2 Touch of the Magi source-row records without misclassifying as APL foreground; do one batched native run only when needed, then WCL independent candidate/holdout."
+  },
+  "branch_only": true,
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Gen5_handoff_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}

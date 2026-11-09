@@ -1,5 +1,15 @@
 # zRotationHelper — General Rotation / Dummy Trainer current status (2026-11-09)
 
+## 2026-11-09 Gen5 continuation — independently replayed original selected source IF (no new C++)
+
+- **Actual offline E2E:** [Actions #42587480633](https://github.com/degong2-code/zrotationhelper/actions/runs/42587480633), **3/3 SUCCESS** (Python 3.12/3.14 compile+synth and four original native log+source profile replays). Reuses [original #42584765533](https://github.com/degong2-code/zrotationhelper/actions/runs/42584765533) C++ single-build and its 149/149 pristine JSON2 parity, zero new C++ builds and zero WCL API.
+- The 203 original emitter rows partition **147 original APL foreground selection→JSON2 same-method callsite**, **2 other COMBAT execution route UNKNOWN**, **54 PRECOMBAT**. The 147 valid selected rows now partition into **15 independently evaluated source IF match with same-call native comparator**, **54 source rows with no explicit IF**, **78 UNKNOWN because original selected-call PRE operands missing**. The 15 independent original source IF matches are Fury ST 13 and Fury 2T 2. Native original comparator appeared in 91 selected calls but is NOT consumed as replay truth (remaining comparator observations do not establish source IF truth).
+- Source adapter provenance: original Fury plan reads `rage` and `buff.recklessness.up` only; source class comparison rejects using these as Mage PRE. The two out-of-foreground COMBAT rows both show original `touch_of_the_magi` / `cooldowns` rank2 (Arcane ST t=4971ms, 2T t=4819ms); exact non-foreground execution cause **UNKNOWN**.
+- Reusable generic engine `tools/research/general_rotation_original_dispatch_if_replay_v1.py` SHA256 `bde3719aaecb29886d74db229dbf0ca2dcaa77e25463a31c79f7aa2afb198754`; result summary SHA256 `03c035dc6e7d28c4247c8756b427da317cce9965932f2e4caf23234dc3bb99f4`; permanent receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_DISPATCH_SOURCE_IF_REPLAY_20261109.json`; output artifact #13659663059 (expires 2026-11-16 UTC).
+- **Limit:** IF TRUE is not full physical action READY or competitor priority. No confirmed opener end, WCL current-IR blind holdout or real dummy error. Original native action `queue_execute` and sequence-add do not prove full execution completion.
+- **Session Exact Next:** reuse the 15 source-IF facts; extend original SELECT PRE by a generic source-pinned SpecAdapter for high-impact missing Arcane IF symbols; isolate two alternative original COMBAT execution routes and validate in one batched C++ run only if offline evidence insufficient. Then independent WCL blind candidate lock/holdout. MAIN, Gen5, FROZEN unchanged.
+
+
 ## 2026-11-09 Gen5 continuation — original C++ foreground APL→JSON2 callsite causal dataflow
 
 **Real native E2E:** [GitHub Actions #42584765533](https://github.com/degong2-code/zrotationhelper/actions/runs/42584765533) **3/3 SUCCESS** (Python 3.12/3.14 synthetic+compile; original pinned C++ single build and actual Fury/Arcane ST/2T). Original JSON2 action time/name/ID/ordinal parity **149/149**, all original emitter 203 accounted for.
