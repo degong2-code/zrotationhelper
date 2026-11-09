@@ -155,6 +155,8 @@ jobs:
           PY
       - name: Post-lock-only source mapping after numeric lock and strict PRE WCL synthetic
         shell: bash
+        env:
+          PYTHONPATH: tools/research:tools/engine_first
         run: |
           set -euo pipefail
           python - <<'PY'
