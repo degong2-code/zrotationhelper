@@ -1,0 +1,116 @@
+name: zrot-simc-exact-source-if-frontier-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_simc_exact_if_capture_frontier_v1.py
+      - .github/workflows/zrot-simc-exact-source-if-frontier-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-synthetic:
+    name: Independent SimC source IF frontier regression Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile and fail-closed synthetic source dependency inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_simc_exact_if_capture_frontier_v1.py
+          python -B tools/research/general_rotation_simc_exact_if_capture_frontier_v1.py > /tmp/simc-if-pre-frontier-synth.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/simc-if-pre-frontier-synth.json'))
+          assert r['schema']=='ZrotGeneralRotationExactAPLSourceIFDecisionPRECaptureFrontierV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['synthetic_cases']==4 and r['tests']>=15
+          assert r['condition_truth_or_full_READY_promotions']==0
+          assert r['same_timestamp_cross_run_join_attempts']==0
+          assert r['WCL_API_calls']==0
+          print('SIMC_IF_PRE_CAPTURE_FRONTIER_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_simc_exact_if_capture_frontier_v1.py
+
+  actual-original-emission:
+    name: Reuse 203 exact native source rows and separately preserve prior 209 original IF comparisons
+    needs: [generic-synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-simc-original-json2-exact-apl-row-research-v1
+          run-id: 42564537815
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-exact-apl
+      - name: Verify exact native JSON bytes and independently classified source IF operands
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE=/tmp/zrot-exact-apl/gr-actual-json2-exact-source-rows-v1.json
+          test -s "$SOURCE"
+          echo "c6ff2f3c9aeff1eb6d6cfc2b9791fc2ad26e656edb1d3fba152da24cac18569b  $SOURCE" | sha256sum -c -
+          python -B tools/research/general_rotation_simc_exact_if_capture_frontier_v1.py \
+            --source-exact-json "$SOURCE" \
+            --expected-sha256 c6ff2f3c9aeff1eb6d6cfc2b9791fc2ad26e656edb1d3fba152da24cac18569b \
+            --separate-root-if-receipt active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ORIGINAL_MANA_NATIVE_IF_ST_2T_20261106.json \
+            --out /tmp/zrot-original-simc-select-if-capture-frontier-v1.json
+          python - <<'PY'
+          import json
+          from collections import Counter
+          p='/tmp/zrot-original-simc-select-if-capture-frontier-v1.json'
+          x=json.load(open(p))
+          assert x['schema']=='ZrotGeneralRotationExactAPLSourceIFDecisionPRECaptureFrontierV1'
+          assert x['source_case_count']==4
+          assert x['total_exact_emitted_source_rows']==203
+          assert x['minimum_new_real_source_producer_obligation']==\
+              'EXACT_SAME_RUN_SELECT_ROOT_ID_PLUS_APL_ROW_AND_PRE_OPERANDS'
+          assert x['same_run_source_select_IF_causality_proven']==0
+          assert x['independent_full_READY_proven']==0
+          assert x['WCL_API_calls']==0 and x['MAIN_promoted'] is False
+          assert x['separate_prior_original_root_if_evidence_not_joined']['available'] is True
+          assert x['separate_prior_original_root_if_evidence_not_joined'][
+              'independent_original_CPP_bounded_AST_vs_native_IF_matches']==209
+          assert x['separate_prior_original_root_if_evidence_not_joined'][
+              'cannot_join_per_emitted_action'] is True
+          assert [(c['source_spec_key'],c['source_case'],c['exact_source_APL_signatures'])
+                  for c in x['cases']]==[
+                  ('warrior_fury','st',59),('warrior_fury','2t',60),
+                  ('mage_arcane','st',41),('mage_arcane','2t',43)]
+          for c in x['cases']:
+              assert c['source_ready_and_priority_decision']=='UNKNOWN'
+              assert c['observed_sample_opener_is_complete'] is False
+              print('SIMC_REAL_SOURCE_IF_GAP',c['source_spec_key'],c['source_case'],
+                    json.dumps(c['classification_counts'],sort_keys=True))
+              print('SOURCE_IF_MISSING_PRE_PRIORITY',c['source_spec_key'],c['source_case'],
+                    json.dumps(c['missing_IF_operand_priority_by_emitted_action_frequency'][:16],sort_keys=True))
+          print('REAL_SOURCE_EXACT_IF_PRE_GAP_FRONTIER_PASS')
+          PY
+          sha256sum /tmp/zrot-original-simc-select-if-capture-frontier-v1.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-original-simc-exact-if-pre-capture-frontier-v1
+          path: /tmp/zrot-original-simc-select-if-capture-frontier-v1.json
+          retention-days: 7
+          if-no-files-found: error
