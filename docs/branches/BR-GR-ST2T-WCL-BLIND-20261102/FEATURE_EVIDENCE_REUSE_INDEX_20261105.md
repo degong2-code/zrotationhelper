@@ -456,3 +456,17 @@ Branch evidence receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/
 | Unobserved | selected-root→emitter unique causal identity, other readiness candidates, full READY, opener end, 3+ targets, WCL independent holdout; **UNKNOWN** |
 
 Canonical branch evidence receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SIMC_SAME_CALL_SOURCE_IF_PRE_20261109.json`.
+
+
+## 2026-11-09 Gen5 successor — cross-spec same-run return/emitter boundary
+
+| Asset | Source/validation | Decision |
+| --- | --- | --- |
+| Generic passive return+emitter identity | `tools/research/general_rotation_same_run_return_emitter_v1.py`; [#42581326058](https://github.com/degong2-code/zrotationhelper/actions/runs/42581326058), 3/3 PASS, SHA256 `c2b77937daa109c9d516ecdb61127bf96e03c6d5da850133f6b280c7bf92156d` | **REUSE** source-pinned passive instrument and structural candidate validator; generic core has no per-spec priority hardcoding |
+| 4-case real original SimC research | 203 emitters: 139 unique temporal actor/pointer/row witnesses; 10 multiple-root UNKNOWN; 54 missing-root UNKNOWN; pristine 149/149 observed JSON2 parity | **EVIDENCE ONLY**; not causal scheduling / full READY / opener end / WoW cast priority |
+| Source IF 60 original previous call | [#42573758563](https://github.com/degong2-code/zrotationhelper/actions/runs/42573758563) | **REUSE separately**, do not silently join the old 60 to this 203-event run |
+| Next generic decision-state work | Minimal source-pinned true schedule handoff where user-facing competing priority changes; then actor+field PRE, cross-scan CALL/RUN variable effect, source READY | **EXTEND**, no new broad C++ framework or per-spell code |
+| Current WCL / dummy | Blind lock, current holdout and actual client practice verdict not tested in this step | **UNKNOWN / NOT_RUN** |
+
+Permanent branch receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SAME_RUN_RETURN_EMITTER_BOUNDARY_20261109.json`. Failed CI wrappers #42579688909/#42579822119/#42580709508 are separately preserved as pipeline mistakes, not gameplay evidence.
+

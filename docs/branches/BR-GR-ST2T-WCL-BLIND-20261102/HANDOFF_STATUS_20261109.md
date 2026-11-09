@@ -1,5 +1,15 @@
 # zRotationHelper — General Rotation / Dummy Trainer current status (2026-11-09)
 
+## 2026-11-09 Gen5 이후 Branch 진행 — Generic same-run return/emitter 경계
+
+- 원본 GitHub 실증: [Actions #42581326058](https://github.com/degong2-code/zrotationhelper/actions/runs/42581326058), 3/3 SUCCESS (Python 3.12/3.14 synthetic + pinned official C++ single build). 4사례 Fury/Arcane ST/2T, 실제 JSON2 pristine/instrumented 행동 순서·시간·ID·ordinal **149/149 보존**.
+- 기존 203개 JSON2 emitter source-row marker와 같은 원본 실행의 source selection return을 actor/action object/list/rank/time/depth로 연결: **139 UNIQUE TEMPORAL WITNESS**, **10 MULTIPLE ROOT UNKNOWN**, **54 NO PRIOR ROOT UNKNOWN**. 이 숫자는 emitter 기록이고 149 combat SAMPLE_ACTION과 합산하거나 일대일로 취급하지 않는다.
+- 핵심 경계: 139는 **동일 실행 시간/객체/행 기반의 후보 연결**일 뿐, 실제 scheduling causality·완전 physical READY·동시 사용 가능한 경쟁 스킬의 최적 우선순위 증명이 아니다. 오프닝 종료/WCL current IR blind holdout/실제 허수아비 오류 판단 **UNKNOWN/NOT_RUN**.
+- 코드: `tools/research/general_rotation_same_run_return_emitter_v1.py` (SHA256 `c2b77937daa109c9d516ecdb61127bf96e03c6d5da850133f6b280c7bf92156d`). 영수증: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SAME_RUN_RETURN_EMITTER_BOUNDARY_20261109.json`; artifact 13657392846, ZIP digest `sha256:56bea509eedf590539741275e76cdb907fd1fd9e20d3014d022e5378ec7997d8`.
+- 구현 효율 감사: 새 APL parser·per-spell solver를 만들지 않고 기존 IF 선택계측/JSON2 emitter/149 parity를 재사용했다. 초기 3회 CI 중 1회 prior receipt schema mismatch와 2회 workflow spec slug mismatch는 **신규 파이프라인 결함**이었으며 SimC/rotation 가설 실패가 아니다. 빌드 전 `spec=fury|arcane` profile preflight를 추가해 재발 위험 축소.
+- Product Exact Next: 동일 실행의 **true selector→execution causal schedule/effect**를 중요한 조건부터 증명하고 Generic PRE/READY/IF-ELSE 모델에 넣는다. 별도 WCL blind lock/holdout 및 WoW dummy feedback은 아직 시작하지 않는다. MAIN/Gen5/FROZEN/Seq578/Seq637 불변.
+
+
 ## 2026-11-09 Scope Gen5 handoff — latest verified same-call SimC proof
 
 **Handoff authority:** branch Gen5 `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json`; parent Gen4 exact bytes archived `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN4_BEFORE_20261109.json` SHA256 `84c15a489c7709bdbd24f4474f6665afc9cc9692ccc286cda1c1ce1e7a6a7a9e`. The branch HEAD displayed here is preparation-time `0a33183eaee1565e7481027c98231d86bc17b6ff`, **not** an eternal HEAD; new chat re-queries. MAIN checked read-only `4790f77f76a75f26ff0558d1d18c16cd9d630c4b`.
