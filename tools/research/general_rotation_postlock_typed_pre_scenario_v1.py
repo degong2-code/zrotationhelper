@@ -189,6 +189,65 @@ def _source_checks(numeric,source_case,compiled):
          "SOURCE_CANDIDATE_MAPPING_ROW_COUNT_DRIFT")
     return indexes
 
+
+def _temporal_checks(transport,temporal):
+    """Require original numeric-cast event IDs and raw receipt to match."""
+    from wcl_raw_actor_aura_temporal_pre_v1 import SCHEMA as AURA_TEMPORAL_SCHEMA
+    need(type(temporal)==dict and
+         temporal.get("schema")==AURA_TEMPORAL_SCHEMA and
+         temporal.get("policy_id")==POLICY and
+         temporal.get("source_numeric_transport_sha256")==
+             transport["numeric_transport_sha256"] and
+         temporal.get("source_raw_receipt_sha256")==
+             transport["raw_receipt_sha256"] and
+         temporal.get("source_raw_page_sha256")==
+             transport["raw_source_page_sha256"] and
+         temporal.get("aura_remains_known")==0 and
+         temporal.get("full_GCD_cooldown_charge_READY_proven")==0 and
+         temporal.get("mandatory_general_rotation_rule_promoted") is False and
+         temporal.get("raw_last_aura_event_age_never_promoted_to_remaining_duration") is True and
+         temporal.get("temporal_matrix_sha256")==
+             sha(canonical({k:v for k,v in temporal.items()
+                            if k!="temporal_matrix_sha256"})),
+         "TEMPORAL_AURA_RAW_SOURCE_OR_GAMEPLAY_AUTHORITY_INVALID")
+    rows=temporal.get("per_numeric_cast")
+    casts=transport["cast_events"]
+    need(type(rows)==list and len(rows)==len(casts)==
+         temporal.get("actual_cast_rows"),
+         "TEMPORAL_AURA_CAST_COUNT_DIFFERS_FROM_RAW")
+    keyed={}
+    for row in rows:
+        ident=row["numeric_raw_cast_event_id"]
+        need(ident not in keyed and
+             row["aura_remaining_duration_for_any_spell"]=="UNKNOWN" and
+             row["complete_action_READY"]=="UNKNOWN",
+             "TEMPORAL_AURA_CAST_ROW_DUPLICATE_OR_PROMOTED")
+        keyed[ident]=row
+    need(set(keyed)=={c["event_id"] for c in casts},
+         "TEMPORAL_CAST_ID_NOT_SAME_AS_FROZEN_RAW")
+    for cast in casts:
+        row=keyed[cast["event_id"]]
+        t=cast["t_ms"]
+        need(row["at_ms"]==t and row["spell_id"]==cast["spell_id"],
+             "TEMPORAL_CAST_TIMESTAMP_OR_ID_DIFFERENT")
+        for sid,aura in row["per_numeric_aura_spell"].items():
+            need(sid.isdecimal() and
+                 aura["aura_remaining_duration_ms"]=="UNKNOWN" and
+                 type(aura["last_transition_t_ms"])==int and
+                 aura["last_transition_t_ms"]<t and
+                 aura["source_checkpoint_raw_receipt_sha256"]==
+                    transport["raw_receipt_sha256"] and
+                 aura["explicit_stack_status"] in (
+                    "EXACT_RAW_STACK_OBSERVED","UNKNOWN_NOT_EXPLICITLY_OBSERVED") and
+                 (aura["explicit_stack"] is None or
+                  type(aura["explicit_stack"])==int and
+                  aura["explicit_stack"]>=0) and
+                 (aura["explicit_stack"] is None)==(
+                  aura["explicit_stack_status"]==
+                    "UNKNOWN_NOT_EXPLICITLY_OBSERVED"),
+                 "WCL_TEMPORAL_AURA_STACK_FACT_NOT_STRICT_PRIOR")
+    return keyed
+
 def _map_checks(mapping,numeric,source_case,compiled):
     need(type(mapping)==dict and mapping.get("schema")==MAP_SCHEMA and
          mapping.get("policy_id")==POLICY and
@@ -235,6 +294,13 @@ def _map_checks(mapping,numeric,source_case,compiled):
                    "raw_units_per_source_unit_scenarios","confidence"},
                  "NUMERIC_RESOURCE_SCALING_MUST_BE_SCENARIO_ONLY")
             scale_operands[symbol]=factors
+        elif kind=="WCL_RAW_AURA_EXPLICIT_STACK":
+            need(symbol.startswith("buff.") and symbol.endswith(".stack") and
+                 type(entry.get("raw_numeric_aura_spell_id"))==int and
+                 entry["raw_numeric_aura_spell_id"]>0 and
+                 set(entry)=={"source_symbol","raw_kind",
+                             "raw_numeric_aura_spell_id","confidence"},
+                 "STACK_SOURCE_SYMBOL_MUST_BE_EXPLICIT_EXPLORATORY_ID_NOT_REMAINS")
         else:raise TypedIfError("UNSUPPORTED_RAW_SOURCE_OPERAND_KIND")
         indexes[symbol]=entry
     scenarios=[dict(zip(scale_operands,values))
@@ -242,7 +308,7 @@ def _map_checks(mapping,numeric,source_case,compiled):
     need(0<len(scenarios)<=16,"NUMERIC_POWER_SCENARIOS_UNBOUNDED")
     return indexes,scenarios
 
-def _facts(row, mapping, scenario, required_symbols):
+def _facts(row, mapping, scenario, required_symbols, temporal_row):
     values={};evidence={};unknown=[]
     t=row["at_ms"]
     for symbol in required_symbols:
@@ -261,6 +327,24 @@ def _facts(row, mapping, scenario, required_symbols):
                      "raw_source_event_id":prior["source_event_id"],
                      "strict_pre_ms":timestamp,
                      "scenario_assumption_only":True}
+        elif contract["raw_kind"]=="WCL_RAW_AURA_EXPLICIT_STACK":
+            need(temporal_row is not None,
+                 "EXPLICIT_AURA_STACK_SOURCE_REQUIRES_PROVEN_TEMPORAL_PRE")
+            sid=str(contract["raw_numeric_aura_spell_id"])
+            prior=temporal_row["per_numeric_aura_spell"].get(sid)
+            if (prior is None or
+                prior["explicit_stack_status"]!="EXACT_RAW_STACK_OBSERVED"):
+                unknown.append(symbol);continue
+            timestamp=prior["last_transition_t_ms"]
+            val=float(prior["explicit_stack"])
+            raw_rec={"kind":"WCL_RAW_AURA_EXPLICIT_STACK",
+                     "raw_numeric_aura_spell_id":
+                         contract["raw_numeric_aura_spell_id"],
+                     "raw_explicit_numeric_stack":prior["explicit_stack"],
+                     "raw_source_event_ids":prior["source_event_ids"],
+                     "strict_pre_ms":timestamp,
+                     "scenario_assumption_only":True,
+                     "game_buff_identity_verified":False}
         else:
             raw_kind=str(contract["raw_power_type"])
             prior=row["raw_numeric_power_owned_strict_pre"].get(raw_kind)
@@ -283,11 +367,17 @@ def _facts(row, mapping, scenario, required_symbols):
         evidence[symbol]=raw_rec
     return values,evidence,unknown
 
-def evaluate(numeric,transport,joint,source_case,compiled,mapping):
+def evaluate(numeric,transport,joint,source_case,compiled,mapping,*,temporal=None):
     """Evaluate all plausible original source-row IFs, with zero auto-promotion."""
     cast_pre=_join_checks(numeric,transport,joint)
+    temporal_casts=(_temporal_checks(transport,temporal)
+                    if temporal is not None else {})
     rows=_source_checks(numeric,source_case,compiled)
     operand_map,scenarios=_map_checks(mapping,numeric,source_case,compiled)
+    need(temporal is not None or
+         all(x["raw_kind"]!="WCL_RAW_AURA_EXPLICIT_STACK"
+             for x in operand_map.values()),
+         "SOURCE_STACK_OPERAND_REQUIRES_EXPLICIT_RAW_TEMPORAL_MATRIX")
     stats=Counter();raw_fact_stats=Counter()
     required_source_symbols=Counter()
     unmapped_source_symbols=Counter()
@@ -308,7 +398,8 @@ def evaluate(numeric,transport,joint,source_case,compiled,mapping):
             statuses=[];scenario_examples=[]
             for scenario in scenarios:
                 facts,evidence,missing=_facts(
-                    pre,operand_map,scenario,required)
+                    pre,operand_map,scenario,required,
+                    temporal_casts.get(idnum))
                 for symbol in evidence:raw_fact_stats[symbol]+=1
                 for symbol in missing:raw_status_unknown[symbol]+=1
                 if if_cond is None:
@@ -373,6 +464,9 @@ def evaluate(numeric,transport,joint,source_case,compiled,mapping):
       "bound_WCL_numeric_phase_sha256":sha(canonical(numeric)),
       "raw_actor_transport_sha256":transport["numeric_transport_sha256"],
       "joint_owned_power_aura_pre_sha256":joint["joined_numeric_pre_sha256"],
+      "optional_raw_aura_temporal_matrix_sha256":(
+          temporal["temporal_matrix_sha256"] if temporal is not None else None),
+      "raw_numeric_aura_stack_cast_channel_replayed":temporal is not None,
       "source_candidate_binding_sha256":sha(canonical(compiled)),
       "postlock_exploratory_operand_map_sha256":sha(canonical(mapping)),
       "WCL_raw_evidence_origin":numeric["source_kind"],
@@ -421,7 +515,8 @@ def selftest():
         p=(cls+'="Synthetic"\nspec='+spec+'\n'
            'actions=alpha,if=buff.ready.up&energy>=100\n'
            'actions+=/alpha,if=energy<100\n'
-           'actions+=/alpha,if=energy>=100&variable.missing\n').encode()
+           'actions+=/alpha,if=energy>=100&variable.missing\n'
+           'actions+=/alpha,if=buff.proc.stack>=2\n').encode()
         model=compile_profile(
             p,{"key":spec,"class_key":cls,"git_blob":git_blob(p)})
         case={"schema":EVIDENCE_SCHEMA,"policy_id":POLICY,
@@ -504,6 +599,39 @@ def selftest():
             "source_APL_candidate_row":"UNKNOWN_UNTIL_POSTLOCK_ADAPTER"}]}
         joint["joined_numeric_pre_sha256"]=sha(canonical(joint))
         compiled=compile_binding(numeric,case,adapter,canonical(adapter))
+        temporal={
+          "schema":"ZrotWclActorAuraTemporalStrictPreV1",
+          "policy_id":POLICY,
+          "source_numeric_transport_sha256":
+             transport["numeric_transport_sha256"],
+          "source_raw_receipt_sha256":transport["raw_receipt_sha256"],
+          "source_raw_page_sha256":"d"*64,
+          "actual_cast_rows":1,
+          "aura_remains_known":0,
+          "full_GCD_cooldown_charge_READY_proven":0,
+          "mandatory_general_rotation_rule_promoted":False,
+          "raw_last_aura_event_age_never_promoted_to_remaining_duration":True,
+          "per_numeric_cast":[{
+            "numeric_raw_cast_event_id":"cast-1","at_ms":1000,
+            "spell_id":1201,"aura_remaining_duration_for_any_spell":"UNKNOWN",
+            "complete_action_READY":"UNKNOWN",
+            "per_numeric_aura_spell":{"777":{
+              "aura_remaining_duration_ms":"UNKNOWN",
+              "last_transition_t_ms":700,
+              "source_checkpoint_raw_receipt_sha256":"c"*64,
+              "explicit_stack":3,
+              "explicit_stack_status":"EXACT_RAW_STACK_OBSERVED",
+              "source_event_ids":["synthetic-stack-event"]}}
+          }]
+        }
+        transport["raw_source_page_sha256"]="d"*64
+        transport["numeric_transport_sha256"]=sha(canonical({
+          k:v for k,v in transport.items() if k!="numeric_transport_sha256"}))
+        joint["source_numeric_transport_sha256"]=transport["numeric_transport_sha256"]
+        joint["joined_numeric_pre_sha256"]=sha(canonical({
+          k:v for k,v in joint.items() if k!="joined_numeric_pre_sha256"}))
+        temporal["source_numeric_transport_sha256"]=transport["numeric_transport_sha256"]
+        temporal["temporal_matrix_sha256"]=sha(canonical(temporal))
         mapping={
           "schema":MAP_SCHEMA,"policy_id":POLICY,
           "use_stage":"AFTER_FROZEN_NUMERIC_CANDIDATE_LOCK_ONLY",
@@ -521,20 +649,28 @@ def selftest():
               "raw_kind":"WCL_RAW_ACTOR_NUMERIC_POWER",
               "raw_power_type":1,
               "raw_units_per_source_unit_scenarios":[1,10],
+              "confidence":"EXPLORATORY_UNVERIFIED_MECHANIC_AND_BUILD"},
+             {"source_symbol":"buff.proc.stack",
+              "raw_kind":"WCL_RAW_AURA_EXPLICIT_STACK",
+              "raw_numeric_aura_spell_id":777,
               "confidence":"EXPLORATORY_UNVERIFIED_MECHANIC_AND_BUILD"}]
         }
-        res=evaluate(numeric,transport,joint,case,compiled,mapping)
+        res=evaluate(numeric,transport,joint,case,compiled,mapping,
+                     temporal=temporal)
         need(res["numeric_observed_casts"]==1 and
              res["required_source_IF_operand_occurrence_counts"]==
-                {"buff.ready.up":1,"energy":3,"variable.missing":1} and
+                {"buff.ready.up":1,"energy":3,
+                 "variable.missing":1,"buff.proc.stack":1} and
              res["source_operand_scenario_usage_counts"]==
-                {"buff.ready.up":2,"energy":6} and
+                {"buff.ready.up":2,"energy":6,"buff.proc.stack":2} and
              res["unmapped_source_IF_operand_occurrence_counts"]==
                 {"variable.missing":1} and
              res["unobserved_source_IF_operand_scenario_counts"]==
                 {"variable.missing":2} and
              res["raw_WCL_candidate_casts_with_source_token"]==1 and
-             res["individual_source_IF_candidate_row_probes"]==3 and
+             res["individual_source_IF_candidate_row_probes"]==4 and
+             res["source_conditional_scenario_counts"][
+                 "TRUE_UNDER_UNVERIFIED_SEMANTIC_LINK"]==1 and
              res["source_conditional_scenario_counts"][
                  "SCALE_SENSITIVE_OR_SCENARIO_UNKNOWN"]==3 and
              res["certified_source_IF_guard_true_count"]==0 and
@@ -542,6 +678,31 @@ def selftest():
              res["dummy_wrong_cast_verdicts"]==0,
              "CROSS_CLASS_NUMERIC_SCENARIO_SOURCE_IF_REGRESSION")
         positive+=1
+        missing=copy.deepcopy(temporal)
+        missing["per_numeric_cast"][0]["per_numeric_aura_spell"]["777"][
+            "explicit_stack"]=None
+        missing["per_numeric_cast"][0]["per_numeric_aura_spell"]["777"][
+            "explicit_stack_status"]="UNKNOWN_NOT_EXPLICITLY_OBSERVED"
+        missing["temporal_matrix_sha256"]=sha(canonical({
+            k:v for k,v in missing.items() if k!="temporal_matrix_sha256"}))
+        unknown=evaluate(numeric,transport,joint,case,compiled,mapping,
+                         temporal=missing)
+        need(unknown["source_conditional_scenario_counts"][
+              "UNKNOWN_UNDER_UNVERIFIED_SEMANTIC_LINK"]>=1 and
+             unknown["certified_source_IF_guard_true_count"]==0,
+             "UNKNOWN_MISSING_RAW_STACK_WAS_FILLED_FROM_APPLICATION")
+        bad=copy.deepcopy(temporal)
+        bad["per_numeric_cast"][0]["per_numeric_aura_spell"]["777"][
+            "last_transition_t_ms"]=1000
+        bad["temporal_matrix_sha256"]=sha(canonical({
+            k:v for k,v in bad.items() if k!="temporal_matrix_sha256"}))
+        must_fail(lambda:evaluate(numeric,transport,joint,case,compiled,
+                                  mapping,temporal=bad))
+        must_fail(lambda:evaluate(numeric,transport,joint,case,compiled,mapping))
+        bad=copy.deepcopy(mapping)
+        bad["operand_bindings"][-1]["source_symbol"]="buff.proc.remains"
+        must_fail(lambda:evaluate(numeric,transport,joint,case,compiled,
+                                  bad,temporal=temporal))
         bad=copy.deepcopy(joint)
         bad["per_numeric_cast"][0]["raw_numeric_power_owned_strict_pre"][
             "1"]["strict_prior_at_ms"]=1000
@@ -578,6 +739,8 @@ def selftest():
        "uncertain_power_divisor_sensitivity_visible":True,
        "multiple_APL_row_conditions_preserved":True,
        "missing_unmapped_source_operand_remains_UNKNOWN":True,
+       "explicit_raw_aura_stack_source_if_exploratory_only":True,
+       "unknown_stack_and_same_time_temporal_controls":True,
        "source_semantics_current_game_certified":False,
        "player_competitor_READY_proven":0,
        "player_dummy_errors_proven":0,
@@ -589,10 +752,13 @@ def main():
     for arg in ("numeric-phase","raw-transport","joined-pre","source-case",
                 "compiled-binding","operand-map","out"):
         ap.add_argument("--"+arg,type=Path)
+    ap.add_argument("--temporal-pre",type=Path)
     opts=ap.parse_args()
-    if all(x is None for x in vars(opts).values()):
+    required=("numeric_phase","raw_transport","joined_pre","source_case",
+              "compiled_binding","operand_map","out")
+    if all(getattr(opts,k) is None for k in required) and opts.temporal_pre is None:
         print(json.dumps(selftest(),sort_keys=True));return
-    need(all(x is not None for x in vars(opts).values()),
+    need(all(getattr(opts,k) is not None for k in required),
          "ALL_PROVENANCE_PINNED_SEPARATE_INPUTS_REQUIRED")
     numeric,_=load_json(opts.numeric_phase)
     transport,_=load_json(opts.raw_transport)
@@ -600,7 +766,9 @@ def main():
     source,_=load_json(opts.source_case)
     compiled,_=load_json(opts.compiled_binding)
     mapping,_=load_json(opts.operand_map)
-    out=evaluate(numeric,transport,joint,source,compiled,mapping)
+    temporal=load_json(opts.temporal_pre)[0] if opts.temporal_pre else None
+    out=evaluate(numeric,transport,joint,source,compiled,mapping,
+                 temporal=temporal)
     need(not opts.out.exists(),"NO_OVERWRITE_EVIDENCE_RESULT")
     opts.out.parent.mkdir(parents=True,exist_ok=True)
     opts.out.write_bytes(canonical(out))
