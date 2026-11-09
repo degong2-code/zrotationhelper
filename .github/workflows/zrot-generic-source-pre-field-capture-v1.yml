@@ -1,0 +1,264 @@
+name: zrot-generic-source-pre-field-capture-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_source_pre_field_capture_v1.py
+      - .github/workflows/zrot-generic-source-pre-field-capture-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generic-python:
+    name: Typed source PRE producer Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Generic source PRE field plan + generator compile and synthetic checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_source_pre_field_capture_v1.py
+          python -B tools/research/general_rotation_source_pre_field_capture_v1.py > /tmp/source-pre-generic-synthetic.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/source-pre-generic-synthetic.json'))
+          assert r['schema']=='ZrotGenericSimcOriginalPREFieldCapturePlanV1'
+          assert r['status']=='PASS_OFFLINE_SYNTHETIC'
+          assert r['checks']>=13
+          assert r['same_generic_cpp_capturer_for_two_specs'] is True
+          assert r['no_hardcoded_class_or_action_in_cpp_producer'] is True
+          assert r['full_positive_READY']==0
+          assert r['real_cpp_build']=='NOT_RUN'
+          assert r['WCL_API_calls']==0
+          print('GENERIC_SOURCE_PRE_CAPTURE_SYNTHETIC_PASS',r['checks'])
+          PY
+          sha256sum tools/research/general_rotation_source_pre_field_capture_v1.py
+
+  pinned-original-schema:
+    name: Official Warrior and Mage rule-to-PRE capture plan
+    needs: [generic-python]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Independently bind actual official Warrior equipment and Mage buff field requests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          python -B tools/research/general_rotation_source_pre_field_capture_v1.py \
+            --source-root simc-upstream --plan-out /tmp/gr-source-pre-capture-plan.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/gr-source-pre-capture-plan.json'))
+          assert p['schema']=='ZrotGenericSimcOriginalPREFieldCapturePlanV1'
+          assert len(p['field_requests'])==3
+          assert len(p['source_rule_bindings'])==3
+          assert {x['spec_fixture'] for x in p['source_rule_bindings']}=={'warrior_fury','mage_arcane'}
+          assert p['original_original_and_patched_cast_parity']=='NOT_YET_PROVEN'
+          assert p['source_dispatch_exhaustive'] is False
+          assert p['independent_READY_or_NOT_READY'] is False
+          assert p['CXX_source_guard_provenance_verified'] is True
+          print('PINNED_GENERIC_TWO_SPEC_PRE_CAPTURE_SOURCE_PLAN_PASS')
+          PY
+          sha256sum /tmp/gr-source-pre-capture-plan.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zrot-generic-source-pre-capture-plan
+          path: /tmp/gr-source-pre-capture-plan.json
+          if-no-files-found: error
+          retention-days: 7
+
+  real-original-source-fields:
+    name: Real native Fury and Arcane same-binary nonperturbing PRE capture
+    needs: [pinned-original-schema]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore compiler cache for one source revision
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: simc-ubuntu-gcc-b522cded8c26b97dac03fdf56e57a03ec7e8faa6-v1
+      - name: Compile pristine original once, capture Fury moving ST and Mage default ST
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-generic-source-pre-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-generic-source-pre-build --target simc --parallel 3
+          python - <<'PY'
+          from pathlib import Path
+          from hashlib import sha1
+          src=Path("simc-upstream/profiles/MID2/MID2_Warrior_Fury.simc").read_bytes()
+          blob=sha1(b'blob '+str(len(src)).encode()+b'\0'+src).hexdigest()
+          assert blob=='3225992ed5b754ad5d61e8b785d9d859f1eed1be'
+          Path('/tmp/zrot-generic-fury-moving.simc').write_bytes(
+              src+b'\nfight_style=LightMovement\n')
+          PY
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile /tmp/zrot-generic-fury-moving.simc --spec fury \
+            --simc-bin /tmp/zrot-generic-source-pre-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/generic-pristine-fury --timeout 180
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc --spec arcane \
+            --simc-bin /tmp/zrot-generic-source-pre-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/generic-pristine-mage --timeout 180
+      - name: Generate single generic PRE field probe, not one patch per specialization
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_source_pre_field_capture_v1.py \
+            --source-root simc-upstream \
+            --plan-out /tmp/gr-actual-source-pre-plan.json \
+            --patch --patch-receipt /tmp/gr-source-pre-producer-receipt.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/gr-actual-source-pre-plan.json'))
+          r=json.load(open('/tmp/gr-source-pre-producer-receipt.json'))
+          assert r['schema']=='ZrotGenericSimcOriginalPREFieldCapturePlanV1'
+          assert r['plan_sha256']==p['plan_sha256']
+          assert r['fields_emitted']==3
+          assert r['original_select_action_ready_call_count_unchanged'] is True
+          assert r['new_virtual_ready_calls']==0
+          assert r['target_selection_parity']=='NOT_YET_PROVEN'
+          print('ACTUAL_GENERIC_SOURCE_PRE_FIELD_PRODUCER_PATCH_PASS')
+          PY
+      - name: Rebuild modified player.cpp only and capture both specifications with same seeds
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake --build /tmp/zrot-generic-source-pre-build --target simc --parallel 3
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile /tmp/zrot-generic-fury-moving.simc --spec fury \
+            --simc-bin /tmp/zrot-generic-source-pre-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/generic-patched-fury --timeout 180
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc --spec arcane \
+            --simc-bin /tmp/zrot-generic-source-pre-build/simc \
+            --targets 1 --seed 31459 --fight-seconds 30 \
+            --out-dir /tmp/generic-patched-mage --timeout 180
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          cases={}
+          for spec in ('fury','mage'):
+              original=extract_json_sequence(Path('/tmp/generic-pristine-'+spec))
+              after=extract_json_sequence(Path('/tmp/generic-patched-'+spec))
+              assert original['status']=='SEQUENCE_SNAPSHOTS_EXTRACTED'
+              assert original['source_apl_sha256']==after['source_apl_sha256']
+              assert original['source_profile_sha256']==after['source_profile_sha256']
+              assert original['combat_sequence']==after['combat_sequence']
+              assert original['precombat_sequence']==after['precombat_sequence']
+              cases[spec]={'identical_precombat_and_combat_actions':True,
+                           'combat_casts':original['combat_count']}
+          report={'schema':'ZrotGenericFuryMagePristineInstrumentedParityV1',
+                  'cases':cases,'new_ready_calls':0,
+                  'whole_route_READY_claimed':False,
+                  'WCL_API_calls':0}
+          Path('/tmp/gr-two-spec-pristine-instrumented-parity.json').write_text(
+              json.dumps(report,sort_keys=True,indent=2)+'\n')
+          print('ORIGINAL_FURY_MAGE_SAME_GENERIC_PRE_PRODUCER_NONPERTURBATION_PASS',
+                cases)
+          PY
+      - name: Recompute original actor PRE state and cross-spec conditional numeric hypotheses
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_source_pre_field_capture_v1.py \
+            --source-root simc-upstream \
+            --audit-log /tmp/generic-patched-fury/simc_native_log.txt \
+            --spec warrior_fury \
+            --audit-out /tmp/gr-original-fury-equipment-pre.json
+          python -B tools/research/general_rotation_source_pre_field_capture_v1.py \
+            --source-root simc-upstream \
+            --audit-log /tmp/generic-patched-mage/simc_native_log.txt \
+            --spec mage_arcane \
+            --audit-out /tmp/gr-original-mage-buff-pre.json
+          python - <<'PY'
+          import json
+          f=json.load(open('/tmp/gr-original-fury-equipment-pre.json'))
+          m=json.load(open('/tmp/gr-original-mage-buff-pre.json'))
+          assert f['schema']==m['schema']=='ZrotGenericSimcOriginalPREFieldCaptureReplayV1'
+          assert f['plan_sha256']==m['plan_sha256']
+          assert f['original_method_PRE_markers_paired']>0
+          assert m['original_method_PRE_markers_paired']>0
+          assert all(x['full_READY']=='UNKNOWN' for x in f['source_bound_condition_results'])
+          assert all(x['full_READY']=='UNKNOWN' for x in m['source_bound_condition_results'])
+          assert f['independent_FULL_READY']==m['independent_FULL_READY']==0
+          assert f['dummy_trainer_error_permitted'] is False
+          assert m['dummy_trainer_error_permitted'] is False
+          assert f['WCL_API_calls']==m['WCL_API_calls']==0
+          assert any(x['matched_original_PRE_attempts']>0 for x in f['source_bound_condition_results'])
+          assert any(x['matched_original_PRE_attempts']>0 for x in m['source_bound_condition_results'])
+          print('ACTUAL_FURY_AND_MAGE_SOURCE_PRE_FIELD_TO_GENERIC_IR_PASS')
+          print('FURY_NUMERIC',json.dumps(f['source_bound_condition_results'],sort_keys=True))
+          print('MAGE_NUMERIC',json.dumps(m['source_bound_condition_results'],sort_keys=True))
+          PY
+          sha256sum /tmp/gr-actual-source-pre-plan.json \
+            /tmp/gr-source-pre-producer-receipt.json \
+            /tmp/gr-original-fury-equipment-pre.json \
+            /tmp/gr-original-mage-buff-pre.json \
+            /tmp/gr-two-spec-pristine-instrumented-parity.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-source-pre-fury-mage-generic-field-evidence
+          path: |
+            /tmp/gr-actual-source-pre-plan.json
+            /tmp/gr-source-pre-producer-receipt.json
+            /tmp/gr-original-fury-equipment-pre.json
+            /tmp/gr-original-mage-buff-pre.json
+            /tmp/gr-two-spec-pristine-instrumented-parity.json
+          if-no-files-found: warn
+          retention-days: 7
