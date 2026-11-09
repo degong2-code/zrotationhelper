@@ -1,0 +1,252 @@
+{
+  "schema": "ZrotGeneralRotationGenericWclColdStartDisjointRealReplayThirdReportReceiptV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "source_truth_original_SimC": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "product_scope": {
+    "goal": "Reusable General Rotation opener and conditional IF/ELSE priorities across specs/target counts; independently validated WCL then dummy practice error explanations.",
+    "in_scope": [
+      "SimC-first source APL",
+      "WCL independent discovery/holdout",
+      "Strict PRE numeric state",
+      "Reusable research-engine functions",
+      "UNKNOWN-safe dummy evaluation"
+    ],
+    "excluded": [
+      "Encounter-specific rotation plans",
+      "raid timelines",
+      "NSRT",
+      "boss mechanic action plans"
+    ]
+  },
+  "generic_engine_features": {
+    "raw_to_actor_numeric_strict_pre": {
+      "path": "tools/engine_first/wcl_raw_actor_numeric_transport_v1.py",
+      "git_blob": "045b94f9e75459f0bd6325b8de0353d73ec99a20",
+      "verified_final_file_sha256": "3828c2f5ffd5c8cbf0fa5fe69001a2077534def5e0268bd68d6ce71d62d94055",
+      "class_spec_action_hardcode": false,
+      "original_checkpoint_and_raw_page_sha_reverified": true,
+      "actor_gate_and_actor_view_SHA_replayed": true,
+      "all_cast_strict_pre_numeric_matrix": true,
+      "raw_aura_active_boolean_only": true,
+      "invalid_unknown_missing_state_inferred": false,
+      "WCL_timestamp_normalized_to_fight_start_ms": true,
+      "same_timestamp_future_leakage_prevented": true,
+      "duplicate_report_identity_classifier": true,
+      "disjoint_numeric_fixture_builder": true,
+      "locked_candidate_presence_only_replay": true
+    },
+    "reusable_ranker_exclusion": {
+      "path": "tools/engine_first/wcl_official_ranker_discovery_v1.py",
+      "git_blob": "eaf9182bb363099e207d27577e7650ff47694aa7",
+      "live_cli": "--exclude-report-code (repeatable)",
+      "numeric_only_pre_metadata_filter": true,
+      "skipped_report_not_queried_for_actor_metadata": true,
+      "existing_select_verified_filter_reused": true,
+      "original_frozen_lock_unchanged": true
+    },
+    "existing_frozen_lock": "tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py",
+    "existing_disjoint_holdout": "tools/engine_first/wcl_disjoint_holdout_v1.py",
+    "existing_raw_replay": "tools/engine_first/fresh_wcl_engine_v1.py",
+    "existing_strict_pre_engine": "tools/research/general_rotation_strict_pre_state_engine_v1.py",
+    "source_pinned_APL_IR": "tools/research/general_rotation_original_source_evidence_bridge_v1.py",
+    "postlock_source_mapping": {
+      "path": "tools/research/general_rotation_wcl_postlock_source_ir_bridge_v1.py",
+      "git_blob": "169ac2f57fa1cd9801d5a78b0107d1e4e02a79e6",
+      "verified_file_sha256": "a3de2f88c114fb94753b8f3f6295cce585e744e1f793f6564652afd51e9f30b4",
+      "one_WCL_spell_multiple_APL_conditional_rows_supported": true,
+      "ambiguous_row_identity": "UNKNOWN_MULTIPLE_SOURCE_ROWS",
+      "no_row_selection_from_observed_cast_or_IF_TRUE": true,
+      "real_WCL_numeric_spell_mapping_independently_audited": false
+    }
+  },
+  "actual_WCL_evidence": {
+    "original_discovery": {
+      "official_live_run": 41463589665,
+      "official_original_raw_artifact_id": 13149059210,
+      "original_artifact_SHA256": "e76011b9363cef304b83fa97344180a25179480bd5c915b660d1bde5400af457",
+      "raw_events": 17083,
+      "actor_casts": 54,
+      "aura_transitions": 159,
+      "excluded_other_actor_casts": 1911,
+      "strict_pre_known_aura_status_items": 1240,
+      "strict_pre_unknown_aura_status_items": 866
+    },
+    "original_predeclared_disjoint_holdout": {
+      "official_live_run": 41473060401,
+      "official_raw_artifact_id": 13156445742,
+      "original_artifact_SHA256": "f4ee1992e71a2fc32e4dc8e4eb53ec578403997d7f82fa3bb7939257e7b9cda1",
+      "discovery_report_disjoint": true,
+      "previous_fixed_metric_observed_threshold": 1,
+      "raw_events": 9101,
+      "actor_casts": 51,
+      "aura_transitions": 115,
+      "excluded_other_actor_casts": 986,
+      "strict_pre_known_aura_status_items": 939,
+      "strict_pre_unknown_aura_status_items": 489,
+      "previous_holdout_numeric_candidates_reobserved": 4,
+      "source_claim": "NUMERIC_ACTION_OBSERVATION_ONLY_NOT_PRIORITY"
+    },
+    "frozen_numeric_candidates": {
+      "old_lock_sha256": "c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e",
+      "candidate_ids": [
+        1,
+        184367,
+        335096,
+        335097
+      ],
+      "frozen_discovery_threshold": 2,
+      "previously_fixed_cross_report_presence_threshold": 1,
+      "source_semantic_name_attached_before_lock": false,
+      "new_candidates_added_after_holdout": 0,
+      "readiness_observed": "UNKNOWN",
+      "threshold_retuned": false,
+      "spell_id_1_is_manual_player_cast": "UNKNOWN"
+    },
+    "first_fresh_coldstart": {
+      "real_official_API_run": 42598862764,
+      "conclusion": "success",
+      "reconstructed_17_083_raw_events_and_54_casts": true,
+      "compared_identity_in_run": 42599116216,
+      "comparison": "EXACT_SAME_RAW_ACTOR_REPLAY",
+      "exact_report_fight_actor_and_raw_checksum_reused": true,
+      "counted_as_new_independent_source": false,
+      "identity_comparison_json_sha256": "5d8694410dff6d0199c730a8b91b89e8194976563fea7595876b601af932305b"
+    },
+    "third_distinct_report": {
+      "actual_official_WCL_API_run": 42599352437,
+      "conclusion": "success",
+      "previously_seen_report_codes_excluded_before_metadata": 2,
+      "disjoint_from_both_prior_report_codes": true,
+      "raw_events": 12393,
+      "actor_casts": 55,
+      "aura_transitions": 134,
+      "strict_pre_known_aura_status_items": 1075,
+      "strict_pre_unknown_aura_status_items": 740,
+      "numeric_source_sha256": "033b59defe9dde17ce0b6d4a029b4bd3a432babde7dbeb6677aad49ff0460b14",
+      "strict_pre_matrix_sha256": "020426d748108ec60bf0d21ce484fa58babff6ac8cbbf5d2e4e223b5c8739b70",
+      "raw_artifact_id": 13664219230,
+      "raw_artifact_sha256": "28252780f26dfcfbefc6143cbc07467a1b165e74f8cb79d25639629b28acd755",
+      "status_artifact_id": 13664433675,
+      "status_artifact_sha256": "3db97af572828cf503770f0e48a0dd747b7b0f7c7b6f9042d7968f3f33e3ac86",
+      "fresh_WCL_API_points": "NOT_MEASURED",
+      "separate_predeclared_holdout_for_new_discovery": "NOT_RUN"
+    },
+    "third_report_locked_candidate_reobservation": {
+      "actual_offline_run": 42599662668,
+      "conclusion": "success",
+      "fixed_threshold": 1,
+      "original_frozen_numeric_candidate_count": 4,
+      "candidate_reobserved_count": 4,
+      "numeric_id_observed_casts": {
+        "1": 30,
+        "184367": 8,
+        "335096": 2,
+        "335097": 4
+      },
+      "third_report_new_unlocked_numeric_spell_kinds": 10,
+      "new_candidates_added_to_frozen_lock": 0,
+      "result_sha256": "553d876c23549530b51259b68ef581bf3c618b5d6e0f0cc107311351d1607a51",
+      "artifact_id": 13665306834,
+      "distinct_report_observation_not_formal_holdout": true,
+      "independent_player_identity": "UNKNOWN",
+      "causal_priority_not_proven": true
+    },
+    "native_source_hypothesis_ir": {
+      "run": 42594344188,
+      "distinct_SimC_class_and_target_cases": 4,
+      "original_selected_source_occurrences": 147,
+      "source_IF_independent_true": 49,
+      "source_IF_UNKNOWN": 44,
+      "source_no_explicit_IF": 54,
+      "source_priority_competitors_READY": "UNKNOWN"
+    }
+  },
+  "validation_layers": {
+    "Python312_and_314_synthetic_compile_selftest": "PASS",
+    "two_existing_real_disjoint_raw_sources_replayed_offline": {
+      "run": 42599589497,
+      "status": "PASS",
+      "actual_raw_cases": 2,
+      "actual_WCL_API_requests_this_run": 0,
+      "actual_SimC_builds_this_run": 0,
+      "real_numeric_to_source_row_mapping": "NOT_AUDITED",
+      "real_WCL_to_SimC_apl_guard_comparisons": 0
+    },
+    "same_report_repeat_detection": {
+      "run": 42599116216,
+      "status": "PASS",
+      "exact_same_raw_actor_replay_detected": true
+    },
+    "new_real_fresh_raw_source_coldstart": {
+      "run": 42599352437,
+      "status": "PASS",
+      "real_WCL_OAuth_API": "EXECUTED",
+      "source_role": "NEW_DISCOVERY",
+      "separate_disjoint_holdout": "NOT_RUN"
+    },
+    "new_distinct_report_fixed_candidate_observation": {
+      "run": 42599662668,
+      "status": "PASS",
+      "same_discovery_numeric_lock_reused": true,
+      "threshold_retuning": false,
+      "new_candidate_lock_created_from_third_report": false
+    },
+    "multiple_APL_rows_per_spell_postlock": {
+      "run": 42598470997,
+      "status": "PASS_3_OF_3",
+      "multiple_source_rows_ambiguous_selection": "UNKNOWN"
+    }
+  },
+  "evidence_status_limits": {
+    "raw_WCL_snapshot_source": "REAL_OFFICIAL_WCL_API_OLDER_AND_NEW_EVENT_SNAPSHOTS",
+    "independent_original_disjoint_report_holdout": "OBSERVED_NUMERIC_ACTIONS_NOT_GAMEPLAY_PRIORITY",
+    "additional_third_report": "DISTINCT_FRESH_OBSERVATION_NOT_PREDECLARED_HOLDOUT",
+    "original_blind_candidate_lock_unchanged": true,
+    "raw_WCL_state_facts": "AURA_ACTIVE_BOOLEAN_ONLY",
+    "numeric_resource_PRE": "UNKNOWN",
+    "numeric_proc_stack_PRE": "UNKNOWN",
+    "current_Retail_patch_build_equivalence_to_SimC": "UNKNOWN",
+    "WCL_target_count_at_each_cast": "UNKNOWN",
+    "WCL_numeric_spell_to_source_APL_identity_audited": false,
+    "WCL_source_condition_pinned_real_cast_matches": 0,
+    "simultaneously_available_competitor_READY_proven": 0,
+    "General_Rotation_mandatory_priority_rules_promoted": 0,
+    "validated_opener_end": "UNKNOWN",
+    "user_target_dummy_wrong_cast": "UNKNOWN",
+    "no_raid_encounter_plan_produced": true
+  },
+  "engine_first_self_audit": {
+    "reusable_cold_start_capture_and_actor_strict_pre_now_actual_real_verified": true,
+    "original_files_and_raw_replay_reused_not_reimplemented": true,
+    "deterministic_checkpoint_replay_and_duplicate_cohort_detection": true,
+    "all_three_real_report_origins_explicitly_classified": true,
+    "same_spell_multiple_APL_source_rows_does_not_force_choice": true,
+    "WCL_blind_discovery_not_contaminated_by_SimC": true,
+    "holdout_threshold_not_retuned": true,
+    "no_CXX_rebuilds": true,
+    "no_historical_MAIN_restore_dependency": true,
+    "real_product_impact": "Actual new WCL data may now be acquired, de-duplicated, normalized and attached to generic strict PRE/locked numeric candidate research independently of SimC.",
+    "tests_are_not_measure_of_product_completion": true
+  },
+  "artifact_retention": {
+    "old_original_raw_artifacts_expire_date_UTC": "2026-11-09",
+    "new_real_third_raw_artifact_expires_UTC": "2026-11-16T10:14:05Z",
+    "reprocessed_two_real_reports_artifact_run": 42599589497,
+    "reprocessed_old_event_data_expires_UTC": "2026-11-16",
+    "full_snapshot_persisted_in_MAIN": false,
+    "compact_evidence_receipt_persisted_on_branch": true
+  },
+  "next": {
+    "session_exact_next": "Post-lock numeric action ID ↔ actual source spell/action identity adapter using official Blizzard mechanic truth, source-row multiplicity and observed build fingerprint; typed WCL aura stack/resource PRE only if truly available; independently evaluate competition/READY necessary gates and selectively compare locked WCL cohort to SimC IR. Use new third report as extra replication, not a retrospectively labeled holdout. No additional WCL full fetch unless needed for new source E2E.",
+    "product_exact_next": "Complete current-season General Rotation opener and conditional ST/2T/cleave/AoE priority with evidence confidence, then use proven rules and UNKNOWN-safe observability for target dummy practice feedback."
+  },
+  "branch_only": true,
+  "MAIN_promoted": false,
+  "Gen5_handoff_modified": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}

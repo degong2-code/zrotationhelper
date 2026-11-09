@@ -1,5 +1,22 @@
 # zRotationHelper — General Rotation / Dummy Trainer current status (2026-11-09)
 
+## 2026-11-09 Engine-first WCL real Cold Start / independent report replay (latest)
+
+**Completed reusable engine:** Existing official WCL ranker/collect/checkpoint, actor identity/gate, numeric-only frozen candidate lock, Strict PRE engine, and conditional source IR are now connected by generic `tools/engine_first/wcl_raw_actor_numeric_transport_v1.py` (SHA256 `3828c2f5ffd5c8cbf0fa5fe69001a2077534def5e0268bd68d6ce71d62d94055`), including normalized fight-relative timestamps, exact raw page SHA/actor cast replay, all-cast aura-active Strict PRE matrix, report overlap identity guard, third-report fixed candidate reobservation. No spec/spell semantics in producer. Existing ranker now offers generic repeatable `--exclude-report-code` filter BEFORE actor metadata API calls. Postlock source IR bridge now supports multiple APL conditional rows per numeric WCL spell without choosing one by observed use or source IF TRUE.
+
+**Actual data, not synthetic:** original official WCL discovery #41463589665 17,083 raw, 54 actor casts, 159 aura transitions, Strict PRE 1,240 known/866 UNKNOWN; original predeclared **different-report holdout** #41473060401 9,101 raw, 51 actor casts, 115 aura transitions, Strict PRE 939 known/489 UNKNOWN. Real two-raw report generic E2E [#42599589497](https://github.com/degong2-code/zrotationhelper/actions/runs/42599589497) PASS, 0 new WCL calls. **Prior requery** #42598862764 was IDENTICAL original actor raw #42599116216 (same report/fight/actor/raw digest)—not new evidence.
+
+**Independent new source Cold Start:** Exclude two prior source report codes, use existing official WCL OAuth/actor collector with bounded 15s window. [#42599352437](https://github.com/degong2-code/zrotationhelper/actions/runs/42599352437) PASS: third DISTINCT report 12,393 real raw events, 55 actor casts, 134 aura transitions, Strict PRE 1,075 known/740 UNKNOWN. Archived raw #13664219230, SHA256 `28252780f26dfcfbefc6143cbc07467a1b165e74f8cb79d25639629b28acd755` (expires 2026-11-16 UTC). New raw source API calls ACTUALLY EXECUTED, API points NOT_MEASURED.
+
+**Numeric lock held fixed:** Original source candidate IDs [1,184367,335096,335097], lock SHA256 `c5e2bedeb7f4f0152e8ba86a30b1b13ecc5aa1374af4c0b01237a16151a1c98e`. Prior fixed observation threshold=1. Third report independent **numeric presence reobservation** [#42599662668](https://github.com/degong2-code/zrotationhelper/actions/runs/42599662668) PASS: 4/4 IDs reobserved (30,8,2,4 casts), ten other numeric spell IDs **not** added to original lock. Third report is additional distinct empirical replication, **NOT a new predeclared holdout**. Separate person/build matching and causal priority not proven.
+
+**Critical unknown:** WCL numeric IDs to source APL rows NOT independently mapped, actor build equivalence to original SimC UNKNOWN, target count/resource/cooldown PRE UNKNOWN. WCL real action-to-source IF matches 0. 49 original SimC IF truths are source-only; competing READY and mandatory priority, opener-end and dummy errors UNKNOWN. Do not claim optimized General Rotation. Real WCL data successfully produced but confidence gates prevent false gameplay advice.
+
+**Workstream evidence:** branch-only `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_REAL_COLDSTART_DISJOINT_REPLAY_THIRD_REPORT_20261109.json`, new artifact #13665306834 cross-report numeric fixed candidates, result JSON SHA256 `553d876c23549530b51259b68ef581bf3c618b5d6e0f0cc107311351d1607a51`. No MAIN, Gen5, FROZEN promotion.
+
+**Exact Next:** build generic independently sourced post-lock SpellId↔SourceRow/SpecAdapter binding with multiple APL rows per ID, source/buff mechanics & build checks, then state-dependent competition with auditable strict PRE. Do not do extra broad WCL collection or claim WCL best priority from casts alone. Product remains General Rotation opener / conditional priority / dummy trainer (no Encounter/NSRT).
+
+
 ## 2026-11-09 — Engine-first WCL blind numeric/strict PRE → post-lock source IR integration
 
 **New reusable engine feature:** `tools/research/general_rotation_wcl_postlock_source_ir_bridge_v1.py` SHA256 `6a1aec9c712ed377ad10f6eb4b09e03fc90b6b26d7ab150aa0d548b4da5426d3`. Reuses existing numeric-only WCL candidate lock, immutable Strict PRE transition replay, post-lock source hypothesis IR, and open-world Decision Proof Engine. No specialization-specific action priority hardcoding, no SimC C++ rebuild, no WCL API calls.

@@ -544,3 +544,18 @@ Evidence `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_
 | Live target dummy trainer | READY/competing/WCL model not independently certified | **BLOCK wrong cast**, maintain UNKNOWN |
 
 Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_BLIND_STRICT_PRE_POSTLOCK_SOURCE_IR_BRIDGE_20261109.json`. Earlier workflow #42595938581 FAIL (Python module path), corrected #42596023358 PASS. Source file SHA256 `6a1aec9c712ed377ad10f6eb4b09e03fc90b6b26d7ab150aa0d548b4da5426d3`.
+
+## 2026-11-09 reusable WCL real cold-start + cross-report numeric replay engine
+
+| Asset | Real evidence / reusable function | Claim bound |
+| --- | --- | --- |
+| `tools/engine_first/fresh_wcl_engine_v1.py` and `wcl_actor_scoped_cohort_v1.py` | Existing original official OAuth, raw checkpoint, actor/spec gate | **REUSED**, not reimplemented |
+| `tools/engine_first/wcl_raw_actor_numeric_transport_v1.py` | [#42599589387](https://github.com/degong2-code/zrotationhelper/actions/runs/42599589387) 3/3 PASS, raw page/actor hashes, generic actor event/aura signal, 54+51 old real casts, Strict PRE; Python3.12/3.14 | **NEW generic engine**, boolean aura-active only, no source semantics or READY |
+| `tools/engine_first/wcl_official_ranker_discovery_v1.py` | Generic repeatable `--exclude-report-code` before metadata fetch; old report requery flagged EXACT_SAME_RAW #42599116216 | **EXTENDED existing engine**, no spec hardcode |
+| New live real cold start | [#42599352437](https://github.com/degong2-code/zrotationhelper/actions/runs/42599352437) PASS 12,393 raw /55 casts /134 aura, 1,075 known PRE /740 UNKNOWN | **REAL fresh WCL**, third report, not holdout |
+| Existing independent WCL holdout | #41473060401 + [#42599589497](https://github.com/degong2-code/zrotationhelper/actions/runs/42599589497) replay 9,101 raw/51 casts, all states PRE | **REAL disjoint WCL raw observation**, not mandatory priority |
+| Frozen numeric 4 candidate cross-report replay | [#42599662668](https://github.com/degong2-code/zrotationhelper/actions/runs/42599662668) 4/4 third report, fixed threshold 1, IDs 1/184367/335096/335097, 10 unlocked observed kinds not added | **NEW generic numeric replay**, third report replication not formal holdout |
+| `general_rotation_wcl_postlock_source_ir_bridge_v1.py` | [#42598470997](https://github.com/degong2-code/zrotationhelper/actions/runs/42598470997) 3/3, same numeric ID multiple original APL source rows preserves ambiguity | **REUSED/EXTENDED**, no numeric-to-SimC semantic lock yet |
+| Research product rules & dummy trainer | Real numeric→SourceRow audit NOT_RUN, build/target/READY UNKNOWN | **NOT PROMOTED** |
+
+Receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_REAL_COLDSTART_DISJOINT_REPLAY_THIRD_REPORT_20261109.json`. Raw evidence artifacts expire in 7 days, compact branch receipt persistent. Engine-first now proven on legitimate new/old real WCL snapshots, still not gameplay truth.
