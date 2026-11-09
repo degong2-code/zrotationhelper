@@ -1,0 +1,129 @@
+{
+  "schema": "ZrotMageExactOriginalReadyMethodSourceNecessaryNegativeV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "date": "2026-11-09",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "original_source_commit": "simulationcraft/simc@b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "official_cpp_mage_git_blob_sha1": "306d835f2db5f7418da221ce155d32e81c53f45c",
+  "official_arcane_profile_git_blob_sha1": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+  "validation": {
+    "initial_failed_run": {
+      "run_id": 42547938744,
+      "conclusion": "failure",
+      "failure_stage": "synthetic import",
+      "cause": "incorrect imported profile constant alias",
+      "truth_of_mechanic_claim_affected": false
+    },
+    "corrected_real_run": {
+      "run_id": 42548160936,
+      "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42548160936",
+      "source_head_sha": "6c97c3cc5fda824daa960e1b7fe027bfd9854aa7",
+      "conclusion": "success",
+      "jobs_total": 4,
+      "jobs_success": 4,
+      "python_versions": [
+        "3.12",
+        "3.14"
+      ],
+      "official_cpp_compiled": true,
+      "instrumented_cpp_recompiled": true,
+      "original_and_patched_precombat_identical": true,
+      "original_and_patched_combat_identical": true,
+      "original_and_patched_combat_casts": 31
+    }
+  },
+  "source_code": [
+    {
+      "path": "tools/research/simc_native_mage_exact_ready_guard_producer_v1.py",
+      "sha256": "60ce9ffb998aba01a76089fc0ff848bae86df9c804adcf325c41266ff20130cb",
+      "scope": "Mage-specific source method guard patch, one check no extra method calls"
+    },
+    {
+      "path": "tools/research/general_rotation_mage_exact_ready_guard_replay_v1.py",
+      "sha256": "3db4a65134f1d8b074853901518d0179782a41f346de781f6e78ded2eae1a481",
+      "scope": "Independent original trace pointer/guard to source-bound GateContract proof"
+    }
+  ],
+  "receipts": {
+    "original_source_patch_json_sha256": "2dfc11ddf00b1103df86653a7aa52fc23c80021f450fdf6c9dbd24569f41ac7d",
+    "same_seed_sequence_parity_json_sha256": "7e7920d064d23be0253ad52044c21b83035cb7e407c2764114fa1545e54e910f",
+    "independent_scoped_proof_json_sha256": "ab88924cc9f30f587142a8f569e2164268f34cd51802acbd5ad7104c8c70bb31",
+    "artifact_id": 13644975289,
+    "artifact_zip_digest": "sha256:e6bab261e984aa2820af3909a7167b6157a56d6a1e253b85400e2a3aba3151d2",
+    "artifact_expires_utc": "2026-11-16T02:02:25Z",
+    "archived_artifact_required_before_new_engine_development": false
+  },
+  "actual_original_source_cases": [
+    {
+      "specialization": "mage_arcane",
+      "action": "prismatic_bolt",
+      "source_list": "spellslinger",
+      "source_index_zero_based": 4,
+      "source_row_sha256": "db3f16cb19b4dbc4405a2a2ae3f683039f6dfb1ede034cc5eb57392f804fa738",
+      "original_source_row_attempts": 5,
+      "original_override_exact_action_pointer_witness_count": 4,
+      "unwitnessed_count": 1,
+      "original_buff_stacks_in_witnessed_cases": 0,
+      "source_necessary_gate": "necessary_eligibility",
+      "source_condition": "prismatic_bolt buff active",
+      "gate_truth": false,
+      "independent_scoped_NOT_READY": 4,
+      "UNKNOWN": 1,
+      "full_positive_READY": 0,
+      "example_times_ms": [
+        2414,
+        4048,
+        19633
+      ]
+    },
+    {
+      "specialization": "mage_arcane",
+      "action": "arcane_blast",
+      "source_list": "spellslinger",
+      "source_index_zero_based": 7,
+      "source_row_sha256": "fbf6148c3295da1a2378f0ba9f077dd2f5c2c5261f8dad9f1aad573645264cd2",
+      "original_source_row_attempts": 4,
+      "original_override_exact_action_pointer_witness_count": 4,
+      "unwitnessed_count": 0,
+      "original_buff_stacks_in_witnessed_cases": 0,
+      "source_necessary_gate": "necessary_eligibility",
+      "source_condition": "prismatic_bolt buff absent",
+      "gate_truth": true,
+      "independent_scoped_NOT_READY": 0,
+      "UNKNOWN": 4,
+      "full_positive_READY": 0,
+      "example_times_ms": [
+        2414,
+        4048,
+        19633
+      ]
+    }
+  ],
+  "evidence_provenance": {
+    "time_contract": "SIMC_ORIGINAL_METHOD_PRE; not WCL_STRICT_PRE",
+    "wcl_strict_pre_latest_transition_less_than_t_still_required": true,
+    "original_a_action_ready_called_once_per_attempt": true,
+    "original_mage_buff_check_called_once_per_original_guard": true,
+    "original_class_method_to_action_pointer_link_verified": true,
+    "method_guard_and_generic_actor_buff_value_agree": true,
+    "native_selected_return_as_independent_fact": false,
+    "source_guard_fact_basis": "INDEPENDENT_SOURCE_REPLAY",
+    "full_positive_route_closed": false,
+    "proven_lifecycle": "INDEPENDENTLY_VALIDATED_SCOPED_SOURCE_NECESSARY_NEGATIVE_NOT_FROZEN"
+  },
+  "limitations": {
+    "WCL_API_calls": 0,
+    "WCL_holdout": false,
+    "actual_WoW_client_tested": false,
+    "dummy_feedback_error_permitted": false,
+    "full_rotation_opener_proven": false,
+    "Fury_ready_method_guard_route_verified_in_this_run": false
+  },
+  "scope_policy_unchanged": true,
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "session_exact_next": "Extract reusable pointer-to-original-ready method attestation contract while keeping source guard semantics in SpecAdapter; confirm one real Fury weapon guard with bounded Native test; keep full positive READY UNKNOWN until route exhaustion.",
+  "product_exact_next": "Complete source-guided SimC General Rotation opener conditional priorities across specs, postlock WCL blind holdout, target dummy trainer with truthful UNKNOWN for missing game states."
+}

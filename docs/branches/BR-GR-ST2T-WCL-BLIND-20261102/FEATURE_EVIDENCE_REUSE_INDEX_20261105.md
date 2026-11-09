@@ -359,3 +359,15 @@ See design note + `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERI
 | Hash-pinned real evidence | audit Fury `5aa431d0...`, Mage `a0e224b8...`, action parity `ea8b9519...`; artifact #13643622261 expires Nov16 UTC | **REUSE** source-pinned permanent receipt, ephemeral raw CI artifact non-prerequisite |
 
 Permanent successor evidence: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_PRE_FIELD_CAPTURE_TWO_SPEC_REAL_E2E_20261109.json`. Earlier static-only checkpoint remains historical truth, not edited to retroactively claim live result.
+
+## 2026-11-09 후속 — Arcane 원본 ready 메서드 실증으로 scoped NOT_READY 독립 증명
+
+| 최근 source 실증 | 원본 독립 근거 | 재사용/주장 제한 |
+|---|---|---|
+| Mage original ready method witness producer + exact pointer replay | [#42548160936](https://github.com/degong2-code/zrotationhelper/actions/runs/42548160936) **4/4 PASS**, Python3.12/3.14, pristine/instrumented 31 actions unchanged, original Mage C++ `ready()` entry witnessed on same `action_t*` | **REUSE** generic PRE field transport and proof engine; **EXTEND** bounded method pointer adapter, not a per-spec generic-engine fork |
+| `spellslinger[4] prismatic_bolt` necessary `buff.present` | 5 original row attempts, exact `prismatic_bolt_t::ready()` source method entered 4, stack0 => independent necessary FALSE => scoped **NOT_READY 4**, no entry 1 => UNKNOWN | **INDEPENDENTLY_VALIDATED_SOURCE_GUARD**, NOT full class availability / WCL optimize |
+| `spellslinger[7] arcane_blast` necessary `buff.absent` | 4 original attempts, same ptr `arcane_blast_t::ready()` 4, stack0 => necessary TRUE; 4 full READY UNKNOWN | Positive gate insufficient to close virtual route; **UNKNOWN** |
+| Source E2E SHA256 receipts | Patch `2dfc11dd...`, parity `7e7920d0...`, independent replay `ab88924c...`; artifact #13644975289 (2026-11-16 UTC expiry) | **REUSE** status and code provenance, do not make historical ZIP prerequisite |
+| #42547938744 failed initial synthetic | wrong `MAGE_PROFILE_BLOB` import, corrected in successor | **FAIL record preserved**, not source mechanics conflict |
+
+See permanent branch evidence `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/MAGE_EXACT_READY_GUARD_SCOPED_NOT_READY_REAL_20261109.json`.
