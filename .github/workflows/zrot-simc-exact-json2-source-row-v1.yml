@@ -1,0 +1,213 @@
+name: zrot-simc-exact-json2-source-row-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/simc_native_sequence_apl_row_producer_v1.py
+      - tools/research/general_rotation_native_sequence_row_replay_v1.py
+      - .github/workflows/zrot-simc-exact-json2-source-row-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-synthetic:
+    name: Original sequence-action APL identity bridge Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Exact source signature-to-JSON2 ordinal pairing and negative controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/simc_native_sequence_apl_row_producer_v1.py \
+            tools/research/general_rotation_native_sequence_row_replay_v1.py
+          python -B tools/research/simc_native_sequence_apl_row_producer_v1.py \
+            > /tmp/gr-original-json2-apl-producer-selftest.json
+          python -B tools/research/general_rotation_native_sequence_row_replay_v1.py \
+            > /tmp/gr-exact-source-sequence-replay-selftest.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/gr-original-json2-apl-producer-selftest.json'))
+          b=json.load(open('/tmp/gr-exact-source-sequence-replay-selftest.json'))
+          assert a['schema']=='ZrotOriginalSimCJson2SequenceExactAPLRowProducerV1'
+          assert a['status']=='PASS_OFFLINE_SYNTHETIC' and a['checks']>=13
+          assert a['original_ready_calls_added']==0
+          assert a['specific_spells_hardcoded']==0
+          assert b['schema']=='ZrotOriginalSimCJson2ExactEmittedAPLRowReplayV1'
+          assert b['status']=='PASS_OFFLINE_SYNTHETIC' and b['checks']>=21
+          assert b['different_same_time_same_name_rows_distinguished_by_ordinal'] is True
+          assert b['source_ptr_is_not_name_heuristic'] is True
+          assert b['full_positive_READY_proven']==0
+          assert b['WCL_API_calls']==0
+          print('ORIGINAL_SAME_JSON2_APPEND_APL_ROW_BRIDGE_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/simc_native_sequence_apl_row_producer_v1.py \
+            tools/research/general_rotation_native_sequence_row_replay_v1.py
+
+  real-original-simc:
+    name: Real original SimC same-JSON2-emitter APL source row 4-case replay
+    needs: [generic-synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-general-rotation-first-real-cast-and-source-ir
+          run-id: 42562520191
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-pristine-simc-cast-IR
+      - name: Source pin and read-only original JSON2 emission patch before first compilation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          BASE=/tmp/zrot-pristine-simc-cast-IR/gr-simc-original-performed-action-and-condition-model.json
+          test -s "$BASE"
+          echo "584819145ec6e51bd7596bd273da74402622adf7bd0ecf1ea25ce19b0f26c715  $BASE" | sha256sum -c -
+          python -B tools/research/simc_native_sequence_apl_row_producer_v1.py \
+            --source-root simc-upstream --out /tmp/gr-native-exact-json2-row-patch.json
+          test "$(git -C simc-upstream diff --name-only)" = engine/player/player.cpp
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/gr-native-exact-json2-row-patch.json'))
+          assert p['schema']=='ZrotOriginalSimCJson2SequenceExactAPLRowProducerV1'
+          assert p['evidence_point']=='BEFORE_SAME_JSON2_EMPLACE_BACK'
+          assert p['original_JSON2_appends_unchanged'] is True
+          assert p['ready_or_RNG_calls_added']==0
+          assert p['pointer_to_original_action_t_captured'] is True
+          assert p['actual_CXX_compiled'] is False
+          print('ORIGINAL_JSON2_APPEND_SOURCE_STATIC_PIN_PASS')
+          PY
+      - name: Single SimC binary compile and four same-seed original actor JSON2 captures
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/gr-simc-sequence-row-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/gr-simc-sequence-row-build --target simc --parallel 3
+          test -x /tmp/gr-simc-sequence-row-build/simc
+          for line in "fury:warrior_fury:MID2_Warrior_Fury.simc" "arcane:mage_arcane:MID2_Mage_Arcane.simc"; do
+            IFS=: read -r actor spec profile <<< "$line"
+            for n in 1 2; do
+              key=st
+              if [ "$n" = 2 ]; then key=2t; fi
+              python -B tools/research/simc_native_reference_capture.py \
+                --profile "simc-upstream/profiles/MID2/$profile" \
+                --spec "$actor" \
+                --simc-bin /tmp/gr-simc-sequence-row-build/simc \
+                --targets "$n" --seed 31459 --fight-seconds 30 \
+                --out-dir "/tmp/gr-original-row-sequence/$spec-$key" \
+                --timeout 180
+            done
+          done
+      - name: Recompute source pins and reconcile real native emitter against pristine JSON2
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          specs=[
+              ('warrior_fury','fury','MID2_Warrior_Fury.simc',
+               '3225992ed5b754ad5d61e8b785d9d859f1eed1be'),
+              ('mage_arcane','arcane','MID2_Mage_Arcane.simc',
+               '8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f')]
+          records=[]
+          for spec,actor,profile,blob in specs:
+              for name,n in [('st',1),('2t',2)]:
+                  path=Path('/tmp/gr-original-row-sequence')/(spec+'-'+name)
+                  r=json.loads((path/'simc_reference_receipt.json').read_bytes())
+                  assert r['controlled_seed']==31459 and r['controlled_target_count']==n
+                  assert r['controlled_fight_seconds']==30
+                  records.append({
+                      'source_spec_key':spec,'source_case':name,
+                      'target_count':n,'actor_spec':actor,
+                      'profile_git_blob':blob,
+                      'official_profile_relpath':'profiles/MID2/'+profile,
+                      'effective_apl_sha256':r['effective_apl_sha256'],
+                      'reference_dir':str(path)})
+          m={'schema':'ZrotSameRunJson2APLRowReconciliationManifestV1',
+             'cases':records}
+          Path('/tmp/gr-native-apl-row-replay-manifest.json').write_text(
+              json.dumps(m,sort_keys=True,indent=2)+'\n')
+          PY
+          python -B tools/research/general_rotation_native_sequence_row_replay_v1.py \
+            --baseline /tmp/zrot-pristine-simc-cast-IR/gr-simc-original-performed-action-and-condition-model.json \
+            --expected-baseline-sha256 584819145ec6e51bd7596bd273da74402622adf7bd0ecf1ea25ce19b0f26c715 \
+            --source-root simc-upstream \
+            --manifest /tmp/gr-native-apl-row-replay-manifest.json \
+            --producer-receipt /tmp/gr-native-exact-json2-row-patch.json \
+            --out /tmp/gr-actual-json2-exact-source-rows-v1.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-actual-json2-exact-source-rows-v1.json'))
+          assert x['schema']=='ZrotOriginalSimCJson2ExactEmittedAPLRowReplayV1'
+          assert x['original_pristine_and_instrumented_sequences_compared'] is True
+          assert x['source_row_witness']=='ORIGINAL_ACTION_SIGNATURE_IN_SAME_JSON2_EMITTER'
+          assert x['full_positive_READY_proven']==0
+          assert x['opener_end']=='UNKNOWN'
+          assert x['dummy_mistake_permitted'] is False
+          assert x['WCL_API_calls']==0 and x['MAIN_promoted'] is False
+          assert len(x['cases'])==4
+          assert sum(y['original_json2_action_count'] for y in x['cases'])==149
+          assert x['counts'].get('exact_source_row_pointer_signature',0)>0
+          for case in x['cases']:
+              assert case['parity']['recorded_combat_action_order_and_times_unchanged']
+              assert case['parity']['recorded_precombat_action_order_and_times_unchanged']
+              assert case['original_select_decision_time_state']=='NOT_CAPTURED'
+              print('GENERIC_EXACT_JSON2_APL_ROW_CASE',case['source_spec_key'],
+                    case['source_case'],
+                    json.dumps(case['counts'],sort_keys=True))
+              for a in case['actual_combat_emitted_actions'][:13]:
+                  print('SIMC_EMITTED_ACTION_SOURCE_ROW',
+                        case['source_spec_key'],case['source_case'],
+                        a['simc_time_ms'],a['JSON2_action_name'],
+                        a['source_APL_list'],a['source_APL_index_one_based'],
+                        a['source_APL_IF'],a['exact_source_row_status'])
+          print('REAL_ORIGINAL_JSON2_SEQUENCE_EXACT_SOURCE_APL_ROW_E2E_PASS',
+                json.dumps(x['counts'],sort_keys=True))
+          PY
+          sha256sum /tmp/gr-native-exact-json2-row-patch.json \
+            /tmp/gr-native-apl-row-replay-manifest.json \
+            /tmp/gr-actual-json2-exact-source-rows-v1.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-simc-original-json2-exact-apl-row-research-v1
+          path: |
+            /tmp/gr-native-exact-json2-row-patch.json
+            /tmp/gr-native-apl-row-replay-manifest.json
+            /tmp/gr-actual-json2-exact-source-rows-v1.json
+          retention-days: 7
+          if-no-files-found: warn
