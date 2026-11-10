@@ -38,4 +38,4 @@
 
 **고양 주술사**를 첫 검증 대상 전문화로 삼아 ST와 AoE의 초기 행동에서 실제 선택 소스 행, 당시 자원·버프·쿨다운·특성 상태, 상위 경쟁 행동의 IF/READY를 같은 SimC 실행에서 재구성한다. 이것을 새로 생성된 `shaman_enhancement.json`의 스킬 규칙에 **검증 상태를 추가하는 방식**으로 반영한다. 모델 자체는 다른 전문화에 동일하게 적용된다.
 
-**관련 장기 이력:** [현재 연구 상태](CURRENT_RESEARCH_STATUS.md) · [기능별 개발 이력](FEATURE_HISTORY_INDEX.md) · [코드·근거·CI 탐색](EVIDENCE_NAVIGATION_INDEX.md) · [MAIN과 Branch 운영](../PARALLEL_WORKSTREAM_AND_MERGE_CONTRACT.md).
+**관련 장기 이력:** [현재 연구 상태](CURRENT_RESEARCH_STATUS.md) · [기능별 개발 이력](FEATURE_HISTORY_INDEX.md) · [코드·근거·CI 탐색](EVIDENCE_NAVIGATION_INDEX.md) · [MAIN과 Branch 운영](HANDOFF_CONTINUITY_PROTOCOL_V1.md).
