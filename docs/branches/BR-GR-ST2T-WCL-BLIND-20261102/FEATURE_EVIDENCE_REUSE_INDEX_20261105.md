@@ -1,5 +1,13 @@
 # zRotationHelper — Feature Evidence Reuse Index (2026-11-05)
 
+## 2026-11-10 — Three-class original Native opener portfolio (REUSE + EXTEND)
+
+REUSE: historical original Fury/Arcane 1/2/3/5 Native source-token grid, CI #42716911610, SHA256 964d5a2a8bd6714d6a538cae71f6f3892a6052aebb5056488f3c4485e8b2a11a, source compiler and generic existing Native target analyzer. EXTEND: new-spec-only tools/research/general_rotation_simc_marginal_native_cold_start_v1.py (SHA256 46949bb29faa8381d63ad520c9f2ff1c07b14044c4127ac564c499aed618ee9d) records actual Shaman actions 40/41/39/40 and 16 first10 in each target condition. CI #42744084203 3/3 PASS, exact profile blob 2f2c951ae07489d124db36c464ab66d1efd262ce, derived JSON SHA256 7b818a65fb4e9a812ddb2efb90406a2825ddd9abdd325067edeb3f37bd263339.
+
+COMPOSE: tools/research/general_rotation_simc_native_source_portfolio_v1.py (SHA256 11550623035ae0ced72ddcb49b0b57f564ed1414c75b3b723c9f36de41a79672) binds both independently verified cohorts to the same pinned source IF/CALL/RUN research graph, without treating the runs as one Native context. CI #42745179980 3/3 PASS, original source rows 286, 12 native target cases and 464 actual action-token samples (first10 185); merged artifact SHA256 151e48f7329ee287827a1fed5f31baad56f9540995c1dd020b961277c0fae6c2. Durable receipt active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_THREE_CLASS_ORIGINAL_SIMC_NATIVE_OPENING_PORTFOLIO_20261110.json.
+
+GAP: exact original source-selected Shaman APL row and strict same-root PRE/READY, source-defined opener exit and independently tested current Retail player correction are UNKNOWN. The first10 sample is not an opener timeline guarantee. NEXT: reuse existing source-neutral SELECT/PRE and CALL/RUN route instrumentation at a Shaman high-impact ST/AoE selected root, avoiding duplicate parsing or broad previous spec recapture.
+
 ## 2026-11-10 — Cross-class conditional source guard decision matrix (REUSE + EXTEND)
 
 - **REUSE**: original pinned 3-class APL profiles and existing source parser / source IR: `tools/research/simc_apl_semantic_ir_v2.py`, `tools/research/general_rotation_source_hypothesis_ir_v1.py`, `general_rotation_simc_multi_spec_cold_start_v1.py`. No duplicate parser and no Native C++ compilation.
