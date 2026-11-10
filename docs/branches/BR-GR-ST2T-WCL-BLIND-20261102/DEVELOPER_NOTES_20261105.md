@@ -1,4 +1,17 @@
 # zRotationHelper — Developer Notes / Branch Local (2026-11-05)
+## 2026-11-10 — Scope Gen9 source-profile static IF guard (approved progress)
+
+**REUSE/CONNECT:** Pinned original SimC b522cded, exact Native same-root gap and original source trait-hash/DBC decoder. Branch-only; Gen9 handoff and historical FROZEN unchanged. Source-only hypothesis remains separate from WCL blind. No new Native/WCL/Blizzard calls.
+
+**Implementation:** `tools/research/general_rotation_original_profile_static_if_guard_v1.py`, pinned external `zrot_shaman_priority_static_talent_v1.json` and `zrot_shaman_profile_static_if_guard_v1.json`. GitHub Actions [#42808161385](https://github.com/degong2-code/zrotationhelper/actions/runs/42808161385) 2/2 SUCCESS (Python 3.12/3.14). Original source profile proves Sundering not selected, Surging Totem rank1 selected, Fire Nova rank1 selected. Free-grant-only without independently verified active subtree remains UNKNOWN.
+
+**New bounded evidence:** The original AoE 3-target decision at 940ms selected `aoe#20 crash_lightning`. Its higher `aoe#19 voltaic_blaze` has source IF `talent.fire_nova.enabled|set_bonus.midnight_season_2_2pc`. The pinned source profile makes this IF TRUE through Fire Nova rank1, even though tier 2pc is UNKNOWN. The same original Native call returned composite FALSE for that candidate. This establishes source IF TRUE / original Native composite FALSE, **not** physical NOT_READY, causality, current Retail priority or user error. The ST/AoE four other selected source IF gaps retain UNKNOWN due to `dot.flame_shock.remains` and `ticking`; source-only ST clock `time<5` is supported by 942ms original selected-root time.
+
+**Validated evidence:** original focused gap SHA256 `2d01d4e0b1c932e69b461b8db3f52d406f53bf74c6ce6c05efafb0b24b653979`; new source talent SHA256 `f87adcd6546a3e8baa8dcd1f32adcc48bedb0b0fffa767b96ad9a7ccbf4870b0`; new static IF projection SHA256 `1c6c906105b2f10d516f7470cc49b1eb98649f579005505ce7f8abf6e9e6af70`. Branch-local receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_SHAMAN_PROFILE_STATIC_IF_GUARDS_SUCCESSOR_20261110.json`.
+
+**Exact Next:** Safely obtain original same-call read-only component PRE for the AoE rank19 Native FALSE. Source `action_t::action_ready()` calls `ready()` first, which checks cooldown, internal cooldown, movement, resource and casting; the actual component values have not been observed. Keep complete CALL/RUN stack and physical READY UNKNOWN until source-pinned Native evidence. Extend missing Flame Shock DoT/ticking PRE only if non-mutating, then WCL blind lock/postlock mechanics comparison. No General Rotation priority rules promoted and no dummy verdicts.
+
+
 
 ## 2026-11-10 — Focused ST/AoE same-root decision PRE and evidence replay (post-Gen9 explicit progress)
 
