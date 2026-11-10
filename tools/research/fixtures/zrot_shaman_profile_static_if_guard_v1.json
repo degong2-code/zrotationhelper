@@ -1,0 +1,17 @@
+{
+  "schema": "ZrotOriginalProfileStaticIfGuardAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "spec_key": "shaman_enhancement",
+  "prior_gap_sha256": "2d01d4e0b1c932e69b461b8db3f52d406f53bf74c6ce6c05efafb0b24b653979",
+  "expected_focus_rows": 5,
+  "talent_symbols": {
+    "talent.surging_totem.enabled": {"trait_name":"Surging Totem","trait_node":94877,"trait_entry":117474,"trait_spell":455630},
+    "talent.fire_nova.enabled": {"trait_name":"Fire Nova","trait_node":109909,"trait_entry":136176,"trait_spell":1260666}
+  },
+  "unobserved_not_promoted": [
+    "ticking", "dot.flame_shock.remains", "set_bonus.midnight_season_2_2pc",
+    "current_Retail_player_talent", "physical_READY", "WCL_postlock"
+  ]
+}
