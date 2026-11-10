@@ -1,0 +1,89 @@
+{
+  "schema": "ZrotGenericSimCThreeClassTargetBuildGuardFrontierReceiptV1",
+  "date": "2026-11-10",
+  "product_scope_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "claim": "Actual pinned original SimC APL control guard expressions can be evaluated from explicit synthetic ST/2T/AoE/talent scenarios through a single generic parser without changing source CALL/RUN order or promoting physical readiness",
+  "baseline": {
+    "previous_three_class_cold_start_run": 42739018146,
+    "original_simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "warrior_fury": {
+      "source_profile_git_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+      "APL_rows": 121,
+      "lists": 8
+    },
+    "mage_arcane": {
+      "source_profile_git_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+      "APL_rows": 51,
+      "lists": 5
+    },
+    "shaman_enhancement": {
+      "source_profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+      "APL_rows": 114,
+      "lists": 6
+    }
+  },
+  "implementation": {
+    "generic_source": "tools/research/general_rotation_source_guard_scenario_frontier_v1.py",
+    "source_SHA256": "1cbf010294a0d42d92ffeaf34eb2084c58d8a3d95927eb4c6b954d14fda4e80f",
+    "manifest": "tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json",
+    "scenario_adapter": "tools/research/fixtures/general_rotation_source_guard_scenarios_three_class_v1.json",
+    "workflow": ".github/workflows/zrot-gr-source-guard-three-class-target-build-v1.yml",
+    "reused_parser": "tools/research/simc_apl_semantic_ir_v2.py",
+    "reused_source_IR": "tools/research/general_rotation_source_hypothesis_ir_v1.py",
+    "hardcoded_spec_ability_or_target_semantics_in_generic_code": false,
+    "source_AST_only_not_own_alternate_grammar": true,
+    "source_row_rank_and_git_blob_checked": true,
+    "root_CALL_and_RUN_not_flattened": true,
+    "action_list_is_ACTUALLY_entered": "UNKNOWN",
+    "source_root_precombat_not_actually_player_cast": true,
+    "opener_end_NOT_guessed_from_time": true
+  },
+  "CI": {
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42742497979",
+    "run_id": 42742497979,
+    "job_count": 3,
+    "jobs_success": 3,
+    "python312_compile_and_synthetic": "PASS",
+    "python314_compile_and_synthetic": "PASS",
+    "real_original_profile_source_replay": "PASS",
+    "source_profile_count": 3,
+    "source_APL_rows": 286,
+    "source_action_lists": 19,
+    "explicit_assumed_source_scenarios": 12,
+    "root_control_guards_evaluated": 48,
+    "SOURCE_TRUE": 24,
+    "SOURCE_FALSE": 24,
+    "SOURCE_UNKNOWN": 0,
+    "SOURCE_UNKNOWN_synthetic_covered": true,
+    "result_SHA256": "eb58720c26d80616c426c163e4c588636555878f22affe5e6297069e0270da76",
+    "artifact_id": 13728769936,
+    "artifact_zip_sha256": "f5b0f1fe97966e3dd92bfd46b52be6d8951e44f1b110d80bd356b7a2524e53c6",
+    "artifact_expires_UTC": "2026-11-17T02:24:23Z",
+    "new_Native_SimC_CXX_builds": 0,
+    "new_WCL_API_calls": 0,
+    "user_dummy_data_collected": false
+  },
+  "proven_guard_scenarios": {
+    "warrior_fury": "Slayer/Thane target 1, 2, 5 and talent swaps in default source RUN rows",
+    "mage_arcane": "Spellslinger/Sunfury source CALL guards for 1, 2, 5 targets and talent swaps",
+    "shaman_enhancement": "single_sb/single_totemic/aoe default CALL guard comparisons in target 1, 2, 5 and hero talent swaps",
+    "counts_are_source_row_evaluations_not_actual_action_reads": true
+  },
+  "evidence_limits": {
+    "facts": "EXPLICIT_SYNTHETIC_SCENARIOS_NOT_ORIGINAL_NATIVE_PRE",
+    "source_full_READY_proven": 0,
+    "source_prior_competitors_entirely_excluded_for_any_real_action": 0,
+    "opener_runtime_termination": "UNKNOWN",
+    "gameplay_OPTIMALITY": "UNKNOWN",
+    "actual_WoW_dummy_wrong_cast": "UNKNOWN",
+    "WCL_blind_candidate_decisions_injected": false,
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "product_exact_next": "Generic source-driven opener sequence and conditional ST/2T/cleave/AoE priorities with source condition state, independently certified competing action READY and reliable dummy feedback after WCL blind postlock validation.",
+  "session_exact_next": "Use the verified 3-class source guard matrix to choose impact-heavy SOURCE IF cases for actual SimC same-root PRE plus competing physical READY and explicit source-defined opener state transitions; reuse existing CALL/RUN route proof and produce a conditional model with evidence-bound UNKNOWN rather than expanding static scenarios indefinitely."
+}
