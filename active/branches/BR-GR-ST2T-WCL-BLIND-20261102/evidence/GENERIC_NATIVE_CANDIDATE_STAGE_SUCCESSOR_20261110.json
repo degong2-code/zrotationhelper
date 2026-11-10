@@ -1,0 +1,119 @@
+{
+  "schema": "ZrotGeneralRotationGenericNativeCandidateStageSuccessorV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "product_scope": "GENERAL_ROTATION_OPENER_CONDITIONAL_PRIORITY_AND_TARGET_DUMMY_TRAINER",
+  "date": "2026-11-10",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "engine_first": true,
+  "implementation": {
+    "commit": "a8977699df1d224d6e350f883f2f17ad8a5c7598",
+    "generic_producer": "tools/research/general_rotation_original_candidate_stage_v1.py",
+    "generic_replay": "tools/research/general_rotation_original_candidate_stage_replay_v1.py",
+    "class_specific_logic_in_generic": false,
+    "pinned_original_SimC_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "workflow": ".github/workflows/zrot-gr-shaman-original-source-ready-frontier-v1.yml",
+    "strategy": "REUSE existing exact action-ready PRE and POST; EXTEND passive source-neutral original candidate branch observation; CONNECT original attempt frontier to source row coverage using selected foreground dispatch, exact same pointer and line ordering",
+    "native_original_action_ready_additions": 0,
+    "extra_IF_RNG_queue_calls": 0,
+    "WCL_API_calls": 0,
+    "wow_API_calls": 0
+  },
+  "verification": {
+    "original_native_CI": 42776023820,
+    "original_native_CI_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42776023820",
+    "result": "SUCCESS_3_OF_3",
+    "Python_3_12_contract": "PASS",
+    "Python_3_14_contract": "PASS",
+    "native_SimC_CXX_compile": "PASS",
+    "ST_1t_and_AoE_3t_original_native_action_time_parity": "PASS",
+    "same_root_stage_to_PRE_and_original_POST_one_to_one": "PASS",
+    "synthetic_patcher_negative_controls": 6,
+    "synthetic_replayer_negative_controls": 7,
+    "independent_offline_artifact_validation": "PASS",
+    "independent_offline_validation_scope": "Validate successor JSON hashes, 1:1 stage/attempt counts, UNKNOWN guard, AoE rank6 unvisited, previous original frontier byte-for-byte identical; no independent raw SimC log replay beyond producer CI",
+    "artifact": {
+      "id": 13743604950,
+      "name": "zrot-gr-shaman-exact-root-pre-a8977699df1d224d6e350f883f2f17ad8a5c7598",
+      "expires_at": "2026-11-24T07:39:44Z",
+      "expired_at_check": false
+    },
+    "patch_receipt_sha256": "5dc5ea7252e9614fe8b0bfc933e7480917cdd1038dc4a084598c60e0c1988ec6"
+  },
+  "rooted_evidence": {
+    "old_native_selected_source_rows_unchanged": 79,
+    "old_native_source_rows_ST": 40,
+    "old_native_source_rows_AoE": 39,
+    "old_selected_source_independent_IF_MATCH": 5,
+    "old_selected_source_no_IF": 15,
+    "old_selected_source_PRE_UNKNOWN": 59,
+    "old_1t_attempt_frontier_sha256": "79d372d06494cc8779daf09ee00fc4676ba03b5f0bbeed8c60d672f9677131aa",
+    "old_3t_attempt_frontier_sha256": "446ce44e36b73b8bf93f6b4845a9f3da912350cb078e6d8190976e8df5a2b369",
+    "previously_published_evidence_unchanged": true,
+    "cases": [
+      {
+        "context": "ST_1TARGET",
+        "selected": {
+          "time_ms": 942,
+          "source_list": "single_sb",
+          "source_rank": 4,
+          "action": "stormstrike"
+        },
+        "original_cxx_candidate_visits": 11,
+        "original_native_ready_attempts": 11,
+        "upper_source_rows": 3,
+        "upper_source_rows_original_ready_false": 3,
+        "upper_source_rows_unvisited": 0,
+        "upper_actions_physical_mechanic_ready": "UNKNOWN",
+        "stage_replay_sha256": "dcbdee7fdf982d573e2ba8bfcb850565ee02e91ddae2780ebf1c23b8cadb6e6a"
+      },
+      {
+        "context": "AOE_3TARGET",
+        "selected": {
+          "time_ms": 940,
+          "source_list": "aoe",
+          "source_rank": 20,
+          "action": "crash_lightning"
+        },
+        "original_cxx_candidate_visits": 32,
+        "original_native_ready_attempts": 32,
+        "upper_source_rows": 19,
+        "upper_source_rows_original_ready_false": 17,
+        "upper_source_rows_original_ready_true_control_CALL": 1,
+        "upper_source_rows_unvisited": 1,
+        "unknown_source_row": {
+          "source_rank": 6,
+          "source_action": "sundering",
+          "status": "UNOBSERVED_IN_SAME_RUNTIME_SCAN",
+          "action_ready_called": false,
+          "why_not_in_runtime_candidate_span": "UNKNOWN",
+          "physical_NOT_READY": "NOT_PROVEN"
+        },
+        "stage_replay_sha256": "6c79a4ea67cc61014cdbc309044f703420d2515e6f8a6529e2aae73c603a59b5"
+      }
+    ]
+  },
+  "explanation_boundary": {
+    "source_rank_order_proven": true,
+    "native_runtime_candidate_visit_proven": true,
+    "candidate_PRE_and_original_READY_return_join_proven": true,
+    "native_composite_return_is_not_independent_mechanic_readiness": true,
+    "source_IF_condition_cause_not_deduced_from_native_FALSE": true,
+    "absence_of_native_visit_is_NOT_READY": false,
+    "original_CXX_init_may_filter_runtime_foreground_actions": true,
+    "instance_specific_runtime_init_reason_for_sundering": "UNKNOWN",
+    "original_full_CALL_RUN_return_stack": "UNKNOWN",
+    "current_Retail_patch_and_mechanic_parity": "UNKNOWN",
+    "WCL_independent_blind_holdout": "NOT_RUN",
+    "mandatory_user_priority_rules_promoted": 0,
+    "opener_end": "UNKNOWN",
+    "in_game_dummy_wrong_cast": "UNKNOWN"
+  },
+  "next_exact": "Generic stage-to-initialized-list provenance: determine why the unvisited source row was absent, using original pinned C++ create/init action and source/SpecAdapter state, without guessing from selected spell. Then independently instrument missing decision-impacting IF operands, complete CALL/RUN path and postlock WCL blind reconciliation before any user-facing rule promotion.",
+  "lifecycle": "OBSERVED_NATIVE_ONLY_NOT_FREEZE_ELIGIBLE",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
