@@ -1,0 +1,126 @@
+name: zrot-gr-profile-static-if-guard-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_profile_static_if_guard_v1.py
+      - tools/research/fixtures/zrot_shaman_priority_static_talent_v1.json
+      - tools/research/fixtures/zrot_shaman_profile_static_if_guard_v1.json
+      - .github/workflows/zrot-gr-profile-static-if-guard-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  source-profile-guard:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.14']
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Shaman_Enhancement.simc
+            engine/player/player.cpp
+            engine/dbc/trait_data.cpp
+            engine/dbc/generated/trait_data.inc
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42805065697
+          name: zrot-gr-focused-priority-gap-3.12-b73453778057d82e0ba0b886c628e6e14b87c1a7
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-previous-focus
+      - name: Verify pinned source plus prior same-call Native/guard proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C original-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          echo '2d01d4e0b1c932e69b461b8db3f52d406f53bf74c6ce6c05efafb0b24b653979  /tmp/zrot-previous-focus/zrot-focused-priority-gap.json' | sha256sum -c -
+          python -m py_compile \
+            tools/research/general_rotation_original_talent_hash_dbc_v1.py \
+            tools/research/general_rotation_original_profile_static_if_guard_v1.py \
+            tools/research/simc_apl_semantic_ir_v2.py
+          python -B tools/research/general_rotation_original_talent_hash_dbc_v1.py >/tmp/zrot-existing-decoder-selftest.json
+          python -B tools/research/general_rotation_original_profile_static_if_guard_v1.py >/tmp/zrot-source-guard-selftest.json
+          python -B tools/research/general_rotation_original_talent_hash_dbc_v1.py \
+            --source-root original-simc \
+            --adapter tools/research/fixtures/zrot_shaman_priority_static_talent_v1.json \
+            --out /tmp/zrot-static-talent-source.json
+          python -B tools/research/general_rotation_original_profile_static_if_guard_v1.py \
+            --source-profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+            --talent-result /tmp/zrot-static-talent-source.json \
+            --prior-gap /tmp/zrot-previous-focus/zrot-focused-priority-gap.json \
+            --adapter tools/research/fixtures/zrot_shaman_profile_static_if_guard_v1.json \
+            --out /tmp/zrot-static-IF-guards.json
+      - name: Check fail-closed original static IF and replay boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,copy,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_original_profile_static_if_guard_v1 import replay,StaticGuardError
+          t=json.loads(Path('/tmp/zrot-static-talent-source.json').read_bytes())
+          p=Path('/tmp/zrot-previous-focus/zrot-focused-priority-gap.json').read_bytes()
+          gap=json.loads(p)
+          c=json.load(open('tools/research/fixtures/zrot_shaman_profile_static_if_guard_v1.json'))
+          profile=Path('original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc').read_bytes()
+          a=json.load(open('/tmp/zrot-static-IF-guards.json'))
+          selftest=json.load(open('/tmp/zrot-source-guard-selftest.json'))
+          assert selftest['status']=='PASS_SYNTHETIC_STATIC' and selftest['negative_controls']>=4
+          assert a['product_general_rotation_rules_promoted']==0 and a['MAIN_promoted'] is False
+          assert a['independent_physical_ready']==a['current_Retail_mechanics']==a['opener_end']=='UNKNOWN'
+          assert a['WCL_blind_candidate_lock']=='NOT_RUN_FOR_THIS_SOURCE_PROJECTION'
+          assert len(a['cases'])==2 and sum(len(x['focused_source_static_projection']) for x in a['cases'])==5
+          assert [z['trait_name'] for z in t['cases']]==['Sundering','Surging Totem','Fire Nova']
+          assert t['cases'][0]['source_profile_status']=='PROFILE_NOT_SELECTED_NOT_GRANTED'
+          assert all(g['independent_physical_READY']=='UNKNOWN' for x in a['cases'] for g in x['focused_source_static_projection'])
+          negatives=0
+          variants=[]
+          wrong=copy.deepcopy(c);wrong['source_profile_git_blob']='0'*40;variants.append(wrong)
+          wrong=copy.deepcopy(c);wrong['prior_gap_sha256']='0'*64;variants.append(wrong)
+          wrong=copy.deepcopy(c);wrong['talent_symbols']['talent.fire_nova.enabled']['trait_spell']+=1;variants.append(wrong)
+          wrong=copy.deepcopy(c);wrong['expected_focus_rows']=6;variants.append(wrong)
+          for wrong in variants:
+            try:replay(profile,t,gap,wrong,p)
+            except StaticGuardError:negatives+=1
+            else:raise AssertionError('INVALID_ORIGINAL_STATIC_GUARD_INPUT_WAS_ACCEPTED')
+          assert negatives==4
+          print('ORIGINAL_SOURCE_STATIC_5_FOCUS_PASS', [
+             (v['case_id'],[(x['rank'],x['profile_static_IF'],x['unresolved_facts'])
+                            for x in v['focused_source_static_projection']])
+             for v in a['cases']])
+          print('SOURCE_PROFILE_TALENT_GATES', [
+            (v['trait_name'],v['source_profile_status'],
+             v['source_profile_allocated_rank'],
+             v['source_dbc_free_grant_to_spec']) for v in t['cases']])
+          PY
+          sha256sum /tmp/zrot-static-talent-source.json /tmp/zrot-static-IF-guards.json
+      - name: Preserve compact source-guard evidence (no new Native/WCL calls)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-profile-static-if-guard-${{ matrix.python }}-${{ github.sha }}
+          path: |
+            /tmp/zrot-existing-decoder-selftest.json
+            /tmp/zrot-source-guard-selftest.json
+            /tmp/zrot-static-talent-source.json
+            /tmp/zrot-static-IF-guards.json
+          retention-days: 14
+          if-no-files-found: warn
