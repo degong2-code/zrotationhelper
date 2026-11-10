@@ -1,0 +1,22 @@
+{
+  "schema": "ZrotOriginalSpellSourceOnlyCrossSpecProbeV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "scope": "ORIGINAL_CXX_SOURCE_PATTERN_COMPATIBILITY_ONLY",
+  "source_class_path": "engine/class_modules/sc_warrior.cpp",
+  "spec_context": "warrior_fury",
+  "cases": [
+    {
+      "source_action": "bloodthirst",
+      "factory_class": "bloodthirst_t",
+      "factory_parent_base": "warrior_attack_t",
+      "expected_spell_data_input": "p->talents.fury.bloodthirst",
+      "must_remain_without_NATIVE_fight_evidence": true
+    }
+  ],
+  "native_action_ready_evidence": "NOT_COLLECTED",
+  "talent_selected_status": "UNKNOWN",
+  "current_Retail_priority": "UNKNOWN",
+  "WCL_blind": "NOT_TOUCHED",
+  "MAIN_promoted": false
+}

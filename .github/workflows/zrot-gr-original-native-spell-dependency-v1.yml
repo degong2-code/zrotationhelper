@@ -5,6 +5,7 @@ on:
     paths:
       - tools/research/general_rotation_original_native_spell_dependency_v1.py
       - tools/research/fixtures/zrot_shaman_native_spell_dependency_v1.json
+      - tools/research/fixtures/zrot_warrior_fury_spell_dependency_sourceonly_v1.json
       - .github/workflows/zrot-gr-original-native-spell-dependency-v1.yml
   workflow_dispatch:
 
@@ -80,6 +81,23 @@ jobs:
           assert a['original_talent_selected_status']=='UNKNOWN'
           assert a['profile_talent_loadout_status']=='OPAQUE_NOT_DECODED'
           print('PINNED_ORIGINAL_NATIVE_SOURCE_SPELL_DEPENDENCY_PASS',a['source_path_provenance'])
+          PY
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_original_native_spell_dependency_v1 import extract_route
+          plan=json.loads(Path('tools/research/fixtures/zrot_warrior_fury_spell_dependency_sourceonly_v1.json').read_bytes())
+          assert plan['source_revision']=='b522cded8c26b97dac03fdf56e57a03ec7e8faa6'
+          assert plan['schema']=='ZrotOriginalSpellSourceOnlyCrossSpecProbeV1'
+          assert plan['native_action_ready_evidence']=='NOT_COLLECTED'
+          src=Path('original-simc')/plan['source_class_path']
+          output=[extract_route(src.read_text(),case) for case in plan['cases']]
+          assert len(output)==1
+          assert output[0]['source_constructor_first_spell_data_input']=='p->talents.fury.bloodthirst'
+          assert output[0]['source_talent_registry_label']=='UNKNOWN'
+          assert output[0]['why_player_talent_pointer_is_not_found']=='UNKNOWN'
+          print('GENERIC_REAL_OTHER_CLASS_SOURCE_ONLY_COMPATIBILITY_PASS',output)
           PY
           sha256sum /tmp/generic-simc-spell-dependency-source-linked.json
       - name: Upload compact independent source dependency replay, no raw logs
