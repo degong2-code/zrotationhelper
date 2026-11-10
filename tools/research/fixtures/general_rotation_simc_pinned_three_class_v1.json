@@ -1,0 +1,24 @@
+{
+  "schema": "ZrotGeneralRotationSimcPinnedSourceManifestV1",
+  "official_simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "profiles": [
+    {
+      "key": "warrior_fury",
+      "class_key": "warrior",
+      "profile": "profiles/MID2/MID2_Warrior_Fury.simc",
+      "git_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be"
+    },
+    {
+      "key": "mage_arcane",
+      "class_key": "mage",
+      "profile": "profiles/MID2/MID2_Mage_Arcane.simc",
+      "git_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f"
+    },
+    {
+      "key": "shaman_enhancement",
+      "class_key": "shaman",
+      "profile": "profiles/MID2/MID2_Shaman_Enhancement.simc",
+      "git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce"
+    }
+  ]
+}
