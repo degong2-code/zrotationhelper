@@ -117,6 +117,16 @@ jobs:
           assert [q['source_IF_counterfactual_proof']['classification'] for q in rows]==['ALL_FALSE','MIXED_OR_UNKNOWN']
           assert rows[0]['source_local_APL_candidate_EXCLUDED'] is True
           assert rows[1]['source_local_APL_candidate_EXCLUDED'] is False
+          assert rows[0]['source_IF_counterfactual_proof'][
+              'minimal_observed_original_PRE_facts_for_ALL_FALSE']=={
+                  'buff.arcane_salvo.react':3.0,'buff.arcane_salvo.stack':4.0}
+          assert rows[0]['source_IF_counterfactual_proof'][
+              'unobserved_binary_source_operands_which_can_change_IF']==[]
+          assert rows[1]['source_IF_counterfactual_proof'][
+              'single_remaining_decisive_source_PRE_operand']=='prev_gcd.1.arcane_surge'
+          assert rows[1]['source_IF_counterfactual_proof'][
+              'unobserved_binary_source_operands_not_influential_under_this_PRE']==[
+                  'talent.orb_barrage']
           assert all(r['global_ability_NOT_READY']=='UNKNOWN' and
                      r['selected_full_ready']=='UNKNOWN' and
                      r['real_WoW_expected_cast']=='UNKNOWN'
