@@ -1,0 +1,78 @@
+{
+  "schema": "ZrotOriginalSimCSelectExtraPREBoundedSourceAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "purpose": "Observe exactly one Shaman source action attempt before action_ready on selected original root; ST/3-target, root exact call ID and pointer, not player READY",
+  "profiles": [
+    {
+      "actor_class": "shaman",
+      "path": "profiles/MID2/MID2_Shaman_Enhancement.simc",
+      "profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+      "class_cpp": "engine/class_modules/sc_shaman.cpp",
+      "class_cpp_git_blob": "46250f6ce200c10fc30795d3afa0b1cb3ce45568"
+    }
+  ],
+  "fields": [
+    {
+      "owner_class": "shaman",
+      "symbol": "active_enemies",
+      "kind": "sim_active_enemies"
+    },
+    {
+      "owner_class": "shaman",
+      "symbol": "buff.maelstrom_weapon.stack",
+      "kind": "buff_stack",
+      "name": "maelstrom_weapon"
+    },
+    {
+      "owner_class": "shaman",
+      "symbol": "buff.doom_winds.up",
+      "kind": "buff_up",
+      "name": "doom_winds"
+    },
+    {
+      "owner_class": "shaman",
+      "symbol": "buff.hot_hand.up",
+      "kind": "buff_up",
+      "name": "hot_hand"
+    },
+    {
+      "owner_class": "shaman",
+      "symbol": "buff.ascendance.up",
+      "kind": "buff_up",
+      "name": "ascendance"
+    },
+    {
+      "owner_class": "shaman",
+      "symbol": "buff.crash_lightning.up",
+      "kind": "buff_up",
+      "name": "crash_lightning"
+    },
+    {
+      "owner_class": "shaman",
+      "symbol": "buff.converging_storms.stack",
+      "kind": "buff_stack",
+      "name": "converging_storms"
+    },
+    {
+      "owner_class": "shaman",
+      "symbol": "buff.whirling_air.up",
+      "kind": "buff_up",
+      "name": "whirling_air"
+    },
+    {
+      "owner_class": "shaman",
+      "symbol": "buff.whirling_fire.up",
+      "kind": "buff_up",
+      "name": "whirling_fire"
+    },
+    {
+      "owner_class": "shaman",
+      "symbol": "buff.whirling_earth.up",
+      "kind": "buff_up",
+      "name": "whirling_earth"
+    }
+  ],
+  "read_only_only": true,
+  "skill_semantics_in_generic": false
+}
