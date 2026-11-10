@@ -1,5 +1,13 @@
 # zRotationHelper — Branch-local continuation instructions (2026-11-09)
 
+## 2026-11-10 — Scope Gen8 인계가 최신 (기존 Gen6/Gen7 설명은 역사 기록)
+
+공식 제품 목표는 `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1` 그대로다. **최신 단일 인계**는 `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json` (**Gen8**)이며, 그 이전 Gen7 전체 바이트는 `archive/LATEST_HANDOFF_SCOPEGEN7_BEFORE_20261110.json`에 SHA256 `ad5a68834f6341029ba7933e25ef65c06f771c1aba0b960508836bb10da577c6`으로 보존돼 있다. Gen6 SHA256 `5df57d1c4577bbf408bb5016f5f2001ad7511c15986192c62e725834ba7f6010` 및 Gen5 체인을 확인한다. [독립 복원 시작 프롬프트](../../../handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_SCOPEGEN8_20261110.md)는 필수 첫 응답 **READ_ONLY_RESTORE_REPORT_THEN_STOP**를 명시한다. 이전 채팅의 개발 진행 승인은 승계하지 않는다.
+
+최신 연구는 **고술 실제 Native ST·3타겟 원본 SELECT 행 79건**과 10필드 부분 PRE를 114행 전문화별 General Rotation 소스 IR에 연결했다. 이 가운데 독립 PRE 조건식 일치 **5**, 원본 IF 없음 **15**, PRE 부족 **59 UNKNOWN**이다. 근거 [영수증](../../../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SHAMAN_GENERAL_ROTATION_NATIVE_SOURCE_ROW_PRE_EVIDENCE_SUCCESSOR_20261110.json) 및 CI [원본 #42749660209](https://github.com/degong2-code/zrotationhelper/actions/runs/42749660209), [증거 overlay #42750471988](https://github.com/degong2-code/zrotationhelper/actions/runs/42750471988). 첫 overlay 실패 #42750341471의 핵심은 Native POST TRUE와 미관측 독립 PRE를 동일시하지 말라는 것이다. 이 실패는 수정됐지만 READY·오프닝 종료·Retail 최적성은 여전히 UNKNOWN이다.
+
+**진행 승인 후 Exact Next:** 79개 중 영향이 큰 ST/AoE 몇 건을 선정해 이미 있는 Generic SELECT/PRE/IF/SpecAdapter로 같은 원본 호출의 상위 경쟁 행동 전체 CALL/RUN·READY 조건을 입증하고, 실제 효과가 있는 규칙만 전문화별 IF/ELSE 모델에 승격한다. MAIN/FROZEN/전역 pointer는 이 분기에서 승격하지 않는다. 이하 Gen6 운영 내역은 역사로 남긴다.
+
 ## Scope Gen6 branch-only operational handoff (2026-11-09, latest)
 
 Official policy remains `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`, full SHA256 `157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295`. Gen5 `LATEST_HANDOFF.json` is now archived byte-for-byte at `_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN5_BEFORE_20261109.json`, SHA256 `ab04457130b37bce8c55e359e60c77a75d9abcfd5f8806da952d8fc070742bd5`; active branch-local handoff is **Scope Gen6**, not Gen5. Do not rewrite archived bytes, prior FROZEN, shared scope policy, MAIN state or global `LATEST_HANDOFF.json`.
