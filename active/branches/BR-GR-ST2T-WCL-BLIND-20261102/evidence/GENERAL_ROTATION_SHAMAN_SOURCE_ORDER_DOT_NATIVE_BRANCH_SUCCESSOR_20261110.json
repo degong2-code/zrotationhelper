@@ -1,0 +1,163 @@
+{
+  "schema": "ZrotGeneralRotationShamanSourceOrderedDotAndReadyCauseSuccessorV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+  "date": "2026-11-10",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "repository": "degong2-code/zrotationhelper",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "product_scope": "GENERAL_ROTATION_OPENER_AND_DUMMY_TRAINER_ONLY",
+  "producer": "tools/research/general_rotation_original_select_passive_dot_v1.py",
+  "replay": "tools/research/general_rotation_original_select_passive_dot_replay_v1.py",
+  "source_spec_adapter": "tools/research/fixtures/zrot_shaman_original_source_order_dot_v1.json",
+  "target_adapters": [
+    "tools/research/fixtures/zrot_shaman_source_order_dot_1t_focus_v1.json",
+    "tools/research/fixtures/zrot_shaman_source_order_dot_3t_focus_v1.json"
+  ],
+  "original_native_branch_replay": "tools/research/general_rotation_original_ready_branch_replay_v1.py",
+  "source_order_measurement": {
+    "data_reader": "player_t::find_dot;dot_t::is_ticking;dot_t::remains",
+    "creates_missing_dot_objects": false,
+    "original_source_action_ready_calls_added": 0,
+    "extra_native_IF_or_RNG_calls": 0,
+    "source_order_before_action_ready": true,
+    "same_millisecond_as_decision": true,
+    "original_source_order_Pre_not_timestamp_Strict_PRE": true,
+    "state_at_action_from_valid_timestamp_less_t": "NOT_PROVEN",
+    "independent_WoW_premise": "UNKNOWN"
+  },
+  "verification": {
+    "workflow": ".github/workflows/zrot-gr-original-source-ordered-dot-v1.yml",
+    "CI_run": 42815228832,
+    "CI_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42815228832",
+    "validated_code_commit": "fe0d446b27d07c0f346413b44b081389a455afaa",
+    "result": "SUCCESS_3_OF_3",
+    "generic_Python_3_12": "PASS",
+    "generic_Python_3_14": "PASS",
+    "original_pinned_SimC_CXX_build": "PASS",
+    "ST_native_action_token_time_parity_1T": "16_OF_16_EXACT",
+    "AoE_native_action_token_time_parity_3T": "16_OF_16_EXACT",
+    "original_ST_frontier_SHA256": "79d372d06494cc8779daf09ee00fc4676ba03b5f0bbeed8c60d672f9677131aa",
+    "original_AoE_frontier_SHA256": "446ce44e36b73b8bf93f6b4845a9f3da912350cb078e6d8190976e8df5a2b369",
+    "original_ST_stage_SHA256": "dcbdee7fdf982d573e2ba8bfcb850565ee02e91ddae2780ebf1c23b8cadb6e6a",
+    "original_AoE_stage_SHA256": "6c79a4ea67cc61014cdbc309044f703420d2515e6f8a6529e2aae73c603a59b5",
+    "passive_Dot_patch_receipt_SHA256": "69ca24e7f9296f3c433297009d97b319782e4069ad5b465f812bac6b8208e8c5",
+    "ST_Dot_replay_SHA256": "e1dc51a2bf39a6a2e3e7cbe196a1214e938428f5d9b445428505900c4c255ed0",
+    "AoE_Dot_replay_SHA256": "6d2497c88ffe661a98de416d8c7c2afa248eac39352b45455683e00c10a4bd04",
+    "ST_original_Native_causal_branch_SHA256": "9119dcf4d6cf75ee8363839dcad1edf835d09f517a9cb797d829eefb24b09f48",
+    "AoE_original_Native_causal_branch_SHA256": "3ed675ac4559e923b4fa9d5e5d00c537cc266dfc3ad1b1e20f030abf65b8c5d5",
+    "downloaded_CI_artifact_zip_SHA256": "f69736185973237c9ffd983f2fe0f0c82ac66891869172f95363cf76715ecb94",
+    "CI_artifact_id": 13764249504,
+    "CI_artifact_expires_UTC": "2026-11-24T12:30:03Z",
+    "independent_artifact_extracted_and_hash_verified": true,
+    "WCL_API_calls": 0,
+    "Blizzard_API_calls": 0,
+    "new_action_ready_calls": 0,
+    "no_original_source_ready_priority_or_gameplay_mutation": true
+  },
+  "cases": [
+    {
+      "case_id": "ST_1T_942ms",
+      "selected_root": {
+        "list": "single_sb",
+        "rank": 4,
+        "action": "stormstrike",
+        "original_call_id": 31
+      },
+      "source_order_dot": {
+        "remains_seconds": 17.499,
+        "ticking": 1
+      },
+      "candidate": [
+        {
+          "rank": 2,
+          "action": "voltaic_blaze",
+          "original_call_id": 29,
+          "source_if": "dot.flame_shock.remains=0&time<5",
+          "source_order_if": "FALSE",
+          "Native_first_failure": "BASE_COOLDOWN_NOT_READY",
+          "Native_action_ready_return": "FALSE",
+          "Strict_PRE_if": "UNKNOWN"
+        },
+        {
+          "rank": 3,
+          "action": "flame_shock",
+          "original_call_id": 30,
+          "source_if": "!ticking",
+          "source_order_if": "FALSE",
+          "Native_first_failure": "OVERRIDE_BEFORE_BASE_READY_CAUSE_UNKNOWN",
+          "Native_action_ready_return": "FALSE",
+          "Strict_PRE_if": "UNKNOWN"
+        }
+      ]
+    },
+    {
+      "case_id": "AoE_3T_940ms",
+      "selected_root": {
+        "list": "aoe",
+        "rank": 20,
+        "action": "crash_lightning",
+        "original_call_id": 74
+      },
+      "source_order_dot": {
+        "remains_seconds": 17.501,
+        "ticking": 1
+      },
+      "candidate": [
+        {
+          "rank": 1,
+          "action": "voltaic_blaze",
+          "original_call_id": 52,
+          "source_if": "talent.surging_totem.enabled&dot.flame_shock.remains=0",
+          "source_order_if": "FALSE",
+          "reason": "dot.remains positive shortcircuits even if runtime hero-talent enabled is UNKNOWN",
+          "Native_first_failure": "BASE_COOLDOWN_NOT_READY",
+          "Native_action_ready_return": "FALSE",
+          "Strict_PRE_if": "UNKNOWN"
+        },
+        {
+          "rank": 2,
+          "action": "flame_shock",
+          "original_call_id": 53,
+          "source_if": "!ticking",
+          "source_order_if": "FALSE",
+          "Native_first_failure": "OVERRIDE_BEFORE_BASE_READY_CAUSE_UNKNOWN",
+          "Native_action_ready_return": "FALSE",
+          "Strict_PRE_if": "UNKNOWN"
+        }
+      ]
+    }
+  ],
+  "separate_previous_competitor": {
+    "case": "AoE_3T_940ms",
+    "rank": 19,
+    "action": "voltaic_blaze",
+    "original_call_id": 73,
+    "source_profile_static_IF": "TRUE_VIA_SELECTED_FIRE_NOVA",
+    "original_native_first_failure": "BASE_COOLDOWN_NOT_READY",
+    "evidence_SHA256": "7921262f2fd18aa52075be05b9eec3e2ff59849953cb5225a393cc30845740c6"
+  },
+  "physical_cause_followup": {
+    "source_code": "original engine/class_modules/sc_shaman.cpp::flame_shock_t::ready()",
+    "source_signature": "if ( p()->talent.voltaic_blaze.ok() ) return false; return shaman_spell_t::ready();",
+    "evidence_class": "SOURCE_CODE_HYPOTHESIS_ONLY_NOT_DIRECT_NATIVE_GATE_WITNESS",
+    "native_observed": "COMPOSITE_BASE_READY_FALSE and no BASE_* marker for Flame Shock calls 30/53",
+    "do_not_promote_to_causal_runtime_truth_without_independent_validation": true
+  },
+  "WCL_independent_blind": "NOT_RUN_FOR_THIS_DECISION_COHORT",
+  "engine_lifecycle": "CANDIDATE",
+  "independent_holdout": "NOT_RUN",
+  "current_Retail_mechanics": "UNKNOWN",
+  "general_rotation_opener_end": "UNKNOWN",
+  "new_user_general_rotation_rules_promoted": 0,
+  "target_dummy_wrong_cast": "UNKNOWN",
+  "product_exact_next": "SimC ST/AoE source state is evidence-bounded; lock WCL blind numeric original readiness/action candidate/threshold from independent raw Strict PRE data, postlock compare Blizzard mechanisms and SimC; complete opener and conditional priority for dummy training.",
+  "session_exact_next": "Use pinned Native ST/AoE outcome; verify original Flame Shock override-specific gating without additional Native build if possible. Do not equate hero-tree hash selected rank with runtime enabled. Prioritize independent WCL blind candidate lock and separate strict event timestamp < t, then holdout and controlled General Rotation IR promotion.",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "GEN9_handoff_unchanged": true,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
