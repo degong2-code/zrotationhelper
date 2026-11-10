@@ -1,0 +1,148 @@
+name: zrot-gr-native-opener-three-class-portfolio-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_simc_native_source_portfolio_v1.py
+      - .github/workflows/zrot-gr-native-opener-three-class-portfolio-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  fail-closed-source-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+      - name: Compile final generic portfolio code and reject unpinned/absent cohorts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_simc_native_source_portfolio_v1.py
+          python -B tools/research/general_rotation_simc_native_source_portfolio_v1.py \
+             >/tmp/generic-native-portfolio-selftest.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/generic-native-portfolio-selftest.json'))
+          assert x['status']=='PASS_OFFLINE_PORTFOLIO_FAIL_CLOSED'
+          assert x['negative_contracts']==2
+          assert x['new_native_CXX_builds']==0
+          assert x['physical_READY_proven']==0
+          assert x['opener_end_proven'] is False
+          print('GENERIC_PINNED_NATIVE_PORTFOLIO_FAIL_CLOSED_PASS')
+          PY
+          sha256sum tools/research/general_rotation_simc_native_source_portfolio_v1.py
+
+  actual-archived-original-native-join:
+    needs: [fail-closed-source-synthetic]
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+            profiles/MID2/MID2_Mage_Arcane.simc
+            profiles/MID2/MID2_Shaman_Enhancement.simc
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse original TWO class 1/2/3/5 source sample artifact
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42716911610
+          name: zrot-simc-original-1-2-3-5-target-grid-d81860cd490f0a7add1919cda17400c0f6c5aff5
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-original-two-class-evidence
+      - name: Reuse NEW third class Native original evidence from separate successful run
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42744084203
+          name: zrot-gr-original-shaman-native-marginal-3d92ad32576e91aaefd19df8d03c39a373c46632
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-original-third-class-evidence
+      - name: Verify each original derived artifact hash independently before join
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '964d5a2a8bd6714d6a538cae71f6f3892a6052aebb5056488f3c4485e8b2a11a  /tmp/zrot-original-two-class-evidence/zrot-original-native-1-2-3-5-target-grid.json' | sha256sum -c -
+          echo '7b818a65fb4e9a812ddb2efb90406a2825ddd9abdd325067edeb3f37bd263339  /tmp/zrot-original-third-class-evidence/zrot-gr-original-shaman-native-1-2-3-5-grid.json' | sha256sum -c -
+          test "$(git -C original-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          echo ORIGINAL_NATIVE_COHORT_INPUT_HASHES_AND_SOURCE_REVISION_PASS
+      - name: Compile exact pinned cross-spec Native opening samples and ordered source IF hypothesis
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_simc_native_source_portfolio_v1.py \
+            --source-root original-simc \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json \
+            --historical-grid /tmp/zrot-original-two-class-evidence/zrot-original-native-1-2-3-5-target-grid.json \
+            --new-marginal /tmp/zrot-original-third-class-evidence/zrot-gr-original-shaman-native-1-2-3-5-grid.json \
+            --out /tmp/zrot-gr-native-3class-12case-source-priority-opener-portfolio.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/zrot-gr-native-3class-12case-source-priority-opener-portfolio.json'))
+          assert x['schema']=='ZrotGeneralRotationMultiClassOriginalNativeOpeningSourcePortfolioV1'
+          assert x['original_class_count']==3
+          assert x['original_profiles']==3
+          assert x['source_APL_rows']==286
+          assert x['native_sample_target_count_cases']==12
+          assert x['original_native_action_tokens_observed']>0
+          assert x['original_selected_APL_rows_still_NOT_proven_from_tokens'] is True
+          assert x['opener_exit_condition']=='UNKNOWN'
+          assert x['full_simultaneously_READY_priorities_proven']==0
+          assert x['new_Native_CXX_build_for_this_join']==0
+          assert x['new_WCL_API_calls']==0
+          assert x['actual_target_dummy_wrong_cast']=='UNKNOWN'
+          assert x['WCL_blind_candidate_semantics_injected'] is False
+          sources=x['source_model_with_native_sample_cohort_boundaries']
+          assert {i['spec_key'] for i in sources}=={
+              'warrior_fury','mage_arcane','shaman_enhancement'}
+          assert sum(i['was_new_profile_cold_start'] for i in sources)==1
+          for spec in sources:
+              assert len(spec['actual_native_source_token_opening_samples'])==4
+              assert spec['original_selection_row_and_exact_PRE']=='UNKNOWN'
+              assert spec['opener_end_condition']=='UNKNOWN'
+              assert spec['conditional_gameplay_priority_proven'] is False
+              for sample in spec['actual_native_source_token_opening_samples']:
+                  assert sample['first_10s_sample_window_is_NOT_phase_boundary'] is True
+                  assert sample['original_cpp_source_row_attribution']=='UNKNOWN'
+                  assert sample['competing_full_READY']=='UNKNOWN'
+                  assert sample['native_first_10s_samples_NOT_opener_end_count']>0
+              print('ACTUAL_ORIGINAL_NATIVE_OPENING_SAMPLES_PER_CLASS',spec['spec_key'],
+                    spec['native_sample_total'],
+                    [r['native_first_10s_samples_NOT_opener_end_count']
+                    for r in spec['actual_native_source_token_opening_samples']],
+                    'ROOT_CONTROL_ROWS',len(spec['original_root_CALL_RUN_guard_hypotheses']))
+          print('GENERIC_THREE_CLASS_ACTUAL_NATIVE_OPENING_SOURCE_PRIORITY_PORTFOLIO_PASS',
+                x['native_sample_target_count_cases'],x['source_APL_rows'],
+                x['original_native_action_tokens_observed'])
+          PY
+          sha256sum /tmp/zrot-gr-native-3class-12case-source-priority-opener-portfolio.json
+      - name: Retain output without raw character logs or full CXX capture
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-3class-original-native-source-opener-portfolio-${{ github.sha }}
+          path: /tmp/zrot-gr-native-3class-12case-source-priority-opener-portfolio.json
+          retention-days: 7
+          if-no-files-found: error
