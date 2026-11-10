@@ -1,0 +1,122 @@
+{
+  "schema": "ZrotGenericSimCSourceGuardScenarioMatrixV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "manifest": "tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json",
+  "semantic_provenance": "EXPLICIT_SYNTHETIC_SOURCE_FACTS_NOT_NATIVE_PRE_NOT_WCL_OBSERVATION",
+  "intended_claim": "SimC APL CALL/RUN IF guards can be evaluated generically across spec/class/target/build while action readiness and actual dispatched list remain UNKNOWN.",
+  "scenarios": [
+    {
+      "spec_key": "warrior_fury",
+      "scenario_id": "st_slayer",
+      "target_count": 1,
+      "source_facts": {
+        "active_enemies": 1,
+        "talent.slayers_dominance": 1,
+        "talent.lightning_strikes": 0
+      }
+    },
+    {
+      "spec_key": "mage_arcane",
+      "scenario_id": "st_spellslinger",
+      "target_count": 1,
+      "source_facts": {
+        "active_enemies": 1,
+        "talent.splintering_sorcery": 1
+      }
+    },
+    {
+      "spec_key": "shaman_enhancement",
+      "scenario_id": "st_stormbringer",
+      "target_count": 1,
+      "source_facts": {
+        "active_enemies": 1,
+        "talent.surging_totem.enabled": 0
+      }
+    },
+    {
+      "spec_key": "warrior_fury",
+      "scenario_id": "two_target_slayer",
+      "target_count": 2,
+      "source_facts": {
+        "active_enemies": 2,
+        "talent.slayers_dominance": 1,
+        "talent.lightning_strikes": 0
+      }
+    },
+    {
+      "spec_key": "mage_arcane",
+      "scenario_id": "two_target_spellslinger",
+      "target_count": 2,
+      "source_facts": {
+        "active_enemies": 2,
+        "talent.splintering_sorcery": 1
+      }
+    },
+    {
+      "spec_key": "shaman_enhancement",
+      "scenario_id": "two_target_totemic",
+      "target_count": 2,
+      "source_facts": {
+        "active_enemies": 2,
+        "talent.surging_totem.enabled": 1
+      }
+    },
+    {
+      "spec_key": "warrior_fury",
+      "scenario_id": "five_target_thane",
+      "target_count": 5,
+      "source_facts": {
+        "active_enemies": 5,
+        "talent.slayers_dominance": 0,
+        "talent.lightning_strikes": 1
+      }
+    },
+    {
+      "spec_key": "mage_arcane",
+      "scenario_id": "five_target_sunfury",
+      "target_count": 5,
+      "source_facts": {
+        "active_enemies": 5,
+        "talent.splintering_sorcery": 0
+      }
+    },
+    {
+      "spec_key": "shaman_enhancement",
+      "scenario_id": "five_target_stormbringer",
+      "target_count": 5,
+      "source_facts": {
+        "active_enemies": 5,
+        "talent.surging_totem.enabled": 0
+      }
+    },
+    {
+      "spec_key": "warrior_fury",
+      "scenario_id": "st_thane",
+      "target_count": 1,
+      "source_facts": {
+        "active_enemies": 1,
+        "talent.slayers_dominance": 0,
+        "talent.lightning_strikes": 1
+      }
+    },
+    {
+      "spec_key": "mage_arcane",
+      "scenario_id": "st_sunfury",
+      "target_count": 1,
+      "source_facts": {
+        "active_enemies": 1,
+        "talent.splintering_sorcery": 0
+      }
+    },
+    {
+      "spec_key": "shaman_enhancement",
+      "scenario_id": "st_totemic",
+      "target_count": 1,
+      "source_facts": {
+        "active_enemies": 1,
+        "talent.surging_totem.enabled": 1
+      }
+    }
+  ]
+}
