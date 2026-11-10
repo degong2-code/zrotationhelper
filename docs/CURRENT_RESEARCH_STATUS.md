@@ -10,6 +10,7 @@
 
 | 연구 영역 | 확인된 범위 | 아직 주장할 수 없는 것 |
 | --- | --- | --- |
+| **전문화별 General Rotation 초안 생성** | **고술·분전·비법 Markdown 3개 + JSON 3개**, 원본 286/286행과 타겟·특성 분기 12사례, 실제 Native 첫 10초 표본 연결. [산출물 인덱스](GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md), [CI #42747802703](https://github.com/degong2-code/zrotationhelper/actions/runs/42747802703) **3/3 PASS** | 초기 **source-only 연구 초안**이며 정확한 실제 우선순위, 오프닝 종료·READY·게임 플레이어 오류는 미확정 |
 | SimC APL 해석 | 고정 Fury/Arcane/Enhancement 원본 3프로필, 소스 **286 APL 행 / 19 리스트**, 순서·조건·CALL/RUN 구분 | 나머지 전문화 및 현재 Retail 최적성 |
 | ST·2T·AoE 소스 분기 | **3클래스·12개 명시적 가상 타겟/특성 조건**에 대해 루트 CALL/RUN IF 48건 평가: TRUE 24, FALSE 24. 원본 APL 소스 조건 결과만 인증 | 실제 해당 리스트 진입, 전체 READY, 유저 오답 판정 및 오프닝 종료는 UNKNOWN |
 | 오프닝 / ST / 2T / 3+ | **3전문화·12개 원본 Native 1·2·3·5타겟 사례**, 실제 SimC 행동 464건(첫 10초 표본 185건). 서로 다른 바이너리/실행 코호트 분리하여 같은 APL source 모델에 결합 | 첫 10초는 오프닝 종료 아님. 고술 원본 선택 행·동일 호출 PRE·전체 경쟁 READY, 현재 Retail 최적성 UNKNOWN |
