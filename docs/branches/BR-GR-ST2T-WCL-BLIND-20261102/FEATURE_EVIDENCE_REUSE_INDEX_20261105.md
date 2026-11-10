@@ -1,4 +1,12 @@
 # zRotationHelper — Feature Evidence Reuse Index (2026-11-05)
+## 2026-11-10 — Native AoE rank19 cooldown gate cause (REUSE / EXTEND / CONNECT)
+
+**REUSE:** Original pinned SimC profile, same-root rank19 Native FALSE, profile Fire Nova rank1 source static IF TRUE, branch-local successor scope. **EXTEND:** Generic `tools/research/general_rotation_original_ready_branch_probe_v1.py` instruments only original return branches, parent patched action.cpp SHA gated. **CONNECT:** Generic `general_rotation_original_ready_branch_replay_v1.py` binds actor/pointer/call ID73/940ms to original PRE/POST and source APL `aoe#19 voltaic_blaze`, before selected `aoe#20 crash_lightning` call ID74. Original Native branch markers `BASE_COOLDOWN_NOT_READY → COMPOSITE_BASE_READY_FALSE`; failure at `cooldown->is_ready()` so the Native IF comparator was **not actually reached**, even though source-profile static IF is TRUE. No new action_ready/IF/RNG or cooldown calls; original selected action parity ST and AoE each 16/16 first 10 seconds.
+
+**Verified:** [Actions #42811258250](https://github.com/degong2-code/zrotationhelper/actions/runs/42811258250) **3/3 SUCCESS**, pinned evidence SHA256 `7921262f2fd18aa52075be05b9eec3e2ff59849953cb5225a393cc30845740c6`, prior frontier/stage digests unchanged. Parent-patch conflict caused previous #42810975447 FAILURE; fixed via immutable prior Native IF patch receipt, not a change in gameplay. Durable `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_SHAMAN_ORIGINAL_READY_BRANCH_CAUSAL_SUCCESSOR_20261110.json`.
+
+**Limit/next:** This is a pinned original SimC cooldown gate, not real Retail physical NOT_READY or a new player-facing priority. Remaining 4 focused source IF missing DoT/ticking PRE and independent WCL blind lock/holdout are still UNKNOWN/NOT RUN. No General Rotation model or target-dummy correction promoted, MAIN/FROZEN unchanged.
+
 ## 2026-11-10 — Scope Gen9 — focused source-profile static IF (REUSE / CONNECT)
 
 **Inputs:** Reuse [previous focused original selected-root ST/AoE 5-gap CI #42805065697](https://github.com/degong2-code/zrotationhelper/actions/runs/42805065697) and its immutable focused JSON SHA256 `2d01d4e0b1c932e69b461b8db3f52d406f53bf74c6ce6c05efafb0b24b653979`; reuse `general_rotation_original_talent_hash_dbc_v1.py` and original pinned SimC profile source, no new Native/WCL/Blizzard requests.
