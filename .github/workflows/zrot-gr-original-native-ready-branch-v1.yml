@@ -119,6 +119,7 @@ jobs:
             --out-receipt /tmp/shaman-action-lifecycle-patch.json
           python -B tools/research/general_rotation_original_ready_branch_probe_v1.py \
             --source-root original-simc \
+            --prior-receipt /tmp/shaman-original-if-prepare.json \
             --out-receipt /tmp/shaman-original-action-ready-branch-patch.json
           python - <<'PY'
           import json
