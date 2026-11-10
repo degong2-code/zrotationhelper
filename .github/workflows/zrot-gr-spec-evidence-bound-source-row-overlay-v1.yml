@@ -1,0 +1,49 @@
+name: zrot-gr-spec-evidence-bound-source-row-overlay-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_spec_native_root_evidence_overlay_v1.py
+      - .github/workflows/zrot-gr-spec-evidence-bound-source-row-overlay-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-overlay-synthetic:
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12','3.14']
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+      - name: Verify generic model overlay compiles and denies fabricated READY and source rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_spec_native_root_evidence_overlay_v1.py \
+            tools/research/general_rotation_spec_model_export_v1.py
+          python -B tools/research/general_rotation_spec_native_root_evidence_overlay_v1.py \
+            >/tmp/zrot-source-row-evidence-overlay-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/zrot-source-row-evidence-overlay-synthetic.json'))
+          assert x['status']=='PASS_GENERIC_NATIVE_ROOT_SOURCE_EVIDENCE_OVERLAY'
+          assert x['positive_synthetic_roots']==1
+          assert x['negative_rejected']==4
+          assert x['source_order_preserved'] is True
+          assert x['physical_ready_proven'] is False
+          assert x['current_Retail_optimality_proven'] is False
+          print('GENERIC_SOURCE_ROW_EVIDENCE_ONLY_OVERLAY_FAIL_CLOSED_PASS')
+          PY
+          sha256sum tools/research/general_rotation_spec_native_root_evidence_overlay_v1.py
