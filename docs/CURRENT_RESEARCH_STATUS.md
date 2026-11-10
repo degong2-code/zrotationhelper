@@ -10,7 +10,8 @@
 
 | 연구 영역 | 확인된 범위 | 아직 주장할 수 없는 것 |
 | --- | --- | --- |
-| SimC APL 해석 | 고정 Fury/Arcane 원본 2프로필, 소스 172 APL 행, 순서·조건·CALL/RUN 구분 | 모든 전문화 및 현재 Retail 최적성 |
+| SimC APL 해석 | 고정 Fury/Arcane/Enhancement 원본 3프로필, 소스 **286 APL 행 / 19 리스트**, 순서·조건·CALL/RUN 구분 | 나머지 전문화 및 현재 Retail 최적성 |
+| ST·2T·AoE 소스 분기 | **3클래스·12개 명시적 가상 타겟/특성 조건**에 대해 루트 CALL/RUN IF 48건 평가: TRUE 24, FALSE 24. 원본 APL 소스 조건 결과만 인증 | 실제 해당 리스트 진입, 전체 READY, 유저 오답 판정 및 오프닝 종료는 UNKNOWN |
 | 오프닝 / ST / 2T / 3+ | 원본 Native 1·2·3·5타겟 각 2전문화, 총 8개 행동 사례; 타겟/특성 조건식 투영 | 오프닝 종료의 확정적인 조건, 3+ 원본 동일 호출 전체 READY |
 | 선택 순간 IF | ST/2T 원본 행동 147건 중 49건 같은 원본 호출의 독립 IF TRUE, 44건 UNKNOWN, 54건 명시적 IF 없음 | IF TRUE = 전체 스킬 READY 또는 최적 우선순위 |
 | 최소 충분 상태 | IF TRUE 49건의 관측값 122개 사용에서 89개로 동일 IF 결론 유지 | 실제 수집 실행시간/비용 27% 절감 |
@@ -28,11 +29,13 @@
 - **실제 WCL 빌드:** [Strict PRE actor combatantinfo](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_COMBATANTINFO_PRE_ACTOR_BUILD_AND_PINNED_SOURCE_LOOKUPS_20261110.json) · [Actions #42642973309](https://github.com/degong2-code/zrotationhelper/actions/runs/42642973309)
 - **WCL 종합 관측 한계:** [메커니즘·패치 증거 게이트](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_POSTLOCK_MECHANIC_EPOCH_EVIDENCE_FRONTIER_20261109.json) · [Actions #42624671123](https://github.com/degong2-code/zrotationhelper/actions/runs/42624671123)
 
+- **3클래스 타겟·특성 가설 검증:** [12개 시나리오·48개 루트 CALL/RUN IF의 참/거짓 판정](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_THREE_CLASS_TARGET_BUILD_SOURCE_GUARD_FRONTIER_20261110.json) · [Actions #42742497979](https://github.com/degong2-code/zrotationhelper/actions/runs/42742497979); **가상 입력에 대한 원본 소스 IF 계산**이며 실제 실행 리스트나 READY 인증이 아님.
+
 ## 정확한 다음 연구 작업
 
 **제품 Exact Next:** 범용 연구 엔진으로 현재 Retail 전문화별 General Rotation 오프닝과 ST/2T/Cleave/AoE 상태별 IF/ELSE 모델을 완성한다. 독립 WCL blind 후보를 고정한 뒤 대조·보정하고, 허수아비 실제 행동과 비교 가능한 경우에만 오류를 설명한다.
 
-**세션 Exact Next:** 원본 동작 보존이 검증된 범용 `prev_gcd.N.action` PRE 읽기 기능과 IF/경쟁 후보 증거를 다른 전문화·빌드의 **General Rotation 오프닝, ST/2T/Cleave/AoE 조건부 우선순위 모델**로 연결한다. 이 두 선행 APL IF만 반복 검증하지 말고 실제 우선순위에 중요한 CALL/RUN 상위 경로·물리 READY·대안을 우선 검토한다. 이전 Native 실행의 2건 UNKNOWN은 별도 그대로 두며, 소스 가설을 WCL blind lock 이전에 유입하지 않는다.
+**세션 Exact Next:** 가상 3클래스 분기 검증은 통과했다. 다음에는 소스 가설만 반복하지 말고 영향이 큰 오프닝/일반 전환과 실제 이전 후보 READY를 **같은 원본 SimC 호출의 PRE/전체 CALL·RUN 경로**로 검증한다. WCL blind는 후보 잠금 전까지 SimC 의미론 입력 금지. 이전에 개발한 원본 동작 보존이 검증된 범용 `prev_gcd.N.action` PRE 읽기 기능과 IF/경쟁 후보 증거를 다른 전문화·빌드의 **General Rotation 오프닝, ST/2T/Cleave/AoE 조건부 우선순위 모델**로 연결한다. 이 두 선행 APL IF만 반복 검증하지 말고 실제 우선순위에 중요한 CALL/RUN 상위 경로·물리 READY·대안을 우선 검토한다. 이전 Native 실행의 2건 UNKNOWN은 별도 그대로 두며, 소스 가설을 WCL blind lock 이전에 유입하지 않는다.
 
 ## 상태를 읽을 때 주의
 
