@@ -19,6 +19,7 @@ POLICY = "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
 SOURCE = "engine/action/action.cpp"
 GIT_BLOB = "399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4"
 SCHEMA = "ZrotOriginalActionReadyBranchPassivePatchV1"
+PARENT_SCHEMA = "ZrotOriginalSimCSelectedRowSameCallIFSourcePatchV1"
 MARK = "ZROT_ORIGINAL_ACTION_READY_BRANCH_V1|"
 START_COMPOSITE = "bool action_t::action_ready()\n{"
 END_COMPOSITE = "\nbool action_t::cost_affordable()"
@@ -71,9 +72,9 @@ def patch(raw):
 
     # Do not re-evaluate the if expression. This records the result AFTER
     # its one actual native evaluation. No conversion into Strict PRE evidence.
-    original="  if ( if_expr && !if_expr->success() )\n    return false;"
-    replaced=("  if ( if_expr && !if_expr->success() )\n  {\n"+
-              emit("COMPOSITE_SOURCE_IF_FALSE")+"    return false;\n  }")
+    original="    if ( !zrot_original_native_if )\n      return false;"
+    replaced=("    if ( !zrot_original_native_if )\n    {\n"+
+              emit("COMPOSITE_SOURCE_IF_FALSE")+"      return false;\n    }")
     composite=once(composite,original,replaced,"ORIGINAL_NATIVE_IF_GATE_CHANGED")
 
     for predicate, label in (
@@ -115,6 +116,7 @@ def patch(raw):
 
     after=before[:cs]+composite+before[ce:rs]+base+before[re:]
     require(after.count(MARK)==9 and
+            after.count("zrot_original_native_if=if_expr->success()")==1 and
             after.count("!cooldown->is_ready()")==before.count("!cooldown->is_ready()") and
             after.count("internal_cooldown->down()")==before.count("internal_cooldown->down()") and
             after.count("!cost_affordable()")==before.count("!cost_affordable()") and
@@ -128,19 +130,28 @@ def patch(raw):
             "ORIGINAL_READY_OR_IF_RNG_RETURN_CALL_STRUCTURE_CHANGED")
     return after.encode("utf-8")
 
-def install(root):
+def install(root,prior):
     root=root.resolve(strict=True)
     version=subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],
                            text=True,capture_output=True,check=True).stdout.strip()
     require(version==REV,"ORIGINAL_SIMC_REVISION_CHANGED")
     path=root/SOURCE
     before=path.read_bytes()
-    require(gitblob(before)==GIT_BLOB,"ORIGINAL_ACTION_CPP_GIT_BLOB_CHANGED")
+    require(prior.get("schema")==PARENT_SCHEMA and
+            prior.get("source_revision")==REV and
+            prior.get("official_action_git_blob")==GIT_BLOB and
+            prior.get("patch_sha256",{}).get(SOURCE)==sha(before) and
+            prior.get("original_action_ready_calls_added")==0 and
+            prior.get("original_if_expr_success_calls_added")==0,
+            "PRIOR_ORIGINAL_ACTION_CPP_IF_PATCH_RECEIPT_NOT_BOUND")
     patched=patch(before)
     path.write_bytes(patched)
     return {"schema":SCHEMA,"policy_id":POLICY,"original_simc_revision":REV,
             "original_action_cpp_git_blob":GIT_BLOB,
             "original_sha256":sha(before),"patched_sha256":sha(patched),
+            "parent_original_native_IF_receipt_sha256":sha(
+                (json.dumps(prior,sort_keys=True,separators=(",",":"))).encode("utf-8")
+            ),
             "original_calls_added":{"action_ready":0,"ready":0,"IF":0,"RNG":0,
                                     "cooldown":0,"queue":0},
             "branch_markers_per_source":9,
@@ -152,7 +163,8 @@ def selftest():
     # Synthetic exact original function bodies; do not execute the spell.
     composite=(START_COMPOSITE+'\n'
        "  if ( !ready() )\n  {\n    return false;\n  }\n"
-       "  if ( if_expr && !if_expr->success() )\n    return false;\n"
+       "  if ( if_expr )\n  {\n    const bool zrot_original_native_if=if_expr->success();\n"
+       "    if ( !zrot_original_native_if )\n      return false;\n  }\n"
        "  return true;\n}\n")
     base=(START_BASE+"\n"+
        "  if ( !cooldown->is_ready() )\n    return false;\n"
@@ -177,7 +189,7 @@ def selftest():
     neg=0
     for bad in (
         src.replace(b"!cooldown->is_ready()",b"!cooldown->up()"),
-        src.replace(b"if_expr && !if_expr->success()",b"if_expr && !if_expr->is_valid()"),
+        src.replace(b"!zrot_original_native_if",b"!other_if_result"),
         src.replace(b"starved_proc->occur();",b"starved_proc->execute();"),
         src.replace(b"internal_cooldown->down()",b"internal_cooldown->ready()"),
         src.replace(b"return true;\n}\n"+END_BASE.encode(),b"return false;\n}\n"+END_BASE.encode()),
@@ -195,12 +207,13 @@ def selftest():
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--source-root",type=Path)
+    p.add_argument("--prior-receipt",type=Path)
     p.add_argument("--out-receipt",type=Path)
     a=p.parse_args()
     if all(x is None for x in vars(a).values()):
         print(json.dumps(selftest(),sort_keys=True));return
     require(all(x is not None for x in vars(a).values()),"PINNED_ORIGINAL_ROOT_AND_OUT_REQUIRED")
-    result=install(a.source_root)
+    result=install(a.source_root,json.loads(a.prior_receipt.read_bytes()))
     raw=(json.dumps(result,sort_keys=True,separators=(",",":"))+"\n").encode()
     a.out_receipt.parent.mkdir(parents=True,exist_ok=True)
     with a.out_receipt.open("xb") as f:f.write(raw)
