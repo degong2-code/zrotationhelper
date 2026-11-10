@@ -1,0 +1,74 @@
+{
+  "schema": "ZrotGeneralRotationScopeGen7NavigationHandoffReceiptV1",
+  "date": "2026-11-10",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "new_scope_generation": 7,
+  "previous_scope_generation": 6,
+  "Gen6_source_git_blob_sha1": "fdc3cf24821059eb58f2e4a3dfbfc8854306df31",
+  "Gen6_source_byte_sha256": "5df57d1c4577bbf408bb5016f5f2001ad7511c15986192c62e725834ba7f6010",
+  "Gen6_byte_identical_archive": "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN6_BEFORE_20261110.json",
+  "archive_byte_for_byte_verified_against_prior_GitHub_blob": true,
+  "actual_new_chat_readonly_until_explicit_progress": true,
+  "MAIN_promoted": false,
+  "shared_authoritative_state_mutated": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "navigation_created": [
+    "docs/RESEARCH_INDEX.md",
+    "docs/CURRENT_RESEARCH_STATUS.md",
+    "docs/FEATURE_HISTORY_INDEX.md",
+    "docs/EVIDENCE_NAVIGATION_INDEX.md"
+  ],
+  "navigation_entrypoint_updated": "README.md",
+  "original_long_history_files_unchanged": true,
+  "original_evidence_JSON_files_unchanged": true,
+  "current_research_claims": {
+    "source_only_general_rotation_hypothesis_current_Retail_complete": false,
+    "real_original_SimC_2_profiles_four_target_counts_eight_cases": true,
+    "original_source_chosen_samples": 147,
+    "independently_replayed_source_IF_true": 49,
+    "source_IF_unknown": 44,
+    "source_no_explicit_IF": 54,
+    "source_IF_observed_operand_instances": 122,
+    "source_IF_inclusion_minimal_operand_instances": 89,
+    "verified_local_competitor_APL_exclusions": 8,
+    "unresolved_native_POST_only_prior_rows": 2,
+    "full_positive_physical_READY": 0,
+    "actual_dummy_error_claims": 0
+  },
+  "verified_reference_CI": [
+    {
+      "run": 42716911610,
+      "conclusion": "SUCCESS_3_OF_3",
+      "scope": "Native 1/2/3/5 source action samples"
+    },
+    {
+      "run": 42721244205,
+      "conclusion": "SUCCESS_3_OF_3",
+      "scope": "original 147 cases / 49 minimal IF"
+    },
+    {
+      "run": 42723323648,
+      "conclusion": "SUCCESS_3_OF_3",
+      "scope": "generic competitor local exclusions and remaining UNKNOWN"
+    },
+    {
+      "run": 42642973309,
+      "conclusion": "SUCCESS_4_OF_4",
+      "scope": "original WCL actor numeric combatantinfo PRE"
+    }
+  ],
+  "navigation_link_check": "PENDING_INDEPENDENT_GITHUB_ACTIONS_AT_HANDOFF_COMMIT",
+  "scope_continuity_verification": "PENDING_INDEPENDENT_GITHUB_ACTIONS_AT_HANDOFF_COMMIT",
+  "product_exact_next": "Current Retail cross-specialization General Rotation opener and evidence-bounded ST/2T/cleave/AoE priority model, validated independently against WCL before safe target dummy correction.",
+  "session_exact_next": "Use saved original two Arcane prior candidate roots, target minimal exact-root PRE for currently unknown IF, preserve full READY UNKNOWN; update generic evidentiary producer only if needed.",
+  "frozen_and_historical_evidence_not_rewritten": true,
+  "historical_ref_paths_unavailable_on_branch": [
+    "docs/ROTATION_RESEARCH_SYSTEM_CORE_CONTRACT_V1.md",
+    "docs/GENERAL_ROTATION_PLAYBOOK_DUAL_LANE_SUCCESSOR_PROPOSAL_v2.md"
+  ]
+}
