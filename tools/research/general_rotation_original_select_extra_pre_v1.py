@@ -41,7 +41,9 @@ CXX_EXPR={
  "buff_up":lambda f:
    f'zrot_extra_buff_up("{f["name"]}")',
  "buff_react":lambda f:
-   f'zrot_extra_buff_react("{f["name"]}")'
+   f'zrot_extra_buff_react("{f["name"]}")',
+ "prev_gcd_match":lambda f:
+   f'zrot_extra_prev_gcd("{f["name"]}",{f["ordinal"]})'
 }
 BUFF_SEMANTICS={
  "buff_stack":"stack","buff_up":"up","buff_react":"react"
@@ -108,6 +110,14 @@ def valid_plan(p:dict,root:Path|None=None)->None:
             need(type(name)==str and FIELD_NAME.fullmatch(name) is not None,
                  "INVALID_BUFF_LOOKUP_NAME")
             expected=f"buff.{name}.{BUFF_SEMANTICS[typ]}"
+        elif typ=="prev_gcd_match":
+            # Source grammar only. Spell names and GCD ordinals belong to
+            # the external pinned SpecAdapter, not this generic reader.
+            ordinal=f.get("ordinal")
+            need(type(name)==str and FIELD_NAME.fullmatch(name) is not None
+                 and type(ordinal) is int and 1<=ordinal<=10,
+                 "UNSAFE_SOURCE_PREV_GCD_NAME_OR_ORDINAL")
+            expected=f"prev_gcd.{ordinal}.{name}"
         else:
             need(name is None,"SPURIOUS_SOURCE_FIELD_NAME")
         need(f["symbol"]==expected,"CAPTURE_SYMBOL_SEMANTICS_NOT_SOURCE_EQUIVALENT")
@@ -161,6 +171,18 @@ def patch_cpp(pristine:bytes,plan:dict)->bytes:
           buff_t* b=buff_t::find(this,key);
           return b?std::pair<int,double>{1,static_cast<double>(b->stack_react())}:
                    std::pair<int,double>{0,0.0};
+        };
+        // Exactly matches action.cpp prev_gcd.N.action source expression:
+        // find_action -> history size -> internal_id equality. The original
+        // source method owns the history; this reader does not mutate it.
+        const auto zrot_extra_prev_gcd = [this](const char* key,unsigned nth)
+          ->std::pair<int,double> {
+          const action_t* wanted=find_action(key);
+          if (!nth) return {0,0.0};
+          if (!wanted || prev_gcd_actions.size()<nth)
+            return {1,0.0};
+          const action_t* actual=prev_gcd_actions[prev_gcd_actions.size()-nth];
+          return {1,actual && actual->internal_id==wanted->internal_id ? 1.0:0.0};
         };
 """
     vars_text=[]
@@ -248,12 +270,17 @@ def selftest():
                     {"owner_class":"mage","symbol":"variable.aoe_count",
                      "kind":"player_variable","name":"aoe_count"},
                     {"owner_class":"mage","symbol":"buff.arcane_salvo.react",
-                     "kind":"buff_react","name":"arcane_salvo"}]}
+                     "kind":"buff_react","name":"arcane_salvo"},
+                    {"owner_class":"mage","symbol":"prev_gcd.1.synthetic_spell",
+                     "kind":"prev_gcd_match","name":"synthetic_spell","ordinal":1}]}
     source=source.replace("    if ( a->action_ready() )\n","")
     raw=patch_cpp(source.encode(),plan).decode()
     assert raw.count(MARK)==1 and raw.count("zrot_if_ready=a->action_ready();")==1
     assert "b->stack_react()" in raw and "sim->active_enemies" in raw
     assert "current_value_" in raw and sha(canonical(plan)) in raw
+    assert 'zrot_extra_prev_gcd("synthetic_spell",1)' in raw
+    assert "prev_gcd_actions.size()<nth" in raw
+    assert raw.count("zrot_if_ready=a->action_ready();")==1
     n=0
     for bad in (
        {**plan,"source_revision":"x"},
@@ -262,6 +289,12 @@ def selftest():
                           "kind":"buff_stack","name":"arcane_salvo"}]},
        {**plan,"fields":[{"owner_class":"priest","symbol":"active_enemies",
                           "kind":"sim_active_enemies"}]},
+       {**plan,"fields":[{"owner_class":"mage","symbol":"prev_gcd.0.spell",
+                          "kind":"prev_gcd_match","name":"spell","ordinal":0}]},
+       {**plan,"fields":[{"owner_class":"mage","symbol":"prev_gcd.1.spell",
+                          "kind":"prev_gcd_match","name":"spell","ordinal":2}]},
+       {**plan,"fields":[{"owner_class":"mage","symbol":"prev_gcd.1.bad-name",
+                          "kind":"prev_gcd_match","name":"bad-name","ordinal":1}]},
     ):
        try:patch_cpp(source.encode(),bad)
        except PREError:n+=1
