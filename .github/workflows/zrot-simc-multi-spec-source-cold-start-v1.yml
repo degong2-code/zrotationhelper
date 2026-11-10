@@ -7,7 +7,7 @@ on:
       - tools/research/general_rotation_source_hypothesis_ir_v1.py
       - tools/research/general_rotation_ir_proof_replay_v1.py
       - tools/research/general_rotation_decision_proof_engine_v1.py
-      - tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json
+      - tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json
       - tools/research/simc_apl_semantic_ir_v2.py
       - .github/workflows/zrot-simc-multi-spec-source-cold-start-v1.yml
   workflow_dispatch:
@@ -38,6 +38,7 @@ jobs:
             tools/research/general_rotation_simc_multi_spec_cold_start_v1.py \
             tools/research/general_rotation_source_hypothesis_ir_v1.py \
             tools/research/general_rotation_ir_proof_replay_v1.py \
+            tools/research/general_rotation_simc_e2e_research_engine_v1.py \
             tools/research/simc_apl_semantic_ir_v2.py
           python -B tools/research/simc_apl_semantic_ir_v2.py > /tmp/generic-source-ir-selftest.json
           python -B tools/research/general_rotation_simc_multi_spec_cold_start_v1.py > /tmp/multi-spec-manifest-selftest.json
@@ -53,7 +54,7 @@ jobs:
           assert ir['schema']=='ZrotGeneralRotationSourceHypothesisIRV1'
           assert ir['status']=='PASS_OFFLINE_SYNTHETIC'
           assert ir['checks']>=15 and ir['WCL_API_calls']==0
-          print('GENERIC_TWO_CLASS_SOURCE_MANIFEST_SYNTHETIC_PASS')
+          print('GENERIC_THREE_CLASS_SOURCE_MANIFEST_SYNTHETIC_PASS')
           proof=json.load(open('/tmp/generic-ir-proof-replay-selftest.json'))
           assert proof['schema']=='ZrotGeneralRotationIRProofCarryingDecisionReplayV1'
           assert proof['status']=='PASS_OFFLINE_SYNTHETIC'
@@ -98,35 +99,35 @@ jobs:
           import json
           x=json.load(open('/tmp/general-rotation-multi-spec-source-receipt.json'))
           assert x['schema']=='ZrotGeneralRotationSimcMultiSpecColdStartV1'
-          assert x['distinct_class_count']>=2
-          assert len(x['profiles'])>=2
-          assert x['total_action_rows']>0
+          assert x['distinct_class_count']==3
+          assert len(x['profiles'])==3
+          assert x['total_action_rows']==286
           assert x['all_profile_source_blobs_verified'] is True
           assert x['Native_action_ready_independently_proven'] is False
           assert x['WCL_independent_blind_holdout_completed'] is False
           assert x['General_Rotation_opener_verified'] is False
           assert x['WCL_API_calls']==0
-          print('ACTUAL_PINNED_MULTI_CLASS_SIMC_APL_SOURCE_COLD_START_PASS')
+          print('ACTUAL_PINNED_THREE_CLASS_SIMC_APL_SOURCE_COLD_START_PASS')
           for p in x['profiles']:
               print('PINNED_GENERIC_SPEC_SOURCE',p['key'],p['source_action_rows'],
                     p['action_list_count'],p['source_symbol_count'])
           PY
           sha256sum /tmp/general-rotation-multi-spec-source-receipt.json
-      - name: Generate class-neutral General Rotation opener and priority source-hypothesis IR
+      - name: Generate three-class source-hypothesis IR and assert Shaman ST/build/AoE branch preservation
         shell: bash
         run: |
           set -euo pipefail
           python -B tools/research/general_rotation_source_hypothesis_ir_v1.py \
             --source-root simc-upstream \
             --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
-            --out /tmp/general-rotation-two-class-hypothesis-ir.json
+            --out /tmp/general-rotation-three-class-hypothesis-ir.json
           python - <<'PY'
           import json
-          x=json.load(open('/tmp/general-rotation-two-class-hypothesis-ir.json'))
+          x=json.load(open('/tmp/general-rotation-three-class-hypothesis-ir.json'))
           old=json.load(open('/tmp/general-rotation-multi-spec-source-receipt.json'))
           assert x['schema']=='ZrotMultiSpecGeneralRotationSourceHypothesisIRV1'
-          assert x['class_count']==2
-          assert x['source_action_rows_total']==old['total_action_rows']==172
+          assert x['class_count']==3
+          assert x['source_action_rows_total']==old['total_action_rows']==286
           assert x['native_positive_ready_NOT_proven'] is True
           assert x['WCL_API_calls']==0 and x['MAIN_promoted'] is False
           for m in x['models']:
@@ -142,23 +143,75 @@ jobs:
                     c['source_action_rows'],c['action_lists'],
                     c['literal_target_count_comparisons'],
                     c['condition_context_hints'])
-          print('GENERIC_SOURCE_OPENER_AND_PRIORITY_IR_SOURCE_ONLY_PASS')
+          shaman=next(m for m in x['models'] if m['spec_key']=='shaman_enhancement')
+          assert shaman['coverage']['source_action_rows']==114
+          lists=shaman['source_only_priority_graph']['lists']
+          assert {'default','precombat','single_sb','single_totemic','aoe','cooldowns'} <= set(lists)
+          calls=[r for r in lists['default'] if r['behavior']=='CALL']
+          by_dest={r['control_destination']:r for r in calls}
+          assert {'single_sb','single_totemic','aoe'} <= set(by_dest)
+          assert 'active_enemies=1' in by_dest['single_sb']['conditions']['if']['raw_expression']
+          assert '!talent.surging_totem.enabled' in by_dest['single_sb']['conditions']['if']['raw_expression']
+          assert 'active_enemies=1' in by_dest['single_totemic']['conditions']['if']['raw_expression']
+          assert 'talent.surging_totem.enabled' in by_dest['single_totemic']['conditions']['if']['raw_expression']
+          assert 'active_enemies>1' in by_dest['aoe']['conditions']['if']['raw_expression']
+          hints=shaman['coverage']['condition_context_hints']
+          for key in ('target_count','build','buff_or_debuff','resource'):
+              assert hints.get(key,0)>0,(key,hints)
+          for rows in lists.values():
+              for row in rows:
+                  assert row['expected_ready']=='UNKNOWN'
+                  assert row['simultaneously_ready_source_priority']=='UNKNOWN'
+          print('THREE_CLASS_GENERIC_SOURCE_OPENER_AND_PRIORITY_IR_PASS',
+                shaman['coverage']['source_action_rows'],shaman['coverage']['action_lists'],
+                sorted(by_dest))
           PY
-          sha256sum /tmp/general-rotation-two-class-hypothesis-ir.json
-      - name: Replay official Fury and Arcane IR with no invented PRE or READY
+          sha256sum /tmp/general-rotation-three-class-hypothesis-ir.json
+      - name: Compile full source-to-conditional-priority E2E model without fabricated Native traces
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_simc_e2e_research_engine_v1.py \
+            --source-root simc-upstream \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json \
+            --out /tmp/general-rotation-three-class-conditional-e2e.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/general-rotation-three-class-conditional-e2e.json'))
+          assert x['schema']=='ZrotGenericSimCSourceToConditionalPriorityOpenerResearchE2EV1'
+          assert x['distinct_class_count']==3
+          assert x['source_APL_rows_compiled']==286
+          assert x['native_reference_cases']==0
+          assert x['original_cpp_selected_source_actions_bound']==0
+          assert x['full_dynamic_ready_state_and_global_optimality']=='UNKNOWN'
+          assert x['WCL_blind_candidate_semantics_injected'] is False
+          assert x['trainer_mistake_verdict']=='UNKNOWN'
+          shaman=next(m for m in x['models'] if m['source_spec_key']=='shaman_enhancement')
+          assert shaman['source_APL_row_count']==114
+          assert shaman['simc_native_observed_source_selection_cases']=={}
+          assert shaman['opener_first_actual_player_cast']=='UNKNOWN'
+          assert shaman['simultaneously_available_physical_priority_proven'] is False
+          p=shaman['conditioned_opener_and_priority']
+          assert p['source_program_complete_for_given_profile'] is True
+          assert p['no_flattening_of_RUN_or_CALL'] is True
+          print('THREE_CLASS_GENERAL_ROTATION_CONDITIONAL_E2E_PASS',
+                x['source_APL_rows_compiled'],x['distinct_class_count'])
+          PY
+          sha256sum /tmp/general-rotation-three-class-conditional-e2e.json
+      - name: Replay all three official class IRs with no invented PRE or READY
         shell: bash
         run: |
           set -euo pipefail
           python -B tools/research/general_rotation_ir_proof_replay_v1.py \
             --source-root simc-upstream \
             --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
-            --out /tmp/general-rotation-two-class-proof-replay.json
+            --out /tmp/general-rotation-three-class-proof-replay.json
           python - <<'PY'
           import json
-          source=json.load(open('/tmp/general-rotation-two-class-hypothesis-ir.json'))
-          report=json.load(open('/tmp/general-rotation-two-class-proof-replay.json'))
+          source=json.load(open('/tmp/general-rotation-three-class-hypothesis-ir.json'))
+          report=json.load(open('/tmp/general-rotation-three-class-proof-replay.json'))
           assert report['schema']=='ZrotMultiSpecGeneralRotationIRProofReplayV1'
-          assert len(report['reports'])==len(source['models'])==2
+          assert len(report['reports'])==len(source['models'])==3
           assert report['full_positive_ready_proven'] is False
           assert report['WCL_independent_holdout_completed'] is False
           assert report['WCL_API_calls']==0
@@ -176,13 +229,13 @@ jobs:
                     case['bounded_source_result'])
           print('ACTUAL_PINNED_IR_PROOF_REPLAY_FAIL_CLOSED_PASS')
           PY
-          sha256sum /tmp/general-rotation-two-class-proof-replay.json
+          sha256sum /tmp/general-rotation-three-class-proof-replay.json
       - uses: actions/upload-artifact@v4
         with:
-          name: pinned-two-class-simc-apl-source-ir
+          name: pinned-three-class-simc-apl-source-ir
           path: |
             /tmp/general-rotation-multi-spec-source-receipt.json
-            /tmp/general-rotation-two-class-hypothesis-ir.json
-            /tmp/general-rotation-two-class-proof-replay.json
+            /tmp/general-rotation-three-class-hypothesis-ir.json
+            /tmp/general-rotation-three-class-proof-replay.json
           retention-days: 7
           if-no-files-found: error
