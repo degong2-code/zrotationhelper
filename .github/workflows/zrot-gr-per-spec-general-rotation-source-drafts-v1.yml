@@ -1,0 +1,149 @@
+name: zrot-gr-per-spec-general-rotation-source-drafts-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_spec_model_export_v1.py
+      - .github/workflows/zrot-gr-per-spec-general-rotation-source-drafts-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  model-generic-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Validate generic per-spec General Rotation source exporter and fail-closed row proofs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_spec_model_export_v1.py \
+            tools/research/general_rotation_source_hypothesis_ir_v1.py \
+            tools/research/general_rotation_simc_e2e_research_engine_v1.py
+          python -B tools/research/general_rotation_spec_model_export_v1.py \
+            >/tmp/zrot-spec-rotation-export-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/zrot-spec-rotation-export-synthetic.json'))
+          assert x['status']=='PASS_GENERIC_READABLE_SPEC_EXPORT'
+          assert x['synthetic_profile_rows']==5
+          assert x['synthetic_spec_contexts']==2
+          assert x['fail_closed_negative_cases']==2
+          assert x['ready_imputed'] is False
+          assert x['native_observation_invented'] is False
+          assert x['opener_end_imputed'] is False
+          print('GENERIC_PER_SPEC_SOURCE_ROTATION_DRAFT_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_spec_model_export_v1.py
+
+  real-pinned-three-specializations:
+    runs-on: ubuntu-latest
+    needs: [model-generic-synthetic]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-pinned
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+            profiles/MID2/MID2_Mage_Arcane.simc
+            profiles/MID2/MID2_Shaman_Enhancement.simc
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse previously independently verified 3-class original Native source-token samples
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42745179980
+          name: zrot-gr-3class-original-native-source-opener-portfolio-d10e166e5bd1e36cb7f108ae5d059ea65c82db94
+          github-token: ${{ github.token }}
+          path: /tmp/gr-native-source-portfolio
+      - name: Export full source-ordered General Rotation as 3 Markdown and 3 JSON draft models
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-pinned rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          echo '151e48f7329ee287827a1fed5f31baad56f9540995c1dd020b961277c0fae6c2  /tmp/gr-native-source-portfolio/zrot-gr-native-3class-12case-source-priority-opener-portfolio.json' | sha256sum -c -
+          python -B tools/research/general_rotation_spec_model_export_v1.py \
+            --source-root simc-pinned \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json \
+            --scenarios tools/research/fixtures/general_rotation_source_guard_scenarios_three_class_v1.json \
+            --portfolio /tmp/gr-native-source-portfolio/zrot-gr-native-3class-12case-source-priority-opener-portfolio.json \
+            --portfolio-sha256 151e48f7329ee287827a1fed5f31baad56f9540995c1dd020b961277c0fae6c2 \
+            --out-dir /tmp/zrot-general-rotation-per-spec
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          root=Path('/tmp/zrot-general-rotation-per-spec')
+          index=json.loads((root/'INDEX.json').read_bytes())
+          assert index['schema']=='ZrotGeneralRotationPerSpecExportIndexV1'
+          assert index['all_specs']==3
+          assert index['total_source_APL_rows']==286
+          assert index['source_APL_only_not_validated_gameplay'] is True
+          assert index['opener_end']=='UNKNOWN'
+          assert index['actual_player_training_error']=='UNKNOWN'
+          assert {k: v['source_APL_rows'] for k,v in index['files'].items()}=={
+              'warrior_fury':121,'mage_arcane':51,'shaman_enhancement':114}
+          assert sum(v['target_build_scenarios'] for v in index['files'].values())==12
+          assert sum(v['original_Native_10s_cases'] for v in index['files'].values())==12
+          for name,manifest in index['files'].items():
+              raw=(root/f'{name}.json').read_bytes()
+              markdown=(root/f'{name}.md').read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==manifest['json_sha256']
+              assert hashlib.sha256(markdown).hexdigest()==manifest['md_sha256']
+              spec=json.loads(raw)
+              assert spec['schema']=='ZrotGeneralRotationPerSpecializationResearchDraftV1'
+              assert spec['source_APL_rows_preserved']==manifest['source_APL_rows']
+              all_lists=spec['general_rotation']['all_source_ordered_IF_ELSE_priority_lists']
+              assert sum(len(rows) for rows in all_lists.values())==manifest['source_APL_rows']
+              assert len(spec['general_rotation']['contextual_ST_2T_AOE_build_source_routes'])==manifest['target_build_scenarios']
+              native=spec['opener']['actual_original_SimC_first_10s_action_samples_NOT_opener_boundary']
+              assert {x['target_count'] for x in native}=={1,2,3,5}
+              assert all(x['opener_end_condition']=='UNKNOWN' for x in native)
+              assert spec['opener']['source_opener_end_condition']=='UNKNOWN'
+              assert spec['proof']['strict_actual_same_root_PRE']=='UNKNOWN'
+              assert spec['proof']['preceding_action_FULL_READY']=='UNKNOWN'
+              assert spec['proof']['current_Retail_priority_verified'] is False
+              assert spec['proof']['dummy_user_error_verdict']=='UNKNOWN'
+              assert b'##' in markdown and b'General Rotation' in markdown
+              assert markdown.count(b'###')>=len(all_lists)
+              # Check every actual source row keeps its exact original text and
+              # that no spec can lose a priority row during pretty rendering.
+              assert all(row['source_text_exact'].startswith('actions')
+                         for rows in all_lists.values() for row in rows)
+              print('PINNED_ACTUAL_SPECIALIZATION_ROTATION_DRAFT_READY',
+                    name,len(all_lists),manifest['source_APL_rows'],
+                    'CONTEXTS',manifest['target_build_scenarios'],
+                    'NATIVE_EARLY_SAMPLE_CASES',len(native))
+          print('THREE_SPECIALIZATION_GENERAL_ROTATION_DRAFTS_SOURCE_COMPLETE_NOT_GAMEPLAY_CERTIFIED')
+          PY
+          sha256sum /tmp/zrot-general-rotation-per-spec/*.json
+          sha256sum /tmp/zrot-general-rotation-per-spec/*.md
+      - name: Retain readable per-spec research models and machine-readable General Rotation IR
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-general-rotation-per-spec-source-drafts-${{ github.sha }}
+          path: /tmp/zrot-general-rotation-per-spec/
+          retention-days: 14
+          if-no-files-found: error
