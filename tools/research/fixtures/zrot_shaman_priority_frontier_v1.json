@@ -1,0 +1,34 @@
+{
+  "schema": "ZrotOriginalNativeSelectedPriorityFrontierPlanV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "spec_key": "shaman_enhancement",
+  "purpose": "Bounded original SimC same-foreground-call attempt ordering only. Original action_ready() POST return is not independent physical WoW readiness or optimal priority.",
+  "cases": [
+    {
+      "targets": 1,
+      "t_ms": 942,
+      "source_list": "single_sb",
+      "source_rank": 4,
+      "source_action": "stormstrike",
+      "entry_list": "default",
+      "entry_rank": 7
+    },
+    {
+      "targets": 3,
+      "t_ms": 940,
+      "source_list": "aoe",
+      "source_rank": 20,
+      "source_action": "crash_lightning",
+      "entry_list": "default",
+      "entry_rank": 9
+    }
+  ],
+  "source_if_pre_independent": true,
+  "same_root_provenance_required": true,
+  "selected_physical_ready_independently_certified": false,
+  "current_Retail_priority_claim": false,
+  "WCL_blind_inputs_used": false,
+  "dummy_mistake": "UNKNOWN"
+}

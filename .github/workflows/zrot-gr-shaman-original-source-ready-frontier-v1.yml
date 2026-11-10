@@ -5,6 +5,9 @@ on:
     paths:
       - tools/research/fixtures/zrot_shaman_original_source_if_pre_adapter_v1.json
       - tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json
+      - tools/research/fixtures/zrot_shaman_priority_frontier_v1.json
+      - tools/research/general_rotation_original_select_extra_pre_v1.py
+      - tools/research/general_rotation_original_attempt_frontier_v1.py
       - .github/workflows/zrot-gr-shaman-original-source-ready-frontier-v1.yml
   workflow_dispatch:
 
@@ -34,10 +37,12 @@ jobs:
           python -m py_compile \
             tools/research/general_rotation_original_select_extra_pre_v1.py \
             tools/research/general_rotation_original_select_extra_pre_replay_v1.py \
+            tools/research/general_rotation_original_attempt_frontier_v1.py \
             tools/research/general_rotation_original_dispatch_if_replay_v1.py \
             tools/research/simc_original_select_if_pre_witness_v1.py
           python -B tools/research/general_rotation_original_select_extra_pre_v1.py >/tmp/generic-pre-selftest.json
           python -B tools/research/general_rotation_original_select_extra_pre_replay_v1.py >/tmp/generic-pre-replay-selftest.json
+          python -B tools/research/general_rotation_original_attempt_frontier_v1.py >/tmp/native-frontier-selftest.json
           python - <<'PY'
           import sys,json
           sys.path.insert(0,'tools/research')
@@ -51,6 +56,10 @@ jobs:
           assert extra['profiles'][0]['profile_git_blob']=='2f2c951ae07489d124db36c464ab66d1efd262ce'
           assert json.load(open('/tmp/generic-pre-selftest.json'))['result']=='PASS_SYNTHETIC_STATIC'
           assert json.load(open('/tmp/generic-pre-replay-selftest.json'))['status']=='PASS_SYNTHETIC_STATIC'
+          frontier=json.load(open('/tmp/native-frontier-selftest.json'))
+          assert frontier['status']=='PASS_SYNTHETIC_STATIC'
+          assert frontier['negatives_rejected']>=9 and frontier['physical_READY_proven']==0
+          assert frontier['native_calls_added']==0 and frontier['WCL_API_calls']==0
           print('GENERIC_SHAMAN_ORIGINAL_READY_PRE_SPEC_ADAPTER_SYNTHETIC_PASS')
           PY
   original-shaman-source-root:
@@ -118,6 +127,8 @@ jobs:
           assert x['original_if_native_comparator_calls_added']==0
           assert x['claims_complete_physical_READY'] is False
           assert len(x['captured_fields'])==10
+          assert x['native_ready_post_return_marker']=='ZROT_ORIGINAL_SELECT_NATIVE_READY_RESULT_V1|'
+          assert x['original_action_ready_call_count_preserved'] is True
           print('SHAMAN_ORIGINAL_SOURCE_PASSIVE_PATCH_NO_READY_SIDE_EFFECT_PASS')
           PY
       - name: Build original pinned SimC CXX once for source-line and PRE root witness
@@ -151,6 +162,14 @@ jobs:
               --legacy-plan tools/research/fixtures/zrot_shaman_original_source_if_pre_adapter_v1.json \
               --source-label shaman_enhancement --targets "$target" \
               --out "$folder/selected-root-exact-pre-source-if.json"
+            python -B tools/research/general_rotation_original_attempt_frontier_v1.py \
+              --native-log "$folder/simc_native_log.txt" \
+              --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+              --prior "$folder/selected-root-exact-pre-source-if.json" \
+              --plan tools/research/fixtures/zrot_shaman_priority_frontier_v1.json \
+              --adapter tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json \
+              --targets "$target" \
+              --out "$folder/original-native-attempt-frontier.json"
           done
           python - <<'PY'
           import json,sys
@@ -173,6 +192,18 @@ jobs:
               prev=[(x['at_simc_ms'],x['action']) for x in oldcase['first_10sec_sample_actions_NOT_opener_end']]
               assert now==prev,(target,'ORIGINAL_NATIVE_SAMPLE_CHANGED')
               x=json.loads((path/'selected-root-exact-pre-source-if.json').read_bytes())
+              frontier=json.loads((path/'original-native-attempt-frontier.json').read_bytes())
+              assert frontier['schema']=='ZrotOriginalNativeSameForegroundRootAttemptFrontierV1'
+              assert frontier['source_spec']=='shaman_enhancement' and frontier['targets']==target
+              assert frontier['selected_root']['t_ms']==(942 if target==1 else 940)
+              assert frontier['selected_root']['source_rank']==(4 if target==1 else 20)
+              assert frontier['selected_root']['native_action_ready_return'] is True
+              assert frontier['original_foreground_CALL_entry']['original_action_ready_return'] is True
+              assert frontier['preceding_noncontrol_NATIVE_TRUE']==0
+              assert frontier['physical_ability_ready_independent_of_Native_result']=='UNKNOWN'
+              assert frontier['WoW_current_Retail_priority']=='UNKNOWN'
+              assert frontier['WCL_blind_holdout']=='NOT_RUN' and frontier['dummy_wrong_cast']=='UNKNOWN'
+              print('SHAMAN_ORIGINAL_NATIVE_ATTEMPT_FRONTIER',target,frontier['preceding_attempt_count'],frontier['higher_source_ranks_not_attempted'])
               assert x['source_spec']=='shaman_enhancement' and x['targets']==target
               assert x['original_selected_direct_foreground']>0
               assert x['source_if_comparator_not_replay_input'] is True
@@ -192,6 +223,8 @@ jobs:
           PY
           sha256sum /tmp/shaman-source-root/shaman_enhancement-1t/selected-root-exact-pre-source-if.json
           sha256sum /tmp/shaman-source-root/shaman_enhancement-3t/selected-root-exact-pre-source-if.json
+          sha256sum /tmp/shaman-source-root/shaman_enhancement-1t/original-native-attempt-frontier.json
+          sha256sum /tmp/shaman-source-root/shaman_enhancement-3t/original-native-attempt-frontier.json
       - name: Preserve compact original source proof only; raw logs remain ephemeral
         if: always()
         uses: actions/upload-artifact@v4
@@ -200,6 +233,8 @@ jobs:
           path: |
             /tmp/shaman-source-root/shaman_enhancement-1t/selected-root-exact-pre-source-if.json
             /tmp/shaman-source-root/shaman_enhancement-3t/selected-root-exact-pre-source-if.json
+            /tmp/shaman-source-root/shaman_enhancement-1t/original-native-attempt-frontier.json
+            /tmp/shaman-source-root/shaman_enhancement-3t/original-native-attempt-frontier.json
             /tmp/shaman-extra-pre-patch.json
           retention-days: 14
           if-no-files-found: warn

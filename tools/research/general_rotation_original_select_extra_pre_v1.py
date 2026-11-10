@@ -27,6 +27,7 @@ SCHEMA="ZrotOriginalSimCSelectExtraPREBoundedSourceAdapterV1"
 PATCH_SCHEMA="ZrotOriginalSimCSelectedExtraPREOneNativeCallPatchV1"
 MARK="ZROT_ORIGINAL_SELECT_EXTRA_PRE_FIELDS_V1|"
 INSERT="      zrot_if_ready=a->action_ready();"
+RESULT_MARK="ZROT_ORIGINAL_SELECT_NATIVE_READY_RESULT_V1|"
 FIELD_NAME=re.compile(r"^[a-z][a-z0-9_]*$")
 GIT40=re.compile(r"^[a-f0-9]{40}$")
 CXX_EXPR={
@@ -138,7 +139,7 @@ def patch_cpp(pristine:bytes,plan:dict)->bytes:
          src.count(INSERT)==1 and src.count(SEL)==1 and
          src.count(NATIVE)==0 and
          src.count(BEGIN)==1 and src.count(SELECT)==1 and
-         src.count(CALLSITE)==1 and MARK not in src,
+         src.count(CALLSITE)==1 and MARK not in src and RESULT_MARK not in src,
          "PINNED_PARENT_ORIGINAL_CXX_INSTRUMENTATION_REQUIRED")
     start=src.index(CPP_START);end=src.index(CPP_END,start)
     segment=src[start:end]
@@ -199,8 +200,16 @@ def patch_cpp(pristine:bytes,plan:dict)->bytes:
         fmtargs+=f",zrot_extra_field_{i}.first,zrot_extra_field_{i}.second"
     logger=f'        sim->print_log("{format_}",\n          {fmtargs});\n'
     helper+="".join(vars_text)+logger+"      }\n"
-    patched=src[:start]+segment.replace(INSERT,helper+INSERT,1)+src[end:]
-    need(patched.count(MARK)==1 and
+    # Result observed AFTER the original action_ready() invocation, never
+    # a second readiness query. This is Native POST evidence, not PRE input.
+    result_log=(
+      f'\n      if ( sim->log && !is_pet() && !is_enemy() )\n'
+      f'        sim->print_log("{RESULT_MARK}{{}}|{{}}|{{}}|{{}}",\n'
+      f'          sim->current_time().total_millis(),zrot_pre_scope.id,\n'
+      f'          static_cast<const void*>(a),zrot_if_ready ? 1 : 0);'
+    )
+    patched=src[:start]+segment.replace(INSERT,helper+INSERT+result_log,1)+src[end:]
+    need(patched.count(MARK)==1 and patched.count(RESULT_MARK)==1 and
          patched.count(INSERT)==1 and
          patched.count("a->action_ready()")==src.count("a->action_ready()") and
          patched.count("action->queue_execute( execute_type::FOREGROUND );")==
@@ -241,6 +250,8 @@ def install(root:Path,plan:dict,prior:dict)->dict:
       "original_action_ready_cxx_call_added":0,
       "original_queue_and_JSON2_methods_added":0,
       "original_if_native_comparator_calls_added":0,
+      "native_ready_post_return_marker":RESULT_MARK,
+      "original_action_ready_call_count_preserved":True,
       "claims_complete_physical_READY":False,
       "causal_route_off_gcd_traced":False,
       "WCL_API_calls":0
@@ -275,7 +286,9 @@ def selftest():
                      "kind":"prev_gcd_match","name":"synthetic_spell","ordinal":1}]}
     source=source.replace("    if ( a->action_ready() )\n","")
     raw=patch_cpp(source.encode(),plan).decode()
-    assert raw.count(MARK)==1 and raw.count("zrot_if_ready=a->action_ready();")==1
+    assert raw.count(MARK)==1 and raw.count(RESULT_MARK)==1
+    assert raw.index(MARK)<raw.index("zrot_if_ready=a->action_ready();")<raw.index(RESULT_MARK)
+    assert raw.count("zrot_if_ready=a->action_ready();")==1
     assert "b->stack_react()" in raw and "sim->active_enemies" in raw
     assert "current_value_" in raw and sha(canonical(plan)) in raw
     assert 'zrot_extra_prev_gcd("synthetic_spell",1)' in raw
