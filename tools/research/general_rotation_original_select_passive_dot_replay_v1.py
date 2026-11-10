@@ -205,8 +205,8 @@ def selftest():
     actions={"action":"synthetic_dot",
              "expression_fields":{"if":{"source":"!ticking",
                "ast":Expression("!ticking").parse(),"symbols":["ticking"]}}}
-    got=guard(spec,selected,row,actions,{"talent.synthetic.enabled":1},{
-         "ticking":0,"remaining_seconds":0})
+    got=guard(spec,selected,row,actions,{"ticking":0,"remaining_seconds":0},
+              {"talent.synthetic.enabled":1})
     need(got["source_order_IF_verdict"]=="SOURCE_ORDER_PRE_IF_TRUE" and
          got["strict_timestamp_lt_IF_verdict"]=="UNKNOWN",
          "IN_CALL_DOT_NOT_STRICT_PRE")
