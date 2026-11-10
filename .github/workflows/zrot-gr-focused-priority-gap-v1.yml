@@ -1,0 +1,111 @@
+name: zrot-gr-focused-priority-gap-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_same_root_priority_gap_v1.py
+      - tools/research/fixtures/zrot_shaman_st_aoe_same_root_gap_v1.json
+      - .github/workflows/zrot-gr-focused-priority-gap-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  focused-original-st-aoe-pre:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Read previously attested immutable original Native and trait ZIPs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl --retry 3 --max-time 90 -fsSL -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -o /tmp/zrot-original-native.zip \
+            https://api.github.com/repos/degong2-code/zrotationhelper/actions/artifacts/13750015431/zip
+          curl --retry 3 --max-time 90 -fsSL -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -o /tmp/zrot-original-trait.zip \
+            https://api.github.com/repos/degong2-code/zrotationhelper/actions/artifacts/13753715876/zip
+          echo 'd9dba3ca94d78d1a9ac4f7f34da834258b9b380dae35867c5d128accedca0c90  /tmp/zrot-original-native.zip' | sha256sum -c -
+          echo '8e500bcb9d2e184e979e5959c90db44464d3ba8be1e261f7e85edf10e995d48d  /tmp/zrot-original-trait.zip' | sha256sum -c -
+      - name: Source-neutral bounded same-root verifier, exact archives and negative controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_same_root_priority_gap_v1.py
+          python -B tools/research/general_rotation_same_root_priority_gap_v1.py >/tmp/zrot-focused-static-selftest.json
+          python -B tools/research/general_rotation_same_root_priority_gap_v1.py \
+            --native-zip /tmp/zrot-original-native.zip \
+            --talent-zip /tmp/zrot-original-trait.zip \
+            --adapter tools/research/fixtures/zrot_shaman_st_aoe_same_root_gap_v1.json \
+            --out /tmp/zrot-focused-priority-gap.json
+          python - <<'PY'
+          import copy,json,sys
+          sys.path.insert(0,'tools/research')
+          from general_rotation_same_root_priority_gap_v1 import analyze,ProofError
+          cfg=json.load(open('tools/research/fixtures/zrot_shaman_st_aoe_same_root_gap_v1.json'))
+          a=json.load(open('/tmp/zrot-focused-priority-gap.json'))
+          test=json.load(open('/tmp/zrot-focused-static-selftest.json'))
+          assert test['status']=='PASS_SYNTHETIC_STATIC' and test['negative_controls_rejected']>=4
+          assert a['new_general_rotation_priority_promotions']==0 and not a['MAIN_promoted']
+          assert a['WCL_independent_blind_candidate_lock']=='NOT_RUN_FOR_THESE_ROOTS'
+          assert a['current_Retail_mechanics']==a['general_priority_and_opener']=='UNKNOWN'
+          assert len(a['cases'])==2
+          st,aoe=a['cases']
+          assert st['selected_root']['source_action']=='stormstrike' and st['selected_root']['t_ms']==942
+          assert aoe['selected_root']['source_action']=='crash_lightning' and aoe['selected_root']['t_ms']==940
+          assert st['verified_foreground_source_CALL_entry']['source_rank']==7
+          assert aoe['verified_foreground_source_CALL_entry']['source_rank']==9
+          assert st['higher_source_evidence_counts']=={
+            'SOURCE_IF_FALSE_AT_INDEPENDENT_PRE':1,
+            'SOURCE_IF_PRE_UNKNOWN_AND_MECHANIC_READY_UNKNOWN':2}
+          assert aoe['higher_source_evidence_counts']=={
+            'SOURCE_IF_FALSE_AT_INDEPENDENT_PRE':11,
+            'SOURCE_IF_PRE_UNKNOWN_AND_MECHANIC_READY_UNKNOWN':4,
+            'NO_SOURCE_IF_NATIVE_COMPOSITE_FALSE_MECHANIC_READY_UNKNOWN':2,
+            'OBSERVED_SOURCE_CONTROL_CALL_NOT_PRIORITY_WINNER':1,
+            'SOURCE_PROFILE_TALENT_EXCLUDED_NATIVE_NOT_FOUND':1}
+          assert [x['rank'] for x in st['focused_missing_PRE_and_READY']]==[2,3]
+          assert [x['rank'] for x in aoe['focused_missing_PRE_and_READY']]==[1,2,19]
+          assert all(x['independent_physical_READY']=='UNKNOWN' for c in a['cases'] for x in c['higher_source_rows'])
+          cases=[]
+          for label in ('selected_clock','archive_digest','source_blob','target_rank','talent_identity','native_file_hash'):
+            x=copy.deepcopy(cfg)
+            if label=='selected_clock':x['cases'][0]['selected_root']['t_ms']+=1
+            if label=='archive_digest':x['native_zip_sha256']='0'*64
+            if label=='source_blob':x['profile_git_blob']='0'*40
+            if label=='target_rank':x['cases'][1]['focus_ranks']=[6]
+            if label=='talent_identity':x['cases'][1]['source_talent_exclusions'][0]['trait_spell']+=1
+            if label=='native_file_hash':x['cases'][0]['original_sha256']['original-native-attempt-frontier']='0'*64
+            try:analyze('/tmp/zrot-original-native.zip','/tmp/zrot-original-trait.zip',x)
+            except ProofError:cases.append(label)
+            else:raise AssertionError('INVALID_INDEPENDENT_EVIDENCE_ACCEPTED: '+label)
+          assert len(cases)==6
+          print('BOUNDED_SOURCE_ROOT_PRE_2_CASES_PASS: FIXED_ARTIFACT_BYTES, 6_NEGATIVES, PRIORITY_0')
+          PY
+          echo '2d01d4e0b1c932e69b461b8db3f52d406f53bf74c6ce6c05efafb0b24b653979  /tmp/zrot-focused-priority-gap.json' | sha256sum -c -
+      - name: Preserve only compact evidence and validation result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-focused-priority-gap-${{ matrix.python }}-${{ github.sha }}
+          path: |
+            /tmp/zrot-focused-static-selftest.json
+            /tmp/zrot-focused-priority-gap.json
+          retention-days: 14
+          if-no-files-found: warn
