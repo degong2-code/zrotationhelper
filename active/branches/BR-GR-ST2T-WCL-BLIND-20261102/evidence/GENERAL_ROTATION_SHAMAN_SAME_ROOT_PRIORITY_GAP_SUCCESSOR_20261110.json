@@ -1,0 +1,145 @@
+{
+  "schema": "ZrotGeneralRotationFocusedSameRootPriorityGapSuccessorV1",
+  "date": "2026-11-10",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch_local_only": true,
+  "decision": "REUSE_EXACT_EXISTING_ORIGINAL_SIMC_NATIVE_AND_TRAIT_ARTIFACTS_CONNECT_STRICT_PRE_GAPS",
+  "implementation": {
+    "source_neutral": "tools/research/general_rotation_same_root_priority_gap_v1.py",
+    "external_spec_fixture": "tools/research/fixtures/zrot_shaman_st_aoe_same_root_gap_v1.json",
+    "workflow": ".github/workflows/zrot-gr-focused-priority-gap-v1.yml",
+    "validated_code_head": "b73453778057d82e0ba0b886c628e6e14b87c1a7",
+    "no_new_native_build": true,
+    "no_new_WCL_API_calls": true,
+    "no_original_source_evidence_modified": true,
+    "no_generic_spec_hardcoding": true
+  },
+  "original_evidence": {
+    "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "original_same_root_lifecycle_CI": 42786821103,
+    "pinned_profile_talent_DBC_CI": 42795917750,
+    "original_native_zip_sha256": "d9dba3ca94d78d1a9ac4f7f34da834258b9b380dae35867c5d128accedca0c90",
+    "original_talent_zip_sha256": "8e500bcb9d2e184e979e5959c90db44464d3ba8be1e261f7e85edf10e995d48d",
+    "zip_retrieved_and_hash_checked": true
+  },
+  "verification": {
+    "workflow_run": 42805065697,
+    "workflow_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42805065697",
+    "status": "SUCCESS_2_OF_2",
+    "python312": "SUCCESS",
+    "python314": "SUCCESS",
+    "independent_negative_mutations_rejected": 6,
+    "synthetic_negative_controls_rejected": 4,
+    "exact_original_per_file_hash_gate": true,
+    "precise_same_root_actor_root_source_rank_and_action_identity_gate": true,
+    "same_call_PRE_source_IF_join": true,
+    "no_same_timestamp_or_POST_to_PRE_leakage_claim": true,
+    "CI_output_sha256": "2d01d4e0b1c932e69b461b8db3f52d406f53bf74c6ce6c05efafb0b24b653979",
+    "independent_local_offline_output_byte_identical_to_CI": true,
+    "artifact_python312_id": 13758541100,
+    "artifact_python314_id": 13758556022,
+    "artifact_expiration_utc": "2026-11-24T11:09:03Z",
+    "actual_current_Retail_WCL_gameplay_validation": "NOT_RUN"
+  },
+  "decisions": [
+    {
+      "context": "ST_1T",
+      "selected": "single_sb#4 stormstrike",
+      "timestamp_ms": 942,
+      "source_foreground_CALL": "default#7",
+      "preceding_source_rows": 3,
+      "verified_source_IF_false": 1,
+      "IF_PRE_unknown_and_mechanic_READY_unknown": 2,
+      "focused_precursor_gaps": [
+        {
+          "source_rank": 2,
+          "action": "voltaic_blaze",
+          "PRE_missing": [
+            "dot.flame_shock.remains",
+            "time"
+          ]
+        },
+        {
+          "source_rank": 3,
+          "action": "flame_shock",
+          "PRE_missing": [
+            "ticking"
+          ]
+        }
+      ]
+    },
+    {
+      "context": "AOE_3T",
+      "selected": "aoe#20 crash_lightning",
+      "timestamp_ms": 940,
+      "source_foreground_CALL": "default#9",
+      "preceding_source_rows": 19,
+      "verified_source_IF_false": 11,
+      "IF_PRE_unknown_and_mechanic_READY_unknown": 4,
+      "source_no_explicit_IF_but_native_composite_false": 2,
+      "observed_source_control_CALL_not_priority_winner": 1,
+      "original_profile_excluded_and_native_not_found": 1,
+      "excluded": {
+        "rank": 6,
+        "action": "sundering",
+        "profile_talent": "NOT_SELECTED_NOT_GRANTED",
+        "physical_current_Retail_NOT_READY": "UNKNOWN"
+      },
+      "focused_precursor_gaps": [
+        {
+          "source_rank": 1,
+          "action": "voltaic_blaze",
+          "PRE_missing": [
+            "dot.flame_shock.remains",
+            "talent.surging_totem.enabled"
+          ]
+        },
+        {
+          "source_rank": 2,
+          "action": "flame_shock",
+          "PRE_missing": [
+            "ticking"
+          ]
+        },
+        {
+          "source_rank": 19,
+          "action": "voltaic_blaze",
+          "PRE_missing": [
+            "set_bonus.midnight_season_2_2pc",
+            "talent.fire_nova.enabled"
+          ]
+        }
+      ]
+    }
+  ],
+  "research_claim_boundary": {
+    "original_source_row_sequence_and_selected_CALL": "PROVEN_FOR_PINNED_EXACT_ROOTS",
+    "earlier_CALL_invocations": "PARTIAL_SOURCE_CONTROL_PROVEN",
+    "complete_CALL_RUN_return_stack": "UNKNOWN",
+    "independent_competitor_full_physical_READY": "UNKNOWN",
+    "selected_full_physical_READY": "UNKNOWN",
+    "current_Retail_talent_build_and_mechanic_parity": "UNKNOWN",
+    "WCL_independently_locked_postlock_validation": "NOT_RUN_FOR_THESE_ROOTS",
+    "opener_end": "UNKNOWN",
+    "dummy_wrong_cast": "UNKNOWN",
+    "new_general_priority_rules_promoted": 0
+  },
+  "product_exact_next": "Evidence-bounded, reusable current Retail General Rotation opener and ST/2-target/cleave/AoE IF/ELSE priorities independently reconciled after WCL blind candidate lock; identical validated IR for target-dummy feedback.",
+  "session_exact_next": "CONNECT missing five high-impact ST/AoE source call PRE operand groups and independent physical readiness using existing source-neutral probe. Reconstruct complete ordered CALL/RUN return path only where observed. Use pinned profile gates. Lock WCL blind numeric candidates before SimC semantic comparison, compare postlock and mechanics. Keep UNKNOWN without proof.",
+  "stopped_inefficient_work": [
+    "full unrelated original SimC rebuild",
+    "unrelated WCL data acquisition",
+    "more standalone abstractions",
+    "source-only READY promotion"
+  ],
+  "shared_authoritative_state_mutated": false,
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "current_handoff_generation_unchanged": 9
+}
