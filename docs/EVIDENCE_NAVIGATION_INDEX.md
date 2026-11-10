@@ -24,6 +24,8 @@
 | 고술 신규 Native 원본 1/2/3/5 | [추가 전문화 전용 범용 리플레이](../tools/research/general_rotation_simc_marginal_native_cold_start_v1.py), 기존 [Native 표본 분석](../tools/research/general_rotation_simc_native_target_grid_v1.py) 재사용 | [고술 4개 새 원본 실행 160건](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_THREE_CLASS_ORIGINAL_SIMC_NATIVE_OPENING_PORTFOLIO_20261110.json) | [#42744084203](https://github.com/degong2-code/zrotationhelper/actions/runs/42744084203) — **3/3 PASS, 동일 바이너리/seed/profile 내 타겟 수 비교, 실행 CALL/READY 입증 아님** |
 | 3클래스 실제 Native + 소스 우선순위 연구 모델 | [기존 2클래스 원본 8실행과 새 고술 4실행 결합기](../tools/research/general_rotation_simc_native_source_portfolio_v1.py) | [기존 8실행 + 신규 4실행 = 12실행·원본 464행, 첫 10초 185건](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_THREE_CLASS_ORIGINAL_SIMC_NATIVE_OPENING_PORTFOLIO_20261110.json) | [#42745179980](https://github.com/degong2-code/zrotationhelper/actions/runs/42745179980) — **3/3 PASS, 각 코호트 SHA 검증, CALL/RUN source 가설과 Native 행동 이름 동시 보존; full READY·opener 종료 UNKNOWN** |
 
+| **전문화별 General Rotation Markdown+JSON 완전한 초안** | [전문화별 모델 인덱스](GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md) · [단일 generic source exporter](../tools/research/general_rotation_spec_model_export_v1.py) · [기존 SimC APL parser](../tools/research/simc_apl_semantic_ir_v2.py) | [고술/분전/비법 3+3 출력 파일·SHA256 영수증](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_PER_SPEC_DRAFT_MODEL_EXPORT_20261110.json) | [#42747802703](https://github.com/degong2-code/zrotationhelper/actions/runs/42747802703) **3/3 PASS; 원본 APL 286/286행·타겟/특성 12조건, 초기 Native 표본. 조건식 가설 ≠ 검증된 READY/최적성** |
+
 ## WCL 독립 연구 경로
 
 | 기능 | 원본·구현 | 검증 영수증 | 실제 CI / 근거 수준 |
