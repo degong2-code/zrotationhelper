@@ -134,6 +134,41 @@ def validate_source_domains(root:Path,adapter:dict)->dict:
              "DOMAIN_CXX_SEMANTICS_ANCHOR_NOT_UNIQUE")
         result[rule["symbol"]]=rule["domain"]
     need(result, "SOURCE_DOMAIN_RULES_REQUIRED")
+    # A generic typed SOURCE-EXPRESSION contract, not a spec/action rule.
+    for symbol,domain in result.items():
+        if symbol.startswith("talent."):
+            need(re.fullmatch(r"talent\\.[a-z0-9_]+",symbol) is not None,
+                 "UNSAFE_TALENT_EXPRESSION_SHAPE")
+            owner=next(r for r in adapter["domain_rules"]
+                       if r["symbol"]==symbol)
+            need(owner["source_path"]=="engine/player/player.cpp" and
+                 any("_talent.enabled()" in a for a in
+                     owner["required_anchors"]),
+                 "TALENT_BOOLEAN_CXX_MECHANIC_NOT_PINNED")
+        elif symbol.startswith("prev_gcd."):
+            need(re.fullmatch(r"prev_gcd\\.[1-9][0-9]*\\.[a-z0-9_]+",
+                              symbol) is not None,
+                 "UNSAFE_PREVIOUS_GCD_EXPRESSION_SHAPE")
+            owner=next(r for r in adapter["domain_rules"]
+                       if r["symbol"]==symbol)
+            need(owner["source_path"]=="engine/action/action.cpp" and
+                 any("internal_id ==" in a for a in
+                     owner["required_anchors"]),
+                 "PREV_GCD_BOOLEAN_CXX_MECHANIC_NOT_PINNED")
+        else:
+            raise SourceCounterfactualError(
+                "UNPROVEN_SOURCE_EXPRESSION_BOOLEAN_DOMAIN")
+    talent=adapter.get("supporting_pinned_talent_boolean_source")
+    if any(k.startswith("talent.") for k in result):
+        need(type(talent) is dict and
+             talent.get("path")=="engine/player/talent.hpp" and
+             GIT40.fullmatch(talent.get("git_blob","")) is not None and
+             type(talent.get("anchor")) is str,
+             "TALENT_ENABLED_BOOLEAN_DEFINITION_NOT_PINNED")
+        source=(root/talent["path"]).read_bytes()
+        need(git_blob(source)==talent["git_blob"] and
+             talent["anchor"].replace("\\n","\n") in source.decode("utf-8"),
+             "PINNED_TALENT_ENABLED_RETURN_TYPE_NOT_VERIFIED")
     return result
 
 def verified_archive(zpath:Path,adapter:dict)->dict:
