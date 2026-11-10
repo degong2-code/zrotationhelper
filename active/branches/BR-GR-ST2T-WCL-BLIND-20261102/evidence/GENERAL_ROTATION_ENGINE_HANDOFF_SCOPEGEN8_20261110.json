@@ -1,0 +1,61 @@
+{
+  "schema": "ZrotGeneralRotationScopeGen8HandoffReceiptV1",
+  "date": "2026-11-10",
+  "scope_policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "policy_git_blob_sha1": "14b9f5174a9d1652a56dcca03af1f2302b78c22d",
+  "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "source_branch_HEAD_before_handoff": "9832f0a889405f69cbf1da2cd303b85149063a78",
+  "actual_branch_HEAD_after_handoff": "MUST_REQUERY",
+  "main_HEAD_read_only": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
+  "handoff_latest": "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json",
+  "new_generation": 8,
+  "previous_generation": 7,
+  "gen7_original_blob_sha1": "297b069ffd6b6ee9be37b018899410acb5a7da8d",
+  "gen7_original_SHA256": "ad5a68834f6341029ba7933e25ef65c06f771c1aba0b960508836bb10da577c6",
+  "gen7_archived_path": "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN7_BEFORE_20261110.json",
+  "gen7_archive_byte_identical_to_prior_latest": true,
+  "gen6_SHA256": "5df57d1c4577bbf408bb5016f5f2001ad7511c15986192c62e725834ba7f6010",
+  "gen5_SHA256": "ab04457130b37bce8c55e359e60c77a75d9abcfd5f8806da952d8fc070742bd5",
+  "existing_proofs": {
+    "per_spec_source_drafts_3_specs_286_APL_rows": 42747802703,
+    "three_spec_native_12cases_464_action_tokens": 42745179980,
+    "shaman_ST_AoE_79_exact_selected_source_rows": 42749660209,
+    "overlay_final_corrected_5_IF_match_15_no_IF_59_unknown": 42750471988,
+    "initial_overlay_failure_with_unknown_fix": 42750341471,
+    "prior_branch_continuity_pass": 42750804867
+  },
+  "verified_technical_scope": {
+    "shaman_original_selected_row_exact_native_CALL_count": 79,
+    "independently_REPLAYED_source_IF_TRUE_matches": 5,
+    "original_selected_source_IF_no_explicit_condition": 15,
+    "missing_independent_PRE_unknown": 59,
+    "all_prior_competitor_physical_READY_closure_proven": 0,
+    "opener_defined_exit_state": "UNKNOWN",
+    "current_Retail_optimal_priority": "UNKNOWN",
+    "dummy_wrong_cast": "UNKNOWN",
+    "WCL_blind_prelock_semantic_leakage": false
+  },
+  "known_fixed_defect": "#42750341471 failed: Native POST IF TRUE must not be substituted for unobserved Strict PRE; corrected in #42750471988 and original raw evidence unchanged.",
+  "current_hand_off_only_new_SimC_WCL_or_Native_calls": 0,
+  "governance": "Branch only, no MAIN promotion, no FROZEN rewrites, Seq578=FAILED_QUARANTINED, Seq637=UNKNOWN",
+  "read_first": [
+    "docs/PRODUCT_SCOPE_LOCK_V1.json",
+    "docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md",
+    "AGENTS.md",
+    "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md",
+    "docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md"
+  ],
+  "branch_navigation": [
+    "docs/CURRENT_RESEARCH_STATUS.md",
+    "docs/RESEARCH_INDEX.md",
+    "docs/FEATURE_HISTORY_INDEX.md",
+    "docs/EVIDENCE_NAVIGATION_INDEX.md",
+    "docs/GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md"
+  ],
+  "new_chat_prompt": "handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_SCOPEGEN8_20261110.md",
+  "new_chat_first_response": "READ_ONLY_RESTORE_REPORT_THEN_STOP",
+  "new_chat_requires_explicit_progress": "진행",
+  "product_exact_next": "Evidence-validated, current Retail General Rotation opener and conditional IF/ELSE ST/2T/cleave/AoE for all specializations plus observable dummy feedback.",
+  "session_exact_next": "Select high-impact exact Shaman ST and AoE native roots among the existing 79; prove same-root preceding CALL/RUN candidate IF and physical readiness, then upgrade only defensible conditional rules in generic per-spec model."
+}
