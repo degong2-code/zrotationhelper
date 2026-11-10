@@ -1,0 +1,123 @@
+{
+  "schema": "ZrotGeneralRotationThreeClassOriginalNativeOpeningPortfolioReceiptV1",
+  "date": "2026-11-10",
+  "scope_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "engine_first_goal": "Reproducible multi-class original SimC General Rotation opening samples and source-ordered conditional IF/ELSE hypotheses with evidence-bound uncertainty and no class rule hardcodes.",
+  "source_inputs": {
+    "simc_commit": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "pinned_profile_manifest": "tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json",
+    "warrior_fury_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+    "mage_arcane_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+    "shaman_enhancement_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+    "original_source_APL_rows": 286,
+    "original_source_action_lists": 19,
+    "original_root_CALL_RUN_if_rows_in_portfolio": 12,
+    "source_ST_2T_3T_5T_hypothesis_guards": "source-only, physical READY unknown",
+    "WCL_prelock_semantics_injected": false
+  },
+  "reused_and_new_cohorts": [
+    {
+      "scope": "historical pinned Warrior Fury and Mage Arcane, both unchanged",
+      "run": 42716911610,
+      "artifact_id": 13718461970,
+      "derived_json_SHA256": "964d5a2a8bd6714d6a538cae71f6f3892a6052aebb5056488f3c4485e8b2a11a",
+      "artifact_zip_digest_SHA256": "3c3728924a276683431c5bccd6e89f32458e0d5cd009f9a15dc898c6e6028350",
+      "source_programs": [
+        "warrior_fury",
+        "mage_arcane"
+      ],
+      "Native_CXX_builds_in_this_successor": 0,
+      "recollected_samples_in_this_successor": 0
+    },
+    {
+      "scope": "NEW marginal third class; only original Enhancement Shaman",
+      "run": 42744084203,
+      "result": "SUCCESS_3_OF_3",
+      "artifact_id": 13730093341,
+      "derived_json_SHA256": "7b818a65fb4e9a812ddb2efb90406a2825ddd9abdd325067edeb3f37bd263339",
+      "artifact_zip_digest_SHA256": "1d555b2655a38a27fcfff9e5d7ce33039d08e8c5e78701744eae1c1f4023650e",
+      "spec_key": "shaman_enhancement",
+      "new_actual_native_target_count_cases": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "new_actual_native_sample_actions_by_target": {
+        "1": 40,
+        "2": 41,
+        "3": 39,
+        "5": 40
+      },
+      "new_native_first10_count_by_target": {
+        "1": 16,
+        "2": 16,
+        "3": 16,
+        "5": 16
+      },
+      "new_native_full_sample_count": 160,
+      "new_actual_native_CXX_builds": 1,
+      "new_WCL_API_calls": 0,
+      "code": "tools/research/general_rotation_simc_marginal_native_cold_start_v1.py",
+      "code_SHA256": "46949bb29faa8381d63ad520c9f2ff1c07b14044c4127ac564c499aed618ee9d"
+    }
+  ],
+  "integrated_research_model": {
+    "script": "tools/research/general_rotation_simc_native_source_portfolio_v1.py",
+    "script_SHA256": "11550623035ae0ced72ddcb49b0b57f564ed1414c75b3b723c9f36de41a79672",
+    "workflow": ".github/workflows/zrot-gr-native-opener-three-class-portfolio-v1.yml",
+    "run": 42745179980,
+    "status": "SUCCESS_3_OF_3",
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42745179980",
+    "result_JSON_SHA256": "151e48f7329ee287827a1fed5f31baad56f9540995c1dd020b961277c0fae6c2",
+    "artifact_id": 13731077208,
+    "artifact_zip_digest_SHA256": "d80655a04ee6a8045982bdc141ad0a44aab133c3daff8dcea54450127e1d91b7",
+    "artifact_expiration_UTC": "2026-11-17T02:48:10Z",
+    "distinct_classes": 3,
+    "original_profiles": 3,
+    "source_APL_rows": 286,
+    "total_cases": 12,
+    "actual_original_native_sample_actions_by_spec": {
+      "warrior_fury": 175,
+      "mage_arcane": 129,
+      "shaman_enhancement": 160
+    },
+    "first10sec_actual_native_samples_by_spec": {
+      "warrior_fury": 72,
+      "mage_arcane": 49,
+      "shaman_enhancement": 64
+    },
+    "actual_original_native_sample_actions_all": 464,
+    "first10sec_actual_native_samples_all": 185,
+    "first10sec_does_NOT_certify_opener_boundary": true,
+    "source_priority_root_controls_by_spec": {
+      "warrior_fury": 6,
+      "mage_arcane": 3,
+      "shaman_enhancement": 3
+    },
+    "new_CXX_builds_for_portfolio_join": 0,
+    "new_WCL_API_calls": 0
+  },
+  "proof_boundaries": {
+    "native_action_tokens_observed": "REAL_PINNED_SIMC_NATIVE",
+    "original_source_APL_priority": "PINNED_APL_SOURCE_HYPOTHESIS",
+    "source_row_candidate_name_matching": "AMBIGUOUS_NOT_EXACT_ROW_PROOF",
+    "same_original_select_action_root_PRE": "UNOBSERVED_FOR_NEW_SHAMAN",
+    "previous_candidate_action_physical_NOT_READY": "UNKNOWN",
+    "selected_spell_full_physical_READY": "UNKNOWN",
+    "opener_termination_condition": "UNKNOWN",
+    "opener_to_steady_state_transition": "UNKNOWN",
+    "same_executable_binary_across_independent_class_run_cohorts": "NOT_ASSUMED",
+    "three_class_all_effects_verified_current_Retail_patch": "UNKNOWN",
+    "dummy_expected_cast_and_error_verdict": "UNKNOWN",
+    "WCL_blind_discovery_prelock_contamination": false,
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "next_session_exact": "For high-impact original Native opening decisions in at least one formerly untraced class, bind source action row/call and strict original same-root PRE of target count, talents, resource, auras and necessary cooldown/readiness blockers with existing source-neutral C++ instrumentation; certify ordered CALL/RUN predecessor outcome without inventing full READY, then independent WCL blind comparison.",
+  "product_exact_next": "Verified General Rotation opener and conditional skill priorities for current Retail by specialization ST/2T/cleave/AoE, followed by observable target dummy practice feedback."
+}
