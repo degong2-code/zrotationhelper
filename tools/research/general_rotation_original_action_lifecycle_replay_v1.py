@@ -163,9 +163,8 @@ def audit(log:str,source:dict,membership:dict):
              bind["signature_bound"] and before["signature_bound"] and
              after["signature_bound"],
              "SAME_OBJECT_ORIGINAL_SOURCE_SIGNATURE_DRIFT")
-        need(after["background"] or not row["background"] or
-             row["foreground"] is False,
-             "NATIVE_BACKGROUND_CONTRADICTION")
+        need(not (row["background"]=="1" and row["foreground"]),
+             "NATIVE_BACKGROUND_FOREGROUND_CONTRADICTION")
         item["native_object_lifecycle"]="EXACT_SOURCE_SIGNATURE_FOUR_PHASES"
         item["native_spell_data_not_found_at_create"]=create["not_found_spell_data"]
         item["native_background_origin"]=cause_for(phase,row)
@@ -238,6 +237,22 @@ def selftest():
         "native_spell_data_not_found_at_create":True}]
         and result["physical_skill_READY_independently_proven"]==0,
         "ORIGINAL_NOT_FOUND_GUARD_NOT_LINKED")
+    # Positive control: the Native string "0" is not a true background flag.
+    from copy import deepcopy
+    present=deepcopy(membership)
+    upper=present["same_root_upper_source_rows"][0]
+    upper["native_foreground_membership"]=True
+    upper["native_background_flag"]="0"
+    upper["runtime_membership_class"]="IN_ORIGINAL_FOREGROUND_LIST"
+    present_log="\n".join([
+        phase("POST_CREATE",0,0),phase("POST_BIND",0,0),
+        phase("PRE_INIT",0,0),phase("POST_INIT",0,0),*ev[4:]
+    ]).replace(INV+"100|0x1|sub|1|0xaa|1|0|1|0",
+              INV+"100|0x1|sub|1|0xaa|1|1|0|0")
+    good=audit(present_log,source,present)
+    need(good["source_upper_rows_with_original_lifecycle"][0]["native_background_origin"]==
+         "NOT_BACKGROUND_AT_ORIGINAL_FOREGROUND_SNAPSHOT",
+         "FOREGROUND_NATIVE_ZERO_FLAG_MISCLASSIFIED")
     invalid=[
         raw.replace("|0xaa|0xabc|","|0xab|0xabc|"),
         raw.replace("POST_BIND|","MALFORMED|"),
