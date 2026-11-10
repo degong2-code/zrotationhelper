@@ -129,18 +129,32 @@ def overlay(draft:dict,roots:list[tuple[dict,str]])->dict:
                 need(state==known and state!="FALSE",
                      "ORIGINAL_SELECTED_ROW_SOURCE_IF_NOT_TRUE")
                 if native=="TRUE":
-                    need(state=="TRUE" and category==
-                         "SOURCE_IF_EXTRA_ORIGINAL_PRE_AST_MATCH_NATIVE_COMPARATOR",
-                         "NATIVE_IF_FALSE_OR_NOT_INDEPENDENTLY_REPLAYED")
-                    state="TRUE_MATCH_NATIVE"
+                    # Native's comparator is a bounded POST witness, not
+                    # an independent source-state fact. When facts are absent,
+                    # keep the source-AST replay UNKNOWN even if Native TRUE.
+                    if state=="TRUE":
+                        need(category==
+                             "SOURCE_IF_EXTRA_ORIGINAL_PRE_AST_MATCH_NATIVE_COMPARATOR",
+                             "KNOWN_SOURCE_PRE_NOT_INDEPENDENTLY_MATCHED")
+                        state="TRUE_MATCH_NATIVE"
+                    else:
+                        need(state=="UNKNOWN" and category==
+                             "UNKNOWN_SOURCE_IF_EXTRA_PRE_INCOMPLETE",
+                             "NATIVE_POST_USED_TO_FILL_MISSING_PRE")
+                        state="UNKNOWN"
                 else:
-                    need(native=="NOT_REACHED" or native=="TRUE",
+                    need(native=="NOT_REACHED",
                          "NATIVE_COMPARATOR_FALSE_FOR_SELECTED_SOURCE")
-                    need(category in (
-                       "SOURCE_IF_EXTRA_ORIGINAL_PRE_AST_KNOWN_NO_NATIVE_COMPARATOR",
-                       "UNKNOWN_SOURCE_IF_EXTRA_PRE_INCOMPLETE",
-                       "SOURCE_IF_EXTRA_ORIGINAL_PRE_AST_MATCH_NATIVE_COMPARATOR"),
-                       "UNKNOWN_OR_UNREACHED_SOURCE_NATIVE_COMPARATOR_UNEXPECTED")
+                    if state=="TRUE":
+                        need(category==
+                             "SOURCE_IF_EXTRA_ORIGINAL_PRE_AST_KNOWN_NO_NATIVE_COMPARATOR",
+                             "KNOWN_PRE_WITHOUT_COMPARATOR_MISLABELED")
+                        state="TRUE_NO_NATIVE_COMPARATOR"
+                    else:
+                        need(state=="UNKNOWN" and category==
+                             "UNKNOWN_SOURCE_IF_EXTRA_PRE_INCOMPLETE",
+                             "MISSING_PRE_WITHOUT_COMPARATOR_MISLABELED")
+                        state="UNKNOWN"
             native_if_counts[state]+=1
             row_counts[(name,rank)]+=1
             if t<10000:
@@ -272,8 +286,20 @@ def selftest()->dict:
         try:overlay(draft,[(bad,"a"*64)])
         except OverlayError:negatives+=1
         else:raise AssertionError("UNTRUSTED_NATIVE_ROOT_PROMOTED")
+    # The Native original IF may be TRUE while the independent source AST
+    # cannot be reproduced from a smaller PRE field adapter. It stays UNKNOWN.
+    incomplete=deepcopy(proof)
+    incomplete["selected_source_IF_samples"][0]["original_PRE_fields"]={}
+    incomplete["selected_source_IF_samples"][0]["original_source_IF_independent_truth"]="UNKNOWN"
+    incomplete["selected_source_IF_samples"][0]["original_SOURCE_IF_evidence"]=(
+        "UNKNOWN_SOURCE_IF_EXTRA_PRE_INCOMPLETE")
+    uncertainty=overlay(draft,[(incomplete,"a"*64)])
+    need(uncertainty["original_selected_root_evidence_successor"][
+         "condition_verdicts_at_exact_native_roots"]=={"UNKNOWN":1},
+         "UNOBSERVED_PRE_FILLED_FROM_NATIVE_POST_COMPARATOR")
     return {"status":"PASS_GENERIC_NATIVE_ROOT_SOURCE_EVIDENCE_OVERLAY",
-       "positive_synthetic_roots":1,"negative_rejected":negatives,
+       "positive_synthetic_roots":1,"unknown_native_comparator_preserved":1,
+       "negative_rejected":negatives,
        "source_order_preserved":True,
        "physical_ready_proven":False,"current_Retail_optimality_proven":False}
 
