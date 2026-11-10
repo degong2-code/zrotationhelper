@@ -85,10 +85,13 @@ def extract_route(cpp:str,case:dict)->dict:
     prefix=cpp[definition.end():definition.end()+1800]
     ctor=re.compile(CTOR_TEMPLATE.format(cls=re.escape(cls),base=re.escape(parent)),re.S)
     starts=list(ctor.finditer(prefix))
-    # Factory Class(this, options_str) disambiguates overloads used for
-    # triggered/background actions; do not link to a different constructor.
+    # Original factory creates Class(this, options_str). Exclude alternate
+    # constructors that require different arguments (e.g. a triggered effect).
     compatible=[x for x in starts if
-                re.search(r'\boptions_str\s*\)\s*:\s*'+re.escape(parent)+r'\s*
+                re.search(r'\boptions_str\s*\)\s*:\s*'+re.escape(parent)+r'\s*$',
+                          x.group(0),re.S)]
+    need(len(compatible)==1,"FACTORY_CONSTRUCTOR_OVERLOAD_NOT_UNAMBIGUOUS")
+    m=CTOR_ARGS.match(prefix,compatible[0].end())
     need(m is not None,"CLASS_SPELL_DATA_ARGUMENT_UNSUPPORTED")
     dep=m["dependency"]
     expected=case.get("expected_spell_data_input", "player->talent."+case.get("expected_talent_field",""))
