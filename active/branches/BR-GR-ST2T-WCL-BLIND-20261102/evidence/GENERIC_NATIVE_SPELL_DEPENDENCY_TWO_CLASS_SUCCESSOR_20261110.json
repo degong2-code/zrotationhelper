@@ -16,11 +16,11 @@
   ],
   "workflow": ".github/workflows/zrot-gr-original-native-spell-dependency-v1.yml",
   "code_implementation_first_commit": "4a4da88504df7683546cb599bb855c19ab8cba20",
-  "code_latest_validated_commit": "22cdf3a9c94a65e98c1635e6b0d2075d427c7a66",
+  "code_latest_validated_commit": "aee9aced2863f65c25bdff9ba57d16ca62661e5c",
   "observed_validations": {
-    "latest_ci_run": 42791707929,
-    "latest_ci_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42791707929",
-    "ci_head": "22cdf3a9c94a65e98c1635e6b0d2075d427c7a66",
+    "latest_ci_run": 42792426056,
+    "latest_ci_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42792426056",
+    "ci_head": "aee9aced2863f65c25bdff9ba57d16ca62661e5c",
     "ci_result": "SUCCESS_2_OF_2",
     "python_3_12": "PASS",
     "python_3_14": "PASS",
@@ -36,12 +36,12 @@
     "actual_shaman_source_native_replay": "PASS",
     "source_only_warrior_other_class_cpp_compatibility": "PASS",
     "local_independent_zip_bytes_verified": true,
-    "local_independent_zip_sha256": "73226d913ba8c1a52782c3965c16a78945b514c60496b31f1532a8917a1f390b",
+    "local_independent_zip_sha256": "56e88d0cb8acf851dc8cd0f962a4f3cd6579819e2a25d391eb7b28221396c802",
     "local_independent_source_link_json_sha256": "e964372972ffad2f00e3f3f6c0db15cc18cd9615d8a606b51d6f6d310e11ab40",
     "artifact": {
-      "id": 13751029831,
-      "github_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42791707929/artifacts/13751029831",
-      "expires_at": "2026-11-24T09:33:46Z",
+      "id": 13751891080,
+      "run": 42792426056,
+      "name": "zrot-gr-source-spell-dependency-3.12-aee9aced2863f65c25bdff9ba57d16ca62661e5c",
       "files": [
         "generic-dependency-selftest.json",
         "generic-simc-spell-dependency-source-linked.json"
@@ -74,7 +74,12 @@
         "cause": "Accidental duplicated module tail in intermediate replacement; quarantined"
       }
     ],
-    "no_results_promoted_from_failed_runs": true
+    "no_results_promoted_from_failed_runs": true,
+    "previous_success_ci_run": 42791707929,
+    "future_simc_version_revisions_are_external_adapter_pins": true,
+    "generic_code_contains_no_fixed_upstream_sha": true,
+    "synthetic_invalid_future_revision_rejected": true,
+    "output_byte_for_byte_stable_after_version_refactor": true
   },
   "case_1": {
     "source_spec": "shaman_enhancement",
@@ -130,9 +135,10 @@
     "current_Retail_IF_ELSE_priority": "UNKNOWN",
     "opener_end": "UNKNOWN",
     "dummy_wrong_cast": "UNKNOWN",
-    "general_rotation_rule_promotions": 0
+    "general_rotation_rule_promotions": 0,
+    "generic_source_version_is_adapter_provided_not_hardcoded": true
   },
-  "exact_next": "Independently resolve pinned SimC talent loadout selection vs unavailable spell for the observed native not_found, using reusable source/DBC talent resolver (not class-hardcoded); then bound strict PRE ready/resources/IF and CALL/RUN, independent WCL blind postlock, then General Rotation model and target-dummy correction. Avoid expensive Native rebuild unless a decision-impacting claim truly needs it.",
+  "exact_next": "Reusable original SimC talent-loadout/DBC resolver that can independently prove selected/unselected spell identity from pinned profile and spell data; preserve unknown where encoded talent string cannot be decoded. Then strict PRE readiness/resource/IF and full CALL/RUN ordering, locked independent WCL blind postlock before user General Rotation opener/conditional-priority or dummy error promotion.",
   "promotion_control": {
     "MAIN_promoted": false,
     "FROZEN_modified": false,
