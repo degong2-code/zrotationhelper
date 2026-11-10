@@ -1,0 +1,69 @@
+{
+  "schema": "ZrotOriginalSimCSourceBoundedIFAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_profile": "profiles/MID2/MID2_Mage_Arcane.simc",
+  "source_profile_git_blob": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+  "source_spec_key": "mage_arcane",
+  "actor_class": "mage",
+  "target_count": 2,
+  "source_list": "spellslinger",
+  "candidate_rank": 3,
+  "selected_rank": 6,
+  "expected_selected_occurrences": 2,
+  "original_workflow_run": 42589894203,
+  "original_artifact_id": 13660659299,
+  "original_artifact_zip_sha256": "d14e1bc622e07db8204ebf95a19c3a52c91620bb90c19247e03fcf1dbe86a48b",
+  "archive_members": {
+    "log": {
+      "path": "zrot-original-extra-pre/mage_arcane-2t/simc_native_log.txt",
+      "sha256": "8c28af727bf95e02bec81b7ebc2752f0121137728647e699fb34ac097cd9c892"
+    },
+    "selected": {
+      "path": "zrot-original-extra-pre/mage_arcane-2t/exact-selected-extra-pre-if.json",
+      "sha256": "83ed63faab6e5067f0fa1f9ccd4db2fa635df7199347c60121879e171711a112"
+    },
+    "native_receipt": {
+      "path": "zrot-original-extra-pre/mage_arcane-2t/simc_reference_receipt.json",
+      "sha256": "b47998284b5160212338bfc037197756a314a53289c5b9d49cfb4a5ed4e9f7e7"
+    }
+  },
+  "domain_rules": [
+    {
+      "symbol": "talent.orb_barrage",
+      "domain": [
+        0,
+        1
+      ],
+      "source_path": "engine/player/player.cpp",
+      "source_git_blob": "88e03a01ca87ff66fd3902c9d6e047fe1a03ecb8",
+      "required_anchors": [
+        "if ( splits.size() >= 2 && ( splits[ 0 ] == \"apex\" || splits[ 0 ] == \"talent\" ) )",
+        "return expr_t::create_constant( expression_str, _talent.enabled() );"
+      ]
+    },
+    {
+      "symbol": "prev_gcd.1.arcane_surge",
+      "domain": [
+        0,
+        1
+      ],
+      "source_path": "engine/action/action.cpp",
+      "source_git_blob": "399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4",
+      "required_anchors": [
+        "if ( splits.size() == 3 && splits[ 0 ] == \"prev_gcd\" )",
+        "return ( *( action.player->prev_gcd_actions.end() - gcd ) )->internal_id == previously_used->internal_id;"
+      ]
+    }
+  ],
+  "supporting_pinned_talent_boolean_source": {
+    "path": "engine/player/talent.hpp",
+    "git_blob": "ec760677bd14abcd867d2907cf2ca78212738b2c",
+    "anchor": "bool enabled() const\\n  { return m_rank > 0 && m_spell->ok(); }"
+  },
+  "focus": "Original source APL guard validity under ALL binary values, not imputed actual talent or previous GCD",
+  "native_POST_comparator_used_as_answer": false,
+  "original_older_Arcane_ready_ledger_is_different_Native_run": true,
+  "current_WoW_priority_proven": false,
+  "MAIN_promoted": false
+}
