@@ -1,0 +1,163 @@
+{
+  "schema": "ZrotOriginalSimCSameRootBooleanDomainIFEvidenceV1",
+  "date": "2026-11-10",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "research_goal": "Generic cross-spec source-IF decisions using same original Native call PRE + pinned source boolean domains; do not convert source row exclusion to physical ability NOT_READY.",
+  "reused_evidence": {
+    "original_native_run": 42589894203,
+    "original_native_artifact_id": 13660659299,
+    "original_native_artifact_zip_sha256": "d14e1bc622e07db8204ebf95a19c3a52c91620bb90c19247e03fcf1dbe86a48b",
+    "native_log_sha256": "8c28af727bf95e02bec81b7ebc2752f0121137728647e699fb34ac097cd9c892",
+    "selected_source_replay_sha256": "83ed63faab6e5067f0fa1f9ccd4db2fa635df7199347c60121879e171711a112",
+    "native_reference_receipt_sha256": "b47998284b5160212338bfc037197756a314a53289c5b9d49cfb4a5ed4e9f7e7",
+    "simc_source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "simc_profile_git_blob_sha1": "8d06eda4f69374dd1ed2e2d1eb8076b82cbbaf7f",
+    "simc_bounded_source_SEMANTICS": [
+      {
+        "operand_class": "talent.<name>",
+        "numeric_domain": [
+          0,
+          1
+        ],
+        "source": "engine/player/player.cpp",
+        "source_git_blob_sha1": "88e03a01ca87ff66fd3902c9d6e047fe1a03ecb8",
+        "supporting_source": "engine/player/talent.hpp",
+        "supporting_git_blob_sha1": "ec760677bd14abcd867d2907cf2ca78212738b2c"
+      },
+      {
+        "operand_class": "prev_gcd.<ordinal>.<action>",
+        "numeric_domain": [
+          0,
+          1
+        ],
+        "source": "engine/action/action.cpp",
+        "source_git_blob_sha1": "399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4"
+      }
+    ],
+    "source_name_adapters": "tools/research/fixtures/general_rotation_original_source_bounded_if_adapter_v1.json",
+    "existing_original_pre_adapter_reused": "tools/research/fixtures/zrot_original_select_extra_pre_two_source_v1.json"
+  },
+  "implementation": {
+    "generic_engine": "tools/research/general_rotation_original_attempt_bounded_if_v1.py",
+    "generic_code_sha256": "505081383bc7a39a4f53132c3dbc0e77dbdeb6c0bbee1bebbda49e7d1c2a03f6",
+    "workflow": ".github/workflows/zrot-gr-original-same-run-bounded-if-v1.yml",
+    "original_PRE_call_id_and_pointer_must_match": true,
+    "original_dispatch_and_selected_row_identity_verified": true,
+    "original_source_profile_and_CPP_git_blob_verified": true,
+    "Native_IF_POST_used_as_truth_input": false,
+    "missing_source_operand_imputed_zero": false,
+    "enumerates_all_binary_assignments": true,
+    "minimal_observed_source_PRE_and_symbol_sensitivity_computed": true,
+    "generic_core_does_not_hardcode_Fury_Arcane_or_skill_priority": true
+  },
+  "real_case_observations": [
+    {
+      "native_original_t_ms": 7667,
+      "actor": "mage_arcane",
+      "target_count": 2,
+      "source_list": "spellslinger",
+      "candidate_source_rank": 3,
+      "candidate_action": "arcane_barrage",
+      "original_same_run_candidate_call_id": 340,
+      "original_same_run_selected_action": "arcane_orb",
+      "original_same_run_selected_call_id": 343,
+      "independent_original_native_if_post": "FALSE",
+      "full_binary_counterfactual_assignments": 4,
+      "all_source_IF_results": "FALSE",
+      "source_IF_all_assignments_false": "CERTIFIED_FROM_ORIGINAL_PRE_AND_SOURCE_BINARY_SEMANTICS",
+      "minimal_required_observed_original_PRE": {
+        "buff.arcane_salvo.react": 3,
+        "buff.arcane_salvo.stack": 4
+      },
+      "remaining_unobserved_domain_operand_sensitivity": [],
+      "source_row_local_exclusion": true,
+      "entire_spell_NOT_READY": "UNKNOWN"
+    },
+    {
+      "native_original_t_ms": 14950,
+      "actor": "mage_arcane",
+      "target_count": 2,
+      "source_list": "spellslinger",
+      "candidate_source_rank": 3,
+      "candidate_action": "arcane_barrage",
+      "original_same_run_candidate_call_id": 609,
+      "original_same_run_selected_action": "arcane_orb",
+      "original_same_run_selected_call_id": 612,
+      "independent_original_native_if_post": "FALSE",
+      "full_binary_counterfactual_assignments": 4,
+      "source_IF_results": {
+        "FALSE": 2,
+        "TRUE": 2
+      },
+      "source_IF_all_assignments_false": false,
+      "source_row_local_exclusion": "UNKNOWN",
+      "only_remaining_decisive_original_PRE_operand": "prev_gcd.1.arcane_surge",
+      "non_influential_unobserved_operand": "talent.orb_barrage",
+      "previous_GCD_from_actual_same_native_root": "UNKNOWN",
+      "entire_spell_NOT_READY": "UNKNOWN"
+    }
+  ],
+  "independent_prior_work_boundary": {
+    "older_competitor_ledger_run": 42186794065,
+    "older_original_prior_root_ids": [
+      901,
+      1610
+    ],
+    "new_replayed_original_root_ids": [
+      340,
+      609
+    ],
+    "same_pinned_source_profile_and_seed_but_distinct_native_run": true,
+    "older_8_of_10_local_negative_proofs_unchanged": true,
+    "older_two_unknowns_not_retroactively_promoted": true,
+    "new_replayed_same_run_first_false_and_second_unknown": true
+  },
+  "final_validation": {
+    "workflow_run": 42729673496,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42729673496",
+    "result": "SUCCESS_3_OF_3",
+    "python_312_compile_and_synthetic": "PASS",
+    "python_314_compile_and_synthetic": "PASS",
+    "real_original_archived_native_log_and_CPP_source_replay": "PASS",
+    "synthetic_invalid_inputs_rejected": 4,
+    "new_actual_source_IF_proven_false_cases_in_this_archived_run": 1,
+    "remaining_original_SOURCE_IF_unknown_in_this_archived_run": 1,
+    "final_derived_json_sha256": "117137f1d6c09533d582a5a18bd3a616e786d106ebb40977cd63a0a8f9b2f312",
+    "artifact_id": 13725090073,
+    "artifact_zip_sha256": "aa91158b06b1207fd060fa7d5d848dc6b4e0f9e14d7e3d2da14e1c86907cbc13",
+    "artifact_expiry_utc": "2026-11-17T00:37:27Z",
+    "earlier_failing_executions": [
+      {
+        "run": 42728904257,
+        "reason": "SOURCE_CPP_BOOLEAN_ANCHOR_NOT_UNIQUE_IN_ORIGINAL_CXX"
+      },
+      {
+        "run": 42729032109,
+        "reason": "PYTHON_SOURCE_GRAMMAR_REGEX_ESCAPING_ERROR"
+      },
+      {
+        "run": 42729171408,
+        "reason": "PRECOMBAT_P_AND_COMBAT_C_SOURCE_DISPATCH_ID_COLLISION_AT_ZERO_TIME"
+      }
+    ],
+    "all_previous_implementation_failures_corrected_in_final_run": true,
+    "new_Native_SimC_CXX_builds": 0,
+    "new_WCL_API_calls": 0
+  },
+  "claim_limits": {
+    "source_APL_row_NOT_READY_local_only": true,
+    "selected_full_physical_READY_certified": 0,
+    "source_complete_priority_proven": 0,
+    "current_retail_patch_parity": "UNKNOWN",
+    "opener_end": "UNKNOWN",
+    "user_target_dummy_cast_error": "UNKNOWN",
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "product_exact_next": "Generate evidence-bounded specialization-agnostic General Rotation opener, resource/proc/CD/target IF/ELSE hypothesis, and compare against independent WCL blind locked data with full READY gated.",
+  "session_exact_next": "The single highest-impact missing original source PRE input in this replicated run is prev_gcd.1.arcane_surge at 14950ms candidate root 609. Before any Native rebuild, review existing source-backed GCD history and whether original predecessor attribution can be independently witnessed at same root. Only then perform targeted source instrumentation, not broad recollection."
+}
