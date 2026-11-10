@@ -1,0 +1,140 @@
+{
+  "schema": "ZrotGeneralRotationShamanOriginalNativeAttemptFrontierSuccessorV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+  "date": "2026-11-10",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "implementation_commit": "b9fc5bf3bddd9f4240cf208b5d7906beaa4eb52f",
+  "upstream_simc_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "original_profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "prior_selected_source_evidence": {
+    "total": 79,
+    "st_1t": 40,
+    "aoe_3t": 39,
+    "independent_selected_if_match": 5,
+    "no_explicit_if": 15,
+    "missing_pre_unknown": 59,
+    "receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SHAMAN_GENERAL_ROTATION_NATIVE_SOURCE_ROW_PRE_EVIDENCE_SUCCESSOR_20261110.json",
+    "preserved_immutable": true
+  },
+  "new_evidence": {
+    "ci_run": 42771130434,
+    "ci_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42771130434",
+    "jobs": "SUCCESS_3_OF_3",
+    "original_binary_rebuilt": true,
+    "original_ST_AOE_action_and_time_sequence_vs_prior": "PASS_EXACT",
+    "original_extra_PRE_and_native_post_return_pointer_call_id_order": "PASS",
+    "original_action_ready_evaluated_once_per_visited_row": true,
+    "new_readiness_calls_added": 0,
+    "new_WCL_API_calls": 0,
+    "artifact_id": 13742590038,
+    "artifact_name": "zrot-gr-shaman-exact-root-pre-b9fc5bf3bddd9f4240cf208b5d7906beaa4eb52f",
+    "artifact_expires_at": "2026-11-24T06:54:11Z",
+    "native_frontiers": [
+      {
+        "targets": 1,
+        "at_ms": 942,
+        "source_list": "single_sb",
+        "source_rank": 4,
+        "source_action": "stormstrike",
+        "selected_call_id": 31,
+        "foreground_dispatch_token": 4,
+        "original_parent_call": {
+          "list": "default",
+          "rank": 7,
+          "native_action_ready_return": "TRUE"
+        },
+        "preceding_native_attempts": 10,
+        "source_list_higher_ranks_observed": 3,
+        "source_list_higher_ranks_total": 3,
+        "selected_native_action_ready_return": "TRUE",
+        "all_higher_source_ranks_excluded_by_original_return": "TRUE_NATIVE_ORIGINAL_ONLY",
+        "higher_source_ranks_unobserved": [],
+        "first_source_rank": {
+          "rank": 1,
+          "action": "primordial_storm",
+          "independent_source_if": "FALSE",
+          "original_action_ready_return": "FALSE"
+        },
+        "selected_source_if": "UNKNOWN_PRE_TIME_MISSING",
+        "evidence_json_sha256": "79d372d06494cc8779daf09ee00fc4676ba03b5f0bbeed8c60d672f9677131aa"
+      },
+      {
+        "targets": 3,
+        "at_ms": 940,
+        "source_list": "aoe",
+        "source_rank": 20,
+        "source_action": "crash_lightning",
+        "selected_call_id": 74,
+        "foreground_dispatch_token": 4,
+        "original_parent_call": {
+          "list": "default",
+          "rank": 9,
+          "native_action_ready_return": "TRUE"
+        },
+        "preceding_native_attempts": 31,
+        "source_list_higher_ranks_observed": 18,
+        "source_list_higher_ranks_total": 19,
+        "selected_native_action_ready_return": "TRUE",
+        "all_higher_source_ranks_excluded_by_original_return": "UNKNOWN_ONE_SOURCE_ROW_UNOBSERVED",
+        "higher_source_ranks_unobserved": [
+          6
+        ],
+        "unknown_row": {
+          "rank": 6,
+          "source_action": "sundering",
+          "original_action_ready_return": "UNKNOWN_UNATTEMPTED"
+        },
+        "selected_source_if": "NO_EXPLICIT_IF",
+        "evidence_json_sha256": "446ce44e36b73b8bf93f6b4845a9f3da912350cb078e6d8190976e8df5a2b369"
+      }
+    ]
+  },
+  "independent_regressions": [
+    {
+      "run": 42770201820,
+      "scope": "Original Fury and Arcane original source PRE replay plus Python 3.12/3.14",
+      "jobs": "SUCCESS_3_OF_3"
+    },
+    {
+      "run": 42770201869,
+      "scope": "Pinned source prev-GCD Native plus Python 3.12/3.14",
+      "jobs": "SUCCESS_3_OF_3"
+    }
+  ],
+  "initial_failed_attempt": {
+    "run": 42770201741,
+    "status": "FAILED",
+    "stage": "New original same-root attempt frontier replay after successful CXX build and previous source replay",
+    "reason": "Original SimC ACTION_VARIABLE may return ready TRUE, execute a state-variable update and continue; first replay incorrectly classified it as an available competing spell.",
+    "correction_commit": "b9fc5bf3bddd9f4240cf208b5d7906beaa4eb52f",
+    "correction": "Pin original select_action() control semantics; exempt VARIABLE and CALL as nonwinning control, do not exempt RUN.",
+    "corrected_synthetic_replay_negative_controls": 9
+  },
+  "proof_boundaries": {
+    "original_native_ACTION_READY_RETURN_directly_observed": true,
+    "PRE_from_each_native_call_not_future_or_POST": true,
+    "same_timestamp_order_resolved_by_original_call_ID_pointer_and_log_line": true,
+    "complete_ALL_CALL_RUN_return_stack": "UNKNOWN",
+    "physical_skill_ready_independent_of_native_return": "UNKNOWN",
+    "original_root_source_IF_independent_completion": "PARTIAL",
+    "unknown_unattempted_action_is_NOT_READY": false,
+    "WoW_current_Retail_mechanics_and_patch_parity": "UNKNOWN",
+    "WCL_independent_blind_holdout_for_these_decisions": "NOT_RUN",
+    "global_optimal_conditional_priority": "UNKNOWN",
+    "opener_end_transition": "UNKNOWN",
+    "dummy_real_wrong_cast": "UNKNOWN"
+  },
+  "lifecycle": "OBSERVED_NATIVE_SIMC_SOURCE_ONLY_NOT_FREEZE_ELIGIBLE",
+  "summary": "Same-root Native visited-action frontier is now evidenced for one ST and one AoE selection, with a correctly handled VARIABLE control. It must not be treated as current Retail optimal priority.",
+  "exact_next": "Mechanic-specific readiness and unattempted AoE rank-6 source instantiation analysis, source-clock IF replay, ordered CALL/RUN stack closure where decision-critical, then independent WCL postlock reconciliation; do not promote dummy errors without observable state.",
+  "mainstream_impact": {
+    "MAIN_promoted": false,
+    "MAIN_files_changed": false,
+    "FROZEN_evidence_mutated": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  }
+}
