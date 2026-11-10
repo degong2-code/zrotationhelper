@@ -243,6 +243,17 @@ if ( name == "beta" ) return new beta_t( this, options_str );
          "p->talents.fury.beta" and
          nested_route["source_talent_registry_label"]=="UNKNOWN",
          "NESTED_TALENT_SOURCE_ONLY_GENERIC_ROUTING_FAIL")
+    # Correctly select the factory-facing constructor when source declares
+    # an additional internal background constructor overload.
+    overloaded=nested.replace(
+        'if ( name == "beta" )',
+        'beta_t( util::string_view label, warrior_t* p )'
+        ' : warrior_attack_t( "beta", p, p->talents.fury.other ) { }\\n'
+        'if ( name == "beta" )')
+    overload_route=extract_route(overloaded,nested_case)
+    need(overload_route["source_constructor_first_spell_data_input"]==
+         "p->talents.fury.beta",
+         "FACTORY_SELECTED_WRONG_NATIVE_CONSTRUCTOR_OVERLOAD")
     return {"schema":SCHEMA,"status":"PASS_SYNTHETIC_STATIC",
             "negative_controls":n,"cpp_factory_dependency_route":"PASS",
             "opaque_loadout_does_not_prove_selected_talent":True,
