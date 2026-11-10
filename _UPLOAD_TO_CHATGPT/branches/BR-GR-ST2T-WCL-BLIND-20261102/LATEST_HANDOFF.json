@@ -401,10 +401,24 @@
     "latest_source_decoder_CI": 42795917750,
     "latest_source_decoder_CI_result": "SUCCESS_2_OF_2",
     "last_original_native_lifecycle_CI": 42786821103,
-    "python_offline_scope_gate": "NOT_YET_RUN_FOR_GEN9",
+    "python_offline_scope_gate": "PASS_2_OF_2_CI_42799508653",
     "new_WCL_SimC_Native_runs_during_handoff": 0,
     "MAIN_promoted": false,
-    "edited_historical_FROZEN": false
+    "edited_historical_FROZEN": false,
+    "branch_scope_real_chain": [
+      "Gen9->Gen8",
+      "Gen8->Gen7",
+      "Gen7->Gen6",
+      "Gen6->Gen5"
+    ],
+    "scope_test_negative_cases": 14,
+    "simulated_successor_hops": 5,
+    "real_parent_chain_sha_verification": "PASS",
+    "documentation_links_checked": 206,
+    "CI_workflow": ".github/workflows/zrot-gr-20261109-branch-handoff-continuity.yml",
+    "stale_Gen8_max_CI_failure": 42799153172,
+    "scope_CI_corrected": 42799508653,
+    "failed_validation_type": "OUTDATED_CI_GENERATION_LIMIT_NOT_POLICY_OR_PARENT_DRIFT"
   },
   "entry_gate": {
     "mode": "READ_ONLY_RESTORE_REPORT_THEN_STOP",

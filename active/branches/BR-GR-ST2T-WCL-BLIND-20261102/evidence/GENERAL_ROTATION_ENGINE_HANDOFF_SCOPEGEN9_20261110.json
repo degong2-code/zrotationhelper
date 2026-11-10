@@ -35,11 +35,22 @@
   },
   "new_general_rotation_priority_rules_promoted": 0,
   "other_branch_chat_owners": "NOT_VERIFIED",
-  "Gen9_parent_byte_identity_check": "RECHECK_AFTER_COMMIT",
-  "scope_validator": "NOT_YET_RUN_FOR_GEN9",
+  "Gen9_parent_byte_identity_check": "PASS_GEN8_BLOB_SHA1_AND_SHA256",
+  "scope_validator": "PASS_2_OF_2_CI_42799508653",
   "followup": "New chat must first perform read-only restoration and report, then stop until user separately says 진행.",
   "shared_main_promoted": false,
   "FROZEN_modified": false,
   "Seq578": "FAILED_QUARANTINED",
-  "Seq637": "UNKNOWN"
+  "Seq637": "UNKNOWN",
+  "scope_validator_previous_failed_run": 42799153172,
+  "scope_validator_failed_reason": "Stale workflow accepted only Scope Gen6/7/8, corrected to dynamic Gen5+ parent archive traversal",
+  "scope_validator_real_hops": [
+    "9->8",
+    "8->7",
+    "7->6",
+    "6->5"
+  ],
+  "scope_negative_cases": 14,
+  "scope_simulated_future_successors": 5,
+  "navigation_links_checked": 206
 }
