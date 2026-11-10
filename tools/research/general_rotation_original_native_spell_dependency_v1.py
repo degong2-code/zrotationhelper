@@ -248,7 +248,7 @@ if ( name == "beta" ) return new beta_t( this, options_str );
     overloaded=nested.replace(
         'if ( name == "beta" )',
         'beta_t( util::string_view label, warrior_t* p )'
-        ' : warrior_attack_t( "beta", p, p->talents.fury.other ) { }\\n'
+        ' : warrior_attack_t( "beta", p, p->talents.fury.other ) { }\n'
         'if ( name == "beta" )')
     overload_route=extract_route(overloaded,nested_case)
     need(overload_route["source_constructor_first_spell_data_input"]==
