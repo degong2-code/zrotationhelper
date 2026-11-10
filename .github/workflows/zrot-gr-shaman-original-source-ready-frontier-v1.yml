@@ -8,6 +8,8 @@ on:
       - tools/research/fixtures/zrot_shaman_priority_frontier_v1.json
       - tools/research/general_rotation_original_select_extra_pre_v1.py
       - tools/research/general_rotation_original_attempt_frontier_v1.py
+      - tools/research/general_rotation_original_candidate_stage_v1.py
+      - tools/research/general_rotation_original_candidate_stage_replay_v1.py
       - .github/workflows/zrot-gr-shaman-original-source-ready-frontier-v1.yml
   workflow_dispatch:
 
@@ -38,11 +40,15 @@ jobs:
             tools/research/general_rotation_original_select_extra_pre_v1.py \
             tools/research/general_rotation_original_select_extra_pre_replay_v1.py \
             tools/research/general_rotation_original_attempt_frontier_v1.py \
+            tools/research/general_rotation_original_candidate_stage_v1.py \
+            tools/research/general_rotation_original_candidate_stage_replay_v1.py \
             tools/research/general_rotation_original_dispatch_if_replay_v1.py \
             tools/research/simc_original_select_if_pre_witness_v1.py
           python -B tools/research/general_rotation_original_select_extra_pre_v1.py >/tmp/generic-pre-selftest.json
           python -B tools/research/general_rotation_original_select_extra_pre_replay_v1.py >/tmp/generic-pre-replay-selftest.json
           python -B tools/research/general_rotation_original_attempt_frontier_v1.py >/tmp/native-frontier-selftest.json
+          python -B tools/research/general_rotation_original_candidate_stage_v1.py >/tmp/candidate-stage-patch-selftest.json
+          python -B tools/research/general_rotation_original_candidate_stage_replay_v1.py >/tmp/candidate-stage-replay-selftest.json
           python - <<'PY'
           import sys,json
           sys.path.insert(0,'tools/research')
@@ -60,6 +66,12 @@ jobs:
           assert frontier['status']=='PASS_SYNTHETIC_STATIC'
           assert frontier['negatives_rejected']>=9 and frontier['physical_READY_proven']==0
           assert frontier['native_calls_added']==0 and frontier['WCL_API_calls']==0
+          stage_patch=json.load(open('/tmp/candidate-stage-patch-selftest.json'))
+          stage_replay=json.load(open('/tmp/candidate-stage-replay-selftest.json'))
+          assert stage_patch['status']=='PASS_SYNTHETIC_STATIC' and stage_patch['negative_controls']>=6
+          assert stage_patch['added_original_ready_calls']==0 and stage_patch['added_native_RNG_calls']==0
+          assert stage_replay['status']=='PASS_SYNTHETIC_STATIC' and stage_replay['negative_controls']>=7
+          assert stage_replay['unobserved_rank_NOT_READY_proven']==0 and stage_replay['WCL_API_calls']==0
           print('GENERIC_SHAMAN_ORIGINAL_READY_PRE_SPEC_ADAPTER_SYNTHETIC_PASS')
           PY
   original-shaman-source-root:
@@ -119,6 +131,10 @@ jobs:
             --plan tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json \
             --prior-receipt /tmp/shaman-dispatch.json \
             --out-receipt /tmp/shaman-extra-pre-patch.json
+          python -B tools/research/general_rotation_original_candidate_stage_v1.py \
+            --source-root original-simc \
+            --prior-receipt /tmp/shaman-extra-pre-patch.json \
+            --out-receipt /tmp/shaman-candidate-stage-patch.json
           python - <<'PY'
           import json
           x=json.load(open('/tmp/shaman-extra-pre-patch.json'))
@@ -129,6 +145,10 @@ jobs:
           assert len(x['captured_fields'])==10
           assert x['native_ready_post_return_marker']=='ZROT_ORIGINAL_SELECT_NATIVE_READY_RESULT_V1|'
           assert x['original_action_ready_call_count_preserved'] is True
+          z=json.load(open('/tmp/shaman-candidate-stage-patch.json'))
+          assert z['schema']=='ZrotOriginalSimCNativeCandidateStagePatchV1'
+          assert z['additional_action_ready_calls']==0 and z['additional_IF_RNG_or_queue_calls']==0
+          assert z['runtime_candidate_stage_is_not_physical_READY'] is True
           print('SHAMAN_ORIGINAL_SOURCE_PASSIVE_PATCH_NO_READY_SIDE_EFFECT_PASS')
           PY
       - name: Build original pinned SimC CXX once for source-line and PRE root witness
@@ -170,6 +190,11 @@ jobs:
               --adapter tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json \
               --targets "$target" \
               --out "$folder/original-native-attempt-frontier.json"
+            python -B tools/research/general_rotation_original_candidate_stage_replay_v1.py \
+              --native-log "$folder/simc_native_log.txt" \
+              --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+              --prior-frontier "$folder/original-native-attempt-frontier.json" \
+              --out "$folder/original-native-candidate-stage.json"
           done
           python - <<'PY'
           import json,sys
@@ -193,6 +218,21 @@ jobs:
               assert now==prev,(target,'ORIGINAL_NATIVE_SAMPLE_CHANGED')
               x=json.loads((path/'selected-root-exact-pre-source-if.json').read_bytes())
               frontier=json.loads((path/'original-native-attempt-frontier.json').read_bytes())
+              stages=json.loads((path/'original-native-candidate-stage.json').read_bytes())
+              assert stages['schema']=='ZrotOriginalSimCNativeCandidateStageSameRootReplayV1'
+              assert stages['source_spec']=='shaman_enhancement' and stages['targets']==target
+              assert stages['every_attempt_has_exact_stage_pre_return'] is True
+              assert stages['same_root_action_ready_attempts']==frontier['preceding_attempt_count']+1
+              assert len(stages['source_rank_coverage'])==frontier['selected_root']['source_rank']-1
+              assert all(x['physical_mechanic_ready']=='UNKNOWN' for x in stages['source_rank_coverage'])
+              assert stages['unknown_source_rank_is_not_NOT_READY'] is True
+              assert stages['native_post_not_independent_physical_ready'] is True
+              assert stages['current_Retail_priority']=='UNKNOWN' and stages['dummy_wrong_cast']=='UNKNOWN'
+              if target==3:
+                  six=stages['source_rank_coverage'][5]
+                  assert six['rank']==6 and six['source_action']=='sundering'
+                  print('SHAMAN_AOE_RANK6_NATIVE_STAGE',six['native_visit_state'],six['original_action_ready_result'])
+              print('GENERIC_ORIGINAL_NATIVE_CANDIDATE_STAGE',target,stages['native_candidate_stage_count'],stages['source_rank_visit_counts'])
               assert frontier['schema']=='ZrotOriginalNativeSameForegroundRootAttemptFrontierV1'
               assert frontier['source_spec']=='shaman_enhancement' and frontier['targets']==target
               assert frontier['selected_root']['t_ms']==(942 if target==1 else 940)
@@ -225,6 +265,8 @@ jobs:
           sha256sum /tmp/shaman-source-root/shaman_enhancement-3t/selected-root-exact-pre-source-if.json
           sha256sum /tmp/shaman-source-root/shaman_enhancement-1t/original-native-attempt-frontier.json
           sha256sum /tmp/shaman-source-root/shaman_enhancement-3t/original-native-attempt-frontier.json
+          sha256sum /tmp/shaman-source-root/shaman_enhancement-1t/original-native-candidate-stage.json
+          sha256sum /tmp/shaman-source-root/shaman_enhancement-3t/original-native-candidate-stage.json
       - name: Preserve compact original source proof only; raw logs remain ephemeral
         if: always()
         uses: actions/upload-artifact@v4
@@ -235,6 +277,9 @@ jobs:
             /tmp/shaman-source-root/shaman_enhancement-3t/selected-root-exact-pre-source-if.json
             /tmp/shaman-source-root/shaman_enhancement-1t/original-native-attempt-frontier.json
             /tmp/shaman-source-root/shaman_enhancement-3t/original-native-attempt-frontier.json
+            /tmp/shaman-source-root/shaman_enhancement-1t/original-native-candidate-stage.json
+            /tmp/shaman-source-root/shaman_enhancement-3t/original-native-candidate-stage.json
             /tmp/shaman-extra-pre-patch.json
+            /tmp/shaman-candidate-stage-patch.json
           retention-days: 14
           if-no-files-found: warn
