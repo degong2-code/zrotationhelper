@@ -1,0 +1,94 @@
+name: zrot-gr-original-native-spell-dependency-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_native_spell_dependency_v1.py
+      - tools/research/fixtures/zrot_shaman_native_spell_dependency_v1.json
+      - .github/workflows/zrot-gr-original-native-spell-dependency-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-source-spell-dependency:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12','3.14']
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Reuse unchanged original Native lifecycle evidence; do not rebuild or rerun SimC
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42786821103
+          name: zrot-gr-shaman-exact-root-pre-6efb44f0ac767eccbdc18e2c1c5960a9a1958288
+          github-token: ${{ github.token }}
+          path: /tmp/previous-native
+      - name: Generic source dependency contract and actual pinned original source-to-Native offline replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C original-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          python -m py_compile tools/research/general_rotation_original_native_spell_dependency_v1.py
+          python -B tools/research/general_rotation_original_native_spell_dependency_v1.py >/tmp/generic-dependency-selftest.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/generic-dependency-selftest.json'))
+          assert x['status']=='PASS_SYNTHETIC_STATIC'
+          assert x['negative_controls']>=8
+          assert x['opaque_loadout_does_not_prove_selected_talent'] is True
+          assert x['new_native_simulations']==x['WCL_API_calls']==0
+          print('GENERIC_SPELL_DEPENDENCY_SYNTHETIC_PASS',x)
+          PY
+          echo '9e7a8696eb8bf67d4da6c222863d7f67e6a8b225d69b682413981fb7cc9f7e55  /tmp/previous-native/shaman-source-root/shaman_enhancement-3t/original-action-lifecycle.json' | sha256sum -c -
+          python -B tools/research/general_rotation_original_native_spell_dependency_v1.py \
+            --source-root original-simc \
+            --adapter tools/research/fixtures/zrot_shaman_native_spell_dependency_v1.json \
+            --native-lifecycle /tmp/previous-native/shaman-source-root/shaman_enhancement-3t/original-action-lifecycle.json \
+            --out /tmp/generic-simc-spell-dependency-source-linked.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/generic-simc-spell-dependency-source-linked.json'))
+          assert x['schema']=='ZrotOriginalNativeGenericSpellDataDependencyLinkV1'
+          assert x['spec_key']=='shaman_enhancement'
+          assert x['general_rotation_rule_promoted']==0
+          assert x['dummy_wrong_cast']=='UNKNOWN' and x['independent_retail_mechanic_truth']=='UNKNOWN'
+          assert x['WCL_independent_blind']=='NOT_TOUCHED'
+          assert len(x['source_to_factory_and_constructor_dependencies'])==1
+          a=x['source_to_factory_and_constructor_dependencies'][0]
+          assert a['source_action']=='sundering' and a['original_source_rank']==6
+          assert a['source_path_provenance']['source_constructor_first_spell_data_input']=='player->talent.sundering'
+          assert a['source_path_provenance']['source_talent_registry_label']=='Sundering'
+          assert a['original_native_spell_data']=='NOT_FOUND' and a['observed_original_constructor_background_guard'] is True
+          assert a['original_talent_selected_status']=='UNKNOWN'
+          assert a['profile_talent_loadout_status']=='OPAQUE_NOT_DECODED'
+          print('PINNED_ORIGINAL_NATIVE_SOURCE_SPELL_DEPENDENCY_PASS',a['source_path_provenance'])
+          PY
+          sha256sum /tmp/generic-simc-spell-dependency-source-linked.json
+      - name: Upload compact independent source dependency replay, no raw logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-source-spell-dependency-${{ matrix.python }}-${{ github.sha }}
+          path: |
+            /tmp/generic-dependency-selftest.json
+            /tmp/generic-simc-spell-dependency-source-linked.json
+          retention-days: 14
+          if-no-files-found: warn

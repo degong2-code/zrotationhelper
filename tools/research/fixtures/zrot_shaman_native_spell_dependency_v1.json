@@ -1,0 +1,27 @@
+{
+  "schema": "ZrotOriginalNativeSpellDependencyAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "spec_key": "shaman_enhancement",
+  "source_class_path": "engine/class_modules/sc_shaman.cpp",
+  "source_profile_path": "profiles/MID2/MID2_Shaman_Enhancement.simc",
+  "profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "purpose": "Original Native code path and talent dependency only, no hardcoded generic semantics. Does NOT decode opaque talents loadout, claim missing talent selection, physical readiness or optimal WoW priority.",
+  "cases": [
+    {
+      "targets": 3,
+      "source_list": "aoe",
+      "source_rank": 6,
+      "source_action": "sundering",
+      "factory_class": "sundering_t",
+      "factory_parent_base": "shaman_attack_t",
+      "expected_talent_field": "sundering",
+      "expected_talent_label": "Sundering",
+      "expected_native_evidence_sha256": "9e7a8696eb8bf67d4da6c222863d7f67e6a8b225d69b682413981fb7cc9f7e55"
+    }
+  ],
+  "lifecycle_provenance_only": true,
+  "current_WoW_gameplay_ready": "UNKNOWN",
+  "WCL_blind_evidence_used": false,
+  "MAIN_promoted": false
+}
