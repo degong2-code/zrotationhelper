@@ -10,6 +10,7 @@
 
 | 연구 영역 | 확인된 범위 | 아직 주장할 수 없는 것 |
 | --- | --- | --- |
+| **고술 첫 실제 선택행 증거 결합** | [고술 ST·3타겟 원본 Native 선택 행 79건을 모델에 연결](GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md): 첫 10초 32건, 독립 IF 일치 5건, IF 없는 선택 15건, PRE 부족 59건 UNKNOWN. [원본 #42749660209](https://github.com/degong2-code/zrotationhelper/actions/runs/42749660209) · [모델 병합 #42750471988](https://github.com/degong2-code/zrotationhelper/actions/runs/42750471988) | 선택행 복원은 실제 우선순위 정답이 아님: 상위 후보 readiness·오프닝 종료·WCL 대조 미완료 |
 | **전문화별 General Rotation 초안 생성** | **고술·분전·비법 Markdown 3개 + JSON 3개**, 원본 286/286행과 타겟·특성 분기 12사례, 실제 Native 첫 10초 표본 연결. [산출물 인덱스](GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md), [CI #42747802703](https://github.com/degong2-code/zrotationhelper/actions/runs/42747802703) **3/3 PASS** | 초기 **source-only 연구 초안**이며 정확한 실제 우선순위, 오프닝 종료·READY·게임 플레이어 오류는 미확정 |
 | SimC APL 해석 | 고정 Fury/Arcane/Enhancement 원본 3프로필, 소스 **286 APL 행 / 19 리스트**, 순서·조건·CALL/RUN 구분 | 나머지 전문화 및 현재 Retail 최적성 |
 | ST·2T·AoE 소스 분기 | **3클래스·12개 명시적 가상 타겟/특성 조건**에 대해 루트 CALL/RUN IF 48건 평가: TRUE 24, FALSE 24. 원본 APL 소스 조건 결과만 인증 | 실제 해당 리스트 진입, 전체 READY, 유저 오답 판정 및 오프닝 종료는 UNKNOWN |
