@@ -109,6 +109,10 @@ def replay(log,source_bytes,frontier,stage,plan,dot_plan,trait):
                  x["trait_entry"]==id_["trait_entry"] and
                  x["trait_spell"]==id_["trait_spell"]]
         need(len(matches)==1,"TALENT_ID_NOT_PINNED")
+        # Encoded HERO tree rank is not a runtime player_talent_t.enabled
+        # witness without active-subtree evidence; keep as UNKNOWN.
+        if matches[0]["trait_tree"]==3:
+            continue
         if matches[0]["source_profile_status"]=="PROFILE_SELECTED_RANK":
             need(matches[0]["source_profile_allocated_rank"]>0,
                  "SOURCE_TALENT_RANK_NOT_SELECTED")
