@@ -39,7 +39,7 @@
       "source_git_blob": "88e03a01ca87ff66fd3902c9d6e047fe1a03ecb8",
       "required_anchors": [
         "if ( splits.size() >= 2 && ( splits[ 0 ] == \"apex\" || splits[ 0 ] == \"talent\" ) )",
-        "return expr_t::create_constant( expression_str, _talent.enabled() );"
+        "if ( splits.size() == 2 )\n    {\n      return expr_t::create_constant( expression_str, _talent.enabled() );\n    }"
       ]
     },
     {
