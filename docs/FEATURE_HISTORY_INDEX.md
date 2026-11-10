@@ -29,6 +29,8 @@
 
 | 11-10: 세 번째 전문화 실제 Native 콜드 스타트·오프닝 표본 통합 | 앞선 Fury·Arcane 8개 Native 사례를 재수집하지 않고 고술 1/2/3/5타겟 4사례 신규 실행. 여러 빌드의 서로 다른 실행 근거를 섞지 않고 3클래스 모델로 결합 | [범용 추가 전문화 Native 수집 검증기](../tools/research/general_rotation_simc_marginal_native_cold_start_v1.py), [기존 Native 코호트+신규 코호트 source IR 결합기](../tools/research/general_rotation_simc_native_source_portfolio_v1.py) · [원본·검증 영수증](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_THREE_CLASS_ORIGINAL_SIMC_NATIVE_OPENING_PORTFOLIO_20261110.json) · [Native #42744084203](https://github.com/degong2-code/zrotationhelper/actions/runs/42744084203) · [통합 #42745179980](https://github.com/degong2-code/zrotationhelper/actions/runs/42745179980) | 실제 Native 행동 464건, 첫 10초 표본 185건, 12타겟 사례. **정확 선택 행·READY·오프닝 종료는 UNKNOWN** |
 
+| **11-10: 전문화별 General Rotation 모델 생성** | 연구 엔진의 실제 산출물인 전문화별 전체 IF/ELSE 우선순위 Markdown·JSON 6개를 한 범용 변환기에서 생성 | [전문화별 모델 인덱스](GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md) · [범용 출력 엔진](../tools/research/general_rotation_spec_model_export_v1.py) · [증거 영수증](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_PER_SPEC_DRAFT_MODEL_EXPORT_20261110.json) · [CI #42747802703](https://github.com/degong2-code/zrotationhelper/actions/runs/42747802703) | 3전문화·286행 소스 초안 완료. **현재 Retail 최적성·스킬 READY·오프닝 전환·허수아비 피드백은 UNKNOWN** |
+
 ## 2. 어떤 문제를 다시 조사하려는 경우
 
 - **SimC APL 조건식·타겟 분기:** 기존 [소스 AST](../tools/research/simc_apl_semantic_ir_v2.py) → [소스 가설 엔진](../tools/research/general_rotation_simc_e2e_research_engine_v1.py) → [타겟 분기 연구](../tools/research/general_rotation_simc_target_count_projection_v1.py) 순으로 확인한다.
