@@ -1,0 +1,43 @@
+# zRotationHelper — 현재 연구 상태 (2026-11-10)
+
+> **범위:** 공식 제품 목표 `ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1`. SimC APL/profile에서 전문화별 General Rotation 오프닝과 조건부 IF/ELSE 가설을 만들고, 독립 WCL blind 후보 고정 후 비교·수정하며, 관측 가능한 사용자 허수아비 연습만 평가한다. 보스별 실행 계획·NSRT는 범위 밖이다.
+>
+> **권한:** 이 문서는 `work/gr-simc-st-2t-wcl-blind-20261102` **격리 브랜치의 연구 현황**이다. MAIN의 제품 정본·FROZEN을 승격하지 않는다. 아래 결과의 날짜는 증거가 검증된 시점이지 현재 게임에서의 최적 우선순위 확정일이 아니다.
+
+[연구 길잡이](RESEARCH_INDEX.md) · [기능별 개발 이력](FEATURE_HISTORY_INDEX.md) · [코드·증거·CI 지도](EVIDENCE_NAVIGATION_INDEX.md)
+
+## 현재까지 확인된 것
+
+| 연구 영역 | 확인된 범위 | 아직 주장할 수 없는 것 |
+| --- | --- | --- |
+| SimC APL 해석 | 고정 Fury/Arcane 원본 2프로필, 소스 172 APL 행, 순서·조건·CALL/RUN 구분 | 모든 전문화 및 현재 Retail 최적성 |
+| 오프닝 / ST / 2T / 3+ | 원본 Native 1·2·3·5타겟 각 2전문화, 총 8개 행동 사례; 타겟/특성 조건식 투영 | 오프닝 종료의 확정적인 조건, 3+ 원본 동일 호출 전체 READY |
+| 선택 순간 IF | ST/2T 원본 행동 147건 중 49건 같은 원본 호출의 독립 IF TRUE, 44건 UNKNOWN, 54건 명시적 IF 없음 | IF TRUE = 전체 스킬 READY 또는 최적 우선순위 |
+| 최소 충분 상태 | IF TRUE 49건의 관측값 122개 사용에서 89개로 동일 IF 결론 유지 | 실제 수집 실행시간/비용 27% 절감 |
+| 경쟁 후보 | 원본 Arcane 2T 선택 2건의 앞선 APL 행 10건 중 8건 독립 배제, 2건 UNKNOWN | 완전한 경쟁 행동 우선순위·전체 경로 |
+| WCL 독립 증거 | 기존 실제 로그 Strict PRE·원본 holdout 및 actor 빌드 추출 검증 | WCL 사용 빈도에서 필수 우선순위·인과성 도출 |
+| 훈련기 | 연구 IR / UNKNOWN 처리·경량 연습기 인터페이스의 부분 설계 및 코드 | 실제 WoW 허수아비에서 검증된 오답 피드백 또는 실시간 관측 가능 확정 |
+
+## 확인된 최신 증거로 바로 이동
+
+- **SimC 타겟별 Native 행동:** [1/2/3/5타겟 실측 증거](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_ACTUAL_NATIVE_1_2_3_5_TARGET_GRID_20261110.json) · [Actions #42716911610](https://github.com/degong2-code/zrotationhelper/actions/runs/42716911610)
+- **Same-call IF:** [49건 최소 충분 PRE 검증](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_SIMC_49_IF_PARTIAL_MINIMAL_WITNESS_20261110.json) · [Actions #42721244205](https://github.com/degong2-code/zrotationhelper/actions/runs/42721244205)
+- **경쟁 후보:** [8건 독립 배제 / 2건 미확인](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_COMPETITOR_READY_FRONTIER_20261110.json) · [Actions #42723323648](https://github.com/degong2-code/zrotationhelper/actions/runs/42723323648)
+- **실제 WCL 빌드:** [Strict PRE actor combatantinfo](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_COMBATANTINFO_PRE_ACTOR_BUILD_AND_PINNED_SOURCE_LOOKUPS_20261110.json) · [Actions #42642973309](https://github.com/degong2-code/zrotationhelper/actions/runs/42642973309)
+- **WCL 종합 관측 한계:** [메커니즘·패치 증거 게이트](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_POSTLOCK_MECHANIC_EPOCH_EVIDENCE_FRONTIER_20261109.json) · [Actions #42624671123](https://github.com/degong2-code/zrotationhelper/actions/runs/42624671123)
+
+## 정확한 다음 연구 작업
+
+**제품 Exact Next:** 범용 연구 엔진으로 현재 Retail 전문화별 General Rotation 오프닝과 ST/2T/Cleave/AoE 상태별 IF/ELSE 모델을 완성한다. 독립 WCL blind 후보를 고정한 뒤 대조·보정하고, 허수아비 실제 행동과 비교 가능한 경우에만 오류를 설명한다.
+
+**세션 Exact Next:** 먼저 기존 Native 선택 호출과 선행 후보 증거를 재사용해 **두 건의 Arcane Barrage 선행 APL IF UNKNOWN**을 같은 원본 root PRE에서 검증한다. `talent.orb_barrage`, `prev_gcd.1.arcane_surge`, `buff.arcane_salvo.react` 등은 *수집 후보*이며 모두 필수라는 뜻이 아니다. 범용 코어에서 전문화·스킬·보스 의미론을 하드코딩하지 않고 SpecAdapter로 분리한다. 더 넓은 전문화·타겟 확대는 영향과 증거가 정당화할 때만 진행한다.
+
+## 상태를 읽을 때 주의
+
+- **소스 가설**(SimC IF TRUE) ≠ **원본 Native 행동 관측** ≠ **독립 WCL 검증** ≠ **현재 게임 최적성** ≠ **사용자 오류 확정**.
+- `state_at_action(t)`에 사용할 상태는 `timestamp < t`인 유효한 전이뿐이다. 같은 시각·미래 이벤트는 금지한다.
+- `UNKNOWN`을 우선순위 오류로 판정하지 않는다. `Seq578=FAILED_QUARANTINED`, `Seq637=UNKNOWN` 유지.
+- 기록을 업데이트할 때 완료/미완료와 CI 검증 범위를 분리한다. GitHub Actions artifact는 만료될 수 있으므로 원본 증거 영수증과 commit/sha가 장기 탐색 기준이다.
+- 자세한 기존 개발 기록은 [보존된 기능별 인덱스](branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md)와 [누적 상태 기록](branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_STATUS_20261109.md)에서 확인한다.
+
+*이 파일은 날짜 기준의 간결한 현황 안내다. 실제 브랜치 HEAD와 CI 상태는 GitHub에서 다시 조회해야 한다.*
