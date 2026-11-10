@@ -1,0 +1,156 @@
+name: zrot-gr-marginal-third-class-native-target-grid-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_simc_marginal_native_cold_start_v1.py
+      - .github/workflows/zrot-gr-marginal-third-class-native-target-grid-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generic-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify final generic code compile, safe PyCharm, and negative source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_simc_marginal_native_cold_start_v1.py
+          python -B tools/research/general_rotation_simc_marginal_native_cold_start_v1.py \
+            >/tmp/zrot-gr-marginal-native-synthetic.json
+          python - <<'PY'
+          import json
+          obj=json.load(open('/tmp/zrot-gr-marginal-native-synthetic.json'))
+          assert obj['status']=='PASS_SYNTHETIC_MARGINAL_NATIVE_COLD_START'
+          assert obj['negative_profile_controls']==3
+          assert obj['shared_native_sequence_analyzer_reused'] is True
+          assert obj['real_native_CXX_build_performed'] is False
+          assert obj['opener_end_proven'] is False
+          assert obj['full_READY_proven'] is False
+          print('GENERIC_MARGINAL_NATIVE_COLD_START_FAIL_CLOSED_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_simc_marginal_native_cold_start_v1.py
+
+  pinned-new-profile-only:
+    needs: [generic-offline]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check pinned enhancement profile against three-class manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C original-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          m=json.loads(Path('tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json').read_bytes())
+          assert len(m['profiles'])==3
+          assert {p['class_key'] for p in m['profiles']}=={'warrior','mage','shaman'}
+          s=next(p for p in m['profiles'] if p['key']=='shaman_enhancement')
+          src=(Path('original-simc')/s['profile']).read_bytes()
+          h=hashlib.sha1(b'blob '+str(len(src)).encode()+b'\0'+src).hexdigest()
+          assert h==s['git_blob']=='2f2c951ae07489d124db36c464ab66d1efd262ce'
+          print('EXACT_UPSTREAM_ENHANCEMENT_PROFILE_SOURCE_PIN_PASS',h)
+          PY
+      - name: One pristine original CXX build, only NEW specialization targets 1/2/3/5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          cmake -S original-simc -B /tmp/zrot-marginal-native-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-marginal-native-build --target simc --parallel 3
+          test -x /tmp/zrot-marginal-native-build/simc
+          for targets in 1 2 3 5; do
+            python -B tools/research/simc_native_reference_capture.py \
+              --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+              --spec enhancement \
+              --simc-bin /tmp/zrot-marginal-native-build/simc \
+              --targets "$targets" --seed 31459 --fight-seconds 30 \
+              --out-dir "/tmp/zrot-marginal-captures/shaman_enhancement-${targets}t" \
+              --timeout 180
+          done
+      - name: Generic source-to-native four target samples; no guessed opener exit or READY
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/general_rotation_simc_marginal_native_cold_start_v1.py \
+            --source-root original-simc \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json \
+            --captures-root /tmp/zrot-marginal-captures \
+            --spec-key shaman_enhancement \
+            --out /tmp/zrot-gr-original-shaman-native-1-2-3-5-grid.json
+          python - <<'PY'
+          import json
+          obj=json.load(open('/tmp/zrot-gr-original-shaman-native-1-2-3-5-grid.json'))
+          assert obj['schema']=='ZrotGenericSimCMarginalNewProfileNativeTargetGridV1'
+          assert obj['source_manifest_total_profiles']==3
+          assert obj['source_manifest_distinct_classes']==3
+          assert obj['new_actual_native_spec_key']=='shaman_enhancement'
+          assert obj['new_original_profile_APL_rows']==114
+          assert obj['new_original_source_action_lists']==6
+          assert obj['original_native_target_counts']==[1,2,3,5]
+          assert obj['native_captures_same_binary_APL_and_seed'] is True
+          assert len(obj['native_target_cases'])==4
+          for case in obj['native_target_cases']:
+              assert case['sample_actions']>0
+              assert case['first_10sec_sample_count']>0
+              assert case['opener_termination_timestamp']=='UNKNOWN'
+              assert case['source_APL_row_attribution']=='UNKNOWN_MULTIPLE_POSSIBLE_ROWS'
+              assert case['Native_full_competing_READY']=='UNKNOWN'
+              print('NEW_ORIGINAL_SHAMAN_NATIVE_SAMPLE',case['target_count'],
+                    case['sample_actions'],case['first_10sec_sample_count'],
+                    case['source_token_match_sample_count'])
+          assert len(obj['compared_to_native_ST'])==3
+          assert obj['total_actual_SimC_sample_actions']>0
+          assert obj['previous_other_class_native_captures_rerun']==0
+          assert obj['new_original_native_CXX_builds_expected']==1
+          assert obj['new_WCL_API_calls']==0
+          assert obj['opener_end_condition']=='UNKNOWN'
+          assert obj['full_competing_action_READY_proven']==0
+          assert obj['current_retail_gameplay_optimality_proven'] is False
+          assert obj['target_dummy_wrong_cast']=='UNKNOWN'
+          assert obj['MAIN_promoted'] is False
+          print('MARGINAL_THIRD_CLASS_NATIVE_TARGET_GRID_PASS')
+          PY
+          sha256sum /tmp/zrot-gr-original-shaman-native-1-2-3-5-grid.json
+      - name: Retain only derived source-token samples and proof, not raw character logs
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-original-shaman-native-marginal-${{ github.sha }}
+          path: /tmp/zrot-gr-original-shaman-native-1-2-3-5-grid.json
+          retention-days: 7
+          if-no-files-found: error
