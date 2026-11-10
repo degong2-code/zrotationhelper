@@ -77,8 +77,7 @@ def patch(raw:bytes)->bytes:
     create=create.replace(CREATE_ANCHOR,postcreate+CREATE_ANCHOR,1)
     # POST_BIND: outside existing skip/else, inside original source row loop;
     # source descriptor pointer is owned by original apl->action_list.
-    create=create.replace(POST_BIND_ANCHOR,
-                          "    }\n"+afterbind+"  }\n\n  if ( sim->collect_action_sequence",1)
+    create=create.replace(POST_BIND_ANCHOR,afterbind+POST_BIND_ANCHOR,1)
     preinit=_emit("PRE_INIT","this","action","action->signature")
     postinit=_emit("POST_INIT","this","action","action->signature")
     init=init.replace(INIT_ANCHOR,preinit+INIT_ANCHOR+"\n"+postinit,1)
@@ -154,6 +153,7 @@ def selftest():
     updated=patch(raw).decode()
     need(updated.count(MARK)==4 and
          updated.index('POST_CREATE')<updated.index(CREATE_ANCHOR) and
+         updated.index('POST_BIND')<updated.index(POST_BIND_ANCHOR) and
          updated.index('PRE_INIT')<updated.index(INIT_ANCHOR)<
          updated.index('POST_INIT') and
          updated.count('action->init();')==1 and
