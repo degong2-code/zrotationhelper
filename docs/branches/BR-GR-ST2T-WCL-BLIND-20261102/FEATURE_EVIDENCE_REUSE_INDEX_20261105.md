@@ -1,5 +1,13 @@
 # zRotationHelper — Feature Evidence Reuse Index (2026-11-05)
 
+## 2026-11-10 — Cross-class conditional source guard decision matrix (REUSE + EXTEND)
+
+- **REUSE**: original pinned 3-class APL profiles and existing source parser / source IR: `tools/research/simc_apl_semantic_ir_v2.py`, `tools/research/general_rotation_source_hypothesis_ir_v1.py`, `general_rotation_simc_multi_spec_cold_start_v1.py`. No duplicate parser and no Native C++ compilation.
+- **EXTEND**: tiny generic source-guard evaluator `tools/research/general_rotation_source_guard_scenario_frontier_v1.py`, with externally declared **12 synthetic** target count/hero talent contexts `tools/research/fixtures/general_rotation_source_guard_scenarios_three_class_v1.json`. Validates original profile Git blob, CALL/RUN rank and SHA, AST guards and destination, and keeps all physical action READY/runtime list activation/opener exit **UNKNOWN**. The external scenario facts are not actual PRE, nor WCL samples.
+- **Real source, synthetic contexts**: Fury 121 / Arcane 51 / Enhancement 114 = 286 original rows, 8+5+6=19 lists. Twelve cases run source conditions for 48 root CALL/RUN rows (24 TRUE, 24 FALSE). The default-source calls `single_sb`, `single_totemic`, `aoe` preserve ST and AoE/hero-talent distinctions; no claim that the actual player chooses a given action.
+- **Actual CI and receipts**: [Actions #42742497979](https://github.com/degong2-code/zrotationhelper/actions/runs/42742497979) 3/3 PASS Python3.12/3.14 and source pin checks. Script SHA256 `1cbf010294a0d42d92ffeaf34eb2084c58d8a3d95927eb4c6b954d14fda4e80f`, output SHA256 `eb58720c26d80616c426c163e4c588636555878f22affe5e6297069e0270da76`; compressed artifact ID 13728769936 expires 2026-11-17 UTC. Permanent compact receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_THREE_CLASS_TARGET_BUILD_SOURCE_GUARD_FRONTIER_20261110.json`.
+- **NEXT**: source guard TRUE/FALSE is not evidence of physical READY or whether preceding actions consumed this priority scan. Next actual source-root call/ready route and explicit opener phase transition; reuse existing `general_rotation_source_eligibility_decision_ir_v1.py`, `general_rotation_time_scoped_priority_ir_v1.py`, `general_rotation_decision_proof_engine_v1.py`. Do not hardcode spell/encounter behavior.
+
 ## 2026-11-10 — Original previous-GCD source PRE reader complete (REUSE/EXTEND, verified 2T real)
 
 - **REUSE:** Existing fully traced original SELECT PRE & Native post IF recording, `general_rotation_original_select_extra_pre_replay_v1.py`, pinned source APL profile, old four-case pristine JSON2 receipt. No new generic spell mechanics or WCL fetch.
