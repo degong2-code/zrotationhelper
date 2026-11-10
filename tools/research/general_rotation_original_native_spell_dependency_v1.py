@@ -88,13 +88,21 @@ def extract_route(cpp:str,case:dict)->dict:
     need(len(starts)==1,"CLASS_CONSTRUCTOR_INITIALIZER_NOT_UNAMBIGUOUS")
     m=CTOR_ARGS.match(prefix,starts[0].end())
     need(m is not None,"CLASS_SPELL_DATA_ARGUMENT_UNSUPPORTED")
-    dep=m["dependency"];expected="player->talent."+case["expected_talent_field"]
-    need(m["token"]==action and m["actor"]=="player" and dep==expected,
+    dep=m["dependency"]
+    expected=case.get("expected_spell_data_input", "player->talent."+case.get("expected_talent_field",""))
+    actor=m["actor"]
+    need(m["token"]==action and dep==expected and
+         dep.startswith(actor+"->"),
          "CLASS_SPELL_DATA_DEPENDENCY_NOT_EXPECTED_TALENT")
+    # Optional source-level talent registry. Class module layouts vary: a
+    # missing flat registry must not be invented as proof of a talent label.
+    expected_label=case.get("expected_talent_label")
     registry=[x["label"] for x in TALENT.finditer(cpp)
-              if x["field"]==case["expected_talent_field"]]
-    need(len(registry)==1 and registry[0]==case["expected_talent_label"],
-         "TALENT_REGISTRY_NAME_MISSING_AMBIGUOUS_OR_DRIFT")
+              if x["field"]==case.get("expected_talent_field")]
+    if expected_label:
+        need(len(registry)==1 and registry[0]==expected_label,
+             "TALENT_REGISTRY_NAME_MISSING_AMBIGUOUS_OR_DRIFT")
+    registry_label=registry[0] if len(registry)==1 else "UNKNOWN"
     return {
        "source_action_factory_token":action,
        "source_action_factory_constructed_class":cls,
@@ -102,8 +110,8 @@ def extract_route(cpp:str,case:dict)->dict:
        "source_class_ancestor":parent,
        "source_constructor_first_spell_data_input":dep,
        "source_constructor_spell_input_link":"EXACT_UNIQUE_CPP_INITIALIZER",
-       "source_talent_registry_symbol":case["expected_talent_field"],
-       "source_talent_registry_label":registry[0],
+       "source_talent_registry_symbol":case.get("expected_talent_field","UNKNOWN"),
+       "source_talent_registry_label":registry_label,
        "source_class_file_sha256":sha256(cpp.encode()).hexdigest(),
        "source_input_is_runtime_selected_talent":"UNKNOWN",
        "source_ancestral_cpp_delegation_chain_complete":False,
@@ -218,6 +226,21 @@ if ( name == "alpha" ) return new alpha_t( this, options_str );
         except LinkError:n+=1
         else:raise AssertionError("ACCEPTED_FOREIGN_CXX_TALENT_SOURCE_DEPENDENCY")
     need(n==8,"NEGATIVE_LINKAGE_COHORT_INCOMPLETE")
+    nested='''struct beta_t : public warrior_attack_t
+{
+ beta_t( warrior_t* p, util::string_view options_str )
+ : warrior_attack_t( "beta", p, p->talents.fury.beta ) { }
+};
+if ( name == "beta" ) return new beta_t( this, options_str );
+'''
+    nested_case={"source_action":"beta","factory_class":"beta_t",
+                 "factory_parent_base":"warrior_attack_t",
+                 "expected_spell_data_input":"p->talents.fury.beta"}
+    nested_route=extract_route(nested,nested_case)
+    need(nested_route["source_constructor_first_spell_data_input"]==
+         "p->talents.fury.beta" and
+         nested_route["source_talent_registry_label"]=="UNKNOWN",
+         "NESTED_TALENT_SOURCE_ONLY_GENERIC_ROUTING_FAIL")
     return {"schema":SCHEMA,"status":"PASS_SYNTHETIC_STATIC",
             "negative_controls":n,"cpp_factory_dependency_route":"PASS",
             "opaque_loadout_does_not_prove_selected_talent":True,
