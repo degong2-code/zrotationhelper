@@ -76,6 +76,18 @@ def bounded_if(ast:list, facts:dict, domains:dict)->dict:
         "ALL_FALSE" if states=={"FALSE"} else
         "ALL_TRUE" if states=={"TRUE"} else
         "MIXED_OR_UNKNOWN")
+    # Symbol sensitivity: compare original source IF outcomes for each 0/1
+    # value with all OTHER source domain assignments held identical. This
+    # produces the smallest set of still-needed binary SOURCE operands,
+    # not necessarily the whole original APL expression's symbol list.
+    keyed={tuple(assignment[name] for name in names):verdict
+           for assignment,verdict in outcomes}
+    influential=[]
+    for index,name in enumerate(names):
+        if any(keyed[key]!=keyed[key[:index]+(1-key[index],)+key[index+1:]]
+               for key in keyed if key[index]==0):
+            influential.append(name)
+    no_change=sorted(set(names)-set(influential))
     minimal=dict(facts)
     if classification=="ALL_FALSE":
         for symbol in sorted(facts):
@@ -95,6 +107,13 @@ def bounded_if(ast:list, facts:dict, domains:dict)->dict:
         "classification":classification,
         "enumerated_synthetic_source_domain_assignments":len(outcomes),
         "assignment_source_IF_outcomes":outcomes,
+        "unobserved_binary_source_operands_which_can_change_IF":
+            influential,
+        "unobserved_binary_source_operands_not_influential_under_this_PRE":
+            no_change,
+        "single_remaining_decisive_source_PRE_operand":
+            influential[0] if len(influential)==1 and
+            states.issubset({"TRUE","FALSE"}) else None,
         "minimal_observed_original_PRE_facts_for_ALL_FALSE":
             {k:minimal[k] for k in sorted(minimal)}
             if classification=="ALL_FALSE" else None,
@@ -435,7 +454,12 @@ def selftest()->dict:
          first["enumerated_synthetic_source_domain_assignments"]==4 and
          second["classification"]=="MIXED_OR_UNKNOWN" and
          first["minimal_observed_original_PRE_facts_for_ALL_FALSE"] is not None and
-         second["minimal_observed_original_PRE_facts_for_ALL_FALSE"] is None,
+         first["unobserved_binary_source_operands_which_can_change_IF"]==[] and
+         second["minimal_observed_original_PRE_facts_for_ALL_FALSE"] is None and
+         second["single_remaining_decisive_source_PRE_operand"]==
+             "prev_gcd.1.spell" and
+         second["unobserved_binary_source_operands_not_influential_under_this_PRE"]==
+             ["talent.flag"],
          "GENERIC_BOUNDED_SOURCE_REPLAY_STATIC_CASE_FAILED")
     rejects=0
     for expr,facts,ds in [
