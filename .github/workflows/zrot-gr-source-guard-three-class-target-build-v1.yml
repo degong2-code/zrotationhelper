@@ -1,0 +1,149 @@
+name: zrot-gr-source-guard-three-class-target-build-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_source_guard_scenario_frontier_v1.py
+      - tools/research/fixtures/general_rotation_source_guard_scenarios_three_class_v1.json
+      - tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json
+      - .github/workflows/zrot-gr-source-guard-three-class-target-build-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic:
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12', '3.14']
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+      - name: Compile and test source-neutral control guards with fail-closed UNKNOWN
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_source_guard_scenario_frontier_v1.py \
+            tools/research/general_rotation_source_hypothesis_ir_v1.py \
+            tools/research/simc_apl_semantic_ir_v2.py
+          python -B tools/research/general_rotation_source_guard_scenario_frontier_v1.py \
+            > /tmp/generic-guard-selftest.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/generic-guard-selftest.json'))
+          assert a['status']=='PASS_OFFLINE_GENERIC_SYNTHETIC'
+          assert a['cases']==3 and a['invalid_inputs_rejected']==4
+          assert a['runtime_call_or_run_activated'] is False
+          assert a['physical_ready_proven'] is False
+          assert a['opener_end_proven'] is False
+          print('GENERIC_SOURCE_GUARD_TRI_STATE_CROSS_CONTEXT_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_source_guard_scenario_frontier_v1.py
+
+  actual-pinned-source:
+    runs-on: ubuntu-latest
+    needs: [synthetic]
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: pinned-simc
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+            profiles/MID2/MID2_Mage_Arcane.simc
+            profiles/MID2/MID2_Shaman_Enhancement.simc
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run source-pinned generic ST/2T/AoE/talent scenarios, no Native CXX build
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C pinned-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          python -B tools/research/general_rotation_source_guard_scenario_frontier_v1.py \
+            --source-root pinned-simc \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json \
+            --scenarios tools/research/fixtures/general_rotation_source_guard_scenarios_three_class_v1.json \
+            --out /tmp/zrot-gr-three-class-source-guards.json
+          python - <<'PY'
+          import json
+          from collections import Counter
+          x=json.load(open('/tmp/zrot-gr-three-class-source-guards.json'))
+          assert x['schema']=='ZrotGenericSimCSourceGuardScenarioFrontierV1'
+          assert x['source_profiles']==3
+          assert x['source_APL_rows']==286
+          assert x['target_count_build_scenarios']==12
+          assert x['source_classes']==['mage','shaman','warrior']
+          assert x['original_Native_source_selection_replayed'] is False
+          assert x['WCL_blind_candidate_discovery_used'] is False
+          assert x['opener_exit_proven'] is False
+          assert x['general_rotation_priority_optimality_proven'] is False
+          assert x['actual_dummy_wrong_cast_proven'] is False
+          s={(z['source_spec_key'],z['scenario_id']):z for z in x['scenarios']}
+          def verdict(spec,scenario,dest):
+              a=[r['source_if_under_explicit_synthetic_facts']
+                 for r in s[(spec,scenario)]['source_control_guard_frontier']
+                 if r['source_destination']==dest]
+              assert len(a)==1,(spec,scenario,dest,a)
+              return a[0]
+          for case,expected in [
+              ('st_stormbringer',{'single_sb':'TRUE','single_totemic':'FALSE','aoe':'FALSE'}),
+              ('st_totemic',{'single_sb':'FALSE','single_totemic':'TRUE','aoe':'FALSE'}),
+              ('two_target_totemic',{'single_sb':'FALSE','single_totemic':'FALSE','aoe':'TRUE'}),
+              ('five_target_stormbringer',{'single_sb':'FALSE','single_totemic':'FALSE','aoe':'TRUE'})
+          ]:
+              for dest,want in expected.items():
+                  assert verdict('shaman_enhancement',case,dest)==want,(case,dest,want)
+          for case,spellslinger,sunfury in [
+              ('st_spellslinger','TRUE','FALSE'),
+              ('st_sunfury','FALSE','TRUE'),
+              ('five_target_sunfury','FALSE','TRUE'),
+          ]:
+              assert verdict('mage_arcane',case,'spellslinger')==spellslinger
+              assert verdict('mage_arcane',case,'sunfury')==sunfury
+          for case,slayer,slayer_aoe,thane,thane_aoe in [
+              ('st_slayer','TRUE','FALSE','FALSE','FALSE'),
+              ('two_target_slayer','FALSE','TRUE','FALSE','FALSE'),
+              ('five_target_thane','FALSE','FALSE','FALSE','TRUE'),
+              ('st_thane','FALSE','FALSE','TRUE','FALSE')
+          ]:
+              for d,v in zip(('slayer','slayer_aoe','thane','thane_aoe'),
+                             (slayer,slayer_aoe,thane,thane_aoe)):
+                  assert verdict('warrior_fury',case,d)==v,(case,d,v)
+          for scenario in x['scenarios']:
+              assert scenario['opener_to_normal_priority_transition']=='UNKNOWN'
+              assert scenario['source_list_ACTIVE_runtime_sequence']=='UNKNOWN'
+              assert scenario['any_physical_READY_independently_proven'] is False
+              for row in scenario['source_control_guard_frontier']:
+                  assert row['control_native_ready']=='UNKNOWN'
+                  assert row['destination_ACTUALLY_ENTERED']=='UNKNOWN'
+                  assert row['earlier_noncontrol_action_consumption']=='UNKNOWN'
+          counts=Counter(r['source_if_under_explicit_synthetic_facts']
+               for s0 in x['scenarios'] for r in s0['source_control_guard_frontier'])
+          print('ORIGINAL_PINNED_3_CLASS_12_GUARD_SCENARIOS_SOURCE_ONLY_PASS',
+                dict(sorted(counts.items())))
+          PY
+          sha256sum /tmp/zrot-gr-three-class-source-guards.json
+      - name: Preserve source-only guard proof, not player gameplay certificate
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-three-class-source-only-guard-frontier-${{ github.sha }}
+          path: /tmp/zrot-gr-three-class-source-guards.json
+          retention-days: 7
+          if-no-files-found: error
