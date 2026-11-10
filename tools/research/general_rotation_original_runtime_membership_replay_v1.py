@@ -221,13 +221,23 @@ def selftest():
         {"rank":2,"action":"beta","membership":"ABSENT_BACKGROUND_FLAG"}] and
         got["General_Rotation_priority_promoted"]==0,
         "SYNTHETIC_ABSENT_BACKGROUND_FLAG_WRONGLY_PROMOTED")
+    # A row may be in the initialized foreground list but not visited during
+    # this call (e.g. random selection or early return). This is a valid
+    # UNKNOWN path, NOT a proof of action readiness or of an invalid trace.
+    present_but_unvisited=original.replace(
+        inv(2,"0x22",1,0,1,0),inv(2,"0x22",1,1,0,0))
+    valid_missing=audit(present_but_unvisited,source,stage,frontier)
+    need(valid_missing["unvisited_source_row_membership_states"]==[
+        {"rank":2,"action":"beta","membership":"IN_ORIGINAL_FOREGROUND_LIST"}] and
+        valid_missing["source_rank_not_visited_is_NOT_READY"] is False,
+        "UNVISITED_BUT_IN_FOREGROUND_OVERCLASSIFIED")
     neg=0
     for broken in (
         original.replace(inv(2,"0x22",1,0,1,0),""),
         original.replace(inv(3,"0x33",1,1,0,0),inv(3,"0x99",1,1,0,0)),
         original.replace(inv(1,"0x11",1,1,0,0),inv(1,"0x11",2,1,0,0)),
         original.replace(inv(1,"0x11",1,1,0,0),inv(1,"0x11",1,0,1,0)),
-        original.replace(inv(2,"0x22",1,0,1,0),inv(2,"0x22",1,1,1,0)),
+        original.replace(inv(2,"0x22",1,0,1,0),inv(2,"0x22",0,1,-1,-1)),
         original.replace(SELECT+"100|1|0x01|0x33",SELECT+"100|1|0x01|0x11"),
         original.replace(MARK,"CORRUPTED_MARKER")
     ):
