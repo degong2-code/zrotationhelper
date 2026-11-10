@@ -1,0 +1,18 @@
+{
+  "schema": "ZrotOriginalSelectPassiveDotSourceAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "source_class_cpp_git_blob": "46250f6ce200c10fc30795d3afa0b1cb3ce45568",
+  "actor_class": "shaman",
+  "source_dot_action": "flame_shock",
+  "profile_path": "profiles/MID2/MID2_Shaman_Enhancement.simc",
+  "profile_stem": "Shaman_Enhancement",
+  "class_cpp_path": "engine/class_modules/sc_shaman.cpp",
+  "source_operands": [
+    "dot.flame_shock.remains",
+    "ticking"
+  ],
+  "target_semantics": "BASE_ACTION_EXPRESSION_TARGET_NO_VIRTUAL_CALL",
+  "evidence_time_contract": "SOURCE_ORDER_BEFORE_READY_NOT_STRICT_TIMESTAMP_LT"
+}
