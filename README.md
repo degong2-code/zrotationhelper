@@ -4,6 +4,21 @@
 
 **NOT product targets:** raid execution, encounter-specific boss rotation plans, NSRT, HTML raid timelines or boss guide export. Raid logs may be reused as **general ST / two-target / AoE evidence**. Historical files and CI bootstrap descriptions below are NOT the current roadmap.
 
+## 처음 방문한 개발자를 위한 탐색
+
+**현재 개발 기록과 실증 코드는 GitHub 기본 `main`이 아니라 격리 브랜치 `work/gr-simc-st-2t-wcl-blind-20261102`에 있습니다.** MAIN으로의 제품 승격은 아직 승인되지 않았습니다.
+
+| 무엇을 알고 싶은가 | 바로가기 |
+| --- | --- |
+| **연구 전체 지도 / 권장 읽기 순서** | [연구·개발 탐색 시작점](docs/RESEARCH_INDEX.md) |
+| 현재까지 구현·검증·미완료 | [현재 연구 상태](docs/CURRENT_RESEARCH_STATUS.md) |
+| 과거에 왜 만들었고 어떻게 개선했나 | [기능별 개발 이력](docs/FEATURE_HISTORY_INDEX.md) |
+| 기능별 코드·원본 증거·Actions 검증 | [증거 및 CI 지도](docs/EVIDENCE_NAVIGATION_INDEX.md) |
+| 날짜별 상세 원문 기록 | [기존 기능별 재사용 인덱스](docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md) |
+| 새 채팅용 최신 인계 | [branch-local LATEST_HANDOFF.json](_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json) |
+
+과거 코드·증거·인계는 삭제하거나 재배치하지 않았습니다. 상단 탐색 문서는 **짧은 연결 지도**이며, 전문화별 General Rotation 정확도 검증 및 사용자 허수아비 피드백의 완료 선언이 아닙니다.
+
 **Mandatory read-first (including any future chat / handoff):**
 1. [Machine-readable user scope lock](docs/PRODUCT_SCOPE_LOCK_V1.json)
 2. [Full official scope declaration](docs/PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md)
