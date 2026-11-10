@@ -1,0 +1,28 @@
+{
+  "schema": "ZrotOriginalNativeSameCallBranchFocusPlanV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "spec_key": "shaman_enhancement",
+  "source_profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "targets": 3,
+  "selected_root": {
+    "t_ms": 940,
+    "source_list": "aoe",
+    "source_rank": 20,
+    "source_action": "crash_lightning"
+  },
+  "focus": [
+    {
+      "source_list": "aoe",
+      "source_rank": 19,
+      "source_action": "voltaic_blaze"
+    }
+  ],
+  "must_not_infer": [
+    "current_Retail_READY",
+    "user_error",
+    "optimal_priority",
+    "WCL_postlock"
+  ],
+  "source_talent_IF_reconciliation_only_after_original_branch_replay": true
+}
