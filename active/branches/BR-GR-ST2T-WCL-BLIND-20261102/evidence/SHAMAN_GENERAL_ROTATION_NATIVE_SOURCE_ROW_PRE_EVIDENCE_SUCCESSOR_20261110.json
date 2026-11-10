@@ -1,0 +1,131 @@
+{
+  "schema": "ZrotShamanGeneralRotationEvidenceBoundOriginalSelectedSourceRowSuccessorV1",
+  "date": "2026-11-10",
+  "scope": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "branch_owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "source": "simulationcraft/simc@b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_profile": "profiles/MID2/MID2_Shaman_Enhancement.simc",
+  "source_profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "result_summary": "Real original Native source SELECT rows + partial original PRE promoted to evidence-bound research annotations for first specialization, while full physical READY and current Retail optimality remain UNKNOWN.",
+  "reuse": {
+    "per_spec_baseline_source_export_CI": 42747802703,
+    "baseline_machine_model_SHA256": "43ab52003608dd2aafcc0e3a44dd2a2f936ed767634c5e7ea36f476260a716e4",
+    "baseline_APL_rows_preserved": 114,
+    "original_uninstrumented_native_shaman_CI": 42744084203,
+    "baseline_original_action_sample_counts": {
+      "ST_1t": 40,
+      "AoE_3t": 39
+    },
+    "baseline_early_first10_sample_counts": {
+      "ST_1t": 16,
+      "AoE_3t": 16
+    },
+    "baseline_to_new_native_action_timestamps_and_tokens_parity": "PASS_EXACT_FIRST10",
+    "source_operand_AST_parser": "tools/research/simc_apl_semantic_ir_v2.py",
+    "original_source_snapshot": "tools/research/general_rotation_spec_model_export_v1.py",
+    "source_causal_capture": "tools/research/simc_original_select_if_pre_witness_v1.py",
+    "original_pre_reader": "tools/research/general_rotation_original_select_extra_pre_v1.py",
+    "original_pre_independent_replayer": "tools/research/general_rotation_original_select_extra_pre_replay_v1.py",
+    "no_previous_evidence_modification": true
+  },
+  "native": {
+    "workflow": ".github/workflows/zrot-gr-shaman-original-source-ready-frontier-v1.yml",
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42749660209",
+    "run_id": 42749660209,
+    "CI_jobs": 3,
+    "CI_PASS": 3,
+    "cpp_builds_for_this_product_step": 1,
+    "target_counts": [
+      1,
+      3
+    ],
+    "source_selected_direct_foreground_count": 79,
+    "selected_direct_by_target": {
+      "1": 40,
+      "3": 39
+    },
+    "source_selected_first10_count": 32,
+    "source_selected_first10_by_target": {
+      "1": 16,
+      "3": 16
+    },
+    "original_source_IF_comparator_and_PRE_categories": {
+      "source_IF_independent_TRUE_and_matches_native": 5,
+      "source_IF_absent": 15,
+      "source_IF_UNKNOWN_missing_PRE": 59
+    },
+    "original_st_1t": {
+      "selected_source_if_match": 3,
+      "source_IF_absent": 4,
+      "missing_PRE_UNKNOWN": 33,
+      "source_evidence_SHA256": "79646b5c0799ce9a3c6fb0575db0e5b738f18d65c326b11fd9c593c1b676687c"
+    },
+    "original_aoe_3t": {
+      "selected_source_if_match": 2,
+      "source_IF_absent": 11,
+      "missing_PRE_UNKNOWN": 26,
+      "source_evidence_SHA256": "504ed71c03f0b6e52eacbffcbf17968223cc8c56da9bfebdf2386e6274528013"
+    },
+    "source_first_selected_examples": {
+      "ST_1t": "single_sb rank4 stormstrike at 942ms; rank9 crash_lightning at 1885ms with source IF independently TRUE",
+      "AoE_3t": "aoe rank19 voltaic_blaze at 0ms; rank20 crash_lightning at 940ms; rank28 stormstrike at 1883ms"
+    },
+    "source_fields": "10 source-pinned Shaman operands, including active_enemies and relevant buff stacks/up flags",
+    "physical_action_ready_calls_added": 0,
+    "native_IF_comparator_calls_added": 0,
+    "source_route_and_native_execution_action_sequence_unchanged": true,
+    "artifact_id": 13731904691,
+    "artifact_zip_digest_SHA256": "2165d48ce8b1b27552840b928cf7509b503b270a3e0ccd1d59c18d746d2547af"
+  },
+  "evidence_bound_model": {
+    "generic_overlay": "tools/research/general_rotation_spec_native_root_evidence_overlay_v1.py",
+    "overlay_source_SHA256": "6d4a69d220033e4a63f1370a08d9224c78b90d4b374e6e59ddc081ca99486401",
+    "workflow": ".github/workflows/zrot-gr-spec-evidence-bound-source-row-overlay-v1.yml",
+    "final_run_id": 42750471988,
+    "final_run_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42750471988",
+    "final_CI_jobs": 3,
+    "final_CI_PASS": 3,
+    "first_join_attempt_run_id": 42750341471,
+    "first_join_attempt": "FAILED_SCHEMA_TRIAGE_TOO_STRICT; corrected independent PRE UNKNOWN despite native POST IF TRUE, no underlying original evidence changed",
+    "synthetic_3_12_3_14": "PASS_AND_NEGATIVE_4_AND_NATIVE_TRUE_PRE_UNKNOWN_PASS",
+    "original_APL_source_rows_preserved": 114,
+    "first_captured_root_count": 79,
+    "original_SELECTED_call_and_PRE_verified": 79,
+    "original_IF_independent_match_occurrences": 5,
+    "original_IF_absent_occurrences": 15,
+    "original_IF_UNOBSERVED_occurrences": 59,
+    "source_row_positive_READY_promotions": 0,
+    "current_Retail_wrong_cast_promotions": 0,
+    "successor_model_filename": "shaman_enhancement.evidence_bound.json",
+    "successor_model_SHA256": "bc24621ca602c5beea50dfb3529513069ef8c2424e78c4a0b128c3cf16a88d58",
+    "complete_markdown_filename": "shaman_enhancement.evidence_bound.md",
+    "complete_markdown_SHA256": "154698d3ceb6e025d6cdfaf263ba5c3cfcb867f2f6f382da5ca2bcf7f109a2e0",
+    "markdown_proof_appendix_SHA256": "6d3f1aaec242c2dfc40cf03d799f3a34d24c080726beb01385031349ad0bde60",
+    "final_artifact_id": 13732913229,
+    "final_artifact_zip_SHA256": "d40d5d7dd9868e823b21f2f1531c8876f32edcc81b41d17ccbcd9a7ae283e6ad",
+    "artifact_expires_utc": "2026-11-24T03:36:08Z",
+    "source_model_unchanged_for_other_two_specs": true
+  },
+  "decision_provenance": {
+    "hypothesis_simc_source_root": "YES",
+    "actual_original_Native_source_selected_row": "PROVEN_FOR_79_EXACT_ROOTS_ONLY",
+    "selected_source_original_PRE": "PARTIAL_10_SOURCE_OPERANDS",
+    "candidate_source_IF_TRUE_proven": "5_EXACT_OCCURRENCES_ONLY",
+    "source_row_without_explicit_IF": "15_SOURCE_ROWS",
+    "source_IF_unobserved_missing_pre": "59_EXACT_OCCURRENCES",
+    "earlier_action_full_not_ready": "UNKNOWN",
+    "selected_action_independently_complete_READY": "UNKNOWN",
+    "opener_end_transition": "UNKNOWN",
+    "across_build_general_rotation_optimal_priority": "UNKNOWN",
+    "WCL_high_ranker_holdout": "NOT_RUN_IN_THIS_SUCCESSOR",
+    "WoW_dummy_wrong_cast": "UNKNOWN",
+    "source_semantics_leak_to_WCL_blind": false,
+    "source_APL_row_time_and_actor_cohort_conflated": false,
+    "MAIN_promoted": false,
+    "FROZEN_modified": false,
+    "Seq578": "FAILED_QUARANTINED",
+    "Seq637": "UNKNOWN"
+  },
+  "next_exact": "Use the 79 exact selected source identities to prioritize recurring ST and AoE decision branches; inspect the original preceding APL list route and individual physical readiness at a small set of impact-heavy decision roots, then certify bounded IF/ELSE rules in the existing per-spec JSON without treating a chosen ability as globally mandatory.",
+  "product_exact": "Eventually produce one complete current Retail General Rotation per specialization with executable opener and conditional ST/2T/cleave/AoE IF/ELSE priority, independent WCL lock/holdout, and observed user target dummy feedback."
+}
