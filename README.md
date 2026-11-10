@@ -11,6 +11,7 @@
 | 무엇을 알고 싶은가 | 바로가기 |
 | --- | --- |
 | **연구 전체 지도 / 권장 읽기 순서** | [연구·개발 탐색 시작점](docs/RESEARCH_INDEX.md) |
+| **전문화별 General Rotation 산출물 (JSON + Markdown)** | [3개 전문화 모델 인덱스](docs/GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md) — SimC 조건부 우선순위 초안·증거·다음 검증 |
 | 현재까지 구현·검증·미완료 | [현재 연구 상태](docs/CURRENT_RESEARCH_STATUS.md) |
 | 과거에 왜 만들었고 어떻게 개선했나 | [기능별 개발 이력](docs/FEATURE_HISTORY_INDEX.md) |
 | 기능별 코드·원본 증거·Actions 검증 | [증거 및 CI 지도](docs/EVIDENCE_NAVIGATION_INDEX.md) |
