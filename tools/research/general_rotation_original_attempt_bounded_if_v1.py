@@ -137,7 +137,7 @@ def validate_source_domains(root:Path,adapter:dict)->dict:
     # A generic typed SOURCE-EXPRESSION contract, not a spec/action rule.
     for symbol,domain in result.items():
         if symbol.startswith("talent."):
-            need(re.fullmatch(r"talent\\.[a-z0-9_]+",symbol) is not None,
+            need(re.fullmatch(r"talent\.[a-z0-9_]+",symbol) is not None,
                  "UNSAFE_TALENT_EXPRESSION_SHAPE")
             owner=next(r for r in adapter["domain_rules"]
                        if r["symbol"]==symbol)
@@ -146,7 +146,7 @@ def validate_source_domains(root:Path,adapter:dict)->dict:
                      owner["required_anchors"]),
                  "TALENT_BOOLEAN_CXX_MECHANIC_NOT_PINNED")
         elif symbol.startswith("prev_gcd."):
-            need(re.fullmatch(r"prev_gcd\\.[1-9][0-9]*\\.[a-z0-9_]+",
+            need(re.fullmatch(r"prev_gcd\.[1-9][0-9]*\.[a-z0-9_]+",
                               symbol) is not None,
                  "UNSAFE_PREVIOUS_GCD_EXPRESSION_SHAPE")
             owner=next(r for r in adapter["domain_rules"]
