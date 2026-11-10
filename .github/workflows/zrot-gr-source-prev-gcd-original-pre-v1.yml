@@ -1,0 +1,264 @@
+name: zrot-gr-source-prev-gcd-original-pre-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_select_extra_pre_v1.py
+      - tools/research/general_rotation_original_attempt_bounded_if_v1.py
+      - tools/research/fixtures/zrot_original_select_prev_gcd_pre_successor_v1.json
+      - .github/workflows/zrot-gr-source-prev-gcd-original-pre-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+      - name: Compile, generic PRE source instrumentation and exact known binary operand regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_original_select_extra_pre_v1.py \
+            tools/research/general_rotation_original_select_extra_pre_replay_v1.py \
+            tools/research/general_rotation_original_attempt_bounded_if_v1.py
+          python -B tools/research/general_rotation_original_select_extra_pre_v1.py >/tmp/generic-source-pre.json
+          python -B tools/research/general_rotation_original_attempt_bounded_if_v1.py >/tmp/generic-source-bounded.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/generic-source-pre.json'))
+          b=json.load(open('/tmp/generic-source-bounded.json'))
+          assert a['result']=='PASS_SYNTHETIC_STATIC'
+          assert a['negative_controls']>=9
+          assert a['new_ready_calls']==0 and a['new_CXX_builds']==0
+          assert b['status']=='PASS_OFFLINE_GENERIC_SYNTHETIC'
+          assert b['negative_invalid_inputs_rejected']==4
+          assert b['physical_READY_proven']==0
+          print('GENERIC_ORIGINAL_PREV_GCD_AND_BOUNDED_SOURCE_IF_SYNTHETIC_PASS')
+          PY
+          sha256sum \
+            tools/research/general_rotation_original_select_extra_pre_v1.py \
+            tools/research/general_rotation_original_attempt_bounded_if_v1.py
+
+  pinned-source-native:
+    runs-on: ubuntu-latest
+    needs: [generic-synthetic]
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: simc-upstream
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse pristine exact original JSON2 without executing new source collection
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42562520191
+          name: zrot-general-rotation-first-real-cast-and-source-ir
+          github-token: ${{ github.token }}
+          path: /tmp/zrot-pristine-json2
+      - name: Verify original profile, source semantic and parent producer pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C simc-upstream rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          echo "584819145ec6e51bd7596bd273da74402622adf7bd0ecf1ea25ce19b0f26c715  /tmp/zrot-pristine-json2/gr-simc-original-performed-action-and-condition-model.json" | sha256sum -c -
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          x=json.loads(Path('tools/research/fixtures/zrot_original_select_prev_gcd_pre_successor_v1.json').read_bytes())
+          assert len(x['fields'])==13
+          f=x['fields'][-1]
+          assert f['kind']=='prev_gcd_match'
+          assert f['symbol']=='prev_gcd.1.arcane_surge'
+          def blob(b):
+              return hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+          for type_,path,sha in [
+              ('source-previous-gcd',x['new_source_expression_semantics']['source_engine_action_cpp_path'],x['new_source_expression_semantics']['source_engine_action_cpp_blob']),
+              ('source-player',x['new_source_expression_semantics']['source_engine_player_cpp_path'],x['new_source_expression_semantics']['source_engine_player_cpp_blob']),
+              ('source-player-history',x['new_source_expression_semantics']['source_player_history_header'],x['new_source_expression_semantics']['source_player_history_blob'])
+          ]:
+              b=(Path('simc-upstream')/path).read_bytes()
+              assert blob(b)==sha,(type_,path)
+          player=(Path('simc-upstream')/'engine/player/player.cpp').read_text()
+          assert 'action_t* player_t::find_action( util::string_view name ) const\n{\n  return find_vector_member( action_list, name );\n}' in player
+          action=(Path('simc-upstream')/'engine/action/action.cpp').read_text()
+          assert 'prev_gcd_actions.end() - gcd' in action and 'internal_id == previously_used->internal_id' in action
+          print('PINNED_ORIGINAL_PREVIOUS_GCD_SOURCE_SEMANTICS_PASS')
+          PY
+      - name: Reuse existing original selection, post IF and dispatch instrumentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/simc_original_select_if_pre_witness_v1.py \
+            --source-root simc-upstream \
+            --plan tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json \
+            --receipt /tmp/gr-native-if-prior.json
+          python -B tools/research/general_rotation_same_run_return_emitter_v1.py \
+            --source-root simc-upstream \
+            --prior-receipt /tmp/gr-native-if-prior.json \
+            --patch-receipt /tmp/gr-native-return-emitter-prior.json
+          python -B tools/research/general_rotation_original_foreground_dispatch_v1.py \
+            --simc-root simc-upstream \
+            --prior-receipt /tmp/gr-native-return-emitter-prior.json \
+            --patch-receipt /tmp/gr-foreground-dispatch-prior.json
+          python -B tools/research/general_rotation_original_select_extra_pre_v1.py \
+            --source-root simc-upstream \
+            --plan tools/research/fixtures/zrot_original_select_prev_gcd_pre_successor_v1.json \
+            --prior-receipt /tmp/gr-foreground-dispatch-prior.json \
+            --out-receipt /tmp/gr-original-prev-gcd-pre-patch.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/gr-original-prev-gcd-pre-patch.json'))
+          assert r['original_action_ready_cxx_call_added']==0
+          assert r['original_queue_and_JSON2_methods_added']==0
+          assert r['original_if_native_comparator_calls_added']==0
+          assert r['claims_complete_physical_READY'] is False
+          assert len(r['captured_fields'])==13
+          assert r['captured_fields'][-1]['kind']=='prev_gcd_match'
+          print('SOURCE_PREVIOUS_GCD_CXX_PATCH_PREFLIGHT_PASS')
+          PY
+      - name: One original SimC CXX build, not a new WCL data collection
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          cmake -S simc-upstream -B /tmp/zrot-gr-prev-gcd-native -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-gr-prev-gcd-native --target simc --parallel 3
+          test -x /tmp/zrot-gr-prev-gcd-native/simc
+      - name: Original Mage 2T only, same seed profile and exact selected source sequence
+        shell: bash
+        run: |
+          set -euo pipefail
+          dest=/tmp/zrot-original-prev-gcd/mage_arcane-2t
+          mkdir -p "$dest"
+          python -B tools/research/simc_native_reference_capture.py \
+            --profile simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc \
+            --spec arcane \
+            --simc-bin /tmp/zrot-gr-prev-gcd-native/simc \
+            --targets 2 --seed 31459 --fight-seconds 30 \
+            --out-dir "$dest" --timeout 180
+          python -B tools/research/general_rotation_original_select_extra_pre_replay_v1.py \
+            --native-log "$dest/simc_native_log.txt" \
+            --profile simc-upstream/profiles/MID2/MID2_Mage_Arcane.simc \
+            --plan tools/research/fixtures/zrot_original_select_prev_gcd_pre_successor_v1.json \
+            --legacy-plan tools/research/fixtures/zrot_fury_source_if_pre_adapter_v1.json \
+            --source-label mage_arcane --targets 2 \
+            --out "$dest/exact-selected-extra-pre-if.json"
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          from general_rotation_native_sequence_row_replay_v1 import compare_pristine
+          pristine=json.loads(Path('/tmp/zrot-pristine-json2/gr-simc-original-performed-action-and-condition-model.json').read_bytes())
+          original=next(x for x in pristine['research_cases'] if x['source_spec_key']=='mage_arcane' and x['case']=='2t')
+          path=Path('/tmp/zrot-original-prev-gcd/mage_arcane-2t')
+          current=extract_json_sequence(path)
+          compare_pristine(original,current)
+          r=json.loads((path/'exact-selected-extra-pre-if.json').read_bytes())
+          assert r['source_spec']=='mage_arcane' and r['targets']==2
+          assert r['original_selected_direct_foreground']==31
+          assert r['original_json2_emitter_records']==43
+          assert r['full_physical_READY_proven']==0
+          assert r['competitor_ready_proven']==0
+          assert r['dummy_wrong_cast']=='UNKNOWN'
+          assert sorted(x['t_ms'] for x in r['selected_source_IF_samples']
+                        if x['source_action']=='arcane_orb' and x['source_rank']==6)==[7667,14950]
+          print('EXACT_ORIGINAL_2T_31_NATIVE_RETURNS_AND_43_JSON2_EMITTERS_PARITY_PASS')
+          PY
+      - name: Recompute first and second earlier IF using new exact-root previous-GCD PRE
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          old=json.loads(Path('tools/research/fixtures/general_rotation_original_source_bounded_if_adapter_v1.json').read_bytes())
+          original=Path('/tmp/zrot-original-prev-gcd/mage_arcane-2t')
+          names={
+             'log':'simc_native_log.txt',
+             'selected':'exact-selected-extra-pre-if.json',
+             'native_receipt':'simc_reference_receipt.json'
+          }
+          old['archive_members']={}
+          with zipfile.ZipFile('/tmp/gr-prev-gcd-same-root-pinned.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for key,filename in names.items():
+                  b=(original/filename).read_bytes()
+                  name='zrot-original-extra-pre/mage_arcane-2t/'+filename
+                  z.writestr(name,b)
+                  old['archive_members'][key]={'path':name,'sha256':hashlib.sha256(b).hexdigest()}
+          old['original_workflow_run']=int(os.environ['GITHUB_RUN_ID'])
+          old['new_native_build']=True
+          Path('/tmp/gr-prev-gcd-this-run-evidence-adapter.json').write_text(json.dumps(old,sort_keys=True,indent=2)+'\n')
+          print('EXACT_NEW_ORIGINAL_NATIVE_SOURCE_CAPTURE_PROVENANCE',old['original_workflow_run'])
+          PY
+          python -B tools/research/general_rotation_original_attempt_bounded_if_v1.py \
+            --source-root simc-upstream \
+            --artifact-zip /tmp/gr-prev-gcd-same-root-pinned.zip \
+            --adapter /tmp/gr-prev-gcd-this-run-evidence-adapter.json \
+            --pre-plan tools/research/fixtures/zrot_original_select_prev_gcd_pre_successor_v1.json \
+            --out /tmp/gr-prev-gcd-real-source-if-frontier.json
+          python - <<'PY'
+          import json
+          r=json.load(open('/tmp/gr-prev-gcd-real-source-if-frontier.json'))
+          assert r['schema']=='ZrotGenericOriginalSimCAttemptBoundedIFReplayV1'
+          assert r['original_selected_cohort_count']==2
+          assert r['original_source_IF_all_FALSE_candidate_count']==2
+          assert r['original_source_IF_not_decidable_candidate_count']==0
+          assert r['new_WCL_API_calls']==0 and r['new_SimC_CXX_builds']==1
+          for x in r['source_only_competitor_counterfactuals']:
+              p=x['source_IF_counterfactual_proof']
+              assert p['classification']=='ALL_FALSE'
+              assert p['observed_exact_root_domain_operand_facts']['prev_gcd.1.arcane_surge']==0
+              assert x['source_local_APL_candidate_EXCLUDED'] is True
+              assert x['global_ability_NOT_READY']=='UNKNOWN'
+              assert x['selected_full_ready']=='UNKNOWN'
+              assert x['real_WoW_expected_cast']=='UNKNOWN'
+          assert r['current_Retail_gameplay_priority_proven']==0
+          assert r['actual_player_wrong_cast']=='UNKNOWN'
+          print('ORIGINAL_SAME_ROOT_PREVIOUS_GCD_INDEPENDENTLY_CERTIFIED_TWO_SOURCE_IF_FALSE',[(q['t_original_simc_ms'],q['source_IF_counterfactual_proof']['classification']) for q in r['source_only_competitor_counterfactuals']])
+          PY
+          sha256sum \
+            /tmp/gr-prev-gcd-real-source-if-frontier.json \
+            /tmp/gr-original-prev-gcd-pre-patch.json \
+            /tmp/gr-prev-gcd-this-run-evidence-adapter.json
+      - name: Keep compact native evidence and source-contract receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-prev-gcd-original-if-frontier-${{ github.sha }}
+          path: |
+            /tmp/gr-prev-gcd-real-source-if-frontier.json
+            /tmp/gr-original-prev-gcd-pre-patch.json
+            /tmp/gr-prev-gcd-this-run-evidence-adapter.json
+            /tmp/zrot-original-prev-gcd/mage_arcane-2t/exact-selected-extra-pre-if.json
+            /tmp/zrot-original-prev-gcd/mage_arcane-2t/simc_reference_receipt.json
+          retention-days: 7
+          if-no-files-found: warn
