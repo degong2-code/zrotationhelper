@@ -260,8 +260,12 @@ def parse_attempts(raw:str,plan:dict)->dict:
                  p[2].isdecimal() and p[5].isdecimal() and
                  PTR.fullmatch(p[6]) is not None,
                  "ORIGINAL_NATIVE_PERFORM_ROW_INVALID")
+            # Precombat (P) and combat (C) may legitimately reuse a
+            # dispatch token at time zero: never merge separate namespaces.
+            if p[1]!="C":
+                continue
             key=(int(p[0]),int(p[2]))
-            need(key not in performed,"DUPLICATE_ORIGINAL_PERFORMED_EVENT")
+            need(key not in performed,"DUPLICATE_COMBAT_PERFORMED_EVENT")
             performed[key]={"line":seq,"channel":p[1],"action":p[3],
                             "owner":p[4],"rank":int(p[5]),"ptr":p[6].lower()}
     for cid,entry in markers.items():
