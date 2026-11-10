@@ -1,0 +1,205 @@
+name: zrot-gr-shaman-original-source-ready-frontier-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/fixtures/zrot_shaman_original_source_if_pre_adapter_v1.json
+      - tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json
+      - .github/workflows/zrot-gr-shaman-original-source-ready-frontier-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-pre-source-contract:
+    strategy:
+      fail-fast: false
+      matrix:
+        py: ['3.12','3.14']
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+      - name: Generic source reader syntax and scope regression plus external Shaman plan validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_original_select_extra_pre_v1.py \
+            tools/research/general_rotation_original_select_extra_pre_replay_v1.py \
+            tools/research/general_rotation_original_dispatch_if_replay_v1.py \
+            tools/research/simc_original_select_if_pre_witness_v1.py
+          python -B tools/research/general_rotation_original_select_extra_pre_v1.py >/tmp/generic-pre-selftest.json
+          python -B tools/research/general_rotation_original_select_extra_pre_replay_v1.py >/tmp/generic-pre-replay-selftest.json
+          python - <<'PY'
+          import sys,json
+          sys.path.insert(0,'tools/research')
+          from simc_original_select_if_pre_witness_v1 import plan_check
+          from general_rotation_original_select_extra_pre_v1 import valid_plan
+          legacy=json.load(open('tools/research/fixtures/zrot_shaman_original_source_if_pre_adapter_v1.json'))
+          extra=json.load(open('tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json'))
+          plan_check(legacy);valid_plan(extra)
+          assert len(extra['profiles'])==1 and extra['profiles'][0]['actor_class']=='shaman'
+          assert 1<=len(extra['fields'])<=24 and extra['fields'][0]['symbol']=='active_enemies'
+          assert extra['profiles'][0]['profile_git_blob']=='2f2c951ae07489d124db36c464ab66d1efd262ce'
+          assert json.load(open('/tmp/generic-pre-selftest.json'))['result']=='PASS_SYNTHETIC_STATIC'
+          assert json.load(open('/tmp/generic-pre-replay-selftest.json'))['status']=='PASS_SYNTHETIC_STATIC'
+          print('GENERIC_SHAMAN_ORIGINAL_READY_PRE_SPEC_ADAPTER_SYNTHETIC_PASS')
+          PY
+  original-shaman-source-root:
+    runs-on: ubuntu-latest
+    needs: [generic-pre-source-contract]
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse already validated Shaman Native 4-target source-token baseline
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42744084203
+          name: zrot-gr-original-shaman-native-marginal-3d92ad32576e91aaefd19df8d03c39a373c46632
+          github-token: ${{ github.token }}
+          path: /tmp/shaman-marginal-existing
+      - name: Verify source pins and apply read-only source instrumentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C original-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          echo '7b818a65fb4e9a812ddb2efb90406a2825ddd9abdd325067edeb3f37bd263339  /tmp/shaman-marginal-existing/zrot-gr-original-shaman-native-1-2-3-5-grid.json' | sha256sum -c -
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from general_rotation_original_select_extra_pre_v1 import valid_plan
+          p=json.load(open('tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json'))
+          valid_plan(p,Path('original-simc'))
+          print('PINNED_SHAMAN_CLASS_AND_PROFILE_PRE_FIELD_SEMANTICS_PASS',len(p['fields']))
+          PY
+          python -B tools/research/simc_original_select_if_pre_witness_v1.py \
+            --source-root original-simc \
+            --plan tools/research/fixtures/zrot_shaman_original_source_if_pre_adapter_v1.json \
+            --receipt /tmp/shaman-original-if-prepare.json
+          python -B tools/research/general_rotation_same_run_return_emitter_v1.py \
+            --source-root original-simc \
+            --prior-receipt /tmp/shaman-original-if-prepare.json \
+            --patch-receipt /tmp/shaman-return-emitter.json
+          python -B tools/research/general_rotation_original_foreground_dispatch_v1.py \
+            --simc-root original-simc \
+            --prior-receipt /tmp/shaman-return-emitter.json \
+            --patch-receipt /tmp/shaman-dispatch.json
+          python -B tools/research/general_rotation_original_select_extra_pre_v1.py \
+            --source-root original-simc \
+            --plan tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json \
+            --prior-receipt /tmp/shaman-dispatch.json \
+            --out-receipt /tmp/shaman-extra-pre-patch.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/shaman-extra-pre-patch.json'))
+          assert x['original_action_ready_cxx_call_added']==0
+          assert x['original_queue_and_JSON2_methods_added']==0
+          assert x['original_if_native_comparator_calls_added']==0
+          assert x['claims_complete_physical_READY'] is False
+          assert len(x['captured_fields'])==10
+          print('SHAMAN_ORIGINAL_SOURCE_PASSIVE_PATCH_NO_READY_SIDE_EFFECT_PASS')
+          PY
+      - name: Build original pinned SimC CXX once for source-line and PRE root witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          cmake -S original-simc -B /tmp/zrot-shaman-select-native -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-shaman-select-native --target simc --parallel 3
+          test -x /tmp/zrot-shaman-select-native/simc
+      - name: Original Enhancement 1T and 3T exact SELECT PRE roots, preserve existing original action tokens
+        shell: bash
+        run: |
+          set -euo pipefail
+          for target in 1 3; do
+            folder="/tmp/shaman-source-root/shaman_enhancement-${target}t"
+            python -B tools/research/simc_native_reference_capture.py \
+              --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+              --spec enhancement \
+              --simc-bin /tmp/zrot-shaman-select-native/simc \
+              --targets "$target" --seed 31459 --fight-seconds 30 \
+              --out-dir "$folder" --timeout 180
+            python -B tools/research/general_rotation_original_select_extra_pre_replay_v1.py \
+              --native-log "$folder/simc_native_log.txt" \
+              --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+              --plan tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json \
+              --legacy-plan tools/research/fixtures/zrot_shaman_original_source_if_pre_adapter_v1.json \
+              --source-label shaman_enhancement --targets "$target" \
+              --out "$folder/selected-root-exact-pre-source-if.json"
+          done
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          from general_rotation_simc_native_target_grid_v1 import examine
+          from general_rotation_simc_e2e_research_engine_v1 import compile_spec
+          old=json.loads(Path('/tmp/shaman-marginal-existing/zrot-gr-original-shaman-native-1-2-3-5-grid.json').read_bytes())
+          assert old['new_actual_native_spec_key']=='shaman_enhancement'
+          src=Path('original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc').read_bytes()
+          meta=next(x for x in json.load(open('tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json'))['profiles'] if x['key']=='shaman_enhancement')
+          program=compile_spec(src,meta,None)['conditioned_opener_and_priority']['all_ordered_source_IF_ELSE_lists']
+          for target in (1,3):
+              path=Path(f'/tmp/shaman-source-root/shaman_enhancement-{target}t')
+              oldcase=next(x for x in old['native_target_cases'] if x['target_count']==target)
+              current=examine(extract_json_sequence(path)['combat_sequence'],program,target)
+              assert current['sample_actions']==oldcase['sample_actions'],target
+              now=[(x['at_simc_ms'],x['action']) for x in current['first_10sec_sample_actions_NOT_opener_end']]
+              prev=[(x['at_simc_ms'],x['action']) for x in oldcase['first_10sec_sample_actions_NOT_opener_end']]
+              assert now==prev,(target,'ORIGINAL_NATIVE_SAMPLE_CHANGED')
+              x=json.loads((path/'selected-root-exact-pre-source-if.json').read_bytes())
+              assert x['source_spec']=='shaman_enhancement' and x['targets']==target
+              assert x['original_selected_direct_foreground']>0
+              assert x['source_if_comparator_not_replay_input'] is True
+              assert x['full_physical_READY_proven']==0 and x['competitor_ready_proven']==0
+              assert x['opener_end']=='UNKNOWN' and x['dummy_wrong_cast']=='UNKNOWN'
+              first=[r for r in x['selected_source_IF_samples'] if r['t_ms']<10000]
+              assert first,(target,'NO_ORIGINAL_SOURCE_ROOT_CANDIDATES')
+              assert all(r['original_PRE_fields'].get('active_enemies')==target for r in first)
+              assert all(r['source_list'] in program for r in first)
+              assert any(r['source_list'] in ('single_sb','single_totemic','aoe') for r in first)
+              print('ACTUAL_PINNED_SHAMAN_EXACT_ROOT_SELECTED_PRE',target,
+                    'direct',x['original_selected_direct_foreground'],
+                    'first10',len(first),'IF_TRIAGE',x['source_independent_IF_triage'],
+                    'EXAMPLES',[(r['t_ms'],r['source_list'],r['source_rank'],r['source_action'],
+                                 r['original_source_IF_independent_truth']) for r in first[:10]])
+          print('ORIGINAL_SHAMAN_ST_AOE_SAME_RUN_SOURCE_ROW_AND_PRE_PARITY_PASS')
+          PY
+          sha256sum /tmp/shaman-source-root/shaman_enhancement-1t/selected-root-exact-pre-source-if.json
+          sha256sum /tmp/shaman-source-root/shaman_enhancement-3t/selected-root-exact-pre-source-if.json
+      - name: Preserve compact original source proof only; raw logs remain ephemeral
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-shaman-exact-root-pre-${{ github.sha }}
+          path: |
+            /tmp/shaman-source-root/shaman_enhancement-1t/selected-root-exact-pre-source-if.json
+            /tmp/shaman-source-root/shaman_enhancement-3t/selected-root-exact-pre-source-if.json
+            /tmp/shaman-extra-pre-patch.json
+          retention-days: 14
+          if-no-files-found: warn
