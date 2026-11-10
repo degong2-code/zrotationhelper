@@ -200,7 +200,7 @@ def witness(log,profile_ir,prior,plan,targets,*,plan_sha,prior_sha):
     # READY true on CALL enters a child list; it is NOT a priority winner.
     prev=[r for r in out if r["call_id"]!=chosen["call_id"]]
     bad=[r for r in prev if r["original_action_ready_return"]=="TRUE"
-         and r["behavior"] not in ("CALL","RUN")]
+         and r["behavior"] not in ("CALL","VARIABLE")]
     need(not bad,"NON_CONTROL_NATIVE_TRUE_BEFORE_RETURNED_ACTION")
     selected_prior=[r for r in prev if r["list"]==wanted["source_list"]]
     known_ranks={r["rank"] for r in selected_prior if r["rank"]<wanted["source_rank"]}
@@ -261,7 +261,7 @@ def selftest():
         def row(name,rank,action,behavior="ACTION",attrs=()):
             return {"action":action,"behavior":behavior,"source_sha256":f"sha-{name}-{rank}",
                     "attributes":[{"key":k,"value":v} for k,v in attrs],"expression_fields":{}}
-        ir={"action_lists":{"default":[row("default",1,"call_action_list","CALL",(("name","sub"),))],
+        ir={"action_lists":{"default":[row("default",1,"variable","VARIABLE"),row("default",2,"call_action_list","CALL",(("name","sub"),))],
                             "sub":[row("sub",1,"alpha"),row("sub",2,"beta")]}}
         prior={"schema":PRIOR_SCHEMA,"policy_id":POLICY,"original_SimC_source_revision":REV,
                "targets":1,"original_profile_blob":"a"*40,"source_spec":"fictional",
@@ -273,10 +273,11 @@ def selftest():
         plan={"schema":PLAN_SCHEMA,"policy_id":POLICY,"source_revision":REV,
               "profile_git_blob":"a"*40,"spec_key":"fictional",
               "cases":[{"targets":1,"t_ms":100,"source_list":"sub","source_rank":2,
-                        "source_action":"beta","entry_list":"default","entry_rank":1}],
+                        "source_action":"beta","entry_list":"default","entry_rank":2}],
               "fields_adapter":{"sha256":"a"*64,"fields":[{"symbol":"active_enemies"}]}}
         events=[BEGIN+"100|1|0x01"]
-        for callid,owner,rank,ptr,success in ((10,"default",1,"0x11",1),
+        for callid,owner,rank,ptr,success in ((9,"default",1,"0x09",1),
+                                               (10,"default",2,"0x11",1),
                                                (20,"sub",1,"0x21",0),
                                                (30,"sub",2,"0x31",1)):
             events.extend((PRE+f"100|{callid}|{owner}|{rank}|{ptr}|0|0",
@@ -284,7 +285,7 @@ def selftest():
                            RESULT+f"100|{callid}|{ptr}|{success}"))
         events.append(SELECT+"100|1|0x01|0x31")
         proof=witness("\n".join(events),ir,prior,plan,1,plan_sha="a"*64,prior_sha="b"*64)
-        need(proof["preceding_attempt_count"]==2 and
+        need(proof["preceding_attempt_count"]==3 and
              proof["all_higher_source_ranks_observed"] and
              proof["selected_root"]["call_id"]==30 and
              proof["original_foreground_CALL_entry"]["original_action_ready_return"],
