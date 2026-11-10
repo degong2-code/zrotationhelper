@@ -7,6 +7,11 @@ on:
       - _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json
       - _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN6_BEFORE_20261110.json
       - .github/workflows/zrot-gr-20261109-branch-handoff-continuity.yml
+      - README.md
+      - docs/RESEARCH_INDEX.md
+      - docs/CURRENT_RESEARCH_STATUS.md
+      - docs/FEATURE_HISTORY_INDEX.md
+      - docs/EVIDENCE_NAVIGATION_INDEX.md
   workflow_dispatch:
 
 permissions:
