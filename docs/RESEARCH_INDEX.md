@@ -14,6 +14,8 @@
 
 **새로운 제품 산출물:** [전문화별 General Rotation 모델 (고술·분전·비법 Markdown+JSON)](GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md) — 3개 전문화 소스 기반 초안을 동일 엔진으로 생성했다. 증거가 없는 완전 READY와 오프닝 종료는 여전히 UNKNOWN이다.
 
+**첫 원본 검증 후속:** [고양 주술사 실제 선택 APL 행·PRE를 반영한 연구용 General Rotation successor](GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md#고술-general-rotation--실제-원본-증거를-반영한-첫-successor-2026-11-10) — 원본 선택 행 79건과 독립 조건 5건을 기록했다. 아직 전체 경쟁 READY·오프닝 종료·최적 로테이션 규칙의 확정은 아니다.
+
 ## 연구 파이프라인으로 탐색
 
 | 찾고 싶은 연구 과정 | 확인 경로 | 현 상태의 핵심 구분 |
