@@ -61,11 +61,14 @@ def bounded_if(ast:list, facts:dict, domains:dict)->dict:
          all(type(k) is str and type(v) in (int,float,bool) and
              math.isfinite(float(v)) for k,v in facts.items()) and
          all(type(k) is str and type(v) is list and v==[0,1]
-             and k not in facts for k,v in domains.items()),
+             for k,v in domains.items()) and
+         all(k not in facts or facts[k] in (0,1) for k in domains),
          "UNTRUSTED_SOURCE_OR_DOMAIN_FACTS")
-    names=sorted(domains)
+    # Exact original PRE can resolve a certified binary source operand.
+    unresolved_domains={k:v for k,v in domains.items() if k not in facts}
+    names=sorted(unresolved_domains)
     outcomes=[]
-    for values in product(*[domains[n] for n in names]):
+    for values in product(*[unresolved_domains[n] for n in names]):
         params={**facts,**dict(zip(names,values))}
         verdict=truth(evaluate_ast(ast,params))
         outcomes.append((dict(zip(names,values)),
@@ -92,7 +95,7 @@ def bounded_if(ast:list, facts:dict, domains:dict)->dict:
     if classification=="ALL_FALSE":
         for symbol in sorted(facts):
             trial={k:v for k,v in minimal.items() if k!=symbol}
-            for vals in product(*[domains[n] for n in names]):
+            for vals in product(*[unresolved_domains[n] for n in names]):
                 if truth(evaluate_ast(ast,{**trial,**dict(zip(names,vals))})) is not False:
                     break
             else:
@@ -101,11 +104,13 @@ def bounded_if(ast:list, facts:dict, domains:dict)->dict:
             trial={k:v for k,v in minimal.items() if k!=key}
             need(any(truth(evaluate_ast(ast,{**trial,**dict(zip(names,vals))}))
                      is not False
-                     for vals in product(*[domains[n] for n in names])),
+                     for vals in product(*[unresolved_domains[n] for n in names])),
                  "NOT_MINIMAL_SOURCE_FACTS")
     return {
         "classification":classification,
         "enumerated_synthetic_source_domain_assignments":len(outcomes),
+        "observed_exact_root_domain_operand_facts":
+            {k:facts[k] for k in sorted(domains) if k in facts},
         "assignment_source_IF_outcomes":outcomes,
         "unobserved_binary_source_operands_which_can_change_IF":
             influential,
@@ -450,6 +455,14 @@ def selftest()->dict:
     second=evaluate(phrase,{"active_enemies":2,"variable.aoe_count":2,
                            "buff.react":20,"buff.charges":3,"buff.stack":20},
                     domains)
+    observed=evaluate(phrase,{"active_enemies":2,"variable.aoe_count":2,
+                              "buff.react":20,"buff.charges":3,"buff.stack":20,
+                              "prev_gcd.1.spell":0},domains)
+    need(observed["classification"]=="ALL_FALSE" and
+         observed["enumerated_synthetic_source_domain_assignments"]==2 and
+         observed["observed_exact_root_domain_operand_facts"]==
+             {"prev_gcd.1.spell":0},
+         "CAPTURED_BINARY_PRE_SOURCE_DOMAIN_NOT_RESOLVED")
     need(first["classification"]=="ALL_FALSE" and
          first["enumerated_synthetic_source_domain_assignments"]==4 and
          second["classification"]=="MIXED_OR_UNKNOWN" and
@@ -465,7 +478,7 @@ def selftest()->dict:
     for expr,facts,ds in [
         ("x|y",{"x":float("nan")},{"y":[0,1]}),
         ("x|y",{"x":0},{"y":[0,2]}),
-        ("x|y",{"x":0},{"x":[0,1]}),
+        ("x|y",{"x":2},{"x":[0,1]}),
         ("x|y",{"x":float("inf")},{"y":[0,1]}),
     ]:
         try:evaluate(expr,facts,ds)
