@@ -150,10 +150,17 @@ def validate_source_domains(root:Path,adapter:dict)->dict:
              all(type(a) is str and len(a)>15 for a in rule["required_anchors"]),
              "UNTRUSTED_OR_DUPLICATE_DOMAIN_CXX_ANCHORS")
         file=(root/rule["source_path"]).resolve(strict=True)
-        need(file.is_relative_to(root) and
-             git_blob(file.read_bytes())==rule["source_git_blob"],
+        need(file.is_relative_to(root), "DOMAIN_SOURCE_PATH_ESCAPED")
+        # The branch may instrument action.cpp in a source-preserving Native
+        # run. Inspect the exact committed original C++ via git show, NOT
+        # a possibly instrumented working-tree source file.
+        original=subprocess.run(
+            ["git","-C",str(root),"show",
+             f"{SOURCE_REV}:{rule['source_path']}"],
+            check=True,capture_output=True).stdout
+        need(git_blob(original)==rule["source_git_blob"],
              "DOMAIN_CXX_BLOB_NOT_PINNED")
-        cpp=file.read_text(encoding="utf-8")
+        cpp=original.decode("utf-8")
         need(all(cpp.count(anchor)==1 for anchor in rule["required_anchors"]),
              "DOMAIN_CXX_SEMANTICS_ANCHOR_NOT_UNIQUE")
         result[rule["symbol"]]=rule["domain"]
@@ -189,7 +196,10 @@ def validate_source_domains(root:Path,adapter:dict)->dict:
              GIT40.fullmatch(talent.get("git_blob","")) is not None and
              type(talent.get("anchor")) is str,
              "TALENT_ENABLED_BOOLEAN_DEFINITION_NOT_PINNED")
-        source=(root/talent["path"]).read_bytes()
+        source=subprocess.run(
+            ["git","-C",str(root),"show",
+             f"{SOURCE_REV}:{talent['path']}"],
+            check=True,capture_output=True).stdout
         need(git_blob(source)==talent["git_blob"] and
              talent["anchor"].replace("\\n","\n") in source.decode("utf-8"),
              "PINNED_TALENT_ENABLED_RETURN_TYPE_NOT_VERIFIED")
@@ -428,7 +438,9 @@ def run(source_root:Path,archive:Path,adapter_path:Path,plan_path:Path)->dict:
         "source_profile_git_blob_sha1":adapter["source_profile_git_blob"],
         "source_native_log_sha256":hash_bytes(artifacts["log"]),
         "selected_source_replay_sha256":hash_bytes(artifacts["selected"]),
-        "reused_original_workflow_run":adapter["original_workflow_run"],
+        "source_native_workflow_run":adapter["original_workflow_run"],
+        "new_Native_build_expected_in_this_capture":
+            adapter.get("new_native_build",False),
         "original_selected_cohort_count":len(rows),
         "original_source_IF_all_FALSE_candidate_count":sum(
             x["source_local_APL_candidate_EXCLUDED"] for x in output),
@@ -440,7 +452,8 @@ def run(source_root:Path,archive:Path,adapter_path:Path,plan_path:Path)->dict:
         "current_Retail_gameplay_priority_proven":0,
         "opener_end":"UNKNOWN",
         "actual_player_wrong_cast":"UNKNOWN",
-        "new_WCL_API_calls":0,"new_SimC_CXX_builds":0,
+        "new_WCL_API_calls":0,
+        "new_SimC_CXX_builds":int(adapter.get("new_native_build",False)),
         "MAIN_promoted":False,
     }
 
