@@ -87,13 +87,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Actual pinned original Warrior and Mage APL semantic source cold-start
+      - name: Actual pinned original Warrior, Mage and Shaman APL semantic source cold-start
         shell: bash
         run: |
           set -euo pipefail
           python -B tools/research/general_rotation_simc_multi_spec_cold_start_v1.py \
             --source-root simc-upstream \
-            --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json \
             --out /tmp/general-rotation-multi-spec-source-receipt.json
           python - <<'PY'
           import json
@@ -119,7 +119,7 @@ jobs:
           set -euo pipefail
           python -B tools/research/general_rotation_source_hypothesis_ir_v1.py \
             --source-root simc-upstream \
-            --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json \
             --out /tmp/general-rotation-three-class-hypothesis-ir.json
           python - <<'PY'
           import json
@@ -156,7 +156,7 @@ jobs:
           assert 'talent.surging_totem.enabled' in by_dest['single_totemic']['conditions']['if']['raw_expression']
           assert 'active_enemies>1' in by_dest['aoe']['conditions']['if']['raw_expression']
           hints=shaman['coverage']['condition_context_hints']
-          for key in ('target_count','build','buff_or_debuff','resource'):
+          for key in ('target_count','build','buff_or_debuff','cooldown'):
               assert hints.get(key,0)>0,(key,hints)
           for rows in lists.values():
               for row in rows:
@@ -204,7 +204,7 @@ jobs:
           set -euo pipefail
           python -B tools/research/general_rotation_ir_proof_replay_v1.py \
             --source-root simc-upstream \
-            --manifest tools/research/fixtures/general_rotation_simc_pinned_multi_spec_v1.json \
+            --manifest tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json \
             --out /tmp/general-rotation-three-class-proof-replay.json
           python - <<'PY'
           import json
@@ -236,6 +236,7 @@ jobs:
           path: |
             /tmp/general-rotation-multi-spec-source-receipt.json
             /tmp/general-rotation-three-class-hypothesis-ir.json
+            /tmp/general-rotation-three-class-conditional-e2e.json
             /tmp/general-rotation-three-class-proof-replay.json
           retention-days: 7
           if-no-files-found: error
