@@ -1,0 +1,139 @@
+name: zrot-gr-original-same-run-bounded-if-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_attempt_bounded_if_v1.py
+      - tools/research/fixtures/general_rotation_original_source_bounded_if_adapter_v1.json
+      - .github/workflows/zrot-gr-original-same-run-bounded-if-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Source-neutral bounded IF and tamper checks on final file
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_original_attempt_bounded_if_v1.py
+          python -B tools/research/general_rotation_original_attempt_bounded_if_v1.py > /tmp/generic-bounded-if-synthetic.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/generic-bounded-if-synthetic.json'))
+          assert x['status']=='PASS_OFFLINE_GENERIC_SYNTHETIC'
+          assert x['two_arbitrary_state_hypotheses']==2
+          assert x['negative_invalid_inputs_rejected']==4
+          assert x['actual_original_native_replay_performed'] is False
+          assert x['physical_READY_proven']==0
+          print('GENERIC_BOUNDED_SOURCE_IF_SYNTHETIC_PASS')
+          PY
+          sha256sum tools/research/general_rotation_original_attempt_bounded_if_v1.py
+
+  original-pinned-same-run:
+    runs-on: ubuntu-latest
+    needs: [generic-synthetic]
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Warrior_Fury.simc
+            profiles/MID2/MID2_Mage_Arcane.simc
+            engine/class_modules/sc_mage.cpp
+            engine/class_modules/sc_warrior.cpp
+            engine/action/action.cpp
+            engine/player/player.cpp
+            engine/player/talent.hpp
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse existing raw Native original 2T selected and attempted PRE, no new build
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42589894203
+          name: zrot-gr-original-selected-extra-pre-native-v1
+          github-token: ${{ github.token }}
+          path: /tmp/gr-original-extra
+      - name: Construct minimal transport from exact original SHA-pinned artifact members
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,zipfile,hashlib
+          from pathlib import Path
+          meta=json.loads(Path('tools/research/fixtures/general_rotation_original_source_bounded_if_adapter_v1.json').read_bytes())
+          with zipfile.ZipFile('/tmp/gr-original-reuse-pinned.zip','w',compression=zipfile.ZIP_DEFLATED) as z:
+              for x in meta['archive_members'].values():
+                  p=Path('/tmp/gr-original-extra')/x['path']
+                  assert p.is_file() and hashlib.sha256(p.read_bytes()).hexdigest()==x['sha256'],p
+                  z.write(p,arcname=x['path'])
+          print('PINNED_ORIGINAL_SAME_RUN_ARTIFACT_REUSED',len(meta['archive_members']))
+          PY
+      - name: Native original SELECT root PRE plus certified boolean-domain APL IF
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C original-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          python -B tools/research/general_rotation_original_attempt_bounded_if_v1.py \
+            --source-root original-simc \
+            --artifact-zip /tmp/gr-original-reuse-pinned.zip \
+            --adapter tools/research/fixtures/general_rotation_original_source_bounded_if_adapter_v1.json \
+            --pre-plan tools/research/fixtures/zrot_original_select_extra_pre_two_source_v1.json \
+            --out /tmp/gr-original-same-run-bounded-if-proofs.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/gr-original-same-run-bounded-if-proofs.json'))
+          assert x['schema']=='ZrotGenericOriginalSimCAttemptBoundedIFReplayV1'
+          assert x['source_spec_key']=='mage_arcane'
+          assert x['original_selected_cohort_count']==2
+          assert x['original_source_IF_all_FALSE_candidate_count']==1
+          assert x['original_source_IF_not_decidable_candidate_count']==1
+          rows=x['source_only_competitor_counterfactuals']
+          assert [q['t_original_simc_ms'] for q in rows]==[7667,14950]
+          assert [q['original_source_candidate_call_id'] for q in rows]==[340,609]
+          assert [q['source_IF_counterfactual_proof']['classification'] for q in rows]==['ALL_FALSE','MIXED_OR_UNKNOWN']
+          assert rows[0]['source_local_APL_candidate_EXCLUDED'] is True
+          assert rows[1]['source_local_APL_candidate_EXCLUDED'] is False
+          assert all(r['global_ability_NOT_READY']=='UNKNOWN' and
+                     r['selected_full_ready']=='UNKNOWN' and
+                     r['real_WoW_expected_cast']=='UNKNOWN'
+                     for r in rows)
+          assert x['this_is_NOT_same_native_run_as_older_ready_ledger'] is True
+          assert x['original_source_competing_full_READY_proven']==0
+          assert x['current_Retail_gameplay_priority_proven']==0
+          assert x['new_WCL_API_calls']==0 and x['new_SimC_CXX_builds']==0
+          print('ORIGINAL_SOURCE_IF_BOOLEAN_DOMAIN_FIRST_FALSE_SECOND_UNKNOWN_PASS',
+                [(v['t_original_simc_ms'],v['source_IF_counterfactual_proof']['classification']) for v in rows])
+          PY
+          sha256sum /tmp/gr-original-same-run-bounded-if-proofs.json
+      - name: Save source-only bounded counterfactual proof (not raw log)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-original-source-bounded-if-${{ github.sha }}
+          path: /tmp/gr-original-same-run-bounded-if-proofs.json
+          retention-days: 7
+          if-no-files-found: error
