@@ -1,0 +1,107 @@
+name: zrot-gr-pinned-trait-hash-dbc-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_talent_hash_dbc_v1.py
+      - tools/research/fixtures/zrot_shaman_talent_hash_dbc_v1.json
+      - tools/research/fixtures/zrot_warrior_talent_hash_dbc_v1.json
+      - .github/workflows/zrot-gr-pinned-trait-hash-dbc-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-trait-hash-dbc:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.14']
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Reuse original source-to-Native dependency without SimC rebuild
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 42792819485
+          name: zrot-gr-source-spell-dependency-3.12-b8705b2f15674e0baa8e1c089975eee7d85bd820
+          github-token: ${{ github.token }}
+          path: /tmp/original-source-link
+      - name: Original SimC trait decoder synthetic and original DBC/profile replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/general_rotation_original_talent_hash_dbc_v1.py
+          python -B tools/research/general_rotation_original_talent_hash_dbc_v1.py >/tmp/trait-hash-selftest.json
+          python - <<'PY'
+          import json
+          x=json.load(open('/tmp/trait-hash-selftest.json'))
+          assert x['status']=='PASS_SYNTHETIC_STATIC'
+          assert x['negative_controls']>=8
+          assert x['unselected_not_promoted_to_READY'] is True
+          assert x['new_original_simc_rebuilds']==x['WCL_API_calls']==0
+          print('GENERIC_PINNED_TRAIT_HASH_SYNTHETIC_PASS',x)
+          PY
+          test "$(git -C original-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          echo 'e964372972ffad2f00e3f3f6c0db15cc18cd9615d8a606b51d6f6d310e11ab40  /tmp/original-source-link/generic-simc-spell-dependency-source-linked.json' | sha256sum -c -
+          python -B tools/research/general_rotation_original_talent_hash_dbc_v1.py \
+            --source-root original-simc \
+            --adapter tools/research/fixtures/zrot_shaman_talent_hash_dbc_v1.json \
+            --prior-native-link /tmp/original-source-link/generic-simc-spell-dependency-source-linked.json \
+            --out /tmp/shaman-pinned-talent-hash-dbc.json
+          python -B tools/research/general_rotation_original_talent_hash_dbc_v1.py \
+            --source-root original-simc \
+            --adapter tools/research/fixtures/zrot_warrior_talent_hash_dbc_v1.json \
+            --out /tmp/warrior-pinned-talent-hash-dbc.json
+          python - <<'PY'
+          import json
+          s=json.load(open('/tmp/shaman-pinned-talent-hash-dbc.json'))
+          w=json.load(open('/tmp/warrior-pinned-talent-hash-dbc.json'))
+          assert s['schema']==w['schema']=='ZrotGenericPinnedSimCTalentHashDbcDecodeV1'
+          assert s['source_revision']==w['source_revision']=='b522cded8c26b97dac03fdf56e57a03ec7e8faa6'
+          assert s['source_trait_nodes']==214 and w['source_trait_nodes']==209
+          assert s['source_allocated_trait_entries']==79 and w['source_allocated_trait_entries']==77
+          a=s['cases'][0]
+          assert (a['trait_name'],a['trait_node'],a['trait_entry'],a['trait_spell'])==('Sundering',80975,101841,197214)
+          assert a['source_profile_status']=='PROFILE_NOT_SELECTED_NOT_GRANTED'
+          assert a['source_profile_allocated_rank']==0 and a['source_dbc_free_grant_to_spec'] is False
+          assert a['source_profile_hash_node_selected'] is False
+          assert a['native_dependency_join']=='SAME_PROFILE_SPELL_INPUT_AND_NATIVE_NOT_FOUND'
+          b=w['cases'][0]
+          assert (b['trait_name'],b['trait_node'],b['trait_entry'],b['trait_spell'])==('Bloodthirst',90392,112261,23881)
+          assert b['source_profile_status']=='PROFILE_SELECTED_RANK'
+          assert b['source_profile_allocated_rank']==1 and b['source_profile_effective_rank_after_free_grant']==1
+          assert b['native_dependency_join']=='NOT_REQUESTED'
+          for x in (s,w):
+              assert x['original_source_parse_and_DBC_proven'] is True
+              assert x['General_Rotation_priority_promoted']==0
+              assert x['Blizzard_current_patch_mechanic_parity']=='UNKNOWN'
+              assert x['WCL_independent_blind']=='NOT_RUN' and x['dummy_wrong_cast']=='UNKNOWN'
+          print('ORIGINAL_DBC_PROFILE_TRAIT_SELECTED_VS_UNSELECTED_TWO_CLASS_PASS')
+          PY
+          sha256sum /tmp/shaman-pinned-talent-hash-dbc.json /tmp/warrior-pinned-talent-hash-dbc.json
+      - name: Preserve compact deterministic evidence, not raw Native logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-pinned-talent-hash-dbc-${{ matrix.python }}-${{ github.sha }}
+          path: |
+            /tmp/trait-hash-selftest.json
+            /tmp/shaman-pinned-talent-hash-dbc.json
+            /tmp/warrior-pinned-talent-hash-dbc.json
+          retention-days: 14
+          if-no-files-found: warn

@@ -1,0 +1,26 @@
+{
+  "schema": "ZrotGenericPinnedSimCTalentHashAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_trait_data_path": "engine/dbc/generated/trait_data.inc",
+  "source_variant": "original_generated_non_PTR",
+  "research_scope": "PINNED_SIMC_PROFILE_HASH_SELECTED_TRAIT_NOT_CURRENT_WOW_READY",
+  "current_retail_mechanics": "UNKNOWN",
+  "WCL_blind": "NOT_TOUCHED",
+  "MAIN_promoted": false,
+  "spec_key": "warrior_fury",
+  "class_id": 1,
+  "spec_id": 72,
+  "source_profile_path": "profiles/MID2/MID2_Warrior_Fury.simc",
+  "profile_git_blob": "3225992ed5b754ad5d61e8b785d9d859f1eed1be",
+  "cases": [
+    {
+      "trait_name": "Bloodthirst",
+      "trait_tree": 2,
+      "trait_node": 90392,
+      "trait_entry": 112261,
+      "trait_spell": 23881,
+      "source_action": "bloodthirst"
+    }
+  ]
+}
