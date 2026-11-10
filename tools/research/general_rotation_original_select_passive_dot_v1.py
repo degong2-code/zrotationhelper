@@ -113,7 +113,7 @@ def patch(raw,plan):
          out.count("if_expr->success()")==src.count("if_expr->success()") and
          out.count("rng().roll(")==src.count("rng().roll(") and
          out.count("queue_execute(")==src.count("queue_execute(") and
-         out.count("get_dot(")==src.count("get_dot(")+1 and # comment only
+         out.count("get_dot(")==src.count("get_dot(") and
          out.count("->find_dot(")==src.count("->find_dot(")+1 and
          out.count("->remains()")==src.count("->remains()")+1,
          "NON_PASSIVE_DOT_CAPTURE_OR_ORIGINAL_READY_MUTATION")
