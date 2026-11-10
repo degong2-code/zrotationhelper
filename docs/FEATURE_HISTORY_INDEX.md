@@ -31,6 +31,8 @@
 
 | **11-10: 전문화별 General Rotation 모델 생성** | 연구 엔진의 실제 산출물인 전문화별 전체 IF/ELSE 우선순위 Markdown·JSON 6개를 한 범용 변환기에서 생성 | [전문화별 모델 인덱스](GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md) · [범용 출력 엔진](../tools/research/general_rotation_spec_model_export_v1.py) · [증거 영수증](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_PER_SPEC_DRAFT_MODEL_EXPORT_20261110.json) · [CI #42747802703](https://github.com/degong2-code/zrotationhelper/actions/runs/42747802703) | 3전문화·286행 소스 초안 완료. **현재 Retail 최적성·스킬 READY·오프닝 전환·허수아비 피드백은 UNKNOWN** |
 
+| **11-10: 고술 General Rotation 첫 원본 선택 행 증거 단계** | 원본 Native가 선택한 APL 행과 부분 PRE를 114행 초안에 증거로 연결, 뒤늦게 Native IF TRUE로 미관측 PRE를 채우지 않음 | [전문화별 산출물](GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md) · [원본 선택행 overlay](../tools/research/general_rotation_spec_native_root_evidence_overlay_v1.py) · [첫 고술 증거 영수증](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SHAMAN_GENERAL_ROTATION_NATIVE_SOURCE_ROW_PRE_EVIDENCE_SUCCESSOR_20261110.json) · [원본 #42749660209](https://github.com/degong2-code/zrotationhelper/actions/runs/42749660209) · [모델 후속 #42750471988](https://github.com/degong2-code/zrotationhelper/actions/runs/42750471988) | **79 실제 선택행 / 5 동일 호출 IF 일치 / 59 SOURCE PRE UNKNOWN. 전체 경쟁 READY·최적성·허수아비 오류 UNKNOWN** |
+
 ## 2. 어떤 문제를 다시 조사하려는 경우
 
 - **SimC APL 조건식·타겟 분기:** 기존 [소스 AST](../tools/research/simc_apl_semantic_ir_v2.py) → [소스 가설 엔진](../tools/research/general_rotation_simc_e2e_research_engine_v1.py) → [타겟 분기 연구](../tools/research/general_rotation_simc_target_count_projection_v1.py) 순으로 확인한다.
