@@ -1,0 +1,40 @@
+# zRotationHelper — 기능별 개발 이력 탐색
+
+> **목적:** 과거에 무엇을 구현했는지, 무엇을 검증했는지, 이후 어떤 한계를 해결했는지를 **최초 구현 → 후속 개선 → 현재 상태** 순서로 찾는 길잡이. 이전 문서와 증거는 변경·삭제하지 않는다.
+>
+> **범위:** `work/gr-simc-st-2t-wcl-blind-20261102` 브랜치의 검증된 기록을 요약한 *탐색용 문서*다. 오래된 보스별/NSRT 문서의 제목은 역사적 사실이지 현재 제품 목표가 아니다.
+
+[연구 시작점](RESEARCH_INDEX.md) · [현재 상태](CURRENT_RESEARCH_STATUS.md) · [코드·증거·CI 링크](EVIDENCE_NAVIGATION_INDEX.md)
+
+## 1. 단계별 진화 지도
+
+| 단계 | 당시 해결하려던 문제 | 핵심 구현/증거 | 그 다음으로 남았던 한계 |
+| --- | --- | --- | --- |
+| 2026-10 말 ~ 11-02: 격리 엔진·정책 | 로컬 이력과 정책의 혼선을 분리 | [초기 SimC 인계 보존](BRANCH_SIMC_HANDOFF_20261031_V16.md), [공식 제품 범위](PRODUCT_SCOPE_GENERAL_ROTATION_DUMMY_TRAINER_20261102.md), [Engine-First 원칙](ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md) | 오래된 레이드 목표를 새 General Rotation 범위로 오인하지 않기 |
+| 11-04 ~ 11-05: SimC APL와 원본 선택 경로 | 이름만 같은 스킬이나 관측 시각을 실제 선택 원인으로 오인하지 않기 | [소스 AST](../tools/research/simc_apl_semantic_ir_v2.py), [원본 SELECT PRE](../tools/research/general_rotation_original_pre_capture_engine_v1.py), [옛 기능 기록](branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261104.md) | 순서/원본 상태와 완전 READY의 구분 |
+| 11-06: 원본 상태·경쟁 후보 | 실제 SimC 선택 전에 앞선 후보를 왜 배제했는지 탐색 | [선택 원본 evidence](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ORIGINAL_SELECTED_RETURN_NATIVE_ST_2T_20261106.json), [Arcane Orb source walk](branches/BR-GR-ST2T-WCL-BLIND-20261102/ARCANE_ORB_READY_SOURCE_WALK_20261106.md), [기존 선행 후보 증거](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ARCANE_2T_PRIOR_COMPETITOR_EXACT_READY_REASON_20261106.json) | 2건의 IF·전체 경쟁 READY 미확정 |
+| 11-09: General Rotation 가설 IR | 개별 스킬 분석을 타 전문화에도 적용할 수 있는 데이터 모델로 묶기 | [조건부 가설 IR](../tools/research/general_rotation_source_hypothesis_ir_v1.py), [원본 source bridge](../tools/research/general_rotation_original_source_evidence_bridge_v1.py), [실제 49 IF 근거](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_CONDITIONAL_IR_49_PROOF_BRIDGE_20261109.json) · [CI #42594344188](https://github.com/degong2-code/zrotationhelper/actions/runs/42594344188) | 44 IF UNKNOWN, 선택된 행동의 완전 READY 없음 |
+| 11-09: WCL 독립 경로 | SimC와 다른 방식으로 랭커 행동을 수집·재생·검증 | [WCL 콜드 스타트/재생](../tools/engine_first/fresh_wcl_engine_v1.py), [blind 후보 고정](../tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py), [기존 검증 근거](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_REAL_COLDSTART_DISJOINT_REPLAY_THIRD_REPORT_20261109.json) | 실제 READY, 장비·패치 동일성, 독립 후보의 과도한 인과 해석 차단 |
+| 11-09: WCL 관측 가능성 경계 | 숫자 ID·원본 상태의 사실과 스킬 효과의 의미를 분리 | [WCL aura PRE](../tools/engine_first/wcl_raw_actor_aura_temporal_pre_v1.py), [메커니즘 증거 게이트](../tools/research/general_rotation_mechanic_epoch_evidence_gate_v1.py), [CI #42624671123](https://github.com/degong2-code/zrotationhelper/actions/runs/42624671123) | 게임 내 최적 우선순위·허수아비 오류는 UNKNOWN |
+| 11-10: WCL 플레이어 빌드 | 실제 actor 특성·장비를 첫 행동 이전에 귀속 | [범용 combatantinfo PRE](../tools/engine_first/wcl_actor_combatantinfo_pre_v1.py) · [증거](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_COMBATANTINFO_PRE_ACTOR_BUILD_AND_PINNED_SOURCE_LOOKUPS_20261110.json) · [CI #42642973309](https://github.com/degong2-code/zrotationhelper/actions/runs/42642973309) | 동일 세트 ID ≠ 실제 4세트 효과 인증 |
+| 11-10: SimC 타겟 분기 | ST/2T/3+ 전환점이 전문화·특성별로 다름을 원본에서 추출 | [소스 타겟 투영](../tools/research/general_rotation_simc_target_count_projection_v1.py) · [증거](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_SOURCE_3PLUS_TARGET_AND_TALENT_PROJECTION_20261110.json) · [CI #42651150670](https://github.com/degong2-code/zrotationhelper/actions/runs/42651150670) | 소스 조건 가설이 실제 Native 행동이라는 뜻은 아님 |
+| 11-10: 3/5타겟 실제 Native 행동 | 타겟별 선택 행동을 실제 SimC에서 관측 | [Native 비교](../tools/research/general_rotation_simc_native_target_grid_v1.py) · [증거](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_ACTUAL_NATIVE_1_2_3_5_TARGET_GRID_20261110.json) · [CI #42716911610](https://github.com/degong2-code/zrotationhelper/actions/runs/42716911610) | APL의 특정 행 선택 이유 및 전체 READY는 별도 |
+| 11-10: 오프닝 구간 분리 | 임의 ‘전투 시작 10초’를 오프닝 종료로 오인하지 않기 | [버프 관측 구간](../tools/research/general_rotation_simc_burst_snapshot_interval_v1.py) · [증거](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_INITIAL_BURST_SNAPSHOT_EXIT_BOUNDS_20261110.json) · [CI #42718056047](https://github.com/degong2-code/zrotationhelper/actions/runs/42718056047) | 버프 종료 관측 구간 ≠ 공통 오프닝 종료 |
+| 11-10: 최소 충분 IF | 이미 수집된 PRE 값 중 실제 조건 결정에 필요하지 않은 값 식별 | [기존 IF 증명 확장](../tools/research/general_rotation_source_if_minimal_witness_v1.py), [원본 증거 재생](../tools/research/general_rotation_original_simc_if_minimal_frontier_v1.py) · [증거](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_SIMC_49_IF_PARTIAL_MINIMAL_WITNESS_20261110.json) · [CI #42721244205](https://github.com/degong2-code/zrotationhelper/actions/runs/42721244205) | 49 IF TRUE ≠ READY, 44 IF UNKNOWN 유지 |
+| 11-10: 경쟁 후보 범용화 | 기존 특화된 8건 배제 근거를 일반화된 연구 판정으로 보존 | [범용 경쟁 후보 frontier](../tools/research/general_rotation_source_competitor_frontier_v1.py) · [증거](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_COMPETITOR_READY_FRONTIER_20261110.json) · [CI #42723323648](https://github.com/degong2-code/zrotationhelper/actions/runs/42723323648) | 10건 중 2건 UNKNOWN, 선택된 스킬의 완전 READY 없음 |
+
+## 2. 어떤 문제를 다시 조사하려는 경우
+
+- **SimC APL 조건식·타겟 분기:** 기존 [소스 AST](../tools/research/simc_apl_semantic_ir_v2.py) → [소스 가설 엔진](../tools/research/general_rotation_simc_e2e_research_engine_v1.py) → [타겟 분기 연구](../tools/research/general_rotation_simc_target_count_projection_v1.py) 순으로 확인한다.
+- **선택 행동이 실제 원본인지:** [Native JSON2 경로](../tools/research/simc_native_json_sequence.py)와 [선택 호출·PRE 경로](../tools/research/general_rotation_original_foreground_dispatch_v1.py)를 먼저 확인한다. 동일 시간의 미래 상태를 끌어오지 않는다.
+- **왜 A 스킬이 B보다 먼저였는지:** [기존 Source READY/우선순위 원본 기록](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/ORIGINAL_SOURCE_DECISION_REASON_LEDGER_20261106.json) → [현재 범용 경쟁 후보 frontier](../tools/research/general_rotation_source_competitor_frontier_v1.py). 단순 반복 사용에서 필수 우선순위를 추론하지 않는다.
+- **WCL 랭커의 숫자 관측:** [WCL 독립 수집 엔진](../tools/engine_first/fresh_wcl_engine_v1.py) → [blind 후보 고정](../tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py) → [postlock 대조](../tools/research/general_rotation_wcl_postlock_source_ir_bridge_v1.py) 순서를 지킨다.
+- **실제 허수아비 피드백:** [Dummy UI/조사 디렉터리](../addons/research/ZRotDummyProbe/README.md)와 [연구 IR 피드백 초안](../tools/research/general_rotation_source_ir_dummy_feedback_v1.py)을 확인하되, 허수아비 실증 PASS로 간주하지 않는다.
+
+## 3. 기존 자료 보존과 역추적
+
+기존 장문의 [기능별 증거 인덱스](branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md), [상태·검증 누적 기록](branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_STATUS_20261109.md), [개발자 노트](branches/BR-GR-ST2T-WCL-BLIND-20261102/DEVELOPER_NOTES_20261105.md)는 **계속 원문 중심 기록**으로 남는다. 빠른 탐색은 본 문서와 [증거 지도](EVIDENCE_NAVIGATION_INDEX.md)를 사용한다.
+
+과거 [Gen1~Gen6 이전 인계 아카이브](../_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/)는 당시 의사결정·실패 원인에 관한 역사 자료다. 실제 새 채팅의 출발점은 [최신 branch-local 인계](../_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json)이고, MAIN 승격 권한은 여전히 MAIN owner에게만 있다.
+
+**분류 원칙:** OBSERVED(행동 관측) / SOURCE_HYPOTHESIS(SimC 가설) / INDEPENDENT_REPLAY(독립 검산) / UNKNOWN(근거 부족) / FROZEN(과거 승인 근거 불변). CI PASS만으로 단계를 자동 승격하지 않는다.
