@@ -21,7 +21,6 @@ import subprocess
 
 SCHEMA="ZrotOriginalNativeGenericSpellDataDependencyLinkV1"
 ADAPTER_SCHEMA="ZrotOriginalNativeSpellDependencyAdapterV1"
-UPSTREAM="b522cded8c26b97dac03fdf56e57a03ec7e8faa6"
 POLICY="ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1"
 LIFECYCLE_SCHEMA="ZrotOriginalSimCActionLifecycleSourceBoundReplayV1"
 PINNED_CTOR_GUARD=r"if ( s_data == spell_data_t::not_found() )"
@@ -52,7 +51,7 @@ def gitblob(data:bytes):
 def valid_adapter(plan:dict):
     need(plan.get("schema")==ADAPTER_SCHEMA and
          plan.get("policy_id")==POLICY and
-         plan.get("source_revision")==UPSTREAM and
+         re.fullmatch(r"[0-9a-f]{40}",plan.get("source_revision","")) is not None and
          re.fullmatch(r"[a-z_]+",plan.get("spec_key","")) is not None and
          re.fullmatch(r"[0-9a-f]{40}",plan.get("profile_git_blob","")) is not None and
          isinstance(plan.get("cases"),list) and len(plan["cases"])<=16 and
@@ -187,7 +186,7 @@ def link(cpp:str,actioncpp:str,profile:bytes,life:dict,plan:dict)->dict:
            "causal_scope":"SOURCE_CONSTRUCTOR_NOT_FOUND_BACKGROUND_ONLY_NOT_GAMEPLAY_PRIORITY"
         })
     return {
-      "schema":SCHEMA,"policy_id":POLICY,"source_revision":UPSTREAM,
+      "schema":SCHEMA,"policy_id":POLICY,"source_revision":plan["source_revision"],
       "spec_key":plan["spec_key"],"profile_git_blob":gitblob(profile),
       "source_cpp_module":plan["source_class_path"],
       "verified_native_lifecycle_sha256":None,
@@ -257,6 +256,22 @@ if ( name == "beta" ) return new beta_t( this, options_str );
     need(overload_route["source_constructor_first_spell_data_input"]==
          "p->talents.fury.beta",
          "FACTORY_SELECTED_WRONG_NATIVE_CONSTRUCTOR_OVERLOAD")
+    # Future source-pinned seasons must be config changes, not edits to the
+    # Generic Engine's specialization-independent code.
+    dummy={"schema":ADAPTER_SCHEMA,"policy_id":POLICY,
+           "source_revision":"1"*40,"spec_key":"fictional_spec",
+           "profile_git_blob":"2"*40,
+           "cases":[{"targets":1,"source_rank":1,"source_list":"a",
+                     "source_action":"alpha","expected_talent_field":"alpha",
+                     "factory_class":"alpha_t","factory_parent_base":"base_t",
+                     "expected_talent_label":"Alpha"}]}
+    need(valid_adapter(dummy),"GENERIC_ADAPTER_REJECTS_FUTURE_PINNED_REVISION")
+    try:
+        valid_adapter({**dummy,"source_revision":"invalid"})
+    except LinkError:
+        pass
+    else:
+        raise AssertionError("INVALID_SIMC_COMMIT_ACCEPTED")
     return {"schema":SCHEMA,"status":"PASS_SYNTHETIC_STATIC",
             "negative_controls":n,"cpp_factory_dependency_route":"PASS",
             "opaque_loadout_does_not_prove_selected_talent":True,
@@ -276,9 +291,9 @@ def main():
     root=a.source_root.resolve(strict=True)
     rev=subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],check=True,
                        text=True,capture_output=True).stdout.strip()
-    need(rev==UPSTREAM,"ORIGINAL_SIMC_SOURCE_COMMIT_NOT_PINNED")
     plan=json.loads(a.adapter.read_bytes())
     valid_adapter(plan)
+    need(rev==plan["source_revision"],"ORIGINAL_SIMC_SOURCE_COMMIT_NOT_PINNED")
     classpath=plan["source_class_path"]
     profpath=plan["source_profile_path"]
     need(classpath.startswith("engine/class_modules/sc_") and
