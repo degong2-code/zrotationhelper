@@ -27,6 +27,8 @@
 
 | 11-10: 3클래스 타겟·특성 루트 분기 | Fury/Arcane 기존 172 APL 행 분석을 고술까지 확장한 286행/19리스트에 적용하고, 12개 가상 상황에서 동일 코어가 CALL/RUN IF를 독립 평가하는지 확인 | [범용 source guard frontier](../tools/research/general_rotation_source_guard_scenario_frontier_v1.py) · [12개 타겟·빌드 입력](../tools/research/fixtures/general_rotation_source_guard_scenarios_three_class_v1.json) · [증거](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_THREE_CLASS_TARGET_BUILD_SOURCE_GUARD_FRONTIER_20261110.json) · [CI #42742497979](https://github.com/degong2-code/zrotationhelper/actions/runs/42742497979) | 48개 루트 IF: TRUE 24/FALSE 24. **시나리오 입력은 Native PRE가 아니며 실제 리스트 진입·READY·오프닝 종료는 UNKNOWN** |
 
+| 11-10: 세 번째 전문화 실제 Native 콜드 스타트·오프닝 표본 통합 | 앞선 Fury·Arcane 8개 Native 사례를 재수집하지 않고 고술 1/2/3/5타겟 4사례 신규 실행. 여러 빌드의 서로 다른 실행 근거를 섞지 않고 3클래스 모델로 결합 | [범용 추가 전문화 Native 수집 검증기](../tools/research/general_rotation_simc_marginal_native_cold_start_v1.py), [기존 Native 코호트+신규 코호트 source IR 결합기](../tools/research/general_rotation_simc_native_source_portfolio_v1.py) · [원본·검증 영수증](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_THREE_CLASS_ORIGINAL_SIMC_NATIVE_OPENING_PORTFOLIO_20261110.json) · [Native #42744084203](https://github.com/degong2-code/zrotationhelper/actions/runs/42744084203) · [통합 #42745179980](https://github.com/degong2-code/zrotationhelper/actions/runs/42745179980) | 실제 Native 행동 464건, 첫 10초 표본 185건, 12타겟 사례. **정확 선택 행·READY·오프닝 종료는 UNKNOWN** |
+
 ## 2. 어떤 문제를 다시 조사하려는 경우
 
 - **SimC APL 조건식·타겟 분기:** 기존 [소스 AST](../tools/research/simc_apl_semantic_ir_v2.py) → [소스 가설 엔진](../tools/research/general_rotation_simc_e2e_research_engine_v1.py) → [타겟 분기 연구](../tools/research/general_rotation_simc_target_count_projection_v1.py) 순으로 확인한다.
