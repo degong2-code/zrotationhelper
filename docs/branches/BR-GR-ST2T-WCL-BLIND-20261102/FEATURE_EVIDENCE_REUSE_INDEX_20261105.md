@@ -1,4 +1,12 @@
 # zRotationHelper — Feature Evidence Reuse Index (2026-11-05)
+## 2026-11-10 — Scope Gen9 — focused source-profile static IF (REUSE / CONNECT)
+
+**Inputs:** Reuse [previous focused original selected-root ST/AoE 5-gap CI #42805065697](https://github.com/degong2-code/zrotationhelper/actions/runs/42805065697) and its immutable focused JSON SHA256 `2d01d4e0b1c932e69b461b8db3f52d406f53bf74c6ce6c05efafb0b24b653979`; reuse `general_rotation_original_talent_hash_dbc_v1.py` and original pinned SimC profile source, no new Native/WCL/Blizzard requests.
+
+**Implementation and evidence:** `tools/research/general_rotation_original_profile_static_if_guard_v1.py`; external pinned source fixture `tools/research/fixtures/zrot_shaman_priority_static_talent_v1.json`, exact same-root bridge `tools/research/fixtures/zrot_shaman_profile_static_if_guard_v1.json`; [Actions #42808161385](https://github.com/degong2-code/zrotationhelper/actions/runs/42808161385) **SUCCESS 2/2 Python 3.12/3.14**. Original source profile Sundering unselected, Surging Totem rank1 and Fire Nova rank1. AoE 940ms `aoe#19 voltaic_blaze` source IF TRUE through Fire Nova; original same-call Native composite FALSE, underlying physical READY reason UNKNOWN. Other four focus IF remain UNKNOWN due to DoT remains/ticking. Verified source static IF result SHA256 `1c6c906105b2f10d516f7470cc49b1eb98649f579005505ce7f8abf6e9e6af70`.
+
+**Next:** Original same-call passive cooldown readiness/component probe for AoE rank19; keep source hypothesis and WCL blind separate, no gameplay priority/target-dummy mistake promotion. Durable receipt: `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_SHAMAN_PROFILE_STATIC_IF_GUARDS_SUCCESSOR_20261110.json`. MAIN, Gen9 and FROZEN unchanged.
+
 
 ## 2026-11-10 — Original pinned SimC talent hash → generated trait DBC → selected/nonselected source profile (GENERIC REUSE / EXTEND / CONNECT)
 
