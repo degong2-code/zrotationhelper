@@ -1,5 +1,13 @@
 # 2026-11-09 branch-only handoff preparation worklog
 
+## 2026-11-10 — Gen8 인계 정리 작업 기록 (새 제품 연구 실행 없음)
+
+사용자 요청에 따라 GitHub 격리 브랜치의 실제 준비 전 HEAD `9832f0a889405f69cbf1da2cd303b85149063a78`, 기준 main `4790f77f76a75f26ff0558d1d18c16cd9d630c4b`를 각각 조회했다. 공식 정책 원본 git blob `14b9f5174a9d1652a56dcca03af1f2302b78c22d` / SHA256 `157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295`, Gen7 원본 SHA256 `ad5a68834f6341029ba7933e25ef65c06f771c1aba0b960508836bb10da577c6`를 독립 계산·대조했다. Gen7 JSON 원본을 byte-for-byte 변경 없이 archive에 추가하고 Gen8 `LATEST_HANDOFF.json`의 정책 스냅샷·parent SHA·다음 행동/불확실성·로컬 소유권을 갱신했다. 독립 프롬프트 `handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_SCOPEGEN8_20261110.md` 및 branch-only compact receipt를 작성하고 Gen8 검증이 되도록 기존 연속성 CI의 세대 경계만 확장했다.
+
+최신 개발 증거는 Gen7 이후의 **고술 ST 40 + AoE 39 = 79 exact selected source rows**, 독립 IF 일치 5, 명시 IF 없음 15, 미관측 PRE 59 UNKNOWN (#42749660209 및 #42750471988 각 3/3 PASS). 첫 overlay 실패 #42750341471은 Native POST IF TRUE를 독립 PRE로 오인한 검증 오류였으며 수정 후 raw evidence 불변이다. 3클래스 286 APL행·12 Native 사례 464 행동·3 Markdown/3 JSON은 앞선 유효한 기록을 재사용했다. `docs/CURRENT_RESEARCH_STATUS.md`의 구형 Session Exact Next와 오프닝 row의 고술 선택행 UNKNOWN 표기를 최신 범위로 정정했다. 다른 FEATURE/DEVELOPER/EVIDENCE 인덱스는 이미 최신 결과를 기록해 중복 수정하지 않았다.
+
+**인계 요청으로 고술 READY 연구는 중단:** 다음 세션에선 79개 실제 루트의 중대 후보를 선택해 원본 같은 호출에서 상위 우선순위 경로·물리 READY를 복원한다. 이 인계 중 신규 SimC C++·WCL API·실제 플레이·브라우저 자동화는 없으며, 과거 Actions를 새로운 제품 검증이라고 재표기하지 않는다. MAIN/FROZEN·Seq578·Seq637는 불변이다. Gen8 연속성 CI 및 링크 검사 결과는 최종 GitHub Actions 실행 완료 후 별도로 확인한다.
+
 **Request:** Prepare the next chat with independently checked GitHub state; summarize actual verified development, gaps, efficient reuse and roadmap. This is an **in-current-chat handoff preparation approval**, NOT a future new chat's implementation approval.
 
 1. Checked uploaded scope lock SHA256 `157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295` and GitHub Git blob `14b9f5174a9d1652a56dcca03af1f2302b78c22d`; same bytes. Read scope natural-language guidance, AGENTS, engine-first charter, continuity protocol.
