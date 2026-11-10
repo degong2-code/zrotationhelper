@@ -1,5 +1,17 @@
 # zRotationHelper — Feature Evidence Reuse Index (2026-11-05)
 
+## 2026-11-10 — Original source IF domain counterfactual without a new Native build (REUSE + EXTEND)
+
+**REUSE:** Old exact original SELECT-PRE + 12 source numeric fields in `zrot-gr-original-selected-extra-pre-native-v1`, [Actions #42589894203](https://github.com/degong2-code/zrotationhelper/actions/runs/42589894203), ZIP sha256 `d14e1bc622e07db8204ebf95a19c3a52c91620bb90c19247e03fcf1dbe86a48b`, raw Arcane 2T native log SHA `8c28af727bf95e02bec81b7ebc2752f0121137728647e699fb34ac097cd9c892`. Same original source C++ semantics pin: `player.cpp` talent enabled bool, `talent.hpp` enabled definition, `action.cpp` prev_gcd bool. This was already present in code & logs; not a fresh game data fetch.
+
+**EXTEND:** Source-neutral `tools/research/general_rotation_original_attempt_bounded_if_v1.py` plus source/actor-specific external adapter `tools/research/fixtures/general_rotation_original_source_bounded_if_adapter_v1.json`, SHA-pins original source/log/selected case receipt and verifies PRE before native POST + exact source row/dispatch/action pointers. Evaluates all `2×2` source-justified boolean domain assignments. For 7667ms prior candidate root 340, source IF **all FALSE**, minimal necessary original PRE `buff.arcane_salvo.react=3`, `buff.arcane_salvo.stack=4`; for 14950ms prior root 609, **2 FALSE/2 TRUE**, source IF UNKNOWN, exactly one influential unobserved symbol `prev_gcd.1.arcane_surge`. In that second case, knowing `talent.orb_barrage` cannot by itself change/resolve the IF.
+
+**Do not conflate historical separate Native roots:** #42186794065 original competitor ledger (root 901/1610, 8/10 excluded, 2 UNKNOWN) stays unchanged. This success is an independent original run: one scoped source IF FALSE, another UNKNOWN, not an official 9/10 claim on the same prior cohort. No entire spell NOT_READY / competitor FULL READY / global source route or user wrong cast supported.
+
+[Final CI #42729673496](https://github.com/degong2-code/zrotationhelper/actions/runs/42729673496) **3/3 SUCCESS** (Python 3.12/3.14 + real same run raw root replay), derived JSON SHA256 `117137f1d6c09533d582a5a18bd3a616e786d106ebb40977cd63a0a8f9b2f312`; artifact 13725090073. Permanent receipt `active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_ORIGINAL_SAME_RUN_BOUNDED_IF_AND_SINGLE_PRE_FRONTIER_20261110.json`.
+
+**NEXT:** only same-run previous-GCD source PRE for source root 609 if necessary. Avoid meaningless repeats of original four-case Native source collection, WCL blind data and full same-root READY; capture not shown yet is still UNKNOWN.
+
 ## 2026-11-10 — Generic competing candidate source-negative proof (REUSE + EXTEND)
 
 **REUSE**: original Arcane source method/selected root receipts from GitHub Actions #42186013774 and #42186794065, `simc_apl_semantic_ir_v2.py` typed IF, `general_rotation_decision_proof_engine_v1.py` open-world gates, source negative minimal witness. **EXTEND**: `general_rotation_source_competitor_frontier_v1.py` with external legacy ledger/SpecAdapter mapping; applies to any original ordered source-list evidence of the same verified protocol. It verifies source row identity/rank, original root ID and old SHA-pinned JSON before converting original independently proven necessary FALSE into local NOT_READY. Native POST false, selected source IF true and selected action never become full READY.
