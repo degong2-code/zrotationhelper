@@ -1,0 +1,129 @@
+{
+  "schema": "ZrotGeneralRotationShamanOriginalReadyBranchCausalSuccessorV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+  "date": "2026-11-10",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "scope": "PINNED_ORIGINAL_SIMC_GENERAL_ROTATION_RESEARCH_NOT_CURRENT_RETAIL_PRIORITY",
+  "original_SimC_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "original_profile_path": "profiles/MID2/MID2_Shaman_Enhancement.simc",
+  "original_profile_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "source_reuse": [
+    "simc_original_select_if_pre_witness_v1.py",
+    "general_rotation_original_attempt_frontier_v1.py",
+    "general_rotation_original_candidate_stage_replay_v1.py",
+    "general_rotation_original_action_lifecycle_v1.py",
+    "general_rotation_original_talent_hash_dbc_v1.py",
+    "general_rotation_original_profile_static_if_guard_v1.py"
+  ],
+  "new_generic_producer": "tools/research/general_rotation_original_ready_branch_probe_v1.py",
+  "new_generic_replayer": "tools/research/general_rotation_original_ready_branch_replay_v1.py",
+  "external_spec_adapter": "tools/research/fixtures/zrot_shaman_original_ready_branch_focus_v1.json",
+  "implementation": {
+    "original_action_cpp_source": "engine/action/action.cpp",
+    "pinned_original_cpp_git_blob": "399ecd9453b3f30bfc2ebf2b3ffd8f56cce8f8d4",
+    "original_cpp_parent_PATCH_RECEIPT_REQUIRED": "/tmp/shaman-original-if-prepare.json",
+    "parent_original_if_patch_schema": "ZrotOriginalSimCSelectedRowSameCallIFSourcePatchV1",
+    "no_new_original_ready_calls": true,
+    "no_new_IF_success_calls": true,
+    "no_new_RNG_calls": true,
+    "no_new_cooldown_queries": true,
+    "no_new_queue_calls": true,
+    "print_logs_only_on_original_return_branches": true,
+    "no_class_specific_conditions_in_generic": true
+  },
+  "verification": {
+    "CI_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42811258250",
+    "CI_run_id": 42811258250,
+    "CI_verified_commit": "18e8ee7816452e5f9c38b52a170bf2a3a5e34e09",
+    "result": "SUCCESS_3_OF_3",
+    "Python_3_12_synthetic": "PASS",
+    "Python_3_14_synthetic": "PASS",
+    "original_pinned_SimC_CXX_build": "PASS",
+    "original_3T_trace_replay": "PASS",
+    "original_1T_3T_action_tokens_parity": "PASS",
+    "original_1T_3T_first_10_seconds_exact_time_parity": "PASS",
+    "original_1T_3T_first10_counts": {
+      "1T": 16,
+      "3T": 16
+    },
+    "original_ST_frontier_SHA256_preserved": "79d372d06494cc8779daf09ee00fc4676ba03b5f0bbeed8c60d672f9677131aa",
+    "original_AoE_frontier_SHA256_preserved": "446ce44e36b73b8bf93f6b4845a9f3da912350cb078e6d8190976e8df5a2b369",
+    "original_ST_stage_SHA256_preserved": "dcbdee7fdf982d573e2ba8bfcb850565ee02e91ddae2780ebf1c23b8cadb6e6a",
+    "original_AoE_stage_SHA256_preserved": "6c79a4ea67cc61014cdbc309044f703420d2515e6f8a6529e2aae73c603a59b5",
+    "original_action_ready_branch_patch_receipt_SHA256": "f3662f03ff6dfd0b9315602f6757db838e9958dda4da357eacd06c994459726c",
+    "original_action_ready_branch_evidence_SHA256": "7921262f2fd18aa52075be05b9eec3e2ff59849953cb5225a393cc30845740c6",
+    "artifact_id": 13763625526,
+    "artifact_name": "zrot-gr-original-branch-cause-18e8ee7816452e5f9c38b52a170bf2a3a5e34e09",
+    "artifact_expires_UTC": "2026-11-24T12:01:43Z",
+    "previous_failed_run": 42810975447,
+    "previous_failed_run_cause": "new action.cpp probe initially assumed pristine file instead of the prior certified original Native IF patch; corrected with prior SHA256 receipt binding",
+    "producer_validator_shared_error_caveat": "The new marker is written by a C++ source patcher and parsed by a Python consumer; original action timestamps and old stage/frontier bytes remain independently pinned and identical, but WoW-current physical READY is not independently observed"
+  },
+  "source_case": {
+    "source_spec": "shaman_enhancement",
+    "encounter_specific": false,
+    "targets": 3,
+    "original_selected_root": {
+      "t_ms": 940,
+      "source_list": "aoe",
+      "rank": 20,
+      "action": "crash_lightning",
+      "original_call_id": 74
+    },
+    "upper_competitor": {
+      "source_list": "aoe",
+      "rank": 19,
+      "action": "voltaic_blaze",
+      "original_call_id": 73,
+      "source_sha256": "9abf05230af631e6efcc633023599e3a1edbf9791c8f3f165a3d4d0f5ea00aaa"
+    },
+    "source_if": "talent.fire_nova.enabled|set_bonus.midnight_season_2_2pc",
+    "source_if_static_profile_verdict": "TRUE_VIA_SELECTED_FIRE_NOVA_RANK_1",
+    "original_native_IF_evaluator_executed_on_this_call": false,
+    "reason_IF_evaluator_not_executed": "action_t::action_ready calls virtual ready() before if_expr->success(); ready() failed in pinned original CXX branch",
+    "native_original_action_ready_result": "FALSE",
+    "exact_in_call_native_branch_markers": [
+      "BASE_COOLDOWN_NOT_READY",
+      "COMPOSITE_BASE_READY_FALSE"
+    ],
+    "first_original_native_failure_guard": "action_t::ready()->!cooldown->is_ready()",
+    "original_native_cause": "PINNED_SIMC_COOLDOWN_GATE_NOT_READY",
+    "source_current_cooldown_remaining_value": "NOT_OBSERVED",
+    "source_queue_tolerance_value": "NOT_OBSERVED",
+    "independent_gameplay_physical_NOT_READY": "UNKNOWN",
+    "decision_conclusion": "The source-profile IF is statically TRUE, but original Native action_ready returned FALSE at the cooldown readiness check, preceding original IF evaluation. Thus the candidate was not chosen in this exact original SimC source root.",
+    "conclusion_scope": "SAME_ORIGINAL_SOURCE_PROFILE_PINNED_CXX_AND_DECISION_ONLY"
+  },
+  "other_cases": {
+    "ST_942ms_stormstrike": "previous_same_root_pre_source_if_gap_preserved",
+    "AoE_940ms_rank1_voltaic_blaze": "dot.flame_shock.remains_PRE_UNKNOWN",
+    "AoE_940ms_rank2_flame_shock": "ticking_PRE_UNKNOWN",
+    "ST_942ms_rank2_voltaic_blaze": "dot.flame_shock.remains_PRE_UNKNOWN",
+    "ST_942ms_rank3_flame_shock": "ticking_PRE_UNKNOWN"
+  },
+  "source_WCL_separation": {
+    "SimC_first": true,
+    "WCL_blind_num_candidates": "NOT_LOCKED",
+    "WCL_independent_postlock_holdout": "NOT_RUN",
+    "no_SimC_source_semantic_injected_to_WCL_blind": true
+  },
+  "product_status": {
+    "opener_end": "UNKNOWN",
+    "current_Retail_patch_and_mechanic_parity": "UNKNOWN",
+    "current_Retail_priority": "UNKNOWN",
+    "dummy_wrong_cast": "UNKNOWN",
+    "original_source_branch_cause_closed_for_this_root": true,
+    "new_user_general_rotation_priority_rules_promoted": 0
+  },
+  "product_exact_next": "Complete current Retail General Rotation opener and target-count-conditioned priorities, verified using independent WCL blind candidate lock and postlock SimC/Blizzard; evaluate dummy practice only with observable state.",
+  "session_exact_next": "Reuse this proven source-root Native cooldown-gate cause. For ST/AoE other four cases, use read-only original same-call strict PRE Dot Flame Shock remains/ticking, avoiding mutating lookups, then compare evidence-bound IF states. Independently lock WCL blind numeric candidates before SimC semantic postlock reconciliation and independent holdout; do not promote user priority yet.",
+  "branch_only": true,
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "handoff_Gen9_unchanged": true
+}
