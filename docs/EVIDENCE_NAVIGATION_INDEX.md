@@ -21,6 +21,9 @@
 
 | 원본 3클래스 ST/2T/AoE 특성 분기 평가 | [기존 파서·source IR 재사용](../tools/research/general_rotation_source_guard_scenario_frontier_v1.py), [12개 명시적 가상 입력](../tools/research/fixtures/general_rotation_source_guard_scenarios_three_class_v1.json) | [286 APL 행 / 19 리스트 / 12시나리오 / 루트 CALL·RUN 48개 IF](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_THREE_CLASS_TARGET_BUILD_SOURCE_GUARD_FRONTIER_20261110.json) | [#42742497979](https://github.com/degong2-code/zrotationhelper/actions/runs/42742497979) **3/3 PASS, 원본 소스 조건 TRUE24/FALSE24, 전투 관측 PRE·READY·오프닝 종료는 UNKNOWN** |
 
+| 고술 신규 Native 원본 1/2/3/5 | [추가 전문화 전용 범용 리플레이](../tools/research/general_rotation_simc_marginal_native_cold_start_v1.py), 기존 [Native 표본 분석](../tools/research/general_rotation_simc_native_target_grid_v1.py) 재사용 | [고술 4개 새 원본 실행 160건](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_THREE_CLASS_ORIGINAL_SIMC_NATIVE_OPENING_PORTFOLIO_20261110.json) | [#42744084203](https://github.com/degong2-code/zrotationhelper/actions/runs/42744084203) — **3/3 PASS, 동일 바이너리/seed/profile 내 타겟 수 비교, 실행 CALL/READY 입증 아님** |
+| 3클래스 실제 Native + 소스 우선순위 연구 모델 | [기존 2클래스 원본 8실행과 새 고술 4실행 결합기](../tools/research/general_rotation_simc_native_source_portfolio_v1.py) | [기존 8실행 + 신규 4실행 = 12실행·원본 464행, 첫 10초 185건](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_THREE_CLASS_ORIGINAL_SIMC_NATIVE_OPENING_PORTFOLIO_20261110.json) | [#42745179980](https://github.com/degong2-code/zrotationhelper/actions/runs/42745179980) — **3/3 PASS, 각 코호트 SHA 검증, CALL/RUN source 가설과 Native 행동 이름 동시 보존; full READY·opener 종료 UNKNOWN** |
+
 ## WCL 독립 연구 경로
 
 | 기능 | 원본·구현 | 검증 영수증 | 실제 CI / 근거 수준 |
