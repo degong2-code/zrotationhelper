@@ -230,31 +230,31 @@ if ( name == "alpha" ) return new alpha_t( this, options_str );
         except LinkError:n+=1
         else:raise AssertionError("ACCEPTED_FOREIGN_CXX_TALENT_SOURCE_DEPENDENCY")
     need(n==8,"NEGATIVE_LINKAGE_COHORT_INCOMPLETE")
-    nested='''struct beta_t : public warrior_attack_t
+    nested='''struct beta_t : public generic_attack_base_t
 {
- beta_t( warrior_t* p, util::string_view options_str )
- : warrior_attack_t( "beta", p, p->talents.fury.beta ) { }
+ beta_t( fake_actor_t* p, util::string_view options_str )
+ : generic_attack_base_t( "beta", p, p->talents.branch.beta ) { }
 };
 if ( name == "beta" ) return new beta_t( this, options_str );
 '''
     nested_case={"source_action":"beta","factory_class":"beta_t",
-                 "factory_parent_base":"warrior_attack_t",
-                 "expected_spell_data_input":"p->talents.fury.beta"}
+                 "factory_parent_base":"generic_attack_base_t",
+                 "expected_spell_data_input":"p->talents.branch.beta"}
     nested_route=extract_route(nested,nested_case)
     need(nested_route["source_constructor_first_spell_data_input"]==
-         "p->talents.fury.beta" and
+         "p->talents.branch.beta" and
          nested_route["source_talent_registry_label"]=="UNKNOWN",
          "NESTED_TALENT_SOURCE_ONLY_GENERIC_ROUTING_FAIL")
     # Correctly select the factory-facing constructor when source declares
     # an additional internal background constructor overload.
     overloaded=nested.replace(
         'if ( name == "beta" )',
-        'beta_t( util::string_view label, warrior_t* p )'
-        ' : warrior_attack_t( "beta", p, p->talents.fury.other ) { }\n'
+        'beta_t( util::string_view label, fake_actor_t* p )'
+        ' : generic_attack_base_t( "beta", p, p->talents.branch.other ) { }\n'
         'if ( name == "beta" )')
     overload_route=extract_route(overloaded,nested_case)
     need(overload_route["source_constructor_first_spell_data_input"]==
-         "p->talents.fury.beta",
+         "p->talents.branch.beta",
          "FACTORY_SELECTED_WRONG_NATIVE_CONSTRUCTOR_OVERLOAD")
     # Future source-pinned seasons must be config changes, not edits to the
     # Generic Engine's specialization-independent code.
