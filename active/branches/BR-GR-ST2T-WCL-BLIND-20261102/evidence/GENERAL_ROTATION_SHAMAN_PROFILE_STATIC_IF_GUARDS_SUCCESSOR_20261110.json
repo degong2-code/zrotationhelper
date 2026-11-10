@@ -1,0 +1,143 @@
+{
+  "schema": "ZrotGeneralRotationShamanSourceStaticIfGuardSuccessorV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+  "date": "2026-11-10",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "provenance": "SOURCE_PROFILE_GUARD_REPLAY_NOT_LIVE_READINESS_OR_WCL_VALIDATION",
+  "original_simc_source": "simulationcraft/simc@b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "original_source_profile_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "producer": "tools/research/general_rotation_original_profile_static_if_guard_v1.py",
+  "source_adapter": "tools/research/fixtures/zrot_shaman_priority_static_talent_v1.json",
+  "decision_adapter": "tools/research/fixtures/zrot_shaman_profile_static_if_guard_v1.json",
+  "workflow": ".github/workflows/zrot-gr-profile-static-if-guard-v1.yml",
+  "validated_commit": "8fee296b329cf574d04a35f177030a8c15c6092b",
+  "verification": {
+    "CI_run": 42808161385,
+    "CI_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42808161385",
+    "Python_3_12": "PASS",
+    "Python_3_14": "PASS",
+    "original_simc_hash_decoder_reused": true,
+    "original_source_3_traits_verified": true,
+    "previous_independent_same_root_gap_reused_sha256": "2d01d4e0b1c932e69b461b8db3f52d406f53bf74c6ce6c05efafb0b24b653979",
+    "fail_closed_source_static_negative_controls": 4,
+    "fail_closed_mutated_input_controls": 4,
+    "source_static_talent_json_sha256": "f87adcd6546a3e8baa8dcd1f32adcc48bedb0b0fffa767b96ad9a7ccbf4870b0",
+    "source_static_if_projection_json_sha256": "1c6c906105b2f10d516f7470cc49b1eb98649f579005505ce7f8abf6e9e6af70",
+    "artifact_id_python_3_12": 13761815340,
+    "artifact_id_python_3_14": 13760531481,
+    "offline_recheck_sha256": "MATCHES_CI_LOGS",
+    "new_Native_builds": 0,
+    "new_WCL_API_calls": 0,
+    "new_Blizzard_API_calls": 0,
+    "complete_CALL_RUN_proven": false,
+    "physical_READY_proven": false
+  },
+  "source_talent_results": [
+    {
+      "name": "Sundering",
+      "node": 80975,
+      "entry": 101841,
+      "spell": 197214,
+      "source_profile_rank": 0,
+      "source_status": "PROFILE_NOT_SELECTED_NOT_GRANTED"
+    },
+    {
+      "name": "Surging Totem",
+      "node": 94877,
+      "entry": 117474,
+      "spell": 455630,
+      "source_profile_rank": 1,
+      "source_status": "PROFILE_SELECTED_RANK",
+      "has_starter_grant_in_source_DBC": true
+    },
+    {
+      "name": "Fire Nova",
+      "node": 109909,
+      "entry": 136176,
+      "spell": 1260666,
+      "source_profile_rank": 1,
+      "source_status": "PROFILE_SELECTED_RANK"
+    }
+  ],
+  "scoped_decision_results": [
+    {
+      "context": "ST_1T",
+      "original_root": "single_sb#4 stormstrike",
+      "original_root_ms": 942,
+      "source_IF_static_unknown": [
+        {
+          "rank": 2,
+          "action": "voltaic_blaze",
+          "unobserved": "dot.flame_shock.remains"
+        },
+        {
+          "rank": 3,
+          "action": "flame_shock",
+          "unobserved": "ticking"
+        }
+      ],
+      "note": "Source time<5 evaluable from original same-root Native clock (0.942 s) but DoT remains UNKNOWN; no independent full readiness"
+    },
+    {
+      "context": "AoE_3T",
+      "original_root": "aoe#20 crash_lightning",
+      "original_root_ms": 940,
+      "source_IF_static_unknown": [
+        {
+          "rank": 1,
+          "action": "voltaic_blaze",
+          "unobserved": "dot.flame_shock.remains"
+        },
+        {
+          "rank": 2,
+          "action": "flame_shock",
+          "unobserved": "ticking"
+        }
+      ],
+      "source_IF_static_true": [
+        {
+          "rank": 19,
+          "action": "voltaic_blaze",
+          "source_IF": "talent.fire_nova.enabled|set_bonus.midnight_season_2_2pc",
+          "source_profile_fact": "Fire Nova selected rank1",
+          "native_composite_return": "FALSE",
+          "independent_cooldown_charge_resource_TARGET_ready": "UNKNOWN",
+          "tier_set": "UNKNOWN"
+        }
+      ],
+      "note": "Native FALSE is not proof of the reason. No physical WoW NOT_READY inference"
+    }
+  ],
+  "source_code_read_only_research": {
+    "original_action_ready_path": "engine/action/action.cpp::action_t::action_ready() checks ready(), target, if_expr and other user options",
+    "source_generic_ready_path": "engine/action/action.cpp::action_t::ready() checks cooldown.is_ready(), internal cooldown, movement, affordability, casting",
+    "original_cooldown_is_ready": "engine/sim/cooldown.cpp::cooldown_t::is_ready() const; it can include spell queueing tolerance",
+    "original_cooldown_remains": "engine/sim/cooldown.cpp::cooldown_t::remains() const",
+    "original_native_component_values_for_AoE_940ms": "NOT_OBSERVED",
+    "inference_candidate": "Voltaic Blaze at 940ms could fail a non-IF readiness component; do not claim cooldown unless original same-call PRE proves it."
+  },
+  "claim_boundary": {
+    "talent_selection": "PINNED_SOURCE_PROFILE_ONLY",
+    "selected_root_exact_action": "ALREADY_CERTIFIED_PREVIOUS_Native",
+    "source_IF_AoE_rank19": "TRUE_SOURCE_STATIC_PROFILE",
+    "original_Native_action_ready_AoE_rank19": "FALSE_OBSERVED_PREVIOUS_CI",
+    "causal_Native_ready_guard": "UNKNOWN",
+    "current_Retail_mechanics": "UNKNOWN",
+    "general_rotation_rule_promotions": 0,
+    "actual_dummy_mistake": "UNKNOWN",
+    "WCL_blind_candidate_lock": "NOT_PERFORMED_FOR_THESE_ROOTS",
+    "MAIN_promoted": false,
+    "FROZEN_modified": false
+  },
+  "reuse": "REUSE existing original profile talent hash parser, DBC and certified original Native same-root gap; CONNECT without SimC CXX build",
+  "next_exact": "Measure source-neutral read-only original cooldown readiness/components for AoE rank19 and causal original action_ready failure, preserving original CALL/IF/RNG counts and action-time parity. Independently obtain DoT remains/ticking PRE for 4 other source condition gaps. Then frozen blind WCL numeric candidate/holdout and postlock SimC+Blizzard reconciliation. Never infer current Retail priority without proof.",
+  "shared_authoritative_state_mutated": false,
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN",
+  "scope_generation_unchanged": 9
+}
