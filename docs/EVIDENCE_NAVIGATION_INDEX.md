@@ -26,6 +26,8 @@
 
 | **전문화별 General Rotation Markdown+JSON 완전한 초안** | [전문화별 모델 인덱스](GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md) · [단일 generic source exporter](../tools/research/general_rotation_spec_model_export_v1.py) · [기존 SimC APL parser](../tools/research/simc_apl_semantic_ir_v2.py) | [고술/분전/비법 3+3 출력 파일·SHA256 영수증](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_PER_SPEC_DRAFT_MODEL_EXPORT_20261110.json) | [#42747802703](https://github.com/degong2-code/zrotationhelper/actions/runs/42747802703) **3/3 PASS; 원본 APL 286/286행·타겟/특성 12조건, 초기 Native 표본. 조건식 가설 ≠ 검증된 READY/최적성** |
 
+| 고술 정확한 선택 APL 행·Strict 원본 PRE 증거 | [읽기 전용 Shaman field SpecAdapter](../tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json), [기존 원본 계측기](../tools/research/general_rotation_original_select_extra_pre_v1.py), [범용 선택행 모델 병합](../tools/research/general_rotation_spec_native_root_evidence_overlay_v1.py) | [실제 ST·3T 선택행 79건, 독립 IF 5일치·59 UNKNOWN](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SHAMAN_GENERAL_ROTATION_NATIVE_SOURCE_ROW_PRE_EVIDENCE_SUCCESSOR_20261110.json) | [Native #42749660209](https://github.com/degong2-code/zrotationhelper/actions/runs/42749660209) + [모델 #42750471988](https://github.com/degong2-code/zrotationhelper/actions/runs/42750471988) **각 3/3 PASS**, 원본 선택과 source IF만, 물리 READY·오프닝 종료 아님 |
+
 ## WCL 독립 연구 경로
 
 | 기능 | 원본·구현 | 검증 영수증 | 실제 CI / 근거 수준 |
