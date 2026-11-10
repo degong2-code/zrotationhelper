@@ -17,7 +17,25 @@
 
 **재생 가능한 코드:** [범용 전문화별 출력 엔진](../tools/research/general_rotation_spec_model_export_v1.py) · [고정 3클래스 소스 manifest](../tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json) · [외부 target/build 시나리오](../tools/research/fixtures/general_rotation_source_guard_scenarios_three_class_v1.json) · [생성 결과의 SHA 및 증거 수명](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_PER_SPEC_DRAFT_MODEL_EXPORT_20261110.json).
 
-## 모든 전문화에 동일하게 적용하는 모델 구성
+## 고술 General Rotation — 실제 원본 증거를 반영한 첫 Successor (2026-11-10)
+
+**고술 1타겟 및 3타겟에 대해 원본 SimC가 정확히 어떤 APL 행을 선택했는지**를 원본 Native 호출 ID·소스 행 SHA256·직전 PRE와 결합했다. [원본 Native 동일 호출 검증 #42749660209](https://github.com/degong2-code/zrotationhelper/actions/runs/42749660209) **3/3 PASS**, [고술 모델에 증거를 병합한 CI #42750471988](https://github.com/degong2-code/zrotationhelper/actions/runs/42750471988) **3/3 PASS**.
+
+| 정확히 무엇을 입증했나 | 1타겟 | 3타겟 | 합계 |
+| --- | ---: | ---: | ---: |
+| 원본 Native에서 직접 선택된 APL 행 | 40 | 39 | **79** |
+| 첫 10초 원본 선택 행 (임의 연구 구간) | 16 | 16 | **32** |
+| 독립 PRE 기반 원본 IF TRUE + Native 비교 일치 | 3 | 2 | **5** |
+| 명시적인 IF가 없는 선택 행 | 4 | 11 | 15 |
+| 선택됐지만 독립 PRE가 부족한 IF | 33 | 26 | **59 UNKNOWN** |
+
+예: 고술 1타겟 원본에서 `single_sb` 9순위 `crash_lightning`이 **1,885ms**에 선택된 호출은 소스 조건을 독립 PRE로 재계산한 결과와 원본 Native IF가 일치했다. 하지만 상위 후보가 그때 모두 사용 불가능했는지, 이것이 현재 Retail에서 필수 우선순위인지까지 검증한 것은 아니다.
+
+**직접 확인할 파일:** [범용 원본 선택 행 증거 연결기](../tools/research/general_rotation_spec_native_root_evidence_overlay_v1.py)는 기존 114행 우선순위 JSON을 변경 없이 보존하면서 해당 관측의 증거를 기록한다. [증거 영수증](../active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SHAMAN_GENERAL_ROTATION_NATIVE_SOURCE_ROW_PRE_EVIDENCE_SUCCESSOR_20261110.json) · [완성된 고술 *연구용* Markdown+JSON successor 출력(CI Artifacts)](https://github.com/degong2-code/zrotationhelper/actions/runs/42750471988). 후속 출력 `shaman_enhancement.evidence_bound.json` SHA256 `bc24621ca602c5beea50dfb3529513069ef8c2424e78c4a0b128c3cf16a88d58`.
+
+**현재 최종 판정:** 실제 선택 APL 행 복원 완료(79개 호출 범위). 그러나 **사용 가능한 모든 경쟁 스킬 간 올바른 General Rotation 규칙은 아직 0건 확정**이다. 원본 사용 가능성 전체 증명, 오프닝 종료 조건, WCL blind postlock 검증 및 허수아비 피드백은 아직 남아 있다. 검증되지 않은 규칙을 정답으로 출판하지 않는다.
+
+
 
 1. **Precombat:** 원본 `actions.precombat` 순서, 전투 시작 오프닝의 확정 시전 순서와 혼동 금지.
 2. **오프닝 행동 관측:** 각 타겟 수에서 원본 Native SimC의 실제 첫 10초 행동 이름·시각 표본. 이 10초는 종료 조건이 아니다.
