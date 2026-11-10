@@ -1,4 +1,4 @@
-name: ZRot General Rotation Branch Handoff Continuity (Gen6/Gen7/Gen8)
+name: ZRot General Rotation Branch Handoff Continuity (Gen5+)
 on:
   push:
     branches:
@@ -7,6 +7,7 @@ on:
       - _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json
       - _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN6_BEFORE_20261110.json
       - _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN7_BEFORE_20261110.json
+      - _UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN8_BEFORE_20261110.json
       - .github/workflows/zrot-gr-20261109-branch-handoff-continuity.yml
       - README.md
       - docs/RESEARCH_INDEX.md
@@ -63,7 +64,7 @@ jobs:
           assert sha(policy_raw)=='157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295'
           assert sha(gen5_raw)=='ab04457130b37bce8c55e359e60c77a75d9abcfd5f8806da952d8fc070742bd5'
           assert latest['scope_continuity']['policy_snapshot']==policy
-          assert latest['scope_continuity']['generation'] in (6,7,8)
+          assert latest['scope_continuity']['generation']>=6
           assert latest['MAIN_promoted'] is False
           assert latest['shared_authoritative_state_mutated'] is False
           assert latest['FROZEN_modified'] is False
@@ -72,36 +73,44 @@ jobs:
           assert latest['Seq637']=='UNKNOWN'
 
           gen=latest['scope_continuity']['generation']
-          if gen==6:
-              assert latest['scope_continuity']['parent_handoff_sha256']==sha(gen5_raw)
-              assert latest['previous_handoff_generation']==5
-              assert result['active_real_generation']==6
-          else:
-              gen6_raw=(home/'archive/LATEST_HANDOFF_SCOPEGEN6_BEFORE_20261110.json').read_bytes()
-              gen6=json.loads(gen6_raw)
-              assert gen6['scope_continuity']['generation']==6
-              assert gen6['scope_continuity']['parent_handoff_sha256']==sha(gen5_raw)
-              assert latest['scope_continuity']['policy_snapshot']==gen6['scope_continuity']['policy_snapshot']
-              assert latest['current_research_navigation'][
-                  'readme_index']=='docs/RESEARCH_INDEX.md'
-              if gen==7:
-                  assert latest['scope_continuity']['parent_handoff_sha256']==sha(gen6_raw)
-                  assert latest['previous_handoff_generation']==6
-                  assert latest['previous_handoff_byte_sha256']==sha(gen6_raw)
-                  assert latest['new_chat_prompt'].endswith('NEW_CHAT_START_PROMPT_SCOPEGEN7_20261110.md')
-              else:
-                  gen7_raw=(home/'archive/LATEST_HANDOFF_SCOPEGEN7_BEFORE_20261110.json').read_bytes()
-                  gen7=json.loads(gen7_raw)
-                  assert gen7['scope_continuity']['generation']==7
-                  assert gen7['scope_continuity']['parent_handoff_sha256']==sha(gen6_raw)
-                  assert gen7['scope_continuity']['policy_snapshot']==policy
-                  assert latest['scope_continuity']['parent_handoff_sha256']==sha(gen7_raw)
-                  assert latest['previous_handoff_generation']==7
-                  assert latest['previous_handoff_byte_sha256']==sha(gen7_raw)
-                  assert latest['scope_continuity']['policy_snapshot']==gen7['scope_continuity']['policy_snapshot']
-                  assert latest['new_chat_prompt'].endswith('NEW_CHAT_START_PROMPT_SCOPEGEN8_20261110.md')
-                  assert latest['current_research_navigation']['per_spec_model']=='docs/GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md'
-              assert result['active_real_generation']==gen
+          assert result['active_real_generation']==gen
+          assert latest['current_research_navigation']['readme_index']=='docs/RESEARCH_INDEX.md'
+          assert latest['current_research_navigation']['per_spec_model']=='docs/GENERAL_ROTATION_PER_SPEC_MODEL_INDEX.md'
+          prompt=Path(latest['new_chat_prompt'])
+          assert prompt.is_file()
+          assert prompt.as_posix().startswith('handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/')
+          assert f'NEW_CHAT_START_PROMPT_SCOPEGEN{gen}_' in prompt.name
+          # Validate every REAL parent archive in order, not just hard-coded
+          # Gen6/7/8 generations. The original SHA256 and Git blob identity
+          # are required at every step; archive files remain read-only.
+          handoff=latest
+          chain=[]
+          while handoff['scope_continuity']['generation']>5:
+              child_gen=handoff['scope_continuity']['generation']
+              archive_path=handoff['previous_handoff_archive']
+              assert archive_path.startswith((home/'archive').as_posix()+'/')
+              path=Path(archive_path)
+              assert re.fullmatch(
+                  rf'LATEST_HANDOFF_SCOPEGEN{child_gen-1}_BEFORE_[0-9]{{8}}[.]json',
+                  path.name),('BAD_ARCHIVE_PATH',archive_path)
+              archived=path.read_bytes()
+              prior=json.loads(archived)
+              parent_hash=sha(archived)
+              blob_hash=hashlib.sha1(
+                  b'blob '+str(len(archived)).encode()+b'\0'+archived
+              ).hexdigest()
+              assert prior['scope_continuity']['generation']==child_gen-1
+              assert prior['scope_continuity']['policy_snapshot']==policy
+              assert handoff['scope_continuity']['parent_handoff_sha256']==parent_hash
+              assert handoff['previous_handoff_byte_sha256']==parent_hash
+              assert handoff['previous_handoff_original_blob_sha1']==blob_hash
+              assert handoff['previous_handoff_generation']==child_gen-1
+              chain.append((child_gen,child_gen-1))
+              handoff=prior
+          assert handoff['scope_continuity']['generation']==5
+          assert sha(gen5_raw)=='ab04457130b37bce8c55e359e60c77a75d9abcfd5f8806da952d8fc070742bd5'
+          assert len(chain)==gen-5
+          print('CONTIGUOUS_REAL_PARENT_ARCHIVES_PASS',chain)
 
           checks=[
               Path('README.md'),
