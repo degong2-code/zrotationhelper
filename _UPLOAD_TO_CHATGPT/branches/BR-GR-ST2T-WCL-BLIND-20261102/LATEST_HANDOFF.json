@@ -1,7 +1,7 @@
 {
-  "schema": "ZrotGeneralRotationEngineFirstHandoffV7",
-  "version": 7,
-  "date": "2026-11-09",
+  "schema": "ZrotGeneralRotationEngineFirstHandoffV8",
+  "version": 8,
+  "date": "2026-11-10",
   "actual_new_chat_handoff": true,
   "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
   "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
@@ -111,19 +111,19 @@
         "FROZEN_EVIDENCE_NOT_REWRITTEN"
       ]
     },
-    "generation": 6,
-    "parent_handoff_sha256": "ab04457130b37bce8c55e359e60c77a75d9abcfd5f8806da952d8fc070742bd5",
-    "carried_forward_at": "2026-11-09",
+    "generation": 7,
+    "parent_handoff_sha256": "5df57d1c4577bbf408bb5016f5f2001ad7511c15986192c62e725834ba7f6010",
+    "carried_forward_at": "2026-11-10",
     "scope_override": false,
     "new_user_scope_override_evidence": null
   },
-  "branch_head_at_handoff_preparation": "3786e69791803e8fd1eb29e90e9365e5a54e77f3",
+  "branch_head_at_handoff_preparation": "7f18b34fd17859a2c0fb85a9f547ddf9c150d07d",
   "actual_branch_head_after_latest_handoff": "MUST_REQUERY_LIVE_GITHUB_REF",
   "main_head_observed_read_only": "4790f77f76a75f26ff0558d1d18c16cd9d630c4b",
-  "previous_handoff_generation": 5,
-  "previous_handoff_archive": "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN5_BEFORE_20261109.json",
-  "previous_handoff_original_blob_sha1": "f64c509a0602a3d01b348493f99d5616ddaf88a9",
-  "previous_handoff_byte_sha256": "ab04457130b37bce8c55e359e60c77a75d9abcfd5f8806da952d8fc070742bd5",
+  "previous_handoff_generation": 6,
+  "previous_handoff_archive": "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN6_BEFORE_20261110.json",
+  "previous_handoff_original_blob_sha1": "fdc3cf24821059eb58f2e4a3dfbfc8854306df31",
+  "previous_handoff_byte_sha256": "5df57d1c4577bbf408bb5016f5f2001ad7511c15986192c62e725834ba7f6010",
   "historical_parent_chain": {
     "gen5_sha256": "ab04457130b37bce8c55e359e60c77a75d9abcfd5f8806da952d8fc070742bd5",
     "gen4_sha256": "84c15a489c7709bdbd24f4474f6665afc9cc9692ccc286cda1c1ce1e7a6a7a9e",
@@ -136,33 +136,27 @@
     "docs/ENGINE_FIRST_REPRODUCIBLE_RESEARCH_CHARTER_20261102.md",
     "docs/HANDOFF_CONTINUITY_PROTOCOL_V1.md",
     "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/LATEST_HANDOFF.json",
-    "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN5_BEFORE_20261109.json",
+    "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN6_BEFORE_20261110.json",
+    "docs/CURRENT_RESEARCH_STATUS.md",
+    "docs/RESEARCH_INDEX.md",
+    "docs/FEATURE_HISTORY_INDEX.md",
+    "docs/EVIDENCE_NAVIGATION_INDEX.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_STATUS_20261109.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md",
     "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/DEVELOPER_NOTES_20261105.md",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_PREPARATION_WORKLOG_20261109.md",
-    "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_INSTRUCTIONS_20261109.md",
-    "handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_SCOPEGEN6_20261109.md",
-    "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_ENGINE_HANDOFF_SCOPEGEN6_20261109.json",
-    "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_POSTLOCK_MECHANIC_EPOCH_EVIDENCE_FRONTIER_20261109.json"
+    "handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_SCOPEGEN7_20261110.md"
   ],
   "feature_evidence_index": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/FEATURE_EVIDENCE_REUSE_INDEX_20261105.md",
   "developer_notes": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/DEVELOPER_NOTES_20261105.md",
   "handoff_status": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_STATUS_20261109.md",
   "handoff_worklog": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_PREPARATION_WORKLOG_20261109.md",
   "branch_operational_instructions": "docs/branches/BR-GR-ST2T-WCL-BLIND-20261102/HANDOFF_INSTRUCTIONS_20261109.md",
-  "new_chat_prompt": "handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_SCOPEGEN6_20261109.md",
-  "handoff_receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_ENGINE_HANDOFF_SCOPEGEN6_20261109.json",
-  "product_exact_next": "Complete the reusable General Rotation research/validation engine and the current Retail General Rotation opener and conditional ST/2-target/cleave/AoE IF/ELSE priority with evidence-bounded alternatives, then safely grade user's own target-dummy practice (UNKNOWN if not observable).",
-  "chat_exact_next": "READ_ONLY_RESTORE_REPORT_THEN_STOP. Independently requery actual GitHub branch and MAIN HEAD, original Gen5 policy/parent chain, existing source/code, real WCL/SimC receipts, CI conclusions, blockers and authority limits, report result and short/medium/long roadmap. Do NOT edit, test, execute, collect, commit, PR or promote until the user explicitly sends a new '진행' in THAT chat.",
-  "session_exact_next_after_explicit_progress": "First audit existing actor combatantinfo/talent/gear/patch and source SimC revision mechanic implementation using already captured raw snapshot and index; independently certify high-impact Fury buff ID/build/effect epoch (Enrage, Recklessness, Hack and Slash, MID2 4pc stacks) and source READY observations where possible. Then connect only evidence-backed source operands to reusable current-General Rotation IF/ELSE and dummy evaluator. Keep broad WCL recollection/Native C++ reruns optional when a proven missing evidence gate requires them.",
-  "concise_current_status": {
-    "scope": "SimC-first General Rotation opener/conditional rules + lightweight target-dummy trainer; no Encounter/NSRT",
-    "research_engine": "PARTIAL_VERIFIED_REUSABLE_SOURCE_APL_WCL_STRICT_PRE_POSTLOCK_AND_MECHANIC_GATE",
-    "research_gameplay_rules": "NOT_YET_INDEPENDENTLY_VALIDATED_AS_GENERAL_ROTATION_PRIORITY",
-    "addon_trainer": "NOT_YET_GAME_CLIENT_VERIFIED_OR_USER_DUMMY_ERROR_EVALUATED",
-    "new_user_progress_needed": true
-  },
+  "new_chat_prompt": "handoff/branches/BR-GR-ST2T-WCL-BLIND-20261102/NEW_CHAT_START_PROMPT_SCOPEGEN7_20261110.md",
+  "handoff_receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERAL_ROTATION_ENGINE_HANDOFF_SCOPEGEN7_20261110.json",
+  "product_exact_next": "Complete the reusable generic General Rotation engine and current Retail opener plus ST/2-target/cleave/AoE conditional IF/ELSE priority; independently validate against locked WCL blind candidates, then grade own target-dummy practice only where observed.",
+  "chat_exact_next": "READ_ONLY_RESTORE_REPORT_THEN_STOP in the NEW CHAT. Check Gen7->Gen6->Gen5 policy/full parent bytes, independent GitHub branch/MAIN HEAD, README->history->evidence navigation, actual latest evidence and gaps. No new edits, API, actions, PRs, MAIN promotion until a NEW explicit user '진행' in that chat.",
+  "session_exact_next_after_explicit_progress": "Reuse pinned original SimC two-target competitor roots. Verify two Arcane Barrage prior source IF cases with only necessary same-root PRE; retain UNKNOWN for full readiness and overall priority until proven. No core spec hardcoding or broad rescan.",
+  "concise_current_status": "2026-11-10 isolated research: Fury/Arcane 1/2/3/5 Native action cases; 147 original selected actions, 49 IF TRUE, 44 IF UNKNOWN, 54 no explicit IF; minimal sufficient IF operand occurrences 122 -> 89. Original Arcane competing source 8 of 10 prior rows locally excluded, 2 UNKNOWN; selected full READY and actual Retail General Rotation still UNKNOWN. WCL actor numeric build strict PRE reproduced on two original reports; no dummy error certified. Four navigation docs added; MAIN and FROZEN unchanged.",
   "current_evidence": {
     "source_PIN": {
       "simc_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
@@ -236,20 +230,56 @@
       "cooldown.bladestorm.ready": 8,
       "buff.fury_mid2_4pc_crit.stack": 2
     },
-    "mechanic_truth_boundary": "Official Blizzard 4pc prose is not raw WCL numeric buff ID nor exact SimC code parity; external Enrage 184362 / Recklessness 1719 public ID candidates not actual player build/talents/effect; WCL actor actual fight epoch and specific build remain UNKNOWN."
+    "mechanic_truth_boundary": "Official Blizzard 4pc prose is not raw WCL numeric buff ID nor exact SimC code parity; external Enrage 184362 / Recklessness 1719 public ID candidates not actual player build/talents/effect; WCL actor actual fight epoch and specific build remain UNKNOWN.",
+    "SimC_original_20261110": {
+      "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+      "native_1_2_3_5": {
+        "CI_run": 42716911610,
+        "conclusion": "SUCCESS_3_OF_3",
+        "receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SIMC_ACTUAL_NATIVE_1_2_3_5_TARGET_GRID_20261110.json"
+      },
+      "selected_source_IF": {
+        "CI_run": 42721244205,
+        "conclusion": "SUCCESS_3_OF_3",
+        "selected": 147,
+        "independent_true": 49,
+        "unknown": 44,
+        "no_explicit_if": 54,
+        "observed_operand_instances": 122,
+        "minimal_sufficient_operand_instances": 89,
+        "receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_ORIGINAL_SIMC_49_IF_PARTIAL_MINIMAL_WITNESS_20261110.json"
+      },
+      "competing_source": {
+        "CI_run": 42723323648,
+        "conclusion": "SUCCESS_3_OF_3",
+        "local_negative": 8,
+        "unresolved": 2,
+        "full_physical_READY": 0,
+        "receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_SOURCE_COMPETITOR_READY_FRONTIER_20261110.json"
+      },
+      "opener_end": "UNKNOWN",
+      "current_Retail_priority_proven": 0
+    },
+    "WCL_actor_numeric_build_20261110": {
+      "CI_run": 42642973309,
+      "conclusion": "SUCCESS_4_OF_4",
+      "strict_pre_actor_numeric_build_observed": true,
+      "source_build_parity": "UNKNOWN",
+      "receipt": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/GENERIC_WCL_COMBATANTINFO_PRE_ACTOR_BUILD_AND_PINNED_SOURCE_LOOKUPS_20261110.json"
+    }
   },
   "gaps": {
     "missing_evidence": [
-      "Pinned independent Blizzard client/patch-buff ID/source C++ effect parity for high-impact source symbols",
-      "Actual WCL actor talent, equipped 4-piece, gear, fight/client patch epoch and target-count equivalence to SimC profile",
-      "Complete Strict PRE readiness for each competing action incl GCD, charges, cooldown, proc and Enrage dynamic remains",
-      "Independently validated gameplay rule with prospectively locked candidate/threshold and applicable held-out WCL cohort",
-      "Actual Retail permitted own-spellcast/addon telemetry and own target dummy session"
+      "Actual WCL actor numeric talents and gear are observed in original holdout and third report; current Retail patch/tier activation/SimC profile DBC-effect parity remain UNKNOWN.",
+      "Complete same-root competing action readiness: two Arcane Barrage prior source IFs and selected full READY remain UNKNOWN.",
+      "Proven source-defined opener exit, all target-count/build variants, general-ready alternative availability and actual client telemetry absent.",
+      "Independent WCL blind lock/holdout sufficient to certify current Retail mandatory priority remains unavailable.",
+      "Actual target-dummy user mistake and addon API permitted observability unverified."
     ],
     "missing_implementation": [
-      "Proven current Retail build-aware SpecAdapter ingestion and exact source spell/aura identity binding; existing exploratory adapters not ready",
-      "Reusable full alternative-READY/priority decision audit and opener-end/3+target breakpoint completion",
-      "Generic rule IR to target dummy own-cast feedback evaluator with truth/UNKNOWN gates"
+      "Reusable complete CALL/RUN graph predecessor READY/NOT_READY proof beyond currently source-list-local evidence.",
+      "Source-driven conditional opener exit and complete ST/2T/cleave/AoE generalized decision IR with alternatives.",
+      "Valid IR-to-dummy user-cast evaluator connected to observable Retail state without protected-data workaround."
     ],
     "missing_product_connection": [
       "No user-facing validated General Rotation opener and complete conditional skill priority",
@@ -308,7 +338,17 @@
     "gen6_offline_governance_validation": "PENDING_POST_COMMIT_ACTIONS",
     "gen6_parent_byte_sha256": "PENDING_POST_COMMIT_ACTIONS",
     "five_hop_scope_simulation": "PENDING_POST_COMMIT_ACTIONS",
-    "new_WCL_SimC_native_run_in_this_handoff": "NOT_RUN"
+    "new_WCL_SimC_native_run_in_this_handoff": "NOT_RUN",
+    "gen7_original_Gen6_git_blob_sha1": "fdc3cf24821059eb58f2e4a3dfbfc8854306df31",
+    "gen7_Gen6_byte_sha256": "5df57d1c4577bbf408bb5016f5f2001ad7511c15986192c62e725834ba7f6010",
+    "gen7_full_policy_snapshot_preserved": true,
+    "gen7_navigation_documents_created": 4,
+    "gen7_scope_continuity_CI": "PENDING_FINAL_GEN7_GITHUB_ACTIONS",
+    "gen7_relative_link_check": "PENDING_FINAL_GEN7_GITHUB_ACTIONS",
+    "latest_verified_source_CI_run": 42723323648,
+    "latest_verified_source_CI_conclusion": "SUCCESS_3_OF_3",
+    "new_WCL_or_SimC_original_runs_in_navigation_handoff": 0,
+    "MAIN_promoted": false
   },
   "entry_gate": {
     "mode": "READ_ONLY_RESTORE_REPORT_THEN_STOP",
@@ -345,5 +385,14 @@
   "FROZEN_modified": false,
   "Seq578": "FAILED_QUARANTINED",
   "Seq637": "UNKNOWN",
-  "historical_evidence_immutable": true
+  "historical_evidence_immutable": true,
+  "current_research_navigation": {
+    "readme_index": "docs/RESEARCH_INDEX.md",
+    "current_research_status": "docs/CURRENT_RESEARCH_STATUS.md",
+    "feature_history": "docs/FEATURE_HISTORY_INDEX.md",
+    "code_evidence_CI": "docs/EVIDENCE_NAVIGATION_INDEX.md",
+    "archive_parent_gen6": "_UPLOAD_TO_CHATGPT/branches/BR-GR-ST2T-WCL-BLIND-20261102/archive/LATEST_HANDOFF_SCOPEGEN6_BEFORE_20261110.json",
+    "purpose": "Find past feature -> code -> evidence -> CI -> current UNKNOWN without moving history",
+    "MAIN_navigation_promoted": false
+  }
 }
