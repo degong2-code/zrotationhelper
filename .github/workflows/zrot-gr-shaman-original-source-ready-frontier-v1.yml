@@ -12,6 +12,8 @@ on:
       - tools/research/general_rotation_original_candidate_stage_replay_v1.py
       - tools/research/general_rotation_original_runtime_membership_v1.py
       - tools/research/general_rotation_original_runtime_membership_replay_v1.py
+      - tools/research/general_rotation_original_action_lifecycle_v1.py
+      - tools/research/general_rotation_original_action_lifecycle_replay_v1.py
       - .github/workflows/zrot-gr-shaman-original-source-ready-frontier-v1.yml
   workflow_dispatch:
 
@@ -46,6 +48,8 @@ jobs:
             tools/research/general_rotation_original_candidate_stage_replay_v1.py \
             tools/research/general_rotation_original_runtime_membership_v1.py \
             tools/research/general_rotation_original_runtime_membership_replay_v1.py \
+            tools/research/general_rotation_original_action_lifecycle_v1.py \
+            tools/research/general_rotation_original_action_lifecycle_replay_v1.py \
             tools/research/general_rotation_original_dispatch_if_replay_v1.py \
             tools/research/simc_original_select_if_pre_witness_v1.py
           python -B tools/research/general_rotation_original_select_extra_pre_v1.py >/tmp/generic-pre-selftest.json
@@ -55,6 +59,8 @@ jobs:
           python -B tools/research/general_rotation_original_candidate_stage_replay_v1.py >/tmp/candidate-stage-replay-selftest.json
           python -B tools/research/general_rotation_original_runtime_membership_v1.py >/tmp/runtime-membership-patch-selftest.json
           python -B tools/research/general_rotation_original_runtime_membership_replay_v1.py >/tmp/runtime-membership-replay-selftest.json
+          python -B tools/research/general_rotation_original_action_lifecycle_v1.py >/tmp/lifecycle-patcher-selftest.json
+          python -B tools/research/general_rotation_original_action_lifecycle_replay_v1.py >/tmp/lifecycle-replay-selftest.json
           python - <<'PY'
           import sys,json
           sys.path.insert(0,'tools/research')
@@ -83,7 +89,13 @@ jobs:
           assert membership_patch['status']=='PASS_SYNTHETIC_STATIC' and membership_patch['negative_controls_rejected']>=6
           assert membership_replay['status']=='PASS_SYNTHETIC_STATIC' and membership_replay['negative_controls_rejected']>=7
           assert membership_patch['added_original_ready_calls']==0 and membership_replay['physical_NOT_READY_claims']==0
-          print('GENERIC_SHAMAN_ORIGINAL_READY_PRE_SPEC_ADAPTER_SYNTHETIC_PASS')
+          life_patch=json.load(open('/tmp/lifecycle-patcher-selftest.json'))
+          life_replay=json.load(open('/tmp/lifecycle-replay-selftest.json'))
+          assert life_patch['status']=='PASS_SYNTHETIC_STATIC' and life_patch['negative_controls']>=6
+          assert life_replay['status']=='PASS_SYNTHETIC_STATIC' and life_replay['negative_controls']>=7
+          assert life_patch['additional_original_create_init_ready_calls']==0
+          assert life_replay['physical_READY_proven']==0 and life_replay['WCL_API_calls']==0
+          print('GENERIC_ORIGINAL_SIMC_LIFECYCLE_SOURCE_NEUTRAL_SYNTHETIC_PASS')
           PY
   original-shaman-source-root:
     runs-on: ubuntu-latest
@@ -150,6 +162,10 @@ jobs:
             --source-root original-simc \
             --prior-receipt /tmp/shaman-candidate-stage-patch.json \
             --out-receipt /tmp/shaman-runtime-membership-patch.json
+          python -B tools/research/general_rotation_original_action_lifecycle_v1.py \
+            --source-root original-simc \
+            --prior-receipt /tmp/shaman-runtime-membership-patch.json \
+            --out-receipt /tmp/shaman-action-lifecycle-patch.json
           python - <<'PY'
           import json
           x=json.load(open('/tmp/shaman-extra-pre-patch.json'))
@@ -169,6 +185,11 @@ jobs:
           assert member['original_action_ready_calls_added']==0
           assert member['native_IF_RNG_queue_calls_added']==0
           assert member['physical_READY_proven']==0
+          life=json.load(open('/tmp/shaman-action-lifecycle-patch.json'))
+          assert life['schema']=='ZrotOriginalSimCActionCreateInitLifecycleProbeV1'
+          assert life['zero_additional_original_create_init_calls'] is True
+          assert life['added_native_ready_or_RNG_or_queue_or_IF_calls']==0
+          assert life['physical_READY_proven']==0 and life['WCL_calls']==0
           print('SHAMAN_ORIGINAL_SOURCE_PASSIVE_PATCH_NO_READY_SIDE_EFFECT_PASS')
           PY
       - name: Build original pinned SimC CXX once for source-line and PRE root witness
@@ -221,6 +242,11 @@ jobs:
               --prior-stage "$folder/original-native-candidate-stage.json" \
               --prior-frontier "$folder/original-native-attempt-frontier.json" \
               --out "$folder/original-apl-runtime-membership.json"
+            python -B tools/research/general_rotation_original_action_lifecycle_replay_v1.py \
+              --native-log "$folder/simc_native_log.txt" \
+              --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+              --prior-membership "$folder/original-apl-runtime-membership.json" \
+              --out "$folder/original-action-lifecycle.json"
           done
           python - <<'PY'
           import json,sys
@@ -246,6 +272,21 @@ jobs:
               frontier=json.loads((path/'original-native-attempt-frontier.json').read_bytes())
               stages=json.loads((path/'original-native-candidate-stage.json').read_bytes())
               membership=json.loads((path/'original-apl-runtime-membership.json').read_bytes())
+              lifecycle=json.loads((path/'original-action-lifecycle.json').read_bytes())
+              assert lifecycle['schema']=='ZrotOriginalSimCActionLifecycleSourceBoundReplayV1'
+              assert lifecycle['source_spec']=='shaman_enhancement' and lifecycle['targets']==target
+              assert lifecycle['selected_root']==membership['selected_root']
+              assert lifecycle['original_source_to_runtime_membership_preserved'] is True
+              assert lifecycle['same_actor_source_and_action_ptr_four_phase_join'] is True
+              assert lifecycle['physical_skill_READY_independently_proven']==0
+              assert lifecycle['current_Retail_priority']=='UNKNOWN'
+              assert lifecycle['WCL_independent_blind_postlock']=='NOT_RUN'
+              assert lifecycle['dummy_wrong_cast']=='UNKNOWN' and lifecycle['opener_end']=='UNKNOWN'
+              if target==3:
+                  gaps=lifecycle['unvisited_source_causal_guard_candidates']
+                  assert len(gaps)==1 and gaps[0]['rank']==6 and gaps[0]['action']=='sundering'
+                  print('AOE_SOURCE_RANK6_NATIVE_CREATION_ORIGIN',gaps[0])
+              print('GENERIC_ORIGINAL_NATIVE_ACTION_LIFECYCLE',target,lifecycle['background_origin_counts'])
               assert membership['schema']=='ZrotOriginalNativeAPLSourceRuntimeMembershipReplayV1'
               assert membership['source_spec']=='shaman_enhancement' and membership['targets']==target
               assert membership['selected_root']==frontier['selected_root']
@@ -312,6 +353,8 @@ jobs:
           sha256sum /tmp/shaman-source-root/shaman_enhancement-3t/original-native-candidate-stage.json
           sha256sum /tmp/shaman-source-root/shaman_enhancement-1t/original-apl-runtime-membership.json
           sha256sum /tmp/shaman-source-root/shaman_enhancement-3t/original-apl-runtime-membership.json
+          sha256sum /tmp/shaman-source-root/shaman_enhancement-1t/original-action-lifecycle.json
+          sha256sum /tmp/shaman-source-root/shaman_enhancement-3t/original-action-lifecycle.json
       - name: Preserve compact original source proof only; raw logs remain ephemeral
         if: always()
         uses: actions/upload-artifact@v4
@@ -326,8 +369,11 @@ jobs:
             /tmp/shaman-source-root/shaman_enhancement-3t/original-native-candidate-stage.json
             /tmp/shaman-source-root/shaman_enhancement-1t/original-apl-runtime-membership.json
             /tmp/shaman-source-root/shaman_enhancement-3t/original-apl-runtime-membership.json
+            /tmp/shaman-source-root/shaman_enhancement-1t/original-action-lifecycle.json
+            /tmp/shaman-source-root/shaman_enhancement-3t/original-action-lifecycle.json
             /tmp/shaman-extra-pre-patch.json
             /tmp/shaman-candidate-stage-patch.json
             /tmp/shaman-runtime-membership-patch.json
+            /tmp/shaman-action-lifecycle-patch.json
           retention-days: 14
           if-no-files-found: warn
