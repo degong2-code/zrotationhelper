@@ -1,0 +1,271 @@
+name: zrot-gr-original-source-ordered-dot-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/research/general_rotation_original_select_passive_dot_v1.py
+      - tools/research/general_rotation_original_select_passive_dot_replay_v1.py
+      - tools/research/fixtures/zrot_shaman_original_source_order_dot_v1.json
+      - tools/research/fixtures/zrot_shaman_source_order_dot_1t_focus_v1.json
+      - tools/research/fixtures/zrot_shaman_source_order_dot_3t_focus_v1.json
+      - tools/research/fixtures/zrot_shaman_native_branch_other_dot_1t_v1.json
+      - tools/research/fixtures/zrot_shaman_native_branch_other_dot_3t_v1.json
+      - .github/workflows/zrot-gr-original-source-ordered-dot-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generic-dot-contract:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.14']
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile source-neutral Dot source/order probes and negative regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/research/general_rotation_original_select_passive_dot_v1.py \
+            tools/research/general_rotation_original_select_passive_dot_replay_v1.py
+          python -B tools/research/general_rotation_original_select_passive_dot_v1.py >/tmp/zrot-passive-dot-selftest.json
+          python -B tools/research/general_rotation_original_select_passive_dot_replay_v1.py >/tmp/zrot-passive-dot-replay-selftest.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/zrot-passive-dot-selftest.json'))
+          b=json.load(open('/tmp/zrot-passive-dot-replay-selftest.json'))
+          assert a['status']==b['status']=='PASS_SYNTHETIC_STATIC'
+          assert a['negative_controls']==4 and b['negative_controls']==5
+          assert a['new_native_ready_or_IF_calls']==0 and a['new_get_dot_or_alloc_calls']==0
+          assert a['Strict_PRE_timestamp_lt_action']=='NOT_PROVEN'
+          assert b['source_order_PRE_distinct_from_Strict_PRE']
+          assert b['missing_observation_promoted_to_READY']==False
+          assert not a['MAIN_promoted']
+          print('GENERIC_SOURCE_ORDER_PASSIVE_DOT_CONTRACT_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-generic-passive-dot-${{ matrix.python }}-${{ github.sha }}
+          path: |
+            /tmp/zrot-passive-dot-selftest.json
+            /tmp/zrot-passive-dot-replay-selftest.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  original-shaman-dot-native:
+    needs: generic-dot-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          submodules: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42744084203
+          name: zrot-gr-original-shaman-native-marginal-3d92ad32576e91aaefd19df8d03c39a373c46632
+          github-token: ${{ github.token }}
+          path: /tmp/shaman-marginal-existing
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42808161385
+          name: zrot-gr-profile-static-if-guard-3.12-8fee296b329cf574d04a35f177030a8c15c6092b
+          github-token: ${{ github.token }}
+          path: /tmp/shaman-static-talent-source
+      - name: Confirm exact original evidence and apply existing + passive source-ordered Dot patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C original-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          echo '7b818a65fb4e9a812ddb2efb90406a2825ddd9abdd325067edeb3f37bd263339  /tmp/shaman-marginal-existing/zrot-gr-original-shaman-native-1-2-3-5-grid.json' | sha256sum -c -
+          echo 'f87adcd6546a3e8baa8dcd1f32adcc48bedb0b0fffa767b96ad9a7ccbf4870b0  /tmp/shaman-static-talent-source/zrot-static-talent-source.json' | sha256sum -c -
+          python -B tools/research/simc_original_select_if_pre_witness_v1.py \
+            --source-root original-simc \
+            --plan tools/research/fixtures/zrot_shaman_original_source_if_pre_adapter_v1.json \
+            --receipt /tmp/shaman-original-if-prepare.json
+          python -B tools/research/general_rotation_same_run_return_emitter_v1.py \
+            --source-root original-simc \
+            --prior-receipt /tmp/shaman-original-if-prepare.json \
+            --patch-receipt /tmp/shaman-return-emitter.json
+          python -B tools/research/general_rotation_original_foreground_dispatch_v1.py \
+            --simc-root original-simc \
+            --prior-receipt /tmp/shaman-return-emitter.json \
+            --patch-receipt /tmp/shaman-dispatch.json
+          python -B tools/research/general_rotation_original_select_extra_pre_v1.py \
+            --source-root original-simc \
+            --plan tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json \
+            --prior-receipt /tmp/shaman-dispatch.json \
+            --out-receipt /tmp/shaman-extra-pre-patch.json
+          python -B tools/research/general_rotation_original_candidate_stage_v1.py \
+            --source-root original-simc \
+            --prior-receipt /tmp/shaman-extra-pre-patch.json \
+            --out-receipt /tmp/shaman-candidate-stage-patch.json
+          python -B tools/research/general_rotation_original_runtime_membership_v1.py \
+            --source-root original-simc \
+            --prior-receipt /tmp/shaman-candidate-stage-patch.json \
+            --out-receipt /tmp/shaman-runtime-membership-patch.json
+          python -B tools/research/general_rotation_original_action_lifecycle_v1.py \
+            --source-root original-simc \
+            --prior-receipt /tmp/shaman-runtime-membership-patch.json \
+            --out-receipt /tmp/shaman-action-lifecycle-patch.json
+          python -B tools/research/general_rotation_original_select_passive_dot_v1.py \
+            --source-root original-simc \
+            --adapter tools/research/fixtures/zrot_shaman_original_source_order_dot_v1.json \
+            --prior-receipt /tmp/shaman-action-lifecycle-patch.json \
+            --out-receipt /tmp/zrot-passive-dot-patch-receipt.json
+          python -B tools/research/general_rotation_original_ready_branch_probe_v1.py \
+            --source-root original-simc \
+            --prior-receipt /tmp/shaman-original-if-prepare.json \
+            --out-receipt /tmp/shaman-original-action-ready-branch-patch.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/zrot-passive-dot-patch-receipt.json'))
+          assert p['schema']=='ZrotGenericOriginalSelectPassiveDotBeforeReadyV1'
+          assert p['original_readiness_IF_RNG_queue_calls_added']==0
+          assert p['target_actor_dot_creation_calls_added']==0
+          assert p['Strict_PRE_timestamp_lt_action']=='NOT_PROVEN'
+          assert not p['MAIN_promoted']
+          c=json.load(open('/tmp/shaman-original-action-ready-branch-patch.json'))
+          assert all(v==0 for v in c['original_calls_added'].values())
+          print('ORIGINAL_SOURCE_ORDER_DOT_READ_ONLY_PATCH_CHAIN_PASS')
+          PY
+      - name: Compile pinned original SimC CXX with passive Dot and Native branch logs
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          cmake -S original-simc -B /tmp/zrot-original-dot -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=OFF -DBUILD_TESTING=OFF \
+            -DSC_NO_NETWORKING=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build /tmp/zrot-original-dot --target simc --parallel 3
+          test -x /tmp/zrot-original-dot/simc
+      - name: Original 1T/3T exact-action replay + 4 focused Dot source-order/Native causes
+        shell: bash
+        run: |
+          set -euo pipefail
+          for target in 1 3; do
+            folder="/tmp/zrot-source-dot/shaman_enhancement-${target}t"
+            python -B tools/research/simc_native_reference_capture.py \
+              --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+              --spec enhancement --simc-bin /tmp/zrot-original-dot/simc \
+              --targets "$target" --seed 31459 --fight-seconds 30 \
+              --out-dir "$folder" --timeout 180
+            python -B tools/research/general_rotation_original_select_extra_pre_replay_v1.py \
+              --native-log "$folder/simc_native_log.txt" \
+              --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+              --plan tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json \
+              --legacy-plan tools/research/fixtures/zrot_shaman_original_source_if_pre_adapter_v1.json \
+              --source-label shaman_enhancement --targets "$target" \
+              --out "$folder/selected-root-exact-pre-source-if.json"
+            python -B tools/research/general_rotation_original_attempt_frontier_v1.py \
+              --native-log "$folder/simc_native_log.txt" \
+              --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+              --prior "$folder/selected-root-exact-pre-source-if.json" \
+              --plan tools/research/fixtures/zrot_shaman_priority_frontier_v1.json \
+              --adapter tools/research/fixtures/zrot_shaman_original_select_extra_pre_v1.json \
+              --targets "$target" \
+              --out "$folder/original-native-attempt-frontier.json"
+            python -B tools/research/general_rotation_original_candidate_stage_replay_v1.py \
+              --native-log "$folder/simc_native_log.txt" \
+              --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+              --prior-frontier "$folder/original-native-attempt-frontier.json" \
+              --out "$folder/original-native-candidate-stage.json"
+            python -B tools/research/general_rotation_original_select_passive_dot_replay_v1.py \
+              --native-log "$folder/simc_native_log.txt" \
+              --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+              --prior-frontier "$folder/original-native-attempt-frontier.json" \
+              --prior-stage "$folder/original-native-candidate-stage.json" \
+              --dot-adapter tools/research/fixtures/zrot_shaman_original_source_order_dot_v1.json \
+              --plan "tools/research/fixtures/zrot_shaman_source_order_dot_${target}t_focus_v1.json" \
+              --talent-evidence /tmp/shaman-static-talent-source/zrot-static-talent-source.json \
+              --out "$folder/source-ordered-dot-if.json"
+            python -B tools/research/general_rotation_original_ready_branch_replay_v1.py \
+              --native-log "$folder/simc_native_log.txt" \
+              --prior-frontier "$folder/original-native-attempt-frontier.json" \
+              --prior-stage "$folder/original-native-candidate-stage.json" \
+              --plan "tools/research/fixtures/zrot_shaman_native_branch_other_dot_${target}t_v1.json" \
+              --out "$folder/original-native-dot-cause.json"
+          done
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'tools/research')
+          from simc_native_json_sequence import extract_json_sequence
+          from general_rotation_simc_native_target_grid_v1 import examine
+          from general_rotation_simc_e2e_research_engine_v1 import compile_spec
+          old=json.loads(Path('/tmp/shaman-marginal-existing/zrot-gr-original-shaman-native-1-2-3-5-grid.json').read_bytes())
+          src=Path('original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc').read_bytes()
+          meta=next(x for x in json.load(open('tools/research/fixtures/general_rotation_simc_pinned_three_class_v1.json'))['profiles'] if x['key']=='shaman_enhancement')
+          program=compile_spec(src,meta,None)['conditioned_opener_and_priority']['all_ordered_source_IF_ELSE_lists']
+          results=[]
+          for target in (1,3):
+              path=Path(f'/tmp/zrot-source-dot/shaman_enhancement-{target}t')
+              prev=next(x for x in old['native_target_cases'] if x['target_count']==target)
+              now=examine(extract_json_sequence(path)['combat_sequence'],program,target)
+              assert now['sample_actions']==prev['sample_actions'],target
+              before=[(x['at_simc_ms'],x['action']) for x in prev['first_10sec_sample_actions_NOT_opener_end']]
+              after=[(x['at_simc_ms'],x['action']) for x in now['first_10sec_sample_actions_NOT_opener_end']]
+              assert before==after,(target,'PASSIVE_DOT_CAPTURE_MUTATED_NATIVE_ACTION_TIMES')
+              dot=json.load(open(path/'source-ordered-dot-if.json'))
+              cause=json.load(open(path/'original-native-dot-cause.json'))
+              assert dot['schema']=='ZrotOriginalSelectedSameCallSourceOrderedDotReplayV1'
+              assert cause['schema']=='ZrotOriginalNativeSameCallBranchOutcomeReplayV1'
+              assert len(dot['observed_focused'])==len(cause['focused_original_native_calls'])==2
+              assert dot['Strict_PRE_timestamp_lt_action']=='NOT_PROVEN'
+              assert dot['new_user_general_rotation_rules_promoted']==cause['General_Rotation_priority_rules_promoted']==0
+              assert all(x['original_native_return']=='FALSE' and not x['dot_snapshot']['timestamp_less_than_action'] for x in dot['observed_focused'])
+              assert [x['rank'] for x in dot['observed_focused']]==([2,3] if target==1 else [1,2])
+              assert [x['source_rank'] for x in cause['focused_original_native_calls']]==([2,3] if target==1 else [1,2])
+              assert dot['targets']==target
+              assert dot['current_Retail_mechanics']==cause['current_Retail_optimal_priority']=='UNKNOWN'
+              assert not dot['MAIN_promoted'] and not cause['MAIN_promoted']
+              results.append({'target':target,'action_parity':len(after),
+                              'ifs':[(x['rank'],x['source_order_IF_verdict'],x['dot_snapshot']['ticking'],x['dot_snapshot']['remains_seconds']) for x in dot['observed_focused']],
+                              'cause':[(x['source_rank'],x['first_original_ready_failure_guard']) for x in cause['focused_original_native_calls']]})
+              print('PASSIVE_DOT_NATIVE_ACTION_TIMES_1_3T_MATCH',target,len(after))
+          print('SOURCE_ORDER_DOT_GAPS_AND_NATIVE_BRANCH_CAUSES',json.dumps(results,sort_keys=True))
+          PY
+          sha256sum /tmp/zrot-passive-dot-patch-receipt.json \
+            /tmp/zrot-source-dot/shaman_enhancement-1t/source-ordered-dot-if.json \
+            /tmp/zrot-source-dot/shaman_enhancement-3t/source-ordered-dot-if.json \
+            /tmp/zrot-source-dot/shaman_enhancement-1t/original-native-dot-cause.json \
+            /tmp/zrot-source-dot/shaman_enhancement-3t/original-native-dot-cause.json
+      - name: Preserve compact read-only evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrot-gr-original-source-order-dot-${{ github.sha }}
+          path: |
+            /tmp/zrot-passive-dot-patch-receipt.json
+            /tmp/zrot-source-dot/shaman_enhancement-1t/source-ordered-dot-if.json
+            /tmp/zrot-source-dot/shaman_enhancement-3t/source-ordered-dot-if.json
+            /tmp/zrot-source-dot/shaman_enhancement-1t/original-native-dot-cause.json
+            /tmp/zrot-source-dot/shaman_enhancement-3t/original-native-dot-cause.json
+            /tmp/zrot-source-dot/shaman_enhancement-1t/original-native-attempt-frontier.json
+            /tmp/zrot-source-dot/shaman_enhancement-3t/original-native-attempt-frontier.json
+          retention-days: 14
+          if-no-files-found: warn
