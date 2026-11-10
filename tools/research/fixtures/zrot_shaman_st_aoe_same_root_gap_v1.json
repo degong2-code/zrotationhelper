@@ -1,0 +1,45 @@
+{
+  "schema": "ZrotSameRootPriorityGapAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "spec_key": "shaman_enhancement",
+  "profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "native_zip_sha256": "d9dba3ca94d78d1a9ac4f7f34da834258b9b380dae35867c5d128accedca0c90",
+  "talent_zip_sha256": "8e500bcb9d2e184e979e5959c90db44464d3ba8be1e261f7e85edf10e995d48d",
+  "talent_json_name": "shaman-pinned-talent-hash-dbc.json",
+  "talent_json_sha256": "7fe66f04486d6fe0cfe5acdc692ac23ea988d4f70d2c636475f58c6823dd4aef",
+  "cases": [
+    {
+      "case_id": "ST_1T_942ms_stormstrike",
+      "targets": 1,
+      "artifact_prefix": "shaman-source-root/shaman_enhancement-1t",
+      "selected_root": {"t_ms": 942, "source_list": "single_sb", "source_rank": 4, "source_action": "stormstrike"},
+      "focus_ranks": [2, 3],
+      "source_talent_exclusions": [],
+      "original_sha256": {
+        "selected-root-exact-pre-source-if": "79646b5c0799ce9a3c6fb0575db0e5b738f18d65c326b11fd9c593c1b676687c",
+        "original-native-attempt-frontier": "79d372d06494cc8779daf09ee00fc4676ba03b5f0bbeed8c60d672f9677131aa",
+        "original-native-candidate-stage": "dcbdee7fdf982d573e2ba8bfcb850565ee02e91ddae2780ebf1c23b8cadb6e6a",
+        "original-apl-runtime-membership": "2c8bd164314326852afff614deeb61d5c25a310887ce3ec4e01dfe1ae598fd81",
+        "original-action-lifecycle": "5dda6cd789d6cf5224fe16624d51e1b547113eecb454588cf6dd8fc896fbdbce"
+      }
+    },
+    {
+      "case_id": "AOE_3T_940ms_crash_lightning",
+      "targets": 3,
+      "artifact_prefix": "shaman-source-root/shaman_enhancement-3t",
+      "selected_root": {"t_ms": 940, "source_list": "aoe", "source_rank": 20, "source_action": "crash_lightning"},
+      "focus_ranks": [1, 2, 19],
+      "source_talent_exclusions": [
+        {"source_rank": 6, "source_action": "sundering", "trait_name": "Sundering", "trait_node": 80975, "trait_spell": 197214}
+      ],
+      "original_sha256": {
+        "selected-root-exact-pre-source-if": "504ed71c03f0b6e52eacbffcbf17968223cc8c56da9bfebdf2386e6274528013",
+        "original-native-attempt-frontier": "446ce44e36b73b8bf93f6b4845a9f3da912350cb078e6d8190976e8df5a2b369",
+        "original-native-candidate-stage": "6c79a4ea67cc61014cdbc309044f703420d2515e6f8a6529e2aae73c603a59b5",
+        "original-apl-runtime-membership": "45badc97a335606ae58c29c78e9b9ce236b650ef6889769f15bdab85ed1d4bf7",
+        "original-action-lifecycle": "9e7a8696eb8bf67d4da6c222863d7f67e6a8b225d69b682413981fb7cc9f7e55"
+      }
+    }
+  ]
+}
