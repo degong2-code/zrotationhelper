@@ -1,0 +1,169 @@
+{
+  "schema": "ZrotGeneralRotationGenericOriginalNativeActionLifecycleSuccessorV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+  "date": "2026-11-10",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "product_scope": "SIMC_FIRST_WCL_BLIND_VALIDATED_GENERAL_ROTATION_DUMMY_TRAINER",
+  "engine_first": true,
+  "original_source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "implementation": {
+    "initial_code_commit": "9d3cdc498cb565c97622c80941cca1828b62718e",
+    "original_function_boundary_correction": "4e59546d4eb24ffacc00e4fd1e68db8243253e38",
+    "original_for_loop_scope_correction": "714f59b1bf730faae012d25f8630c7c6681930f7",
+    "native_boolean_parser_correction": "6efb44f0ac767eccbdc18e2c1c5960a9a1958288",
+    "source_neutral_producer": "tools/research/general_rotation_original_action_lifecycle_v1.py",
+    "source_neutral_replay": "tools/research/general_rotation_original_action_lifecycle_replay_v1.py",
+    "ci": ".github/workflows/zrot-gr-shaman-original-source-ready-frontier-v1.yml",
+    "original_lifecycle_phases": [
+      "POST_CREATE",
+      "POST_BIND",
+      "PRE_INIT",
+      "POST_INIT"
+    ],
+    "provenance": "Exact original actor and action pointers, source descriptor pointer and stage order, same prior source-root runtime membership proof; no name-based guessing",
+    "original_action_create_init_ready_or_if_rng_queue_calls_added": 0,
+    "WCL_API_calls": 0,
+    "Blizzard_API_calls": 0,
+    "generic_spec_specific_logic_hardcoded": false
+  },
+  "verification": {
+    "final_ci_run": 42786821103,
+    "final_ci_url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42786821103",
+    "final_ci_head": "6efb44f0ac767eccbdc18e2c1c5960a9a1958288",
+    "result": "SUCCESS_3_OF_3",
+    "py312_contract": "PASS",
+    "py314_contract": "PASS",
+    "original_native_CXX_compile": "PASS",
+    "same_original_ST_and_AoE_actions_times_parity": "PASS",
+    "exact_native_source_signature_four_lifecycle_phase_join": "PASS",
+    "previous_source_evidence_byte_for_byte_unchanged": "PASS",
+    "independent_offline_artifact_sha256_checked_files": 10,
+    "independent_offline_artifact_sha256_result": "PASS_10_OF_10",
+    "artifact": {
+      "id": 13750015431,
+      "filename": "zrot-gr-shaman-exact-root-pre-6efb44f0ac767eccbdc18e2c1c5960a9a1958288",
+      "expires_at": "2026-11-24T09:04:21Z",
+      "zip_sha256": "d9dba3ca94d78d1a9ac4f7f34da834258b9b380dae35867c5d128accedca0c90"
+    },
+    "failed_runs_preserved": [
+      {
+        "run": 42785022179,
+        "status": "FAIL",
+        "cause": "Original init_actions function boundary anchored to wrong following function; patch insertion aborted before compile",
+        "corrected_in": "4e59546d4eb24ffacc00e4fd1e68db8243253e38"
+      },
+      {
+        "run": 42785183273,
+        "status": "FAIL",
+        "cause": "Original CXX POST_BIND instrumentation outside source action_priority loop caused undeclared variables",
+        "corrected_in": "714f59b1bf730faae012d25f8630c7c6681930f7"
+      },
+      {
+        "run": 42785780604,
+        "status": "FAIL",
+        "cause": "Replay treated source Native background string '0' as truthy Python value; old root ready/source replay PASS, new lifecycle replay failed",
+        "corrected_in": "6efb44f0ac767eccbdc18e2c1c5960a9a1958288"
+      }
+    ]
+  },
+  "actual_original_native": {
+    "ST_1target": {
+      "selected_root": {
+        "time_ms": 942,
+        "source_list": "single_sb",
+        "source_rank": 4,
+        "action": "stormstrike",
+        "call_id": 31
+      },
+      "higher_source_rows": 3,
+      "original_native_foreground_registered": 3,
+      "background_origin_counts": {
+        "NOT_BACKGROUND_AT_ORIGINAL_FOREGROUND_SNAPSHOT": 3
+      },
+      "result_sha256": "5dda6cd789d6cf5224fe16624d51e1b547113eecb454588cf6dd8fc896fbdbce"
+    },
+    "AoE_3target": {
+      "selected_root": {
+        "time_ms": 940,
+        "source_list": "aoe",
+        "source_rank": 20,
+        "action": "crash_lightning",
+        "call_id": 74
+      },
+      "higher_source_rows": 19,
+      "original_native_foreground_registered": 18,
+      "background_origin_counts": {
+        "NOT_BACKGROUND_AT_ORIGINAL_FOREGROUND_SNAPSHOT": 18,
+        "SOURCE_PINNED_CONSTRUCTOR_NOT_FOUND_SPELL_GUARD_OBSERVED": 1
+      },
+      "rank6": {
+        "source_action": "sundering",
+        "original_source_if": "talent.surging_elements.enabled|buff.whirling_earth.up",
+        "same_actor_original_action_and_source_signature_pointer": "PROVEN",
+        "original_action_POST_CREATE": {
+          "spell_data": "not_found",
+          "spell_data_ok": false,
+          "background": true,
+          "sequence": false
+        },
+        "original_action_POST_BIND": {
+          "spell_data": "not_found",
+          "background": true,
+          "sequence": false
+        },
+        "original_action_PRE_INIT": {
+          "spell_data": "not_found",
+          "background": true,
+          "sequence": false
+        },
+        "original_action_POST_INIT": {
+          "spell_data": "not_found",
+          "background": true,
+          "sequence": false
+        },
+        "action_initialized_foreground_membership": false,
+        "original_select_candidate_visited": false,
+        "original_action_ready_called": false,
+        "sufficient_original_source_cause": "action_t constructor sets background=true when s_data == spell_data_t::not_found(); original instance has this condition and flag directly at POST_CREATE",
+        "not_found_root_talent_or_blizzard_reason": "UNKNOWN",
+        "current_Retail_physical_ready": "UNKNOWN"
+      },
+      "result_sha256": "9e7a8696eb8bf67d4da6c222863d7f67e6a8b225d69b682413981fb7cc9f7e55"
+    }
+  },
+  "artifact_integrity": {
+    "prior_ST_selected_pre": "79646b5c0799ce9a3c6fb0575db0e5b738f18d65c326b11fd9c593c1b676687c",
+    "prior_AoE_selected_pre": "504ed71c03f0b6e52eacbffcbf17968223cc8c56da9bfebdf2386e6274528013",
+    "prior_ST_attempt_frontier": "79d372d06494cc8779daf09ee00fc4676ba03b5f0bbeed8c60d672f9677131aa",
+    "prior_AoE_attempt_frontier": "446ce44e36b73b8bf93f6b4845a9f3da912350cb078e6d8190976e8df5a2b369",
+    "prior_ST_stage": "dcbdee7fdf982d573e2ba8bfcb850565ee02e91ddae2780ebf1c23b8cadb6e6a",
+    "prior_AoE_stage": "6c79a4ea67cc61014cdbc309044f703420d2515e6f8a6529e2aae73c603a59b5",
+    "prior_ST_membership": "2c8bd164314326852afff614deeb61d5c25a310887ce3ec4e01dfe1ae598fd81",
+    "prior_AoE_membership": "45badc97a335606ae58c29c78e9b9ce236b650ef6889769f15bdab85ed1d4bf7",
+    "new_ST_lifecycle": "5dda6cd789d6cf5224fe16624d51e1b547113eecb454588cf6dd8fc896fbdbce",
+    "new_AoE_lifecycle": "9e7a8696eb8bf67d4da6c222863d7f67e6a8b225d69b682413981fb7cc9f7e55"
+  },
+  "boundaries": {
+    "SimC_not_found_has_causal_constructor_background_guard": "VALIDATED_FOR_OBSERVED_INSTANCE",
+    "missing_talent_causality": "UNKNOWN",
+    "WoW_current_patch_mechanics_parity": "UNKNOWN",
+    "independent_gameplay_physical_READY": "UNKNOWN",
+    "fully_ordered_CALL_RUN_path": "UNKNOWN",
+    "WCL_blind_holdout": "NOT_RUN",
+    "new_user_general_rotation_priority_promotions": 0,
+    "opener_end": "UNKNOWN",
+    "dummy_wrong_cast": "UNKNOWN",
+    "MAIN_promoted": false,
+    "FROZEN_modified": false
+  },
+  "lifecycle": "OBSERVED_NATIVE_SOURCE_SUCCESSOR_NOT_FREEZE_ELIGIBLE",
+  "exact_product_next": "Reuse generic lifecycle provenance across other classes; independently pin missing spell data to Blizzard/talent/profile without semantic injection into blind WCL; then complete exact PRE mechanic readiness and ordered CALL/RUN; postlock WCL holdout before any General Rotation rule/dummy feedback promotion.",
+  "main_only_promotion": false,
+  "branch_only": true,
+  "frozen_historical_unchanged": true,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
