@@ -1,0 +1,168 @@
+{
+  "schema": "ZrotGeneralRotationShamanWclMwStackAndTriggerFamilySuccessorV1",
+  "date": "2026-11-11",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "scope": "GENERAL_ROTATION_OPENER_AND_DUMMY_TRAINER_ONLY",
+  "original_simc_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "original_source_class_cpp_blob": "46250f6ce200c10fc30795d3afa0b1cb3ce45568",
+  "original_fixed_numeric_lock_sha256": "34a90fbce125058dc164d7f4e3facad39ca69ba7311abfcbe3c2aa93af1da552",
+  "original_holdout_metrics_sha256": "99f0a600eeb20ab6fe90e4900c54205fdf4d4c07415368553efc77d6e11f00de",
+  "reused": [
+    "tools/engine_first/wcl_raw_actor_aura_temporal_pre_v1.py",
+    "tools/research/wcl_actor_resource_owner_strict_pre_v1.py",
+    "tools/research/simc_apl_semantic_ir_v2.py",
+    "tools/engine_first/wcl_raw_action_event_grain_audit_v1.py"
+  ],
+  "new_generic": [
+    "tools/research/wcl_postlock_aura_source_if_sensitivity_v1.py",
+    "tools/research/wcl_postlock_source_trigger_timing_v1.py"
+  ],
+  "external_spec_adapters": [
+    "tools/research/fixtures/zrot_shaman_wcl_postlock_aura_predicate_v1.json",
+    "tools/research/fixtures/zrot_shaman_wcl_postlock_thorim_trigger_family_v1.json"
+  ],
+  "actual_strict_pre": {
+    "raw_aura": {
+      "discovery_SHA256": "7984e54d1490a0b37ddb3ddfcd09de68deb15effb91491ab1ca8e57016a783f4",
+      "holdout_SHA256": "ac37e2e97d6e3ded948623a693148d73491d7d12c556ebb6a5ff34400ffc39eb",
+      "raw_Maelstrom_Weapon_buff_ID": 344179,
+      "raw_Ascendance_buff_ID": 114051,
+      "raw_Doom_Winds_buff_ID": 466772
+    },
+    "actor_owned_resource": {
+      "discovery_actor_owned_events": 128,
+      "holdout_actor_owned_events": 91,
+      "raw_resource_type": "0_ONLY_NOT_MAELSTROM_WEAPON_STACK",
+      "discovery_action_PRE_with_snapshot": 54,
+      "holdout_action_PRE_with_snapshot": 50,
+      "source_vs_target_owner_proof_required": true,
+      "SHA256": "f61d013a16ab80bf6a6ffb22c2f0e6f4a6772cf5e104de62baba899437e551f9"
+    },
+    "maelstrom_source_IF_partial": {
+      "source_hypothesis_only": true,
+      "focus_completed_WCL_casts": {
+        "discovery": 26,
+        "holdout": 21
+      },
+      "exact_prior_stack": {
+        "discovery": 11,
+        "holdout": 9
+      },
+      "unknown_prior_stack": {
+        "discovery": 15,
+        "holdout": 12
+      },
+      "stack_at_least5_TRUE": {
+        "discovery": 9,
+        "holdout": 4
+      },
+      "stack_at_least8_TRUE": {
+        "discovery": 0,
+        "holdout": 2
+      },
+      "stack_at_least10_TRUE": {
+        "discovery": 0,
+        "holdout": 0
+      },
+      "stack_at_least10_FALSE": {
+        "discovery": 11,
+        "holdout": 9
+      },
+      "unknown_stack_never_inferred_zero": true,
+      "source_IF_TRUE_not_READY": true,
+      "source_IF_FALSE_not_user_error": true,
+      "SHA256": "307af3ab3870ed4efd58bb03ff88f8a24c3e10ffe16b3494aac1117b6df33b83"
+    }
+  },
+  "source_trigger": {
+    "pinned_CPP_mechanic": "shaman_t::trigger_thorims_invocation checks talent and Maelstrom Weapon and executes tempest_ti, ti_trigger or lightning_bolt_ti",
+    "pinned_CPP_parent_paths": [
+      "windstrike_t::impact",
+      "crash_lightning_t::execute",
+      "stormstrike_t::impact"
+    ],
+    "TI_variant_background_true": true,
+    "pinned_DBC_Thorims_Invocation": {
+      "node": 80949,
+      "entry": 101813,
+      "spell": 384444
+    },
+    "source_profile_positive_rank": 1,
+    "WCL_discovery_positive_rank": 1,
+    "WCL_holdout_positive_rank": 1,
+    "runtime_talent_enabled": "UNKNOWN",
+    "child_numeric_ids": [
+      188196,
+      452201
+    ],
+    "parent_numeric_ids": [
+      115356,
+      187874
+    ],
+    "posthoc_exploratory_ms_window": 1,
+    "threshold_predeclared_before_inspecting_WCL": false,
+    "discovery": {
+      "child_casts": 12,
+      "parents": 12,
+      "unique_near_parent": 12,
+      "Ascendance_strict_PRE_active": 12,
+      "Doom_Winds_strict_PRE_active": 10,
+      "parent_windstrike": 9,
+      "parent_crash_lightning": 3
+    },
+    "holdout": {
+      "child_casts": 9,
+      "parents": 10,
+      "unique_near_parent": 9,
+      "Ascendance_strict_PRE_active": 9,
+      "Doom_Winds_strict_PRE_active": 9,
+      "parent_windstrike": 8,
+      "parent_crash_lightning": 1
+    },
+    "WCL_direct_trigger_parent_relation": "UNKNOWN",
+    "independent_threshold_holdout_validation": "NOT_RUN_POSTHOC_WINDOW",
+    "SHA256": "0126b56618960ee2e07e1f2533ae8770fb13b391703d9912ec99b0d493f5bab3",
+    "compact_byte_identical_file": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/SHAMAN_WCL_THORIM_TRIGGER_COTIMING_COMPACT_20261111.json",
+    "compact_sha256": "4cd18d6868aa04973f8c1701ffb4ae0217225823fb91b4b060ba3ee91450a0d7"
+  },
+  "validation": {
+    "initial_aura_resource_CI_run": 43037986057,
+    "initial_CI_status": "FAILED_ZIP_PACKAGING_UNSAFE_ARCHIVE_MEMBER_NOT_GAMEPLAY",
+    "corrected_aura_resource_CI_run": 43038246560,
+    "corrected_CI_status": "SUCCESS_3_OF_3",
+    "source_trigger_family_CI_run": 43039263538,
+    "source_trigger_CI_status": "SUCCESS_3_OF_3",
+    "Python312": "PASS",
+    "Python314": "PASS",
+    "real_raw_WCL_two_reports": "PASS",
+    "original_blind_lock_unchanged": true,
+    "new_WCL_API_calls": 0,
+    "new_SimC_CXX_builds": 0,
+    "aura_resource_artifact_id": 13864177053,
+    "aura_resource_artifact_sha256": "d7242d1b1630b94a20fa678b3d7c701563726dc3eb555dc94d6ce270f0f854a3",
+    "trigger_artifact_id": 13865215482,
+    "trigger_artifact_sha256": "1f30289561ea3edf2fa50b6d7c8895ccc791bdd12087c8d074d9e711140e8afe"
+  },
+  "interpretation": {
+    "actual_WCL_casts_manual_or_triggered": "UNKNOWN",
+    "source_trigger_consistency": "CANDIDATE_NOT_CAUSAL_PROOF",
+    "active_target_count": "UNKNOWN",
+    "full_build_equivalence": "NOT_IDENTICAL_POSITIVE_TALENT_RANK_AND_GEAR_VECTOR",
+    "current_Retail_mechanics": "UNKNOWN",
+    "complete_action_READY": "UNKNOWN",
+    "current_Retail_optimal_priority": "UNKNOWN",
+    "target_dummy_false_positive_guard": "DO_NOT_ASSUME_188196_OR_452201_NUMERIC_CAST_EVENTS_ARE_MANUAL_WITHOUT_ACTION_ROLE_PROOF",
+    "new_General_Rotation_priority_rules_promoted": 0,
+    "new_confirmed_dummy_mistakes": 0
+  },
+  "session_exact_next": "Resolve independent current Blizzard and actor-build activation truth for Thorim trigger only if needed; classify cast role with source/target/parent raw evidence without using 1ms exploratory co-timing as causal proof; then focus on source IF alternatives and actual user dummy trainer observability.",
+  "product_exact_next": "General Rotation conditional ST/2T/cleave/AoE and opener, safely compare real target dummy practice.",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Gen9_handoff_unchanged": true,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
