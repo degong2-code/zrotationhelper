@@ -1,0 +1,83 @@
+{
+  "schema": "ZrotPostlockSourceAuraPredicateAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "scope": "GENERAL_ROTATION_RESEARCH_ONLY",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_profile_git_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+  "source_class_cpp_git_blob": "46250f6ce200c10fc30795d3afa0b1cb3ce45568",
+  "protected_prior_numeric_lock_sha256": "34a90fbce125058dc164d7f4e3facad39ca69ba7311abfcbe3c2aa93af1da552",
+  "source_profile_path": "profiles/MID2/MID2_Shaman_Enhancement.simc",
+  "source_cpp_path": "engine/class_modules/sc_shaman.cpp",
+  "source_spell_concordance_checks": [
+    {
+      "numeric_id": 344179,
+      "source_cpp_exact": "buff.maelstrom_weapon = make_buff( this, \"maelstrom_weapon\", find_spell( 344179 ) )"
+    },
+    {
+      "numeric_id": 466772,
+      "source_cpp_exact": "buff.doom_winds = make_buff( this, \"doom_winds\", find_spell( 466772 ) )"
+    },
+    {
+      "numeric_id": 114051,
+      "source_cpp_exact": "case SHAMAN_ENHANCEMENT: spell.ascendance = find_spell( 114051 ); break;"
+    },
+    {
+      "numeric_id": 454015,
+      "source_cpp_exact": "buff.tempest = make_buff( this, \"tempest\", find_spell( 454015 ) )"
+    },
+    {
+      "numeric_id": 115356,
+      "source_cpp_exact": "player->find_spell( 115356 )"
+    },
+    {
+      "numeric_id": 452201,
+      "source_cpp_exact": "player->find_spell( 452201 )"
+    },
+    {
+      "numeric_id": 188196,
+      "source_cpp_exact": "if ( step.spell_id == 188196 )"
+    },
+    {
+      "numeric_id": 469270,
+      "source_cpp_exact": "player->find_spell( 469270 )"
+    }
+  ],
+  "source_talent_DBC_checks": [
+    {
+      "numeric_id": 470057,
+      "trait_node": 80954,
+      "trait_entry": 101819
+    },
+    {
+      "numeric_id": 187874,
+      "trait_node": 80974,
+      "trait_entry": 101840
+    }
+  ],
+  "buff_symbols": {
+    "buff.maelstrom_weapon.stack": 344179,
+    "buff.maelstrom_weapon.up": 344179,
+    "buff.ascendance.up": 114051,
+    "buff.doom_winds.up": 466772,
+    "buff.tempest.up": 454015
+  },
+  "observed_numeric_source_action_candidates": {
+    "115356": "windstrike",
+    "187874": "crash_lightning",
+    "188196": "lightning_bolt",
+    "452201": "tempest",
+    "470057": "voltaic_blaze"
+  },
+  "excluded_numeric_action_families": {
+    "1": "NOT_CERTIFIED_MANUAL_AUTO_ATTACK",
+    "469270": "SOURCE_CLASS_DOOM_WINDS_DAMAGE_BACKGROUND_TRUE"
+  },
+  "target_count_at_action": "UNKNOWN",
+  "manual_input_proven": false,
+  "ready_and_competing_spells_proven": false,
+  "allow_source_apl_prior_to_lock": false,
+  "allow_wcl_holdout_relocking": false,
+  "allow_unknown_stack_as_zero": false,
+  "allow_t_same_timestamp_as_pre": false,
+  "allow_promote_gameplay_rule": false
+}
