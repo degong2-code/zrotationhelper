@@ -96,8 +96,24 @@ jobs:
           echo '34a90fbce125058dc164d7f4e3facad39ca69ba7311abfcbe3c2aa93af1da552  /tmp/original-discovery/results/discovery-lock.json' | sha256sum -c -
           echo '332a7a309c14bc8be24ee1d240dd316758338033a7d88232c34a68def74278e9  /tmp/original-discovery/results/holdout-contract.json' | sha256sum -c -
           echo '99f0a600eeb20ab6fe90e4900c54205fdf4d4c07415368553efc77d6e11f00de  /tmp/original-holdout/holdout/derived/holdout_observed_metrics.json' | sha256sum -c -
-          (cd /tmp/original-discovery && zip -qr /tmp/original-discovery-repack.zip .)
-          (cd /tmp/original-holdout && zip -qr /tmp/original-holdout-repack.zip .)
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          for role in ("discovery","holdout"):
+              outer=Path("/tmp/original-"+role)
+              inner=outer/role
+              # One full-root archive for exact event-grain audit; one
+              # legacy cohort-root archive for existing resource-owner API.
+              # Zip entries must NOT contain "./" directories.
+              for path,root in ((Path("/tmp/original-"+role+"-repack.zip"),outer),
+                                (Path("/tmp/original-"+role+"-cohort.zip"),inner)):
+                  with zipfile.ZipFile(path,"w",compression=zipfile.ZIP_DEFLATED) as z:
+                      for f in sorted(root.rglob("*")):
+                          if f.is_file():z.write(f,f.relative_to(root).as_posix())
+                  with zipfile.ZipFile(path) as z:
+                      assert z.namelist() and all(not x.startswith("./") and not x.endswith("/") for x in z.namelist())
+          print("ORIGINAL_ARTIFACT_REPACKED_WITH_ROOT_SAFE_LEGACY_RESOURCE_PATHS")
+          PY
           test "$(git -C original-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
       - name: Reuse generic existing raw Aura Temporal Strict PRE for two disjoint reports
         shell: bash
@@ -116,8 +132,8 @@ jobs:
         run: |
           set -euo pipefail
           python -B tools/research/wcl_actor_resource_owner_strict_pre_v1.py \
-            --discovery-zip /tmp/original-discovery-repack.zip \
-            --holdout-zip /tmp/original-holdout-repack.zip \
+            --discovery-zip /tmp/original-discovery-cohort.zip \
+            --holdout-zip /tmp/original-holdout-cohort.zip \
             --out /tmp/zrot-shaman-postlock/actor-resource-pre.json
       - name: Postlock only source APL IF with strict prior numeric buff facts
         shell: bash
