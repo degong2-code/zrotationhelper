@@ -1,0 +1,162 @@
+name: zrot-gr-postlock-thorim-numeric-trigger-family-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - .github/workflows/zrot-gr-postlock-thorim-numeric-trigger-family-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  generic:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12','3.14']
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Static source-neutral timing and type guard
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/research/wcl_postlock_source_trigger_timing_v1.py
+          python -B tools/research/wcl_postlock_source_trigger_timing_v1.py >/tmp/trigger-family-selftest.json
+          python - <<'PY'
+          import json
+          j=json.load(open('/tmp/trigger-family-selftest.json'))
+          assert j['status']=='PASS_SYNTHETIC_STATIC' and j['checks']==2
+          assert j['one_ms_window_is_posthoc'] and j['no_gameplay_promotion']
+          print('GENERIC_TRIGGER_TIMING_SOURCE_BOUNDARY_STATIC_PASS')
+          PY
+  real-original-paired-source:
+    needs: generic
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONPATH: tools/engine_first:tools/research
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          sparse-checkout: |
+            engine/class_modules/sc_shaman.cpp
+          sparse-checkout-cone-mode: false
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42962352771
+          github-token: ${{ github.token }}
+          name: zrot-shaman-blind-discovery-d3f0f6c776c3b31b14fa200004d84c3a0d5d677e
+          path: /tmp/original-discovery
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42962352771
+          github-token: ${{ github.token }}
+          name: zrot-shaman-blind-holdout-d3f0f6c776c3b31b14fa200004d84c3a0d5d677e
+          path: /tmp/original-holdout
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 43038246560
+          github-token: ${{ github.token }}
+          name: zrot-shaman-postlock-raw-buff-resource-source-if-322b4ee810bfd7b2e7659f7fcea8e82372356d3e
+          path: /tmp/prior-postlock
+      - name: Preserve immutable numeric blind lock and original raw page bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-trigger
+          evidence=active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence
+          cmp /tmp/original-discovery/results/discovery-lock.json "$evidence/WCL_SHAMAN_ENHANCEMENT_DISCOVERY_NUMERIC_LOCK_20261111.json"
+          cmp /tmp/original-discovery/results/holdout-contract.json "$evidence/WCL_SHAMAN_ENHANCEMENT_HOLDOUT_CONTRACT_20261111.json"
+          echo '34a90fbce125058dc164d7f4e3facad39ca69ba7311abfcbe3c2aa93af1da552  /tmp/original-discovery/results/discovery-lock.json' | sha256sum -c -
+          echo '307af3ab3870ed4efd58bb03ff88f8a24c3e10ffe16b3494aac1117b6df33b83  /tmp/prior-postlock/postlock-aura-source-if.json' | sha256sum -c -
+          test "$(git -C original-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          for role in ('discovery','holdout'):
+              root=Path('/tmp/original-'+role)
+              out=Path('/tmp/original-'+role+'-safe.zip')
+              with zipfile.ZipFile(out,'w',compression=zipfile.ZIP_DEFLATED) as z:
+                  for p in sorted(root.rglob('*')):
+                      if p.is_file():z.write(p,p.relative_to(root).as_posix())
+              with zipfile.ZipFile(out) as z:
+                  assert z.namelist() and all(not n.startswith('./') and not n.endswith('/') for n in z.namelist())
+          print('EXACT_RAW_MEMBERS_REPACKAGED_SAFE_ROOT')
+          PY
+      - name: Original independently checked raw cast IDs -> postlock source-trigger candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/wcl_postlock_source_trigger_timing_v1.py \
+            --source-cpp original-simc/engine/class_modules/sc_shaman.cpp \
+            --adapter tools/research/fixtures/zrot_shaman_wcl_postlock_thorim_trigger_family_v1.json \
+            --prior-postlock /tmp/prior-postlock/postlock-aura-source-if.json \
+            --prior-lock /tmp/original-discovery/results/discovery-lock.json \
+            --prior-contract /tmp/original-discovery/results/holdout-contract.json \
+            --discovery-zip /tmp/original-discovery-safe.zip \
+            --holdout-zip /tmp/original-holdout-safe.zip \
+            --out /tmp/zrot-trigger/trigger-family-timing.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          p=Path('/tmp/zrot-trigger')
+          o=json.loads((p/'trigger-family-timing.json').read_bytes())
+          assert o['schema']=='ZrotGenericWclPostlockSourceTriggerTimingWitnessV1'
+          assert o['original_numeric_lock_sha256']=='34a90fbce125058dc164d7f4e3facad39ca69ba7311abfcbe3c2aa93af1da552'
+          assert o['window_selected_posthoc_after_data_inspection']
+          assert not o['independent_holdout_confirmation_of_predeclared_timing_threshold']
+          assert not o['direct_wcl_trigger_parent_event_relation_observed']
+          assert o['new_general_rotation_rules_promoted']==0 and not o['MAIN_promoted']
+          assert [(r['numeric_child_completed_casts'],r['summary'].get('ONE_NEAR_PARENT_EXPLORATORY')) for r in o['cases']]==[(12,12),(9,9)]
+          assert [r['summary'].get('CHILD_PRE_ASCENDANCE_OBSERVED_ACTIVE') for r in o['cases']]==[12,9]
+          assert all(x['observed_event_caused_by_source_cpp_trigger']=='CANDIDATE_NOT_PROVEN' for r in o['cases'] for x in r['candidate_pairs'])
+          compact={
+            'schema':'ZrotPostlockOriginalShamanTriggerFamilyObservedCoTimingCompactV1',
+            'source_original_simc_cxx_pinned':True,
+            'posthoc_ms_window':1,
+            'fixed_numeric_lock_sha256':o['original_numeric_lock_sha256'],
+            'source_trigger_mechanism_exists_in_pinned_cpp':True,
+            'pairing_not_causal_validation':True,
+            'direct_WCL_trigger_parent_relation':'UNKNOWN',
+            'manual_cast_versus_trigger':'UNKNOWN',
+            'source_if_and_gameplay_PRIORITY':'UNKNOWN',
+            'dummy_error':'UNKNOWN',
+            'new_user_rules_promoted':0,
+            'pairs':[{'role':r['role'],'child_cast_events':r['numeric_child_completed_casts'],
+                      'parent_cast_events':r['numeric_parent_completed_casts'],
+                      'matched_within_1ms':r['summary']['ONE_NEAR_PARENT_EXPLORATORY'],
+                      'ascendance_strict_pre_active':r['summary']['CHILD_PRE_ASCENDANCE_OBSERVED_ACTIVE'],
+                      'doom_winds_strict_pre_active':r['summary'].get('CHILD_PRE_DOOM_WINDS_OBSERVED_ACTIVE',0)}
+                     for r in o['cases']]
+          }
+          (p/'compact.json').write_bytes(canonical(compact))
+          print('ORIGINAL_WCL_SOURCE_TRIGGER_TIMING_CONSISTENCY_PASS',json.dumps(compact,sort_keys=True))
+          PY
+          sha256sum /tmp/zrot-trigger/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-gr-postlock-trigger-family-observational-${{ github.sha }}
+          path: /tmp/zrot-trigger/*.json
+          retention-days: 14
+          if-no-files-found: warn
