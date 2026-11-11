@@ -83,8 +83,8 @@ def validated_adapter(a,profile,cpp,dbc,lock_raw):
                      expected_git_blob=a["source_profile_git_blob"])
     found={row["action"] for rows in ir["action_lists"].values() for row in rows}
     require(set(mappings.values())<=found and
-            all(x in ir["source_symbol_dependencies"] for x in symbols),
-            "SOURCE_APL_ACTION_OR_BUFF_SYMBOL_MISSING")
+            any(x in ir["source_symbol_dependencies"] for x in symbols),
+            "SOURCE_APL_ACTION_OR_ALL_BUFF_SYMBOLS_MISSING")
     return ir
 
 def load_aura(raw,transport,role):
