@@ -1,0 +1,185 @@
+name: zrot-gr-shaman-postlock-aura-resource-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - .github/workflows/zrot-gr-shaman-postlock-aura-resource-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static:
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12','3.14']
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Generic source-neutral aura/resource and source IF static regression
+        shell: bash
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            tools/engine_first/wcl_raw_actor_aura_temporal_pre_v1.py \
+            tools/research/wcl_actor_resource_owner_strict_pre_v1.py \
+            tools/research/wcl_postlock_aura_source_if_sensitivity_v1.py
+          python -B tools/engine_first/wcl_raw_actor_aura_temporal_pre_v1.py >/tmp/old-raw-aura-selftest.json
+          python -B tools/research/wcl_actor_resource_owner_strict_pre_v1.py >/tmp/resource-owner-selftest.json
+          python -B tools/research/wcl_postlock_aura_source_if_sensitivity_v1.py >/tmp/postlock-if-selftest.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/old-raw-aura-selftest.json'))
+          b=json.load(open('/tmp/resource-owner-selftest.json'))
+          c=json.load(open('/tmp/postlock-if-selftest.json'))
+          assert a['status']=='PASS_SOURCE_NEUTRAL_AURA_TEMPORAL_SYNTHETIC' and a['negative_controls']==3
+          assert b['status']=='PASS_OFFLINE_SYNTHETIC' and b['checks']==9
+          assert c['status']=='PASS_SYNTHETIC_STATIC' and c['checks']==3
+          assert c['strict_PRE_same_timestamp_rejected'] and c['unknown_stack_not_zero']
+          print('GENERIC_AURA_RESOURCE_SOURCE_IF_CONTRACT_PASS')
+          PY
+
+  original-real-e2e:
+    needs: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    env:
+      PYTHONPATH: tools/engine_first:tools/research
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Shaman_Enhancement.simc
+            engine/class_modules/sc_shaman.cpp
+            engine/dbc/generated/trait_data.inc
+          sparse-checkout-cone-mode: false
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42962352771
+          github-token: ${{ github.token }}
+          name: zrot-shaman-blind-discovery-d3f0f6c776c3b31b14fa200004d84c3a0d5d677e
+          path: /tmp/original-discovery
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42962352771
+          github-token: ${{ github.token }}
+          name: zrot-shaman-blind-holdout-d3f0f6c776c3b31b14fa200004d84c3a0d5d677e
+          path: /tmp/original-holdout
+      - name: Original numeric lock and report disjoint identity verified before postlock semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-shaman-postlock
+          evidence=active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence
+          cmp /tmp/original-discovery/results/discovery-lock.json "$evidence/WCL_SHAMAN_ENHANCEMENT_DISCOVERY_NUMERIC_LOCK_20261111.json"
+          cmp /tmp/original-discovery/results/holdout-contract.json "$evidence/WCL_SHAMAN_ENHANCEMENT_HOLDOUT_CONTRACT_20261111.json"
+          cmp /tmp/original-holdout/holdout/derived/holdout_observed_metrics.json "$evidence/WCL_SHAMAN_ENHANCEMENT_HOLDOUT_OBSERVED_METRICS_20261111.json"
+          echo '34a90fbce125058dc164d7f4e3facad39ca69ba7311abfcbe3c2aa93af1da552  /tmp/original-discovery/results/discovery-lock.json' | sha256sum -c -
+          echo '332a7a309c14bc8be24ee1d240dd316758338033a7d88232c34a68def74278e9  /tmp/original-discovery/results/holdout-contract.json' | sha256sum -c -
+          echo '99f0a600eeb20ab6fe90e4900c54205fdf4d4c07415368553efc77d6e11f00de  /tmp/original-holdout/holdout/derived/holdout_observed_metrics.json' | sha256sum -c -
+          (cd /tmp/original-discovery && zip -qr /tmp/original-discovery-repack.zip .)
+          (cd /tmp/original-holdout && zip -qr /tmp/original-holdout-repack.zip .)
+          test "$(git -C original-simc rev-parse HEAD)" = b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+      - name: Reuse generic existing raw Aura Temporal Strict PRE for two disjoint reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/engine_first/wcl_raw_actor_aura_temporal_pre_v1.py \
+            --actor-root /tmp/original-discovery/discovery \
+            --raw-transport /tmp/original-discovery/results/discovery-numeric.json \
+            --out /tmp/zrot-shaman-postlock/discovery-raw-aura-pre.json
+          python -B tools/engine_first/wcl_raw_actor_aura_temporal_pre_v1.py \
+            --actor-root /tmp/original-holdout/holdout \
+            --raw-transport /tmp/original-holdout/results/holdout-numeric.json \
+            --out /tmp/zrot-shaman-postlock/holdout-raw-aura-pre.json
+      - name: Reuse actor-owned resource proof; never equate mana to Maelstrom Weapon stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/wcl_actor_resource_owner_strict_pre_v1.py \
+            --discovery-zip /tmp/original-discovery-repack.zip \
+            --holdout-zip /tmp/original-holdout-repack.zip \
+            --out /tmp/zrot-shaman-postlock/actor-resource-pre.json
+      - name: Postlock only source APL IF with strict prior numeric buff facts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/research/wcl_postlock_aura_source_if_sensitivity_v1.py \
+            --discovery-zip /tmp/original-discovery-repack.zip \
+            --holdout-zip /tmp/original-holdout-repack.zip \
+            --discovery-aura /tmp/zrot-shaman-postlock/discovery-raw-aura-pre.json \
+            --holdout-aura /tmp/zrot-shaman-postlock/holdout-raw-aura-pre.json \
+            --profile original-simc/profiles/MID2/MID2_Shaman_Enhancement.simc \
+            --cpp original-simc/engine/class_modules/sc_shaman.cpp \
+            --dbc original-simc/engine/dbc/generated/trait_data.inc \
+            --adapter tools/research/fixtures/zrot_shaman_wcl_postlock_aura_predicate_v1.json \
+            --lock /tmp/original-discovery/results/discovery-lock.json \
+            --contract /tmp/original-discovery/results/holdout-contract.json \
+            --metrics /tmp/original-holdout/holdout/derived/holdout_observed_metrics.json \
+            --out /tmp/zrot-shaman-postlock/postlock-aura-source-if.json
+      - name: Check no gameplay overpromotion, disclose exact stack 5/8/10 observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from collections import Counter
+          from fresh_wcl_engine_v1 import canonical,sha
+          root=Path('/tmp/zrot-shaman-postlock')
+          a=json.loads((root/'postlock-aura-source-if.json').read_bytes())
+          b=json.loads((root/'actor-resource-pre.json').read_bytes())
+          assert a['protected_blind_lock_sha256']=='34a90fbce125058dc164d7f4e3facad39ca69ba7311abfcbe3c2aa93af1da552'
+          assert a['schema']=='ZrotGenericPostlockWclAuraSourceIfSensitivityV1'
+          assert not a['MAIN_promoted'] and a['new_general_rotation_rules_promoted']==0
+          assert not a['source_IF_true_is_not_action_READY']==False or a['source_IF_true_is_not_action_READY']
+          assert b['status']=='ACTOR_OWNED_STRICT_PRE_SNAPSHOT_OBSERVATIONS_ONLY'
+          out=[]
+          for c in a['cases']:
+              assert c['complete_READY_proven']==0 and c['new_general_rotation_rule_promoted']==0
+              done=[x for x in c['per_observed_action_event'] if x['event_type']=='cast']
+              sums=Counter()
+              for x in done:
+                  v=x['maelstrom_weapon_exact_raw_stack']
+                  sums['EXACT_STACK' if v is not None else 'UNKNOWN_STACK']+=1
+                  for n in (5,8,10):
+                      tag=f'stack_at_least_{n}'
+                      got=x['maelstrom_predicate_candidates'][tag]
+                      assert got=='UNKNOWN' if v is None else got==(v>=n)
+                      sums[f'STACK_GE_{n}_'+str(got)]+=1
+              out.append({'role':c['role'],'completed_focus_casts':len(done),
+                          'numeric_and_stack_observability':c['per_numeric_action_coverage'],
+                          'stack_condition_counts':dict(sorted(sums.items()))})
+          assert len(out)==2 and a['cases'][0]['report_code']!=a['cases'][1]['report_code']
+          (root/'compact-status.json').write_bytes(canonical({'status':'PASS_OBSERVATIONAL_ONLY',
+               'prior_lock_unchanged':True,'new_WCL_API_calls':0,'new_native_builds':0,
+               'gameplay_READY_and_user_error':'UNKNOWN','cases':out}))
+          print('RAW_WCL_POSTLOCK_MAELSTROM_STACK_5_8_10_COVERAGE',json.dumps(out,sort_keys=True))
+          PY
+          sha256sum /tmp/zrot-shaman-postlock/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-shaman-postlock-raw-buff-resource-source-if-${{ github.sha }}
+          path: /tmp/zrot-shaman-postlock/*.json
+          retention-days: 14
+          if-no-files-found: warn
