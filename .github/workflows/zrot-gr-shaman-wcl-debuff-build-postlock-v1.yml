@@ -1,0 +1,152 @@
+name: zrot-gr-shaman-wcl-debuff-build-postlock-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - tools/engine_first/wcl_outgoing_debuff_strict_pre_v1.py
+      - tools/research/wcl_postlock_numeric_build_profile_compare_v1.py
+      - .github/workflows/zrot-gr-shaman-wcl-debuff-build-postlock-v1.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.12','3.14']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile and synthetic source-scope and build regressions
+        env:
+          PYTHONPATH: tools/engine_first:tools/research
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/engine_first/wcl_outgoing_debuff_strict_pre_v1.py tools/research/wcl_postlock_numeric_build_profile_compare_v1.py
+          python -B tools/engine_first/wcl_outgoing_debuff_strict_pre_v1.py
+          python -B tools/research/wcl_postlock_numeric_build_profile_compare_v1.py
+  offline:
+    needs: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONPATH: tools/engine_first:tools/research
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: simulationcraft/simc
+          ref: b522cded8c26b97dac03fdf56e57a03ec7e8faa6
+          path: original-simc
+          persist-credentials: false
+          sparse-checkout: |
+            profiles/MID2/MID2_Shaman_Enhancement.simc
+            engine/dbc/generated/trait_data.inc
+            engine/class_modules/sc_shaman.cpp
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42962352771
+          github-token: ${{ github.token }}
+          name: zrot-shaman-blind-discovery-d3f0f6c776c3b31b14fa200004d84c3a0d5d677e
+          path: /tmp/discovery
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 42962352771
+          github-token: ${{ github.token }}
+          name: zrot-shaman-blind-holdout-d3f0f6c776c3b31b14fa200004d84c3a0d5d677e
+          path: /tmp/holdout
+      - name: Verify immutable locks and independently replay archived actor source
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-postlock
+          evidence=active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence
+          cmp /tmp/discovery/results/discovery-lock.json "$evidence/WCL_SHAMAN_ENHANCEMENT_DISCOVERY_NUMERIC_LOCK_20261111.json"
+          cmp /tmp/discovery/results/holdout-contract.json "$evidence/WCL_SHAMAN_ENHANCEMENT_HOLDOUT_CONTRACT_20261111.json"
+          cmp /tmp/holdout/holdout/derived/holdout_observed_metrics.json "$evidence/WCL_SHAMAN_ENHANCEMENT_HOLDOUT_OBSERVED_METRICS_20261111.json"
+          echo '34a90fbce125058dc164d7f4e3facad39ca69ba7311abfcbe3c2aa93af1da552  /tmp/discovery/results/discovery-lock.json' | sha256sum -c -
+          echo '332a7a309c14bc8be24ee1d240dd316758338033a7d88232c34a68def74278e9  /tmp/discovery/results/holdout-contract.json' | sha256sum -c -
+          echo '99f0a600eeb20ab6fe90e4900c54205fdf4d4c07415368553efc77d6e11f00de  /tmp/holdout/holdout/derived/holdout_observed_metrics.json' | sha256sum -c -
+          for role in discovery holdout; do
+            if [ "$role" = discovery ]; then
+              gate=/tmp/discovery/discovery/derived/identity.json
+            else
+              gate=/tmp/holdout/holdout/derived/identity_gate.json
+            fi
+            raw=$(find "/tmp/$role/$role/raw" -name checkpoint.json -print -quit)
+            test -n "$raw"
+            python -B tools/engine_first/wcl_actor_combatantinfo_pre_v1.py \
+              --raw-root "$(dirname "$raw")" --actor-gate "$gate" \
+              --out "/tmp/zrot-postlock/$role-build.json"
+            # Repackage downloaded, original member bytes; raw page hashes,
+            # transport/matrix digests and event IDs are validated inside.
+            (cd "/tmp/$role" && zip -qr "/tmp/$role-repacked.zip" .)
+            python -B tools/engine_first/wcl_outgoing_debuff_strict_pre_v1.py \
+              --zip "/tmp/$role-repacked.zip" --role "$role" \
+              --out "/tmp/zrot-postlock/$role-debuff.json"
+          done
+          python -B tools/research/wcl_postlock_numeric_build_profile_compare_v1.py \
+            --source-root original-simc \
+            --adapter tools/research/fixtures/zrot_shaman_talent_hash_dbc_v1.json \
+            --discovery-cert /tmp/zrot-postlock/discovery-build.json \
+            --holdout-cert /tmp/zrot-postlock/holdout-build.json \
+            --lock /tmp/discovery/results/discovery-lock.json \
+            --contract /tmp/discovery/results/holdout-contract.json \
+            --metrics /tmp/holdout/holdout/derived/holdout_observed_metrics.json \
+            --out /tmp/zrot-postlock/build-compare.json
+      - name: Pinned source postlock Flame Shock ID and exact target active evidence
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          from collections import Counter
+          from fresh_wcl_engine_v1 import canonical,sha
+          from general_rotation_original_talent_hash_dbc_v1 import gitblob
+          source=Path('original-simc/engine/class_modules/sc_shaman.cpp').read_bytes()
+          assert gitblob(source)=='46250f6ce200c10fc30795d3afa0b1cb3ce45568'
+          assert b'shaman_spell_t( "flame_shock", player, player->find_spell( 188389 ), type_)' in source
+          path=Path('/tmp/zrot-postlock')
+          compare=json.loads((path/'build-compare.json').read_bytes())
+          out=[]
+          for role in ('discovery','holdout'):
+              x=json.loads((path/f'{role}-debuff.json').read_bytes())
+              b=json.loads((path/f'{role}-build.json').read_bytes())
+              assert x['strict_timestamp_lt'] and x['same_timestamp_not_used']
+              assert b['combatantinfo_pre_status']=='OBSERVED_STRICT_PRE'
+              assert b['actor_numeric_build_snapshot']['observed_numeric_specID']==263
+              assert x['own_debuff_transitions']==(54 if role=='discovery' else 46)
+              counts=Counter()
+              rows=[]
+              for a in x['per_action_event']:
+                  f=a['per_target_debuff'].get('188389')
+                  active=f['active'] if f else None
+                  # Only actual prior transitions establish active/inactive.
+                  # At a completion, this does not prove state at cast start.
+                  if f and active is not None:assert f['transition_t_ms']<a['t_ms']
+                  counts[a['event_type']+'|'+('ACTIVE' if active is True else 'INACTIVE' if active is False else 'UNKNOWN')]+=1
+                  rows.append({'event_id':a['raw_action_event_id'],'event_type':a['event_type'],'numeric_action_id':a['spell_id'],'target_id':a['target_id'],'t_ms':a['t_ms'],'source_scoped_flame_shock_active':active,'source_transition_t_ms':f['transition_t_ms'] if f else None,'source_event_ids':f['source_event_ids'] if f else [],'source_IF_ticking_candidate':active,'source_IF_remains':'UNKNOWN' if active is not False else 'ZERO_IF_SOURCE_MECHANIC_EQUIVALENCE','native_and_WoW_mechanic_equivalence':'UNKNOWN','player_input':'UNKNOWN'})
+              out.append({'role':role,'source_debuff_matrix_sha256':sha((path/f'{role}-debuff.json').read_bytes()),'numeric_aura_id':188389,'source_action':'flame_shock','source_binding':'PINNED_CPP_FIND_SPELL_ID_CONCORDANCE_NOT_CURRENT_RETAIL_MECHANIC_CERTIFICATION','same_target_state_counts':dict(sorted(counts.items())),'rows':rows,'current_Retail_IF_verdict':'UNKNOWN'})
+          receipt={'schema':'ZrotPostlockShamanFlameShockTargetScopeObservationV1','policy_id':compare['policy_id'],'lock_sha256':compare['original_numeric_lock_sha256'],'source_revision':compare['source_revision'],'source_class_cpp_blob':gitblob(source),'postlock_only':True,'cases':out,'new_priority_rules_promoted':0,'current_Retail_priority':'UNKNOWN','MAIN_promoted':False}
+          (path/'flame-shock-postlock.json').write_bytes(canonical(receipt))
+          print('FLAME_SHOCK_POSTLOCK_TARGET_PRE',json.dumps([{'role':a['role'],'counts':a['same_target_state_counts']} for a in out],sort_keys=True))
+          PY
+          sha256sum /tmp/zrot-postlock/*.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-shaman-wcl-debuff-build-postlock-${{ github.sha }}
+          path: /tmp/zrot-postlock/*.json
+          retention-days: 14
+          if-no-files-found: error
