@@ -1,0 +1,223 @@
+{
+  "schema": "ZrotGeneralRotationShamanWclBlindReportDisjointAndEventGrainSuccessorV1",
+  "date": "2026-11-11",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "repository": "degong2-code/zrotationhelper",
+  "product_scope": "GENERAL_ROTATION_OPENER_AND_DUMMY_TRAINER_ONLY",
+  "role": "WCL_INDEPENDENT_NUMERIC_OBSERVATION_BEFORE_SIMC_POSTLOCK_SEMANTIC_RECONCILIATION",
+  "reuse": "Existing official bounded ranker collector, actor gate, raw replay, numeric lock, disjoint holdout and Strict PRE transport; no new SimC build.",
+  "source_plan": {
+    "file": "tools/engine_first/fixtures/zrot_wcl_shaman_enhancement_blind_cohort_v1.json",
+    "predeclared_commit": "c2a3a11d75a7563c85ff80d88cc890f3e5d2d9f1",
+    "canonical_sha256": "a3d102d56e1d9d7018b3157d0e48c3ff806c8b108061c183f4d090156b3304db",
+    "encounter_id": 3420,
+    "difficulty": 4,
+    "fixture_role": "GENERAL_ROTATION_RESEARCH_FIXTURE_NOT_ENCOUNTER_PLAN",
+    "window_ms": 15000,
+    "discovery_min_action_event_observations": 2,
+    "holdout_presence_threshold": 1,
+    "semantics_before_lock": false,
+    "readiness_inferred": false
+  },
+  "actual_official_WCL": {
+    "workflow": ".github/workflows/zrot-gr-shaman-blind-cohort-v1.yml",
+    "run_id": 42962352771,
+    "verified_commit": "d3f0f6c776c3b31b14fa200004d84c3a0d5d677e",
+    "CI": "SUCCESS_2_OF_2",
+    "discovery_job": 130331599776,
+    "holdout_job": 130331667900,
+    "actual_live_API": "EXECUTED_BOTH_COHORTS",
+    "api_points": "NOT_MEASURED",
+    "new_SimC_builds": 0,
+    "discovery_lock_completed_before_holdout_job": true,
+    "heldout_report_disjoint": true,
+    "actual_independent_player_identity": "UNKNOWN",
+    "exact_official_rank": "UNKNOWN",
+    "current_patch_alignment": "UNKNOWN"
+  },
+  "discovery": {
+    "report_code": "MmxjpHwdYFTc36K2",
+    "fight_id": 18,
+    "actor_id": 35,
+    "ranking_page_position": 1,
+    "raw_events": 18704,
+    "action_events_cast_plus_begincast": 55,
+    "cast_events": 43,
+    "begincast_events": 12,
+    "raw_melee_cast_flags": 2,
+    "actor_aura_transitions": 467,
+    "excluded_other_actor_action_events": 1766,
+    "known_strict_PRE": 1301,
+    "unknown_strict_PRE": 514,
+    "unknown_same_prior_timestamp": 94,
+    "unknown_no_earlier_transition": 420,
+    "artifact_id": 13829602894,
+    "artifact_zip_sha256": "3dcf43583cac3c281c86a43b9d492b0fc3faa43fcec7f3b7a5c2493be82bc6b1",
+    "artifact_expires_UTC": "2026-11-25T04:55:38Z",
+    "numeric_transport_digest": "a97625aa8c02ec0e0bab9d5316c721fc258f47b3aa5bdf24f882fe5e66463214",
+    "matrix_digest": "a0d5c742d1bee9219b66bebf6cf83c05d4f0e83d8ee6d1442d9ee3f2242073c6",
+    "raw_receipt_sha256": "7330ac5098d212c706ee29b5775e1a58b15f6988d6633b490c1175a567a686f6"
+  },
+  "holdout": {
+    "report_code": "zKLjnhaJFfZX8pBG",
+    "fight_id": 21,
+    "actor_id": 19,
+    "ranking_page_position": 2,
+    "raw_events": 15274,
+    "action_events_cast_plus_begincast": 51,
+    "cast_events": 42,
+    "begincast_events": 9,
+    "raw_melee_cast_flags": 6,
+    "actor_aura_transitions": 438,
+    "excluded_other_actor_action_events": 1628,
+    "known_strict_PRE": 1234,
+    "unknown_strict_PRE": 449,
+    "unknown_same_prior_timestamp": 48,
+    "unknown_no_earlier_transition": 401,
+    "artifact_id": 13829817902,
+    "artifact_zip_sha256": "d190b09def01b6e0bd2fbce17e859227babad6598d895e7854a955d1d91d5b5b",
+    "artifact_expires_UTC": "2026-11-25T04:55:51Z",
+    "numeric_transport_digest": "c99f1db286716adb83a310094080cd08e58a092083a602cd9c95be983d08cfbc",
+    "matrix_digest": "80f9eea4093fb0d9746aaa54eb76409ebc7fdabba8b6f6351569d537cd498a86",
+    "raw_receipt_sha256": "19f48d3dc37f1880a277d78fc317ae2e9f20d41c60ce9452d5bb58623a0f17c6"
+  },
+  "immutable_branch_local_original_copies": {
+    "lock": {
+      "file": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/WCL_SHAMAN_ENHANCEMENT_DISCOVERY_NUMERIC_LOCK_20261111.json",
+      "sha256": "34a90fbce125058dc164d7f4e3facad39ca69ba7311abfcbe3c2aa93af1da552",
+      "git_blob": "84c0fe74d4807d6c39dbcc20a0c1b48262eb02f2"
+    },
+    "holdout_contract": {
+      "file": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/WCL_SHAMAN_ENHANCEMENT_HOLDOUT_CONTRACT_20261111.json",
+      "sha256": "332a7a309c14bc8be24ee1d240dd316758338033a7d88232c34a68def74278e9",
+      "git_blob": "0db8127092537711bddac56475718231c4fcf626"
+    },
+    "holdout_metrics": {
+      "file": "active/branches/BR-GR-ST2T-WCL-BLIND-20261102/evidence/WCL_SHAMAN_ENHANCEMENT_HOLDOUT_OBSERVED_METRICS_20261111.json",
+      "sha256": "99f0a600eeb20ab6fe90e4900c54205fdf4d4c07415368553efc77d6e11f00de",
+      "git_blob": "b907e0c55c480941b5a44ef6e2885c64ebdaf279"
+    },
+    "byte_identical_original_artifact_copies_verified": true,
+    "existing_FROZEN_modified": false
+  },
+  "independent_raw_audit": {
+    "defect": "Original cast_events combines cast and begincast and drops raw event type. Counts cannot be interpreted as independent manual decisions.",
+    "successor_module": "tools/engine_first/wcl_raw_action_event_grain_audit_v1.py",
+    "tested_file_sha256": "5360900bd564a4db57c10808310c565b3f05fb191be693a4f14b4f8d6193b55c",
+    "git_blob": "95a428d01145488373fc0b0b2f84e469676bf897",
+    "code_commit": "bb8008a2521223b6ff56696d4dbbf362a57badec",
+    "compile": "PASS",
+    "safe_noarg_synthetic": "PASS",
+    "tampered_digest_negative": "PASS_REJECTED",
+    "real_two_artifact_offline_replay": "PASS",
+    "local_output_sha256": "0c5eec8752431070bf8db4dba87412c319ac53ce6259ee9cb7d1793bf9dd68f2",
+    "repo_bytes_match_tested_local_file": true,
+    "original_raw_artifact_zip_digests_independently_checked": true,
+    "raw_page_and_ledger_SHA256_recomputed": true,
+    "raw_action_event_id_membership_recomputed": true,
+    "known_PRE_event_ids_and_strict_timestamp_lt_action_checked": true,
+    "latest_signal_semantic_state_full_independent_recomputation": "NOT_CLAIMED_BY_NEW_AUDITOR",
+    "preserves_event_type_target_id_melee_flag_sidecar": true,
+    "manual_decision_classification": "UNKNOWN",
+    "postlock_cast_only_sensitivity_not_new_holdout": true,
+    "original_lock_unchanged": true,
+    "threshold_unchanged": true,
+    "candidate_set_same_cast_only": true,
+    "locked_candidates_reobserved_cast_only": 7,
+    "candidate_rows": [
+      {
+        "id": 1,
+        "discovery_all": 2,
+        "holdout_all": 6,
+        "discovery_cast": 2,
+        "holdout_cast": 6
+      },
+      {
+        "id": 115356,
+        "discovery_all": 9,
+        "holdout_all": 8,
+        "discovery_cast": 9,
+        "holdout_cast": 8
+      },
+      {
+        "id": 187874,
+        "discovery_all": 3,
+        "holdout_all": 2,
+        "discovery_cast": 3,
+        "holdout_cast": 2
+      },
+      {
+        "id": 188196,
+        "discovery_all": 16,
+        "holdout_all": 12,
+        "discovery_cast": 8,
+        "holdout_cast": 6
+      },
+      {
+        "id": 452201,
+        "discovery_all": 8,
+        "holdout_all": 6,
+        "discovery_cast": 4,
+        "holdout_cast": 3
+      },
+      {
+        "id": 469270,
+        "discovery_all": 10,
+        "holdout_all": 9,
+        "discovery_cast": 10,
+        "holdout_cast": 9
+      },
+      {
+        "id": 470057,
+        "discovery_all": 2,
+        "holdout_all": 2,
+        "discovery_cast": 2,
+        "holdout_cast": 2
+      }
+    ]
+  },
+  "postlock_raw_field_coverage": {
+    "discovery": {
+      "combatantinfo_relative_ms": 0,
+      "specID": 263,
+      "own_outgoing_debuff_transitions": 54,
+      "distinct_debuff_ids": 7,
+      "target_ids_observed": 2,
+      "action_event_rows_with_nonempty_classResources": 43
+    },
+    "holdout": {
+      "combatantinfo_relative_ms": 0,
+      "specID": 263,
+      "own_outgoing_debuff_transitions": 46,
+      "distinct_debuff_ids": 7,
+      "target_ids_observed": 2,
+      "action_event_rows_with_nonempty_classResources": 40
+    },
+    "debuff_duration_or_expiry_field_observed": false,
+    "resource_ownership_and_strict_PRE_not_yet_validated": true,
+    "two_target_ids_not_proof_of_two_target_combat": true,
+    "do_not_convert_observed_debuff_age_to_remains": true
+  },
+  "blockers": [
+    "Original candidate event counts include begin/cast; original lock preserved, post-lock sensitivity separately validated.",
+    "Manual input versus triggered/automatic cast not established.",
+    "One report per cohort; report/fight/actor numeric identities disjoint, distinct human player not independently certified.",
+    "Actor-target-specific debuff Strict PRE not yet reconstructed, raw aura-active matrix is actor-targeted buff state only.",
+    "Build equivalence, actual cooldown/charges, current patch mechanics, active target count, opener termination not proven.",
+    "No exact official rank number in ranking response."
+  ],
+  "General_Rotation_priority_rules_promoted": 0,
+  "dummy_wrong_cast": "UNKNOWN",
+  "current_Retail_mechanic_truth": "UNKNOWN",
+  "postlock_SimC_semantic_reconciliation": "NOT_RUN",
+  "Session_Exact_Next": "Reuse two immutable raw WCL Enhancement cohorts and existing combatantinfo PRE/actor-resource validators; construct source-neutral target+source scoped debuff transition PRE and raw event grain/action-role separation, then postlock identify numeric action families against pinned original SimC spell/talent/DBC and current Blizzard mechanic truth. Retain unknown cooldown/remaining time, target count and build when evidence lacking. Avoid another Native build unless material. Do not relearn locked candidates from holdout.",
+  "Product_Exact_Next": "Complete evidence-bounded General Rotation openers and ST/2T/cleave/AoE IF/ELSE priorities, then safe target-dummy practice feedback.",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Gen9_handoff_unchanged": true,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
