@@ -1,0 +1,193 @@
+name: zrot-gr-shaman-blind-cohort-v1
+on:
+  push:
+    branches: [work/gr-simc-st-2t-wcl-blind-20261102]
+    paths:
+      - .github/workflows/zrot-gr-shaman-blind-cohort-v1.yml
+      - tools/engine_first/fixtures/zrot_wcl_shaman_enhancement_blind_cohort_v1.json
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: tools/engine_first:tools/research
+      PLAN: tools/engine_first/fixtures/zrot_wcl_shaman_enhancement_blind_cohort_v1.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Preflight existing numeric-only collector and replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-wcl-cohort/results
+          python -m py_compile tools/engine_first/wcl_official_ranker_discovery_v1.py tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py tools/engine_first/wcl_disjoint_holdout_v1.py tools/engine_first/wcl_raw_actor_numeric_transport_v1.py
+          python -B tools/engine_first/wcl_official_ranker_discovery_v1.py --self-test >/tmp/zrot-wcl-cohort/results/ranker-selftest.json
+          python -B tools/engine_first/wcl_blind_numeric_candidate_lock_v1.py --self-test >/tmp/zrot-wcl-cohort/results/lock-selftest.json
+          python -B tools/engine_first/wcl_disjoint_holdout_v1.py --self-test >/tmp/zrot-wcl-cohort/results/holdout-selftest.json
+          python -B tools/engine_first/wcl_raw_actor_numeric_transport_v1.py >/tmp/zrot-wcl-cohort/results/transport-selftest.json
+      - name: Official live WCL discovery (no SimC inputs)
+        shell: bash
+        env:
+          WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
+          WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical
+          from wcl_official_ranker_discovery_v1 import run_live,RankSourceError
+          root=Path('/tmp/zrot-wcl-cohort')
+          p=json.loads(Path(os.environ['PLAN']).read_bytes());d=p['discovery'];h=p['holdout']
+          assert p['schema']=='ZrotWclBlindCohortRunPlanV1'
+          assert p['policy_id']=='ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1'
+          assert not p['semantic_names_before_lock'] and not p['source_APL_injection_before_lock'] and not p['threshold_retuning']
+          assert d['min_observations']==2 and h['observed_threshold']==1 and h['exclude_discovery_report']
+          (root/'results/predeclared-plan.json').write_bytes(canonical(p))
+          if not os.environ.get('WCL_CLIENT_ID') or not os.environ.get('WCL_CLIENT_SECRET'):
+              status={'status':'BLOCKED_MISSING_WCL_AUTH','gameplay_priority':'UNKNOWN'}
+          else:
+              try:
+                  status=run_live(encounter=p['encounter_id'],class_name=p['class_name'],spec_name=p['spec_name'],difficulty=p['difficulty'],max_pages=d['max_event_pages'],max_rank=d['max_rank'],max_age_days=d['max_age_days'],out_dir=root/'discovery',min_observations=d['min_observations'],opener_window_ms=d['window_ms'])
+              except Exception as e:
+                  status={'status':'BLOCKED_OR_FAILED','category':type(e).__name__,'reason':str(e)[:200] if isinstance(e,RankSourceError) else 'EXTERNAL_API_OR_ENGINE_DIAGNOSIS_REQUIRED','gameplay_priority':'UNKNOWN'}
+          (root/'results/discovery-status.json').write_bytes(canonical(status))
+          print('DISCOVERY_STATUS',status)
+          assert status['status']=='LIVE_WCL_ACTOR_SCOPED_NUMERIC_DISCOVERY_ONLY', 'DISCOVERY_NOT_COMPLETE_NO_HOLDOUT'
+          PY
+      - name: Replay original raw pages and seal numeric-only lock plus holdout contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/engine_first/wcl_raw_actor_numeric_transport_v1.py --actor-root /tmp/zrot-wcl-cohort/discovery --out /tmp/zrot-wcl-cohort/results/discovery-numeric.json
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          from wcl_raw_actor_numeric_transport_v1 import strict_pre_numeric_matrix
+          from wcl_disjoint_holdout_v1 import validate_contract,validate_frozen_lock
+          from wcl_blind_numeric_candidate_lock_v1 import lock_candidates
+          root=Path('/tmp/zrot-wcl-cohort');res=root/'results';derived=root/'discovery/derived'
+          p=json.loads((res/'predeclared-plan.json').read_bytes());d=p['discovery'];h=p['holdout']
+          s=json.loads((derived/'selection.json').read_bytes());raw=(derived/'blind_lock.json').read_bytes()
+          v=json.loads((derived/'blind_replay.json').read_bytes())
+          assert canonical(lock_candidates([v],min_observations=d['min_observations']))==raw
+          t=json.loads((res/'discovery-numeric.json').read_bytes())
+          m=strict_pre_numeric_matrix(t)
+          assert m['cast_rows']==t['actor_numeric_cast_count'] and m['all_known_facts_strictly_before_cast'] and m['complete_READY_proven']==0
+          c={'schema':'ZrotPredeclaredDisjointWclHoldoutV1','scope_policy_id':p['policy_id'],
+             'frozen_discovery':{'report_code':s['report_code'],'fight_id':s['fight_id'],'actor_id':s['actor_id'],'blind_lock_sha256':sha(raw),'frozen_min_observations':d['min_observations']},
+             'holdout_source':{'encounter_id':p['encounter_id'],'difficulty':p['difficulty'],'class_name':p['class_name'],'spec_name':p['spec_name'],'rankings_page':h['rankings_page'],'min_page_position':h['min_page_position'],'max_page_position':h['max_page_position'],'max_metadata_candidates':h['max_metadata_candidates'],'max_age_days':h['max_age_days'],'opener_window_ms':d['window_ms'],'max_event_pages':h['max_event_pages'],'forbid_same_report_code_as_discovery':True,'forbid_same_report_fight_as_discovery':True,'exact_official_rank_required':False,'verify_actor_fight_spec_class':True},
+             'locked_metrics':{'candidate_set_source':'IMMUTABLE_DISCOVERY_LOCK_ONLY','retained_candidate_metric':'HOLDOUT_CAST_EVENT_COUNT_AND_OBSERVED_AT_LEAST_ONCE','observed_threshold':h['observed_threshold'],'no_new_candidate_discovery_in_holdout':True,'no_threshold_retuning':True,'same_timestamp_state':'EXCLUDE','build_readiness_unknown_allowed':True,'no_causal_priority_or_gameplay_promotion':True},
+             'predeclared_plan_sha256':sha((res/'predeclared-plan.json').read_bytes())}
+          lock=validate_frozen_lock(raw,validate_contract(c))
+          (res/'discovery-matrix.json').write_bytes(canonical(m))
+          (res/'holdout-contract.json').write_bytes(canonical(c))
+          (res/'discovery-lock.json').write_bytes(raw)
+          receipt={'status':'DISCOVERY_RAW_REPLAY_NUMERIC_LOCKED','source_role':'DISCOVERY','raw_events':t['raw_event_count'],'actor_casts':t['actor_numeric_cast_count'],'aura_transitions':t['raw_aura_boolean_transitions'],'known_PRE':m['signal_status_summary'].get('KNOWN',0),'unknown_PRE':m['signal_status_summary'].get('UNKNOWN',0),'candidate_count':lock['candidate_n'],'lock_sha256':sha(raw),'holdout_contract_sha256':sha(canonical(c)),'semantic_names_attached':False,'priority':'UNKNOWN','target_count':'UNKNOWN','opener_end':'UNKNOWN'}
+          (res/'discovery-summary.json').write_bytes(canonical(receipt))
+          print('DISCOVERY_NUMERIC_LOCK_COMPLETE',json.dumps(receipt,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-shaman-blind-discovery-${{ github.sha }}
+          path: /tmp/zrot-wcl-cohort/
+          retention-days: 14
+          if-no-files-found: error
+  holdout:
+    needs: discovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: tools/engine_first:tools/research
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: zrot-shaman-blind-discovery-${{ github.sha }}
+          path: /tmp/zrot-locked-discovery
+      - name: Verify sealed discovery before independent holdout requests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/zrot-wcl-holdout/results
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import sha
+          from wcl_disjoint_holdout_v1 import validate_contract,validate_frozen_lock
+          root=Path('/tmp/zrot-locked-discovery/results')
+          c=validate_contract(json.loads((root/'holdout-contract.json').read_bytes()))
+          s=json.loads((root/'discovery-summary.json').read_bytes())
+          raw=(root/'discovery-lock.json').read_bytes()
+          assert sha(raw)==s['lock_sha256'] and sha((root/'holdout-contract.json').read_bytes())==s['holdout_contract_sha256']
+          assert sha((root/'predeclared-plan.json').read_bytes())==c['predeclared_plan_sha256']
+          validate_frozen_lock(raw,c)
+          print('SEALED_DISCOVERY_BEFORE_HOLDOUT_PASS')
+          PY
+      - name: Official disjoint holdout, frozen candidate set only
+        shell: bash
+        env:
+          WCL_CLIENT_ID: ${{ secrets.WCL_CLIENT_ID }}
+          WCL_CLIENT_SECRET: ${{ secrets.WCL_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          python -B tools/engine_first/wcl_disjoint_holdout_v1.py --live \
+            --contract /tmp/zrot-locked-discovery/results/holdout-contract.json \
+            --discovery-lock /tmp/zrot-locked-discovery/results/discovery-lock.json \
+            --out-dir /tmp/zrot-wcl-holdout/holdout \
+            > /tmp/zrot-wcl-holdout/results/holdout-status.json
+          cat /tmp/zrot-wcl-holdout/results/holdout-status.json
+          python - <<'PY'
+          import json
+          s=json.load(open('/tmp/zrot-wcl-holdout/results/holdout-status.json'))
+          assert s['status']=='DISJOINT_REPORT_HOLDOUT_OBSERVATION_ONLY'
+          PY
+      - name: Independently replay holdout raw pages and strict timestamp PRE
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B tools/engine_first/wcl_raw_actor_numeric_transport_v1.py \
+            --actor-root /tmp/zrot-wcl-holdout/holdout --role holdout \
+            --discovery-lock /tmp/zrot-locked-discovery/results/discovery-lock.json \
+            --holdout-contract /tmp/zrot-locked-discovery/results/holdout-contract.json \
+            --out /tmp/zrot-wcl-holdout/results/holdout-numeric.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from fresh_wcl_engine_v1 import canonical,sha
+          from wcl_raw_actor_numeric_transport_v1 import strict_pre_numeric_matrix,classify_cohort_identity
+          root=Path('/tmp/zrot-wcl-holdout/results');d=Path('/tmp/zrot-locked-discovery/results')
+          a=json.loads((d/'discovery-numeric.json').read_bytes())
+          b=json.loads((root/'holdout-numeric.json').read_bytes())
+          h=json.loads((root/'holdout-status.json').read_bytes())
+          m=strict_pre_numeric_matrix(b);i=classify_cohort_identity(a,b)
+          assert i['report_disjoint'] and not i['same_actor_replay_sha256']
+          assert m['all_known_facts_strictly_before_cast'] and m['complete_READY_proven']==0
+          assert h['frozen_discovery_candidate_count']==json.loads((d/'discovery-summary.json').read_bytes())['candidate_count']
+          (root/'holdout-matrix.json').write_bytes(canonical(m))
+          (root/'cohort-identity.json').write_bytes(canonical(i))
+          rec={'status':'REPORT_DISJOINT_OBSERVATION_ONLY','raw_events':b['raw_event_count'],'actor_casts':b['actor_numeric_cast_count'],'aura_transitions':b['raw_aura_boolean_transitions'],'known_PRE':m['signal_status_summary'].get('KNOWN',0),'unknown_PRE':m['signal_status_summary'].get('UNKNOWN',0),'locked_count':h['frozen_discovery_candidate_count'],'reobserved':h['reobserved_discovery_candidates'],'lock_sha256':sha((d/'discovery-lock.json').read_bytes()),'holdout_metrics_sha256':h['holdout_metrics_sha256'],'independent_player':'UNKNOWN','target_count':'UNKNOWN','readiness':'UNKNOWN','priority':'UNKNOWN','opener_end':'UNKNOWN','new_rules_promoted':0}
+          (root/'holdout-summary.json').write_bytes(canonical(rec))
+          print('HOLDOUT_NUMERIC_REPORT_DISJOINT_REPLAY_COMPLETE',json.dumps(rec,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zrot-shaman-blind-holdout-${{ github.sha }}
+          path: /tmp/zrot-wcl-holdout/
+          retention-days: 14
+          if-no-files-found: warn
