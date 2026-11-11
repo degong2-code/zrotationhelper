@@ -1,0 +1,40 @@
+{
+  "schema": "ZrotPostlockActionTriggerFamilyAuditAdapterV1",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "source_revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+  "source_cpp_git_blob": "46250f6ce200c10fc30795d3afa0b1cb3ce45568",
+  "protected_blind_lock_sha256": "34a90fbce125058dc164d7f4e3facad39ca69ba7311abfcbe3c2aa93af1da552",
+  "source_postlock_aura_replay_sha256": "307af3ab3870ed4efd58bb03ff88f8a24c3e10ffe16b3494aac1117b6df33b83",
+  "observed_child_numeric_ids": [
+    188196,
+    452201
+  ],
+  "observed_candidate_parent_numeric_ids": [
+    115356,
+    187874
+  ],
+  "coincident_window_ms": 1,
+  "coincident_window_status": "POSTHOC_EXPLORATORY_NOT_PREDECLARED_HOLDOUT_THRESHOLD",
+  "source_cpp_snippets": [
+    "void shaman_t::trigger_thorims_invocation( const action_state_t* state )",
+    "if ( !talent.thorims_invocation.ok() )",
+    "if ( buff.maelstrom_weapon->check() == 0 )",
+    "action.tempest_ti->execute_on_target( state->target );",
+    "action.lightning_bolt_ti->execute_on_target( state->target );",
+    "p()->trigger_thorims_invocation( state );",
+    "if ( p()->buff.doom_winds->up() || p()->buff.ascendance->up() )",
+    "if ( is_variant( spell_variant::THORIMS_INVOCATION ) )",
+    "background = true;"
+  ],
+  "aura_active_symbols": [
+    "buff.ascendance.up",
+    "buff.doom_winds.up"
+  ],
+  "aura_required_exact_stacks": "NOT_REQUIRED_FOR_TIMING_CORRELATION",
+  "target_id_alignment": "NOT_ASSERTED_FOR_CLEAVE_OR_AOE_PARENT_WITH_UNSET_TARGET",
+  "manual_input_proven": false,
+  "source_trigger_caused_this_WCL_event": false,
+  "priority_claim_proven": false,
+  "independent_holdout_threshold_predeclared": false,
+  "new_gameplay_rules_promoted": 0
+}
