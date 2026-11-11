@@ -1,0 +1,261 @@
+{
+  "schema": "ZrotGeneralRotationShamanWclTargetDebuffBuildPostlockSuccessorV1",
+  "date": "2026-11-11",
+  "policy_id": "ZROT_GENERAL_ROTATION_OPENER_DUMMY_TRAINER_20261102_V1",
+  "policy_sha256": "157daa151bc60b0d059aab4fbb8b0d7f5fb4a8e9e42811e401edffecfc1df295",
+  "owner": "BR-GR-ST2T-WCL-BLIND-20261102",
+  "repository": "degong2-code/zrotationhelper",
+  "branch": "work/gr-simc-st-2t-wcl-blind-20261102",
+  "scope": "GENERAL_ROTATION_OPENER_AND_DUMMY_TRAINER_ONLY",
+  "prior_WCL_lock_sha256": "34a90fbce125058dc164d7f4e3facad39ca69ba7311abfcbe3c2aa93af1da552",
+  "prior_holdout_metrics_sha256": "99f0a600eeb20ab6fe90e4900c54205fdf4d4c07415368553efc77d6e11f00de",
+  "prior_lock_unchanged": true,
+  "implementations": {
+    "outgoing_debuff": "tools/engine_first/wcl_outgoing_debuff_strict_pre_v1.py",
+    "postlock_build": "tools/research/wcl_postlock_numeric_build_profile_compare_v1.py",
+    "reuse": [
+      "wcl_raw_action_event_grain_audit_v1.py",
+      "wcl_actor_combatantinfo_pre_v1.py",
+      "general_rotation_original_talent_hash_dbc_v1.py",
+      "wcl_disjoint_holdout_v1.py"
+    ],
+    "strict_PRE_key": "report/fight/source actor/target actor/spell/timestamp; latest batch strictly before action; ambiguous batch UNKNOWN",
+    "future_ID_vocabulary": "coverage only; does not assert prior presence or absence",
+    "event_grain": "cast and begincast kept distinct; manual input unknown"
+  },
+  "source": {
+    "revision": "b522cded8c26b97dac03fdf56e57a03ec7e8faa6",
+    "profile_blob": "2f2c951ae07489d124db36c464ab66d1efd262ce",
+    "trait_blob": "6eec16fcea3e9eb82948cf5810a599401606b3ee",
+    "class_cpp_blob": "46250f6ce200c10fc30795d3afa0b1cb3ce45568"
+  },
+  "verification": {
+    "CI_run": 42969184955,
+    "url": "https://github.com/degong2-code/zrotationhelper/actions/runs/42969184955",
+    "tested_commit": "3e5b0f7ffba19eeb3e562fa3d737d611bcb7bfb2",
+    "result": "SUCCESS_3_OF_3",
+    "Python312": "PASS_COMPILE_SYNTHETIC",
+    "Python314": "PASS_COMPILE_SYNTHETIC",
+    "offline_original_two_WCL_checkpoints": "PASS",
+    "pinned_profile_DBC_decode": "PASS",
+    "original_lock_contract_metrics_cmp": "BYTE_IDENTICAL",
+    "new_WCL_API_calls": 0,
+    "new_SimC_CXX_builds": 0,
+    "artifact_id": 13832901158,
+    "artifact_expires_UTC": "2026-11-25T05:58:38Z",
+    "artifact_zip_sha256": "89cba052163d72da8f83b056f199d831183eb2236b55a3d3c13f453971c28659",
+    "independent_download_member_sha_verification": "PASS",
+    "members_sha256": {
+      "build-compare.json": "127d96f97bf51b6ee3d3bfb53f190f4ab543064ad5f7fec414fea19af50b5246",
+      "discovery-build.json": "b3fb53f004824024d8a6f631d9be98cab9a0e3640b6fb255d1d4930f2a3fb2f9",
+      "discovery-debuff.json": "ee589793039f50c65fe0b01d78727ecd8b9275d28f94c310e0b7d6eb56eaf054",
+      "flame-shock-postlock.json": "2b9fd3a0bc6be7dfde32eb6ed11731082836ccc49f783a96e3b4cdfe2ed13c83",
+      "holdout-build.json": "68c4c432d074dfbb21ea41714276a586537a192285bdc821606e478835a23f68",
+      "holdout-debuff.json": "b35a91fe9de4b12e77a92e63eeb0fc44838ea5345f946a5a56b278cfa8aa287a"
+    },
+    "original_archive_members_repacked_in_CI": "Original page bytes verified, ZIP container digest differs; original raw artifact ZIP hashes preserved in prior receipt"
+  },
+  "cases": [
+    {
+      "role": "DISCOVERY",
+      "report": "MmxjpHwdYFTc36K2",
+      "fight": 18,
+      "actor": 35,
+      "raw_debuff_transitions": 54,
+      "distinct_source_target_spell_keys": 7,
+      "other_source_debuff_events_excluded": 1190,
+      "cast_known_active_slots": 130,
+      "cast_known_inactive_slots": 11,
+      "cast_unknown_no_prior_slots": 15,
+      "action_rows": 55,
+      "completed_cast_rows": 43,
+      "begincast_rows": 12,
+      "flame_shock": {
+        "numeric_id": 188389,
+        "first_application_ms": 2145,
+        "refresh_ms": 12800,
+        "exact_target_id": 517,
+        "cast_active": 25,
+        "cast_unknown": 18,
+        "begincast_unknown": 12,
+        "cast_inactive": 0
+      },
+      "numeric_build": {
+        "combatantinfo_ms": 0,
+        "first_actor_action_ms": 1481,
+        "specID": 263,
+        "source_positive_entries": 79,
+        "WCL_positive_entries": 79,
+        "matching_positive_rank_entries": 75,
+        "different_positive_rank_vector_entries": 8,
+        "source_items": 16,
+        "WCL_items": 17,
+        "item_ID_multiset_intersection": 12,
+        "raw_setID_counts": {
+          "2065": 5,
+          "2070": 2
+        },
+        "encoded_positive_rank_vector_equal": false,
+        "gear_ID_multiset_equal": false
+      },
+      "voltaic_blaze": {
+        "id": 470057,
+        "completed_casts": [
+          {
+            "t_ms": 1630,
+            "target": 517,
+            "prior_flame_shock": "UNKNOWN"
+          },
+          {
+            "t_ms": 12302,
+            "target": 517,
+            "prior_flame_shock": "OBSERVED_ACTIVE"
+          }
+        ]
+      }
+    },
+    {
+      "role": "HOLDOUT",
+      "report": "zKLjnhaJFfZX8pBG",
+      "fight": 21,
+      "actor": 19,
+      "raw_debuff_transitions": 46,
+      "distinct_source_target_spell_keys": 7,
+      "other_source_debuff_events_excluded": 916,
+      "cast_known_active_slots": 98,
+      "cast_known_inactive_slots": 12,
+      "cast_unknown_no_prior_slots": 52,
+      "action_rows": 51,
+      "completed_cast_rows": 42,
+      "begincast_rows": 9,
+      "flame_shock": {
+        "numeric_id": 188389,
+        "first_application_ms": 1041,
+        "refresh_ms": 13121,
+        "exact_target_id": 237,
+        "cast_active": 26,
+        "cast_unknown": 16,
+        "begincast_unknown": 9,
+        "cast_inactive": 0
+      },
+      "numeric_build": {
+        "combatantinfo_ms": 0,
+        "first_actor_action_ms": 530,
+        "specID": 263,
+        "source_positive_entries": 79,
+        "WCL_positive_entries": 78,
+        "matching_positive_rank_entries": 76,
+        "different_positive_rank_vector_entries": 5,
+        "source_items": 16,
+        "WCL_items": 16,
+        "item_ID_multiset_intersection": 10,
+        "raw_setID_counts": {
+          "2065": 4,
+          "2070": 2
+        },
+        "encoded_positive_rank_vector_equal": false,
+        "gear_ID_multiset_equal": false
+      },
+      "voltaic_blaze": {
+        "id": 470057,
+        "completed_casts": [
+          {
+            "t_ms": 530,
+            "target": 237,
+            "prior_flame_shock": "UNKNOWN"
+          },
+          {
+            "t_ms": 12628,
+            "target": 237,
+            "prior_flame_shock": "OBSERVED_ACTIVE"
+          }
+        ]
+      }
+    }
+  ],
+  "postlock_trait_identity": [
+    {
+      "name": "Voltaic Blaze",
+      "spell": 470057,
+      "node": 80954,
+      "entry": 101819,
+      "source_positive_rank": 1,
+      "discovery_positive_rank": 1,
+      "holdout_positive_rank": 1
+    },
+    {
+      "name": "Crash Lightning",
+      "spell": 187874,
+      "node": 80974,
+      "entry": 101840,
+      "source_positive_rank": 1,
+      "discovery_positive_rank": 1,
+      "holdout_positive_rank": 1
+    },
+    {
+      "name": "Fire Nova",
+      "spell": 1260666,
+      "node": 109909,
+      "entry": 136176,
+      "source_positive_rank": 1,
+      "discovery_positive_rank": 1,
+      "holdout_positive_rank": 1
+    },
+    {
+      "name": "Surging Totem",
+      "spell": 455630,
+      "node": 94877,
+      "entry": 117474,
+      "source_positive_rank": 1,
+      "discovery_positive_rank": "NOT_IN_POSITIVE_RANK_VECTOR",
+      "holdout_positive_rank": "NOT_IN_POSITIVE_RANK_VECTOR",
+      "DBC_free_grant_and_hero_activation_uncertainty": true
+    }
+  ],
+  "postlock_source_row_reasoning": {
+    "flame_shock": "pinned CPP flame_shock_t find_spell(188389), raw exact source-target aura ID concordance only",
+    "voltaic_blaze": "pinned DBC talent spell 470057 + CPP talent.voltaic_blaze, source action identity candidate",
+    "source_APL": "single_sb initial remains=0&time<5; aoe initial talent.surging_totem.enabled&remains=0; other Voltaic Blaze rows use Fire Nova, set bonus, Maelstrom Weapon, Thorim's Invocation, or no explicit IF",
+    "observed_second_cast_with_active_flame_shock_both_reports": true,
+    "claim": "Cannot explain all observed completed Voltaic Blaze events with absent-Flame-Shock-only hypothesis; do not infer which exact source row or manual input from this finding.",
+    "actual_source_IF_verdict": "UNKNOWN",
+    "current_mechanics_equivalence": "UNKNOWN"
+  },
+  "additional_source_inspection_not_runtime_claim": {
+    "numeric_469270": {
+      "source_symbol": "doom_winds_damage_t",
+      "source_CPP": "player->find_spell(469270); background=true",
+      "discovery_completed_cast_events": 10,
+      "holdout_completed_cast_events": 9,
+      "classification": "PINNED_SIMC_BACKGROUND_DAMAGE_FAMILY_HYPOTHESIS_NOT_WCL_MANUAL_CAST_CERTIFICATION"
+    },
+    "numeric_1": {
+      "discovery_raw_melee_flag_events": 2,
+      "holdout_raw_melee_flag_events": 6,
+      "classification": "RAW_MELEE_FLAG_NOT_MANUAL_DECISION_PROOF"
+    },
+    "remaining_numeric_families": "115356 windstrike; 187874 crash_lightning; 452201 tempest; 470057 voltaic_blaze; 188196 lightning_bolt (assisted-combat source association); all actual manual-vs-triggered roles need independent adjudication"
+  },
+  "limitations": [
+    "No duration/expiry for active raw debuff; raw observed active is not independent current Retail mechanic remaining seconds.",
+    "Unobserved target or pre-window debuff state UNKNOWN; not all future vocabulary slots explicitly represented; missing keys UNKNOWN.",
+    "All begincast Flame Shock state UNKNOWN; completion PRE not necessarily action-start PRE.",
+    "Positive rank absent means absent from raw positive vector, not independently observed runtime disabled; full hero activation and tier effect remain UNKNOWN.",
+    "The raw item multiset omits full gear effects, enchants and bonus IDs; comparison is not full build normalization.",
+    "Postlock source ID concordance does not prove current client build, actual active targets or competing cooldown/charges readiness.",
+    "Only one report per role; distinct actual players not certified."
+  ],
+  "next": {
+    "session": "Use existing aura-temporal and actor-resource ownership engines to build numeric Maelstrom Weapon stacks and strict PRE readiness evidence. Before any comparison of action priority, establish postlock action family roles (especially 469270 background family and 1 melee), target-count observability, source row ambiguity and relevant build/patch mechanism alignment. Reuse locked reports, no new C++ build or WCL calls unless material.",
+    "product": "Evidence-bounded General Rotation opener/conditional ST/2T/cleave/AoE priorities and accurate dummy feedback"
+  },
+  "current_Retail_priority": "UNKNOWN",
+  "opener_end": "UNKNOWN",
+  "new_user_rules_promoted": 0,
+  "dummy_wrong_cast": "UNKNOWN",
+  "MAIN_promoted": false,
+  "FROZEN_modified": false,
+  "Gen9_handoff_unchanged": true,
+  "Seq578": "FAILED_QUARANTINED",
+  "Seq637": "UNKNOWN"
+}
